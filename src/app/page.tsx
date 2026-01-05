@@ -6,9 +6,9 @@ import {
 import SidebarNav from '@/components/dashboard/sidebar-nav';
 import Header from '@/components/dashboard/header';
 import VolumeCards from '@/components/dashboard/volume-cards';
-import PaymentSummary from '@/components/dashboard/payment-summary';
 import TransactionsList from '@/components/dashboard/transactions-list';
 import type { Metadata } from 'next';
+import PaymentSummaryDynamic from '@/components/dashboard/payment-summary-dynamic';
 
 export const metadata: Metadata = {
   title: 'SATS Dashboard',
@@ -28,7 +28,7 @@ export default function DashboardPage() {
             <h1 className="text-3xl font-headline font-semibold">Dashboard</h1>
             <VolumeCards />
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              <PaymentSummary className="lg:col-span-2" />
+              <PaymentSummaryDynamic className="lg:col-span-2" />
               <TransactionsList className="lg:col-span-1" />
             </div>
           </main>
