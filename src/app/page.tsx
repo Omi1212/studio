@@ -1,3 +1,39 @@
-export default function Home() {
-  return <></>;
+import {
+  SidebarProvider,
+  Sidebar,
+  SidebarInset,
+} from '@/components/ui/sidebar';
+import SidebarNav from '@/components/dashboard/sidebar-nav';
+import Header from '@/components/dashboard/header';
+import VolumeCards from '@/components/dashboard/volume-cards';
+import PaymentSummary from '@/components/dashboard/payment-summary';
+import TransactionsList from '@/components/dashboard/transactions-list';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'SATS Dashboard',
+  description: 'A dashboard to manage your SATS payments and transactions.',
+};
+
+export default function DashboardPage() {
+  return (
+    <SidebarProvider>
+      <Sidebar className="border-r">
+        <SidebarNav />
+      </Sidebar>
+      <SidebarInset>
+        <div className="flex flex-col min-h-screen">
+          <Header />
+          <main className="flex-1 p-6 lg:p-8 space-y-8 bg-background">
+            <h1 className="text-3xl font-headline font-semibold">Dashboard</h1>
+            <VolumeCards />
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              <PaymentSummary className="lg:col-span-2" />
+              <TransactionsList className="lg:col-span-1" />
+            </div>
+          </main>
+        </div>
+      </SidebarInset>
+    </SidebarProvider>
+  );
 }
