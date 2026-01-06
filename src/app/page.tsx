@@ -29,7 +29,7 @@ export default function DashboardPage() {
             <VolumeCards />
             <div className="grid grid-cols-1 gap-8">
               <PaymentSummaryDynamic />
-              <TransactionsList />
+              <TransactionsList limit={7} />
             </div>
           </main>
         </div>

@@ -3,31 +3,40 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
+  CardFooter
 } from '@/components/ui/card';
 import { transactionData } from '@/lib/data';
-import { ArrowDownLeft, ArrowUpRight } from 'lucide-react';
+import { ArrowDownLeft, ArrowUpRight, ExternalLink } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Button } from '../ui/button';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
 
-export default function TransactionsList({ className }: { className?: string }) {
+export default function TransactionsList({ className, limit }: { className?: string; limit?: number }) {
+  const transactions = limit ? transactionData.slice(0, limit) : transactionData;
+
   return (
     <Card className={className}>
-      <CardHeader className="p-4 sm:p-6">
+      <CardHeader className="p-4 sm:p-6 flex flex-row items-center justify-between">
         <CardTitle className="font-headline">Transaction history</CardTitle>
+        <Button variant="outline" size="sm" asChild>
+          <a href="/transactions">View All</a>
+        </Button>
       </CardHeader>
       <CardContent className="p-0">
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="text-xs text-muted-foreground uppercase">
-              <tr className="border-b">
-                <th className="px-4 sm:px-6 py-3 font-medium text-left">Transaction</th>
-                <th className="px-4 sm:px-6 py-3 font-medium text-left hidden sm:table-cell">Date</th>
-                <th className="px-4 sm:px-6 py-3 font-medium text-right">Amount</th>
-              </tr>
-            </thead>
-            <tbody>
-              {transactionData.map((transaction) => (
-                <tr key={transaction.id} className="border-b">
-                  <td className="px-4 sm:px-6 py-4">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Transaction</TableHead>
+                <TableHead className="hidden sm:table-cell">Date</TableHead>
+                <TableHead className="text-right">Amount</TableHead>
+                <TableHead className="hidden md:table-cell"></TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {transactions.map((transaction) => (
+                <TableRow key={transaction.id}>
+                  <TableCell>
                     <div className="flex items-center gap-3">
                        <div
                         className={cn(
@@ -45,14 +54,14 @@ export default function TransactionsList({ className }: { className?: string }) 
                       </div>
                       <div>
                         <p className="font-medium">{transaction.type}</p>
-                        <p className="text-xs text-muted-foreground truncate">
+                        <p className="text-xs text-muted-foreground truncate max-w-28 sm:max-w-xs">
                           {transaction.address}
                         </p>
                       </div>
                     </div>
-                  </td>
-                  <td className="px-4 sm:px-6 py-4 text-muted-foreground hidden sm:table-cell">{transaction.date}</td>
-                  <td className="px-4 sm:px-6 py-4 text-right">
+                  </TableCell>
+                  <TableCell className="text-muted-foreground hidden sm:table-cell">{transaction.date}</TableCell>
+                  <TableCell className="text-right">
                      <p
                       className={cn(
                         'font-medium',
@@ -64,11 +73,17 @@ export default function TransactionsList({ className }: { className?: string }) 
                       {transaction.direction === 'in' ? '+' : '-'}
                       {transaction.amount.toLocaleString()} {transaction.currency}
                     </p>
-                  </td>
-                </tr>
+                  </TableCell>
+                  <TableCell className="hidden md:table-cell text-right">
+                      <Button variant="ghost" size="icon">
+                          <ExternalLink className="h-4 w-4" />
+                          <span className="sr-only">Open on Sparkscan</span>
+                      </Button>
+                  </TableCell>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         </div>
       </CardContent>
     </Card>
