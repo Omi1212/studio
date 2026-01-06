@@ -24,7 +24,7 @@ export default function TransactionsList({ className, limit }: { className?: str
       </CardHeader>
       <CardContent className="p-0">
         <div className="overflow-x-auto">
-          <Table className="table-fixed">
+          <Table>
             <TableHeader>
               <TableRow>
                 <TableHead className="px-4 sm:px-6 w-[40%]">Transaction</TableHead>
