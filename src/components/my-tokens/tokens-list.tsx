@@ -35,8 +35,7 @@ function TokenRow({ token }: { token: (typeof tokenData)[0] }) {
       onOpenChange={setIsOpen}
     >
       <div className="border-b">
-        <CollapsibleTrigger asChild>
-          <div className="flex items-center p-4 cursor-pointer hover:bg-muted/50">
+        <div className="flex items-center p-4">
             <div className="flex items-center gap-4 w-[35%]">
               <Avatar>
                 <AvatarFallback>{token.ticker.charAt(0)}</AvatarFallback>
@@ -56,16 +55,17 @@ function TokenRow({ token }: { token: (typeof tokenData)[0] }) {
               </p>
             </div>
             <div className="w-[20%] flex items-center justify-end gap-2 px-6">
-              <Button size="sm" variant="outline" className="bg-accent text-accent-foreground hover:bg-accent/90">
+              <Button size="sm" className="bg-accent text-accent-foreground hover:bg-accent/90">
                 <Send className="mr-2 h-4 w-4" />
                 Send
               </Button>
-              <Button variant="ghost" size="icon" className="h-8 w-8 transition-transform data-[state=open]:rotate-180">
-                <ChevronDown className="h-4 w-4" />
-              </Button>
+              <CollapsibleTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-8 w-8 data-[state=open]:rotate-180">
+                  <ChevronDown className="h-4 w-4" />
+                </Button>
+              </CollapsibleTrigger>
             </div>
           </div>
-        </CollapsibleTrigger>
         <CollapsibleContent className="p-6 bg-muted/20">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 text-sm">
             <InfoRow 
