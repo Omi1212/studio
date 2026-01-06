@@ -59,16 +59,18 @@ export default function TokenOverview({
               <Badge variant="outline" className="text-green-400 border-green-400">Active</Badge>
             </div>
 
-            <InfoRow 
-              label="Token Public Key" 
-              value={token.publicKey} 
-              onCopy={() => copyToClipboard(token.publicKey, 'Token Public Key')} 
-            />
-            <InfoRow 
-              label="Token ID" 
-              value={token.id} 
-              onCopy={() => copyToClipboard(token.id, 'Token ID')}
-            />
+            <div className="space-y-4">
+              <InfoRow 
+                label="Token Public Key" 
+                value={token.publicKey} 
+                onCopy={() => copyToClipboard(token.publicKey, 'Token Public Key')} 
+              />
+              <InfoRow 
+                label="Token ID" 
+                value={token.id} 
+                onCopy={() => copyToClipboard(token.id, 'Token ID')}
+              />
+            </div>
             
             <Separator />
             
@@ -140,10 +142,10 @@ export default function TokenOverview({
 
 function InfoRow({ label, value, onCopy }: { label: string; value: string, onCopy: () => void }) {
   return (
-    <div className="space-y-1">
-      <p className="text-sm text-muted-foreground">{label}</p>
-      <div className="flex items-center gap-2">
-        <p className="font-mono text-sm font-medium truncate">{value}</p>
+    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+      <p className="text-sm text-muted-foreground w-40 shrink-0">{label}</p>
+      <div className="flex items-center gap-2 w-full">
+        <p className="font-mono text-sm font-medium truncate flex-1">{value}</p>
         <Button
           variant="ghost"
           size="icon"
