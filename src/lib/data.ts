@@ -150,6 +150,10 @@ export const tokenData = [
     ticker: 'OMI',
     price: 0.0000,
     balance: 95.999,
+    tokenId: 'btkn176av28r...4txyuqq5uq0e',
+    publicKey: '03a0626e300a...3c753c732a20',
+    maxSupply: 1000000,
+    decimals: 10,
   },
   {
     id: 2,
@@ -157,5 +161,9 @@ export const tokenData = [
     ticker: 'JMT',
     price: 0.0000,
     balance: 2500,
+    tokenId: 'btkn176av28r...anotherid001',
+    publicKey: '03a0626e300a...anotherkey01',
+    maxSupply: 2000000,
+    decimals: 8,
   },
 ];
