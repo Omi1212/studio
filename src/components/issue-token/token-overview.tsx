@@ -10,7 +10,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Copy, Info, Globe } from 'lucide-react';
+import { Copy, Info, Globe, Coins, Flame, Snowflake } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import type { TokenDetails } from '@/app/issue-token/page';
 import { Avatar, AvatarFallback } from '../ui/avatar';
@@ -114,6 +114,26 @@ export default function TokenOverview({
           </CardFooter>
         </Card>
       </div>
+      <Card>
+        <CardHeader>
+            <CardTitle>Token Actions</CardTitle>
+            <CardDescription>Perform actions on this token.</CardDescription>
+        </CardHeader>
+        <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Button variant="outline">
+                <Coins className="mr-2 h-4 w-4" />
+                Mint Tokens
+            </Button>
+            <Button variant="outline">
+                <Flame className="mr-2 h-4 w-4" />
+                Burn Tokens
+            </Button>
+            <Button variant="outline">
+                <Snowflake className="mr-2 h-4 w-4" />
+                Freeze Tokens
+            </Button>
+        </CardContent>
+      </Card>
     </div>
   );
 }
