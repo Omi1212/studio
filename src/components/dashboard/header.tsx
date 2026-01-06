@@ -2,7 +2,6 @@ import {
   Bell,
   ChevronDown,
   PlusCircle,
-  Search,
   User,
   LogOut,
   Settings,
@@ -30,11 +29,6 @@ export default function Header() {
     <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-card px-4 sm:px-6">
       <div className="md:hidden">
         <SidebarTrigger />
-      </div>
-
-      <div className="relative flex-1 hidden md:block">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input placeholder="Search..." className="pl-9" />
       </div>
 
       <div className="flex items-center gap-2 md:gap-4 ml-auto">
