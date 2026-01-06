@@ -24,13 +24,13 @@ export default function TransactionsList({ className, limit }: { className?: str
       </CardHeader>
       <CardContent className="p-0">
         <div className="overflow-x-auto">
-          <Table>
+          <Table className="table-fixed">
             <TableHeader>
               <TableRow>
-                <TableHead className="px-4 sm:px-6">Transaction</TableHead>
-                <TableHead className="hidden sm:table-cell px-4 sm:px-6">Date</TableHead>
-                <TableHead className="text-right px-4 sm:px-6">Amount</TableHead>
-                <TableHead className="hidden md:table-cell px-4 sm:px-6"></TableHead>
+                <TableHead className="px-4 sm:px-6 w-[40%]">Transaction</TableHead>
+                <TableHead className="hidden sm:table-cell px-4 sm:px-6 w-[30%]">Date</TableHead>
+                <TableHead className="text-right px-4 sm:px-6 w-[20%]">Amount</TableHead>
+                <TableHead className="hidden md:table-cell px-4 sm:px-6 w-[10%]"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
