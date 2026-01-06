@@ -47,7 +47,7 @@ export default function Header() {
           <DropdownMenuTrigger asChild>
             <Button
               variant="ghost"
-              className="flex items-center gap-3 p-2 focus-visible:ring-0 focus-visible:ring-offset-0"
+              className="group flex items-center gap-3 p-2 focus-visible:ring-0 focus-visible:ring-offset-0"
             >
               <Avatar className="h-9 w-9">
                 {userAvatar && (
@@ -61,11 +61,11 @@ export default function Header() {
               </Avatar>
               <div className="hidden text-left lg:block">
                 <p className="text-sm font-medium">John Doe</p>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-muted-foreground group-hover:text-accent-foreground">
                   john.doe@example.com
                 </p>
               </div>
-              <ChevronDown className="hidden h-4 w-4 text-muted-foreground lg:block" />
+              <ChevronDown className="hidden h-4 w-4 text-muted-foreground group-hover:text-accent-foreground lg:block" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
