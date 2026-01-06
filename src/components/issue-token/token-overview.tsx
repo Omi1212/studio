@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -9,82 +10,129 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { CheckCircle, Copy } from 'lucide-react';
+import { Copy, Info, Globe } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import type { TokenDetails } from '@/app/issue-token/page';
+import { Avatar, AvatarFallback } from '../ui/avatar';
+import { Badge } from '../ui/badge';
+import { Separator } from '../ui/separator';
+import { Progress } from '../ui/progress';
+import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
 
 interface TokenOverviewProps {
   token: TokenDetails;
-  onIssueNew: () => void;
 }
 
 export default function TokenOverview({
-  token,
-  onIssueNew,
+  token
 }: TokenOverviewProps) {
   const { toast } = useToast();
 
-  const copyToClipboard = (text: string) => {
+  const copyToClipboard = (text: string, fieldName: string) => {
     navigator.clipboard.writeText(text);
     toast({
       title: 'Copied to clipboard!',
-      description: text,
+      description: `${fieldName} "${text}" has been copied.`,
     });
   };
 
   return (
-    <Card>
-      <CardHeader className="items-center text-center">
-        <CheckCircle className="w-16 h-16 text-green-500 mb-4" />
-        <CardTitle className="text-2xl">Token Issued Successfully</CardTitle>
-        <CardDescription>
-          Your new token has been created on the network.
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="p-3 rounded-lg border bg-muted/50">
-          <div className="flex justify-between items-center">
-            <div>
-              <p className="text-sm text-muted-foreground">Token ID</p>
-              <p className="font-mono font-semibold">{token.id}</p>
+    <div className="space-y-6">
+      <Alert>
+        <Info className="h-4 w-4" />
+        <AlertTitle>Token Overview</AlertTitle>
+      </Alert>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <Card className="lg:col-span-2">
+          <CardContent className="p-6 space-y-6">
+            <div className="flex items-start justify-between">
+              <div className="flex items-center gap-4">
+                <Avatar className="h-12 w-12 text-xl font-bold">
+                  <AvatarFallback>{token.tokenName.charAt(0)}</AvatarFallback>
+                </Avatar>
+                <div>
+                  <h2 className="text-xl font-bold">{token.tokenName}</h2>
+                  <p className="text-primary">{token.tokenTicker}</p>
+                </div>
+              </div>
+              <Badge variant="outline" className="text-green-400 border-green-400">Active</Badge>
             </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => copyToClipboard(token.id)}
-            >
-              <Copy className="w-4 h-4" />
+
+            <InfoRow 
+              label="Token Public Key" 
+              value={token.publicKey} 
+              onCopy={() => copyToClipboard(token.publicKey, 'Token Public Key')} 
+            />
+            <InfoRow 
+              label="Token ID" 
+              value={token.id} 
+              onCopy={() => copyToClipboard(token.id, 'Token ID')}
+            />
+            
+            <Separator />
+            
+            <div className="grid grid-cols-3 gap-4 text-sm">
+                <div className="space-y-1">
+                    <p className="text-muted-foreground">Decimals</p>
+                    <p className="font-medium">{token.decimals}</p>
+                </div>
+                <div className="space-y-1">
+                    <p className="text-muted-foreground">Is Freezable</p>
+                    <p className="font-medium">{token.isFreezable ? 'Yes' : 'No'}</p>
+                </div>
+                <div className="space-y-1">
+                    <p className="text-muted-foreground">Holders</p>
+                    <p className="font-medium">--</p>
+                </div>
+            </div>
+
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Supply Information</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex justify-between text-sm">
+              <span className="text-muted-foreground">Max Supply</span>
+              <span className="font-medium">{token.maxSupply.toLocaleString()}</span>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span className="text-muted-foreground">Current Total Supply</span>
+              <span className="font-medium">0 / {token.maxSupply.toLocaleString()}</span>
+            </div>
+            <Progress value={0} />
+             <div className="text-right text-sm text-muted-foreground">0%</div>
+          </CardContent>
+          <CardFooter>
+            <Button variant="outline" className="w-full">
+              <Globe className="mr-2 h-4 w-4" />
+              View on Sparkscan
             </Button>
-          </div>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-          <InfoItem label="Token Name" value={token.tokenName} />
-          <InfoItem label="Token Ticker" value={token.tokenTicker} />
-          <InfoItem label="Decimals" value={token.decimals.toString()} />
-          <InfoItem
-            label="Max Supply"
-            value={token.maxSupply.toLocaleString()}
-          />
-          <InfoItem
-            label="Is Freezable"
-            value={token.isFreezable ? 'Yes' : 'No'}
-          />
-        </div>
-      </CardContent>
-      <CardFooter>
-        <Button onClick={onIssueNew} variant="outline" className="w-full">
-          Issue Another Token
-        </Button>
-      </CardFooter>
-    </Card>
+          </CardFooter>
+        </Card>
+      </div>
+    </div>
   );
 }
 
-function InfoItem({ label, value }: { label: string; value: string }) {
+function InfoRow({ label, value, onCopy }: { label: string; value: string, onCopy: () => void }) {
   return (
-    <div className="flex justify-between items-center p-3 rounded-lg border">
-      <p className="text-muted-foreground">{label}</p>
-      <p className="font-medium">{value}</p>
+    <div className="space-y-1">
+      <p className="text-sm text-muted-foreground">{label}</p>
+      <div className="flex items-center gap-2">
+        <p className="font-mono text-sm font-medium truncate">{value}</p>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-7 w-7"
+          onClick={onCopy}
+        >
+          <Copy className="w-4 h-4" />
+        </Button>
+      </div>
     </div>
   );
 }
