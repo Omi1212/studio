@@ -40,7 +40,7 @@ export default function SidebarNav() {
   return (
     <>
       <SidebarHeader className="p-4">
-        <h2 className="text-2xl font-bold text-primary font-headline">SATS</h2>
+        <h2 className="text-2xl font-bold text-primary font-headline">BlockStratus</h2>
       </SidebarHeader>
       <SidebarContent className="p-4">
         <SidebarMenu>
