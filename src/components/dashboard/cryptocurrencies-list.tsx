@@ -1,3 +1,4 @@
+
 import {
   Card,
   CardContent,
@@ -27,13 +28,11 @@ export default function CryptocurrenciesList({ className }: { className?: string
                   {crypto.ticker === 'BTC' ? (
                      <AvatarImage src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Bitcoin.svg/1200px-Bitcoin.svg.png" alt="Bitcoin logo" />
                   ) : crypto.icon ? (
-                    <div className="flex items-center justify-center h-full w-full bg-muted rounded-full">
-                        <AvatarFallback className="bg-muted text-foreground">{crypto.ticker}</AvatarFallback>
-                    </div>
+                     <AvatarImage src={crypto.icon} alt={`${crypto.name} logo`} />
                   ) : (
-                    <AvatarFallback>{crypto.ticker}</AvatarFallback>
+                    <AvatarFallback className="bg-muted text-foreground">{crypto.ticker}</AvatarFallback>
                   )}
-                   {crypto.ticker !== 'BTC' && <AvatarFallback className="bg-muted text-foreground">{crypto.ticker}</AvatarFallback>}
+                  <AvatarFallback className="bg-muted text-foreground">{crypto.ticker}</AvatarFallback>
                 </Avatar>
                 <div className="flex flex-col">
                   <span className="font-bold">{crypto.ticker}</span>
