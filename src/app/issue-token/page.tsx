@@ -44,20 +44,24 @@ export default function IssueTokenPage() {
         <div className="flex flex-col min-h-dvh">
           <HeaderDynamic />
           <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-8 bg-background">
-            {!createdToken ? (
-              <>
-                <h1 className="text-3xl font-headline font-semibold">Issue Token</h1>
-                <div className="flex justify-center pb-8">
-                  <div className="w-full max-w-2xl">
-                    <IssueTokenForm onSubmit={handleTokenCreate} />
-                  </div>
-                </div>
-              </>
-            ) : (
-              <TokenOverview
-                token={createdToken}
-              />
-            )}
+            <div className="flex justify-center">
+              <div className="w-full max-w-4xl">
+                {!createdToken ? (
+                  <>
+                    <h1 className="text-3xl font-headline font-semibold mb-8">Issue Token</h1>
+                    <div className="flex justify-center pb-8">
+                      <div className="w-full max-w-2xl">
+                        <IssueTokenForm onSubmit={handleTokenCreate} />
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <TokenOverview
+                    token={createdToken}
+                  />
+                )}
+              </div>
+            </div>
           </main>
         </div>
       </SidebarInset>
