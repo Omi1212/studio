@@ -79,16 +79,16 @@ export default function AllTransactions({ className }: { className?: string }) {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Transaction</TableHead>
-                <TableHead className="hidden sm:table-cell">Date</TableHead>
-                <TableHead className="text-right">Amount</TableHead>
-                <TableHead className="hidden md:table-cell"></TableHead>
+                <TableHead className="px-4 sm:px-6">Transaction</TableHead>
+                <TableHead className="hidden sm:table-cell px-4 sm:px-6">Date</TableHead>
+                <TableHead className="text-right px-4 sm:px-6">Amount</TableHead>
+                <TableHead className="hidden md:table-cell px-4 sm:px-6"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {paginatedTransactions.map((transaction) => (
                 <TableRow key={transaction.id}>
-                  <TableCell>
+                  <TableCell className="px-4 sm:px-6">
                     <div className="flex items-center gap-3">
                       <div
                         className={cn(
@@ -112,8 +112,8 @@ export default function AllTransactions({ className }: { className?: string }) {
                       </div>
                     </div>
                   </TableCell>
-                  <TableCell className="text-muted-foreground hidden sm:table-cell">{transaction.date}</TableCell>
-                  <TableCell className="text-right">
+                  <TableCell className="text-muted-foreground hidden sm:table-cell px-4 sm:px-6">{transaction.date}</TableCell>
+                  <TableCell className="text-right px-4 sm:px-6">
                     <p
                       className={cn(
                         'font-medium',
@@ -126,7 +126,7 @@ export default function AllTransactions({ className }: { className?: string }) {
                       {transaction.amount} {transaction.currency}
                     </p>
                   </TableCell>
-                  <TableCell className="hidden md:table-cell text-right">
+                  <TableCell className="hidden md:table-cell text-right px-4 sm:px-6">
                       <Button variant="ghost" size="icon">
                           <ExternalLink className="h-4 w-4" />
                           <span className="sr-only">Open on Sparkscan</span>
