@@ -123,7 +123,7 @@ export default function AllTransactions({ className }: { className?: string }) {
                       )}
                     >
                       {transaction.direction === 'in' ? '+' : '-'}
-                      {transaction.amount.toLocaleString()} {transaction.currency}
+                      {transaction.amount} {transaction.currency}
                     </p>
                   </TableCell>
                   <TableCell className="hidden md:table-cell text-right">

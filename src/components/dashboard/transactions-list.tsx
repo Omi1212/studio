@@ -71,7 +71,7 @@ export default function TransactionsList({ className, limit }: { className?: str
                       )}
                     >
                       {transaction.direction === 'in' ? '+' : '-'}
-                      {transaction.amount.toLocaleString()} {transaction.currency}
+                      {transaction.amount} {transaction.currency}
                     </p>
                   </TableCell>
                   <TableCell className="hidden md:table-cell text-right">
