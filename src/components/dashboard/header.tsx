@@ -30,7 +30,7 @@ export default function Header() {
         <SidebarTrigger />
       </div>
 
-      <Button className="hidden sm:inline-flex">
+      <Button className="hidden sm:inline-flex bg-primary text-primary-foreground">
         <PlusCircle />
         Create Payment
       </Button>
