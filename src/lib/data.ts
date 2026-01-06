@@ -73,7 +73,7 @@ export const transactionData = [
     address: 'spark1...j8g2q',
     date: '3 days ago',
     amount: 1250,
-    currency: 'BTC',
+    currency: 'SATS',
     direction: 'out',
   },
 ];
