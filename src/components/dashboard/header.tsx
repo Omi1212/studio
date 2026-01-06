@@ -47,7 +47,7 @@ export default function Header() {
           <DropdownMenuTrigger asChild>
             <Button
               variant="ghost"
-              className="flex items-center gap-2 rounded-full p-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+              className="flex items-center gap-3 p-2 focus-visible:ring-0 focus-visible:ring-offset-0"
             >
               <Avatar className="h-9 w-9">
                 {userAvatar && (
