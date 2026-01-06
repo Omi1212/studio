@@ -27,9 +27,9 @@ export default function DashboardPage() {
           <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-8 bg-background">
             <h1 className="text-3xl font-headline font-semibold">Dashboard</h1>
             <VolumeCards />
-            <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
-              <PaymentSummaryDynamic className="xl:col-span-2" />
-              <TransactionsList className="xl:col-span-1" />
+            <div className="grid grid-cols-1 gap-8">
+              <PaymentSummaryDynamic />
+              <TransactionsList />
             </div>
           </main>
         </div>
