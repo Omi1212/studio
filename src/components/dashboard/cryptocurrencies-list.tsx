@@ -32,7 +32,6 @@ export default function CryptocurrenciesList({ className }: { className?: string
                   ) : (
                     <AvatarFallback className="bg-muted text-foreground">{crypto.ticker}</AvatarFallback>
                   )}
-                  <AvatarFallback className="bg-muted text-foreground">{crypto.ticker}</AvatarFallback>
                 </Avatar>
                 <div className="flex flex-col">
                   <span className="font-bold">{crypto.ticker}</span>
