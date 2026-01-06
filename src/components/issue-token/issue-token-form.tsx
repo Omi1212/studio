@@ -24,7 +24,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { useState } from 'react';
-import { Loader2, Upload } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 
 const formSchema = z.object({
   tokenName: z.string().min(1, 'Token name is required'),
@@ -75,31 +75,6 @@ export default function IssueTokenForm({ onSubmit }: IssueTokenFormProps) {
           <CardContent className="space-y-6">
             <FormField
               control={form.control}
-              name="tokenIcon"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Token Icon</FormLabel>
-                  <FormControl>
-                    <div className="flex items-center gap-4">
-                      <div className="w-full">
-                        <Input 
-                          type="file" 
-                          accept="image/*"
-                          onChange={(e) => field.onChange(e.target.files)} 
-                          className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/90"
-                        />
-                      </div>
-                    </div>
-                  </FormControl>
-                  <FormDescription>
-                    Upload an image for your token (e.g., PNG, JPG, SVG).
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
               name="tokenName"
               render={({ field }) => (
                 <FormItem>
@@ -120,6 +95,31 @@ export default function IssueTokenForm({ onSubmit }: IssueTokenFormProps) {
                   <FormControl>
                     <Input placeholder="e.g. MAT" {...field} />
                   </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+             <FormField
+              control={form.control}
+              name="tokenIcon"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Token Icon</FormLabel>
+                  <FormControl>
+                    <div className="flex items-center gap-4">
+                      <div className="w-full">
+                        <Input 
+                          type="file" 
+                          accept="image/*"
+                          onChange={(e) => field.onChange(e.target.files)} 
+                          className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/90"
+                        />
+                      </div>
+                    </div>
+                  </FormControl>
+                  <FormDescription>
+                    Upload an image for your token (e.g., PNG, JPG, SVG).
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
