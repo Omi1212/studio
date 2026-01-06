@@ -48,9 +48,9 @@ export default function TokensList() {
                   ${token.price.toFixed(4)}
                 </TableCell>
                 <TableCell className="text-right">
-                  <p className="font-medium font-mono">{token.balance.toLocaleString()}</p>
+                  <p className="font-medium font-mono">{token.balance}</p>
                   <p className="text-sm text-muted-foreground font-mono">
-                    ${(token.balance * token.price).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    ${(token.balance * token.price).toFixed(2)}
                   </p>
                 </TableCell>
                 <TableCell className="px-6">
