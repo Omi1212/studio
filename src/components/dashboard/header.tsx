@@ -18,7 +18,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Input } from '@/components/ui/input';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
@@ -31,15 +30,15 @@ export default function Header() {
         <SidebarTrigger />
       </div>
 
-      <div className="flex items-center gap-2 md:gap-4 ml-auto">
-        <Button className="hidden sm:inline-flex">
-          <PlusCircle />
-          Create Payment
-        </Button>
-        <Button size="icon" variant="ghost" className="sm:hidden">
-          <PlusCircle />
-        </Button>
+      <Button className="hidden sm:inline-flex">
+        <PlusCircle />
+        Create Payment
+      </Button>
+      <Button size="icon" variant="ghost" className="sm:hidden">
+        <PlusCircle />
+      </Button>
 
+      <div className="flex items-center gap-2 md:gap-4 ml-auto">
         <Button variant="ghost" size="icon" className="rounded-full">
           <Bell />
           <span className="sr-only">Notifications</span>
