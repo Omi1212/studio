@@ -141,3 +141,21 @@ export const transactionData = [
     direction: 'in',
   },
 ];
+
+
+export const tokenData = [
+  {
+    id: 1,
+    name: 'Omar',
+    ticker: 'OMI',
+    price: 0.0000,
+    balance: 95.999,
+  },
+  {
+    id: 2,
+    name: 'MoisesToken',
+    ticker: 'JMT',
+    price: 0.0000,
+    balance: 2500,
+  },
+];

@@ -10,20 +10,20 @@ import {
 } from '@/components/ui/sidebar';
 import {
   LayoutDashboard,
-  Wallet,
   ArrowRightLeft,
   Users,
   Settings,
   ShieldCheck,
   LifeBuoy,
   CircleDollarSign,
+  Briefcase,
 } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 
 const menuItems = [
   { href: '/', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/issue-token', label: 'Issue Token', icon: CircleDollarSign },
-  { href: '/wallet', label: 'Wallet', icon: Wallet },
+  { href: '/my-tokens', label: 'My Tokens', icon: Briefcase },
   { href: '/transactions', label: 'Transactions', icon: ArrowRightLeft },
   { href: '/users', label: 'Users', icon: Users },
 ];
