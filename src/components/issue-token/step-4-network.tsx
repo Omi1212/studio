@@ -18,7 +18,7 @@ import {
   CardFooter,
 } from '@/components/ui/card';
 import { useState } from 'react';
-import { Loader2, Zap } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import type { TokenFormValues } from './issue-token-form';
 import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
 import { cn } from '@/lib/utils';
@@ -36,7 +36,7 @@ interface Step4NetworkProps {
 }
 
 const networks = [
-    { id: 'spark', name: 'Spark Network', icon: <Zap className="h-6 w-6" /> },
+    { id: 'spark', name: 'Spark Network', icon: <svg width="24" height="24" viewBox="0 0 68 64" fill="none" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" clipRule="evenodd" d="M39.68 24.656L40.836 0H26.398l1.156 24.656-23.092-8.718L0 29.668l23.807 6.52L8.38 55.457l11.68 8.487 13.558-20.628 13.558 20.627 11.68-8.486L43.43 36.188l23.804-6.52-4.461-13.73-23.092 8.718zM33.617 33v.001z" fill="currentColor"></path></svg> },
     { id: 'liquid', name: 'Liquid Network', icon: <img src="https://liquid.net/_next/static/media/logo.28b5ba97.svg" alt="Liquid Network Logo" className="h-6 w-6" /> },
     { id: 'rgb', name: 'RGB Protocol', icon: <img src="https://rgb.tech/logo/rgb-symbol-color.svg" alt="RGB Protocol Logo" className="h-6 w-6" /> },
 ]
