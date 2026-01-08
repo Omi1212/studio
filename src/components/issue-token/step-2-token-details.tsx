@@ -25,27 +25,10 @@ import { useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import type { TokenFormValues } from './issue-token-form';
 
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
-const ACCEPTED_FILE_TYPES = ["application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"];
-
 const step2Schema = z.object({
   decimals: z.coerce.number().int().min(0).max(18),
   maxSupply: z.coerce.number().positive('Max supply must be a positive number'),
   isFreezable: z.boolean(),
-  legalTokenizationDoc: z.any()
-    .refine((files) => files?.[0], "Document is required.")
-    .refine((files) => files?.[0]?.size <= MAX_FILE_SIZE, `Max file size is 5MB.`)
-    .refine(
-      (files) => ACCEPTED_FILE_TYPES.includes(files?.[0]?.type),
-      ".pdf and .doc files are accepted."
-    ),
-  tokenIssuanceLegalDoc: z.any()
-    .refine((files) => files?.[0], "Document is required.")
-    .refine((files) => files?.[0]?.size <= MAX_FILE_SIZE, `Max file size is 5MB.`)
-    .refine(
-      (files) => ACCEPTED_FILE_TYPES.includes(files?.[0]?.type),
-      ".pdf and .doc files are accepted."
-    ),
 });
 
 type Step2FormValues = z.infer<typeof step2Schema>;
@@ -65,8 +48,6 @@ export default function Step2TokenDetails({ onNext, onBack, defaultValues }: Ste
       decimals: defaultValues?.decimals || 6,
       maxSupply: defaultValues?.maxSupply || 1_000_000_000000,
       isFreezable: defaultValues?.isFreezable ?? true,
-      legalTokenizationDoc: defaultValues?.legalTokenizationDoc,
-      tokenIssuanceLegalDoc: defaultValues?.tokenIssuanceLegalDoc,
     }
   });
 
@@ -76,15 +57,6 @@ export default function Step2TokenDetails({ onNext, onBack, defaultValues }: Ste
     onNext(data);
     setIsSubmitting(false);
   };
-  
-  const FileInput = ({ field }: { field: any }) => (
-    <Input 
-      type="file" 
-      accept=".pdf,.doc,.docx"
-      onChange={(e) => field.onChange(e.target.files)} 
-      className="h-auto file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/90"
-    />
-  );
 
   return (
     <Form {...form}>
@@ -140,34 +112,6 @@ export default function Step2TokenDetails({ onNext, onBack, defaultValues }: Ste
                       onCheckedChange={field.onChange}
                     />
                   </FormControl>
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="legalTokenizationDoc"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Submit Legal Tokenization Document</FormLabel>
-                  <FormControl>
-                    <FileInput field={field} />
-                  </FormControl>
-                  <FormDescription>Upload the legal tokenization document (PDF, DOC, DOCX).</FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="tokenIssuanceLegalDoc"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Submit Token Issuance Legal Document</FormLabel>
-                  <FormControl>
-                     <FileInput field={field} />
-                  </FormControl>
-                   <FormDescription>Upload the token issuance legal document (PDF, DOC, DOCX).</FormDescription>
-                  <FormMessage />
                 </FormItem>
               )}
             />

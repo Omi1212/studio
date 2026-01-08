@@ -15,6 +15,7 @@ import { TokenFormValues } from '@/components/issue-token/issue-token-form';
 import TokenOverview from '@/components/issue-token/token-overview';
 import { Button } from '@/components/ui/button';
 import Step2TokenDetails from '@/components/issue-token/step-2-token-details';
+import Step3Documents from '@/components/issue-token/step-3-documents';
 
 export interface TokenDetails extends TokenFormValues {
   id: string;
@@ -37,7 +38,8 @@ export default function IssueTokenPage() {
   const steps = [
     { id: 1, label: 'Token Information' },
     { id: 2, label: 'Token Details' },
-    { id: 3, label: 'Confirmation' },
+    { id: 3, label: 'Documents' },
+    { id: 4, label: 'Confirmation' },
   ];
 
   const handleNext = (data: Partial<TokenFormValues>) => {
@@ -83,11 +85,12 @@ export default function IssueTokenPage() {
                       Create and issue a new token on the network.
                     </p>
                     <div className="mb-8">
-                      <Stepper>
+                      <Stepper totalSteps={steps.length}>
                         {steps.map((step) => (
                           <StepperItem
                             key={step.id}
                             step={step.id}
+                            isLastStep={step.id === steps.length}
                             isActive={currentStep === step.id}
                             isCompleted={currentStep > step.id}
                           >
@@ -113,9 +116,16 @@ export default function IssueTokenPage() {
                           />
                         )}
                          {currentStep === 3 && (
+                          <Step3Documents
+                            onBack={handleBack}
+                            onNext={handleNext}
+                            defaultValues={formData}
+                          />
+                        )}
+                         {currentStep === 4 && (
                           <div>
                             <h2 className="text-xl font-semibold mb-4">
-                              Step 3: Confirmation
+                              Step 4: Confirmation
                             </h2>
                             <p>Coming soon...</p>
                              <Button onClick={handleBack} variant="outline">Back</Button>

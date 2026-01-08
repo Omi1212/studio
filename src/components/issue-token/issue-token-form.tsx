@@ -37,15 +37,22 @@ export const formSchema = z.object({
   maxSupply: z.coerce.number().positive('Max supply must be a positive number'),
   isFreezable: z.boolean(),
   tokenIcon: z.any().optional(),
+  whitepaper: z.any()
+    .refine((files) => files?.[0], "Whitepaper is required.")
+    .refine((files) => files?.[0]?.size <= MAX_FILE_SIZE, `Max file size is 5MB.`)
+    .refine(
+      (files) => ACCEPTED_FILE_TYPES.includes(files?.[0]?.type),
+      ".pdf and .doc files are accepted."
+    ).optional(),
   legalTokenizationDoc: z.any()
-    .refine((files) => files?.length == 1, "Document is required.")
+    .refine((files) => files?.[0], "Document is required.")
     .refine((files) => files?.[0]?.size <= MAX_FILE_SIZE, `Max file size is 5MB.`)
     .refine(
       (files) => ACCEPTED_FILE_TYPES.includes(files?.[0]?.type),
       ".pdf and .doc files are accepted."
     ).optional(),
   tokenIssuanceLegalDoc: z.any()
-    .refine((files) => files?.length == 1, "Document is required.")
+    .refine((files) => files?.[0], "Document is required.")
     .refine((files) => files?.[0]?.size <= MAX_FILE_SIZE, `Max file size is 5MB.`)
     .refine(
       (files) => ACCEPTED_FILE_TYPES.includes(files?.[0]?.type),
