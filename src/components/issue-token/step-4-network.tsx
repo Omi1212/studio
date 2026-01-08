@@ -18,7 +18,7 @@ import {
   CardFooter,
 } from '@/components/ui/card';
 import { useState } from 'react';
-import { Loader2, Zap, Droplets, Rss } from 'lucide-react';
+import { Loader2, Zap } from 'lucide-react';
 import type { TokenFormValues } from './issue-token-form';
 import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
 import { cn } from '@/lib/utils';
@@ -37,8 +37,8 @@ interface Step4NetworkProps {
 
 const networks = [
     { id: 'spark', name: 'Spark Network', icon: <Zap className="h-6 w-6" /> },
-    { id: 'liquid', name: 'Liquid Network', icon: <Droplets className="h-6 w-6" /> },
-    { id: 'rgb', name: 'RGB Protocol', icon: <Rss className="h-6 w-6" /> },
+    { id: 'liquid', name: 'Liquid Network', icon: <img src="https://liquid.net/_next/static/media/logo.28b5ba97.svg" alt="Liquid Network Logo" className="h-6 w-6" /> },
+    { id: 'rgb', name: 'RGB Protocol', icon: <img src="https://rgb.tech/logo/rgb-symbol-color.svg" alt="RGB Protocol Logo" className="h-6 w-6" /> },
 ]
 
 export default function Step4Network({ onNext, onBack, defaultValues }: Step4NetworkProps) {
