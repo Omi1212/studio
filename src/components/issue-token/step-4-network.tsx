@@ -81,7 +81,7 @@ export default function Step4Network({ onNext, onBack, defaultValues }: Step4Net
                             <FormLabel
                                 htmlFor={field.name}
                                 className={cn(
-                                'flex flex-row items-center justify-start gap-4 rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground cursor-pointer',
+                                'flex flex-row items-center justify-start gap-4 rounded-md border-2 border-muted bg-popover p-6 hover:bg-accent hover:text-accent-foreground cursor-pointer',
                                 field.value === network.id && 'border-primary'
                                 )}
                             >
