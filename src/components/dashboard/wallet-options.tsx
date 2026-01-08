@@ -1,5 +1,7 @@
 
-import { Asterisk, ExternalLink, Plus, Power, Settings, Pencil, Share2, ArrowDownToLine, ArrowUpFromLine, Copy } from "lucide-react";
+'use client';
+
+import { Asterisk, ExternalLink, Plus, Power, Copy, ArrowDownToLine, ArrowUpFromLine } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -40,9 +42,6 @@ function ConnectedView({ onDisconnect }: { onDisconnect: () => void }) {
           <span className="font-semibold">spa...kjc</span>
         </div>
         <div className="flex items-center gap-1">
-          <Button variant="ghost" size="icon"><Share2 className="h-5 w-5" /></Button>
-          <Button variant="ghost" size="icon"><Pencil className="h-5 w-5" /></Button>
-          <Button variant="ghost" size="icon"><Settings className="h-5 w-5" /></Button>
           <SheetClose asChild>
             <Button variant="ghost" size="icon" onClick={onDisconnect}><Power className="h-5 w-5 text-red-500" /></Button>
           </SheetClose>
