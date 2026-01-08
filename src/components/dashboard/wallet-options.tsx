@@ -39,7 +39,7 @@ function ConnectedView({ onDisconnect }: { onDisconnect: () => void }) {
             <AvatarImage src="https://placehold.co/40x40/7c3aed/ffffff/png?text=A" alt="User Avatar" />
             <AvatarFallback>A</AvatarFallback>
           </Avatar>
-          <span className="font-semibold">spa...kjc</span>
+          <span className="font-semibold">spark1pg...92kjc</span>
         </div>
         <div className="flex items-center gap-1">
           <SheetClose asChild>
