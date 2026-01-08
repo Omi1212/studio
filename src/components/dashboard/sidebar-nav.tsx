@@ -50,8 +50,10 @@ const superAdminMenu = [
 export default function SidebarNav() {
   const pathname = usePathname();
   const [userRole, setUserRole] = useState<string | null>(null);
+  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
+    setIsClient(true);
     if (typeof window !== 'undefined') {
       const role = localStorage.getItem('userRole');
       setUserRole(role);
@@ -61,6 +63,10 @@ export default function SidebarNav() {
   const menuItems = userRole === 'superadmin' ? superAdminMenu : allMenuItems.filter(
     item => !item.roles || item.roles.includes(userRole || '')
   );
+
+  if (!isClient) {
+    return null; // O un skeleton/loader
+  }
 
 
   return (
