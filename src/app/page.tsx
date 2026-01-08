@@ -1,6 +1,7 @@
 import {
   Sidebar,
   SidebarInset,
+  SidebarProvider,
 } from '@/components/ui/sidebar';
 import SidebarNav from '@/components/dashboard/sidebar-nav';
 import VolumeCards from '@/components/dashboard/volume-cards';
@@ -17,7 +18,7 @@ export const metadata: Metadata = {
 
 export default function DashboardPage() {
   return (
-    <>
+    <SidebarProvider>
       <Sidebar className="border-r">
         <SidebarNav />
       </Sidebar>
@@ -35,6 +36,6 @@ export default function DashboardPage() {
           </main>
         </div>
       </SidebarInset>
-    </>
+    </SidebarProvider>
   );
 }

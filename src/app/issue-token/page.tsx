@@ -5,6 +5,7 @@ import { useState } from 'react';
 import {
   Sidebar,
   SidebarInset,
+  SidebarProvider,
 } from '@/components/ui/sidebar';
 import SidebarNav from '@/components/dashboard/sidebar-nav';
 import HeaderDynamic from '@/components/dashboard/header-dynamic';
@@ -35,7 +36,7 @@ export default function IssueTokenPage() {
   };
 
   return (
-    <>
+    <SidebarProvider>
       <Sidebar className="border-r">
         <SidebarNav />
       </Sidebar>
@@ -64,6 +65,6 @@ export default function IssueTokenPage() {
           </main>
         </div>
       </SidebarInset>
-    </>
+    </SidebarProvider>
   );
 }
