@@ -26,6 +26,9 @@ import {
 import { useState } from 'react';
 import { Loader2 } from 'lucide-react';
 
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+const ACCEPTED_FILE_TYPES = ["application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"];
+
 export const formSchema = z.object({
   tokenName: z.string().min(1, 'Token name is required'),
   tokenTicker: z.string().min(1, 'Token ticker is required').max(5, 'Ticker cannot exceed 5 characters'),
@@ -34,6 +37,20 @@ export const formSchema = z.object({
   maxSupply: z.coerce.number().positive('Max supply must be a positive number'),
   isFreezable: z.boolean(),
   tokenIcon: z.any().optional(),
+  legalTokenizationDoc: z.any()
+    .refine((files) => files?.length == 1, "Document is required.")
+    .refine((files) => files?.[0]?.size <= MAX_FILE_SIZE, `Max file size is 5MB.`)
+    .refine(
+      (files) => ACCEPTED_FILE_TYPES.includes(files?.[0]?.type),
+      ".pdf and .doc files are accepted."
+    ).optional(),
+  tokenIssuanceLegalDoc: z.any()
+    .refine((files) => files?.length == 1, "Document is required.")
+    .refine((files) => files?.[0]?.size <= MAX_FILE_SIZE, `Max file size is 5MB.`)
+    .refine(
+      (files) => ACCEPTED_FILE_TYPES.includes(files?.[0]?.type),
+      ".pdf and .doc files are accepted."
+    ).optional(),
 });
 
 export type TokenFormValues = z.infer<typeof formSchema>;

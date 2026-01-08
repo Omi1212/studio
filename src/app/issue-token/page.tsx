@@ -14,6 +14,7 @@ import Step1TokenInfo from '@/components/issue-token/step-1-token-info';
 import { TokenFormValues } from '@/components/issue-token/issue-token-form';
 import TokenOverview from '@/components/issue-token/token-overview';
 import { Button } from '@/components/ui/button';
+import Step2TokenDetails from '@/components/issue-token/step-2-token-details';
 
 export interface TokenDetails extends TokenFormValues {
   id: string;
@@ -27,6 +28,9 @@ export default function IssueTokenPage() {
     tokenName: 'Ingeniería Coin',
     tokenTicker: 'ING',
     destinationAddress: 'spark1pgssyd5f0685tu3v2hpqv2rx9cxu6vskyzjulwepzq79kd583gyw4z0gp92kjc',
+    decimals: 6,
+    maxSupply: 1_000_000_000000,
+    isFreezable: true,
   });
   const { toast } = useToast();
 
@@ -102,14 +106,11 @@ export default function IssueTokenPage() {
                           />
                         )}
                         {currentStep === 2 && (
-                          <div>
-                            <h2 className="text-xl font-semibold mb-4">
-                              Step 2: Token Details
-                            </h2>
-                            <p>Coming soon...</p>
-                            <Button onClick={handleBack} variant="outline" className="mr-2">Back</Button>
-                            <Button onClick={() => handleNext({})}>Next</Button>
-                          </div>
+                          <Step2TokenDetails
+                            onBack={handleBack}
+                            onNext={handleNext}
+                            defaultValues={formData}
+                          />
                         )}
                          {currentStep === 3 && (
                           <div>
