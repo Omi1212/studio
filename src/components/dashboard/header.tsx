@@ -8,6 +8,14 @@ import {
 
 import { Button } from '@/components/ui/button';
 import { SidebarTrigger } from '@/components/ui/sidebar';
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet"
+import WalletOptions from './wallet-options';
 
 
 export default function Header() {
@@ -23,10 +31,20 @@ export default function Header() {
           <Bell />
           <span className="sr-only">Notifications</span>
         </Button>
-        <Button className="hidden sm:inline-flex bg-primary text-primary-foreground">
-            <Wallet className="mr-2 h-4 w-4" />
-            Connect Wallet
-        </Button>
+        <Sheet>
+          <SheetTrigger asChild>
+            <Button className="hidden sm:inline-flex bg-primary text-primary-foreground">
+                <Wallet className="mr-2 h-4 w-4" />
+                Connect Wallet
+            </Button>
+          </SheetTrigger>
+          <SheetContent className="pt-16">
+            <SheetHeader>
+              <SheetTitle>Wallet options</SheetTitle>
+            </SheetHeader>
+            <WalletOptions />
+          </SheetContent>
+        </Sheet>
       </div>
     </header>
   );
