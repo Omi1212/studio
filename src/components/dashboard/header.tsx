@@ -38,7 +38,7 @@ export default function Header() {
                 Connect Wallet
             </Button>
           </SheetTrigger>
-          <SheetContent className="pt-16">
+          <SheetContent>
             <SheetHeader>
               <SheetTitle>Wallet options</SheetTitle>
             </SheetHeader>
