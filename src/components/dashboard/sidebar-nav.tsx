@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
+import NavUser from './nav-user';
 
 const allMenuItems = [
   { href: '/', label: 'Dashboard', icon: LayoutDashboard },
@@ -85,7 +86,7 @@ export default function SidebarNav() {
           ))}
         </SidebarMenu>
       </SidebarContent>
-      <SidebarFooter className="p-4">
+      <SidebarFooter className="p-2 space-y-2">
         <SidebarMenu>
           {helpMenuItems.map((item) => (
             <SidebarMenuItem key={item.href}>
@@ -102,6 +103,7 @@ export default function SidebarNav() {
             </SidebarMenuItem>
           ))}
         </SidebarMenu>
+        <NavUser />
       </SidebarFooter>
     </>
   );
