@@ -1,3 +1,5 @@
+'use client';
+
 import {
   Bell,
   ChevronDown,
@@ -8,6 +10,7 @@ import {
 } from 'lucide-react';
 import Image from 'next/image';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
+import { useRouter } from 'next/navigation';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -24,6 +27,12 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 const userAvatar = PlaceHolderImages.find((img) => img.id === 'user-avatar');
 
 export default function Header() {
+  const router = useRouter();
+
+  const handleLogout = () => {
+    router.push('/login');
+  };
+
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-card px-4 sm:px-6">
       <div className="md:hidden">
@@ -60,7 +69,7 @@ export default function Header() {
                 <AvatarFallback>JD</AvatarFallback>
               </Avatar>
               <div className="hidden text-left lg:block">
-                <p className="text-sm font-medium">John Doe</p>
+                <p className="text-sm font-medium group-hover:text-accent-foreground">John Doe</p>
                 <p className="text-xs text-muted-foreground group-hover:text-accent-foreground">
                   john.doe@example.com
                 </p>
@@ -80,7 +89,7 @@ export default function Header() {
               <span>Settings</span>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={handleLogout}>
               <LogOut className="mr-2" />
               <span>Log out</span>
             </DropdownMenuItem>
