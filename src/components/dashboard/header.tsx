@@ -3,7 +3,6 @@
 
 import {
   Bell,
-  PlusCircle,
   Wallet,
 } from 'lucide-react';
 
@@ -18,14 +17,6 @@ export default function Header() {
       <div className="md:hidden">
         <SidebarTrigger />
       </div>
-
-      <Button className="hidden sm:inline-flex bg-primary text-primary-foreground">
-        <PlusCircle />
-        Create Payment
-      </Button>
-      <Button size="icon" variant="ghost" className="sm:hidden">
-        <PlusCircle />
-      </Button>
 
       <div className="flex items-center gap-2 md:gap-4 ml-auto">
         <Button variant="ghost" size="icon" className="rounded-full">
