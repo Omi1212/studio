@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useForm } from 'react-hook-form';
@@ -14,53 +15,46 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Switch } from '@/components/ui/switch';
 import {
   Card,
   CardContent,
-  CardDescription,
   CardFooter,
-  CardHeader,
-  CardTitle,
 } from '@/components/ui/card';
 import { useState } from 'react';
 import { Loader2 } from 'lucide-react';
+import type { TokenFormValues } from './issue-token-form';
 
-export const formSchema = z.object({
+const step1Schema = z.object({
   tokenName: z.string().min(1, 'Token name is required'),
   tokenTicker: z.string().min(1, 'Token ticker is required').max(5, 'Ticker cannot exceed 5 characters'),
-  destinationAddress: z.string().min(1, 'Destination address is required'),
-  decimals: z.coerce.number().int().min(0).max(18),
-  maxSupply: z.coerce.number().positive('Max supply must be a positive number'),
-  isFreezable: z.boolean(),
   tokenIcon: z.any().optional(),
+  destinationAddress: z.string().min(1, 'Destination address is required'),
 });
 
-export type TokenFormValues = z.infer<typeof formSchema>;
+type Step1FormValues = z.infer<typeof step1Schema>;
 
-interface IssueTokenFormProps {
-  onSubmit: (data: TokenFormValues) => void;
+interface Step1TokenInfoProps {
+  onNext: (data: Partial<TokenFormValues>) => void;
+  defaultValues?: Partial<TokenFormValues>;
 }
 
-export default function IssueTokenForm({ onSubmit }: IssueTokenFormProps) {
+export default function Step1TokenInfo({ onNext, defaultValues }: Step1TokenInfoProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   
-  const form = useForm<TokenFormValues>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<Step1FormValues>({
+    resolver: zodResolver(step1Schema),
     defaultValues: {
-      tokenName: 'Ingeniería Coin',
-      tokenTicker: 'ING',
-      destinationAddress: 'spark1pgssyd5f0685tu3v2hpqv2rx9cxu6vskyzjulwepzq79kd583gyw4z0gp92kjc',
-      decimals: 6,
-      maxSupply: 1_000_000_000000,
-      isFreezable: true,
-    },
+        tokenName: defaultValues?.tokenName || '',
+        tokenTicker: defaultValues?.tokenTicker || '',
+        destinationAddress: defaultValues?.destinationAddress || '',
+        tokenIcon: defaultValues?.tokenIcon,
+    }
   });
 
-  const handleSubmit = async (data: TokenFormValues) => {
+  const handleSubmit = async (data: Step1FormValues) => {
     setIsSubmitting(true);
-    await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate async operation
-    onSubmit(data);
+    await new Promise((resolve) => setTimeout(resolve, 500)); // Simulate async validation/operation
+    onNext(data);
     setIsSubmitting(false);
   };
 
@@ -68,13 +62,7 @@ export default function IssueTokenForm({ onSubmit }: IssueTokenFormProps) {
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)}>
         <Card>
-          <CardHeader>
-            <CardTitle>Create a New Token</CardTitle>
-            <CardDescription>
-              Fill out the details below to issue a new token on the network.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
+          <CardContent className="space-y-6 pt-6">
             <FormField
               control={form.control}
               name="tokenName"
@@ -113,7 +101,7 @@ export default function IssueTokenForm({ onSubmit }: IssueTokenFormProps) {
                         <Input 
                           type="file" 
                           accept="image/*"
-                          onChange={(e) => field.onChange(e.target.files)} 
+                          onChange={(e) => field.onChange(e.target.files ? e.target.files[0] : null)} 
                           className="h-auto file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/90"
                         />
                       </div>
@@ -126,7 +114,7 @@ export default function IssueTokenForm({ onSubmit }: IssueTokenFormProps) {
                 </FormItem>
               )}
             />
-             <FormField
+            <FormField
               control={form.control}
               name="destinationAddress"
               render={({ field }) => (
@@ -135,72 +123,23 @@ export default function IssueTokenForm({ onSubmit }: IssueTokenFormProps) {
                   <FormControl>
                     <Input placeholder="e.g. spark1..." {...field} />
                   </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="decimals"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Decimals</FormLabel>
-                  <FormControl>
-                    <Input type="number" {...field} />
-                  </FormControl>
-                  <FormDescription>
-                    The number of decimal places the token can have (0-18).
+                   <FormDescription>
+                    The address that will receive the initial supply of tokens.
                   </FormDescription>
                   <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="maxSupply"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Max Supply</FormLabel>
-                  <FormControl>
-                    <Input type="number" {...field} />
-                  </FormControl>
-                  <FormDescription>
-                    The maximum number of tokens that can be minted.
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="isFreezable"
-              render={({ field }) => (
-                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                  <div className="space-y-0.5">
-                    <FormLabel>Is Freezable?</FormLabel>
-                    <FormDescription>
-                      Can the token supply be frozen by the issuer?
-                    </FormDescription>
-                  </div>
-                  <FormControl>
-                    <Switch
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                  </FormControl>
                 </FormItem>
               )}
             />
           </CardContent>
-          <CardFooter>
-            <Button type="submit" disabled={isSubmitting} className="w-full">
+          <CardFooter className="justify-end">
+            <Button type="submit" disabled={isSubmitting}>
               {isSubmitting ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Issuing Token...
+                  Next
                 </>
               ) : (
-                'Issue Token'
+                'Next'
               )}
             </Button>
           </CardFooter>
