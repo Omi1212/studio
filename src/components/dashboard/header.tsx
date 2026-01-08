@@ -49,10 +49,7 @@ export default function Header() {
         <Sheet>
           <SheetTrigger asChild>
              <Button 
-              className={cn(
-                "hidden sm:inline-flex bg-primary text-primary-foreground",
-                isConnected && "bg-orange-400 hover:bg-orange-400/90 text-white" // Example styling for connected state
-              )}
+              className="hidden sm:inline-flex bg-primary text-primary-foreground hover:bg-primary/90"
               onClick={!isConnected ? undefined : toggleConnection} // Toggle off when clicked if connected
             >
               {isConnected ? (
