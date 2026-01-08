@@ -49,6 +49,13 @@ const superAdminMenu = [
   { href: '/user-management', label: 'User Management', icon: Users },
 ];
 
+const adminMenu = [
+    { href: '/', label: 'Dashboard', icon: LayoutDashboard },
+    { href: '/requests', label: 'Requests', icon: ClipboardList },
+    { href: '/tokens', label: 'Tokens', icon: CircleDollarSign },
+    { href: '/transfers', label: 'Transfers', icon: ArrowRightLeft },
+];
+
 const investorMenu = [
     { href: '/', label: 'Dashboard', icon: LayoutDashboard },
     { href: '/marketplace', label: 'Marketplace', icon: ShoppingBag },
@@ -89,6 +96,8 @@ export default function SidebarNav() {
     menuItems = investorMenu;
   } else if (userRole === 'issuer') {
     menuItems = issuerMenu;
+  } else if (userRole === 'admin') {
+    menuItems = adminMenu;
   } else {
     menuItems = allMenuItems.filter(
       item => !item.roles || item.roles.includes(userRole || '')
