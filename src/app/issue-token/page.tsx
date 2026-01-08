@@ -16,6 +16,7 @@ import TokenOverview from '@/components/issue-token/token-overview';
 import { Button } from '@/components/ui/button';
 import Step2TokenDetails from '@/components/issue-token/step-2-token-details';
 import Step3Documents from '@/components/issue-token/step-3-documents';
+import Step4Network from '@/components/issue-token/step-4-network';
 
 export interface TokenDetails extends TokenFormValues {
   id: string;
@@ -32,6 +33,7 @@ export default function IssueTokenPage() {
     decimals: 6,
     maxSupply: 1_000_000_000000,
     isFreezable: true,
+    network: 'spark',
   });
   const { toast } = useToast();
 
@@ -39,7 +41,8 @@ export default function IssueTokenPage() {
     { id: 1, label: 'Token Information' },
     { id: 2, label: 'Token Details' },
     { id: 3, label: 'Documents' },
-    { id: 4, label: 'Confirmation' },
+    { id: 4, label: 'Network' },
+    { id: 5, label: 'Confirmation' },
   ];
 
   const handleNext = (data: Partial<TokenFormValues>) => {
@@ -123,9 +126,16 @@ export default function IssueTokenPage() {
                           />
                         )}
                          {currentStep === 4 && (
+                          <Step4Network
+                            onBack={handleBack}
+                            onNext={handleNext}
+                            defaultValues={formData}
+                          />
+                        )}
+                         {currentStep === 5 && (
                           <div>
                             <h2 className="text-xl font-semibold mb-4">
-                              Step 4: Confirmation
+                              Step 5: Confirmation
                             </h2>
                             <p>Coming soon...</p>
                              <Button onClick={handleBack} variant="outline">Back</Button>
