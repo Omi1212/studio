@@ -7,10 +7,7 @@ import {
 } from "@/components/ui/sheet"
 
 const XverseIcon = () => (
-    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="bg-white text-black rounded-full p-0.5">
-        <path d="M9.35156 8.28125L12 12M12 12L14.6484 15.7188M12 12L9.42969 15.7188M12 12L14.7266 8.28125" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-        <path d="M18.3984 5.03906L15.2734 3.96094L12 7.67188L8.72656 3.96094L5.60156 5.03906L8.80469 8.82812L6.15625 12.3281L7.64062 14.9219L10.5 12.8906L12.0781 18.0234H11.9219L13.5 12.8906L16.3594 14.9219L17.8438 12.3281L15.1953 8.82812L18.3984 5.03906Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-    </svg>
+    <img src="https://spark.satsterminal.com/xverse.svg" alt="Xverse logo" className="h-8 w-8" />
 )
 
 interface WalletOptionsProps {

@@ -54,7 +54,7 @@ export default function Header() {
             >
               {isConnected ? (
                 <>
-                  <Wallet className="h-4 w-4" />
+                  <img src="https://spark.satsterminal.com/xverse.svg" alt="Xverse logo" className="h-6 w-6" />
                   <div className="w-px h-4 bg-white/50 mx-2" />
                   <SparkIcon />
                   <span>spark1pg...92kjc</span>
