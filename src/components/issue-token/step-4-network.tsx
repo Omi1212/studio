@@ -71,7 +71,7 @@ export default function Step4Network({ onNext, onBack, defaultValues }: Step4Net
                   <RadioGroup
                     onValueChange={field.onChange}
                     defaultValue={field.value}
-                    className="grid grid-cols-1 md:grid-cols-3 gap-4"
+                    className="grid grid-cols-1 gap-4"
                   >
                     {networks.map(network => (
                         <FormItem key={network.id} className="w-full">
@@ -81,12 +81,12 @@ export default function Step4Network({ onNext, onBack, defaultValues }: Step4Net
                             <FormLabel
                                 htmlFor={field.name}
                                 className={cn(
-                                'flex flex-col items-center justify-center rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground cursor-pointer',
+                                'flex flex-row items-center justify-start gap-4 rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground cursor-pointer',
                                 field.value === network.id && 'border-primary'
                                 )}
                             >
                                 {network.icon}
-                                <span className="mt-2 font-semibold">{network.name}</span>
+                                <span className="font-semibold">{network.name}</span>
                             </FormLabel>
                         </FormItem>
                     ))}
