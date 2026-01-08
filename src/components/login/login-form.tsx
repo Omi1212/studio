@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Card,
@@ -40,7 +40,19 @@ export default function LoginForm() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
-    console.log('Logging in with:', { email, password });
+    
+    // Determine role from email
+    const role = Object.keys(roleEmails).find(
+      (key) => roleEmails[key as Role] === email
+    ) as Role | undefined;
+
+    if (role) {
+      localStorage.setItem('userRole', role);
+    } else {
+      localStorage.removeItem('userRole'); // Or set a default role
+    }
+
+    console.log('Logging in with:', { email, password, role });
     await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate async operation
     router.push('/');
   };

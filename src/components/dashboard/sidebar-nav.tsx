@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -17,15 +18,19 @@ import {
   LifeBuoy,
   CircleDollarSign,
   Briefcase,
+  Building,
 } from 'lucide-react';
 import { usePathname } from 'next/navigation';
+import { useState, useEffect } from 'react';
 
-const menuItems = [
+const allMenuItems = [
   { href: '/', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/issue-token', label: 'Issue Token', icon: CircleDollarSign },
   { href: '/my-tokens', label: 'My Tokens', icon: Briefcase },
   { href: '/transactions', label: 'Transactions', icon: ArrowRightLeft },
-  { href: '/users', label: 'Users', icon: Users },
+  { href: '/issuer-management', label: 'Issuer Management', icon: Building, roles: ['superadmin'] },
+  { href: '/user-management', label: 'User Management', icon: Users, roles: ['superadmin'] },
+  { href: '/users', label: 'Users', icon: Users, roles: ['admin', 'investor', 'issuer'] },
 ];
 
 const helpMenuItems = [
@@ -34,8 +39,28 @@ const helpMenuItems = [
   { href: '/help', label: 'Help', icon: LifeBuoy },
 ];
 
+const superAdminMenu = [
+  { href: '/', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/issuer-management', label: 'Issuer Management', icon: Building },
+  { href: '/user-management', label: 'User Management', icon: Users },
+];
+
+
 export default function SidebarNav() {
   const pathname = usePathname();
+  const [userRole, setUserRole] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const role = localStorage.getItem('userRole');
+      setUserRole(role);
+    }
+  }, []);
+
+  const menuItems = userRole === 'superadmin' ? superAdminMenu : allMenuItems.filter(
+    item => !item.roles || item.roles.includes(userRole || '')
+  );
+
 
   return (
     <>
