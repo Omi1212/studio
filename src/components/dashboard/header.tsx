@@ -17,15 +17,17 @@ import {
 } from "@/components/ui/sheet"
 import WalletOptions from './wallet-options';
 import { useState } from 'react';
-import { cn } from '@/lib/utils';
 
 export default function Header() {
   const [isConnected, setIsConnected] = useState(false);
 
-  // This function is for demonstration purposes to toggle the wallet state
-  const toggleConnection = () => {
-    setIsConnected(!isConnected);
-  }
+  const handleConnect = () => {
+    setIsConnected(true);
+  };
+  
+  const handleDisconnect = () => {
+    setIsConnected(false);
+  };
 
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-card px-4 sm:px-6">
@@ -42,7 +44,6 @@ export default function Header() {
           <SheetTrigger asChild>
              <Button 
               className="hidden sm:inline-flex bg-primary text-primary-foreground hover:bg-primary/90"
-              onClick={!isConnected ? undefined : toggleConnection} // Toggle off when clicked if connected
             >
               {isConnected ? (
                 <>
@@ -62,10 +63,13 @@ export default function Header() {
           </SheetTrigger>
           <SheetContent>
             <SheetHeader>
-              <SheetTitle>Wallet options</SheetTitle>
+              <SheetTitle>{isConnected ? 'Wallet' : 'Wallet options'}</SheetTitle>
             </SheetHeader>
-            {/* Pass a function to WalletOptions to handle connection */}
-            <WalletOptions onConnect={toggleConnection} />
+            <WalletOptions 
+              isConnected={isConnected} 
+              onConnect={handleConnect} 
+              onDisconnect={handleDisconnect} 
+            />
           </SheetContent>
         </Sheet>
       </div>
