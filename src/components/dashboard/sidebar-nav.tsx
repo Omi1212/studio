@@ -19,6 +19,8 @@ import {
   CircleDollarSign,
   Briefcase,
   Building,
+  ShoppingBag,
+  ClipboardList,
 } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
@@ -46,6 +48,13 @@ const superAdminMenu = [
   { href: '/user-management', label: 'User Management', icon: Users },
 ];
 
+const investorMenu = [
+    { href: '/', label: 'Dashboard', icon: LayoutDashboard },
+    { href: '/marketplace', label: 'Marketplace', icon: ShoppingBag },
+    { href: '/orders', label: 'Orders', icon: ClipboardList },
+    { href: '/my-tokens', label: 'Portfolio', icon: Briefcase },
+];
+
 
 export default function SidebarNav() {
   const pathname = usePathname();
@@ -53,19 +62,27 @@ export default function SidebarNav() {
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
+    // This ensures the code runs only on the client, preventing hydration errors.
     setIsClient(true);
-    if (typeof window !== 'undefined') {
-      const role = localStorage.getItem('userRole');
-      setUserRole(role);
-    }
+    const role = localStorage.getItem('userRole');
+    setUserRole(role);
   }, []);
 
-  const menuItems = userRole === 'superadmin' ? superAdminMenu : allMenuItems.filter(
-    item => !item.roles || item.roles.includes(userRole || '')
-  );
+  let menuItems;
 
   if (!isClient) {
-    return null; // O un skeleton/loader
+    // Render nothing or a skeleton loader on the server/initial client render.
+    return null;
+  }
+
+  if (userRole === 'superadmin') {
+    menuItems = superAdminMenu;
+  } else if (userRole === 'investor') {
+    menuItems = investorMenu;
+  } else {
+    menuItems = allMenuItems.filter(
+      item => !item.roles || item.roles.includes(userRole || '')
+    );
   }
 
 
