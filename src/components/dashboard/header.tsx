@@ -60,7 +60,7 @@ export default function Header() {
                   <Wallet className="h-4 w-4" />
                   <div className="w-px h-4 bg-white/50 mx-2" />
                   <SparkIcon />
-                  <span>spark1p...2kjc</span>
+                  <span>spark1pg...92kjc</span>
                 </>
               ) : (
                 <>

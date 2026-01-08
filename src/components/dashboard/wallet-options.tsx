@@ -26,7 +26,7 @@ export default function WalletOptions({ onConnect }: WalletOptionsProps) {
     onConnect();
     toast({
       title: 'Wallet Connected',
-      description: 'Your Spark Wallet is now connected.',
+      description: 'Your Xverse Wallet is now connected.',
     });
   };
 
@@ -36,6 +36,7 @@ export default function WalletOptions({ onConnect }: WalletOptionsProps) {
         <Button
           variant="outline"
           className="flex h-14 w-full items-center justify-between rounded-lg px-4"
+          onClick={handleConnect}
         >
           <div className="flex items-center gap-3">
             <XverseIcon />
@@ -48,7 +49,6 @@ export default function WalletOptions({ onConnect }: WalletOptionsProps) {
         <Button
           variant="outline"
           className="flex h-14 w-full items-center justify-between rounded-lg px-4"
-          onClick={handleConnect}
         >
           <div className="flex items-center gap-3">
             <div className="flex-center h-6 w-6 rounded-full bg-muted-foreground/20">
