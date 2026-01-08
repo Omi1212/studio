@@ -49,7 +49,7 @@ function ConnectedView({ onDisconnect }: { onDisconnect: () => void }) {
         </div>
       </div>
       
-      <div className="flex-1 flex flex-col items-center justify-center text-center py-4">
+      <div className="flex flex-col items-center justify-center text-center py-4">
         <p className="text-muted-foreground">Portfolio Balance</p>
         <p className="text-5xl font-bold">$0.00</p>
       </div>
