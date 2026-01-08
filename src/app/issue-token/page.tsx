@@ -3,7 +3,6 @@
 
 import { useState } from 'react';
 import {
-  SidebarProvider,
   Sidebar,
   SidebarInset,
 } from '@/components/ui/sidebar';
@@ -36,7 +35,7 @@ export default function IssueTokenPage() {
   };
 
   return (
-    <SidebarProvider>
+    <>
       <Sidebar className="border-r">
         <SidebarNav />
       </Sidebar>
@@ -65,6 +64,6 @@ export default function IssueTokenPage() {
           </main>
         </div>
       </SidebarInset>
-    </SidebarProvider>
+    </>
   );
 }

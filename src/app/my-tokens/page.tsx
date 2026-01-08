@@ -1,5 +1,4 @@
 import {
-  SidebarProvider,
   Sidebar,
   SidebarInset,
 } from '@/components/ui/sidebar';
@@ -16,7 +15,7 @@ export const metadata: Metadata = {
 
 export default function MyTokensPage() {
   return (
-    <SidebarProvider>
+    <>
       <Sidebar className="border-r">
         <SidebarNav />
       </Sidebar>
@@ -32,6 +31,6 @@ export default function MyTokensPage() {
           </main>
         </div>
       </SidebarInset>
-    </SidebarProvider>
+    </>
   );
 }

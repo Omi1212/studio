@@ -1,5 +1,4 @@
 import {
-  SidebarProvider,
   Sidebar,
   SidebarInset,
 } from '@/components/ui/sidebar';
@@ -18,7 +17,7 @@ export const metadata: Metadata = {
 
 export default function DashboardPage() {
   return (
-    <SidebarProvider>
+    <>
       <Sidebar className="border-r">
         <SidebarNav />
       </Sidebar>
@@ -36,6 +35,6 @@ export default function DashboardPage() {
           </main>
         </div>
       </SidebarInset>
-    </SidebarProvider>
+    </>
   );
 }
