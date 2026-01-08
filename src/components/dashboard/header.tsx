@@ -53,8 +53,9 @@ export default function Header() {
                 </>
               ) : (
                 <>
-                  <Wallet className="mr-2 h-4 w-4" />
-                  Connect Wallet
+                  <Wallet className="h-6 w-6" />
+                  <div className="w-px h-4 bg-white/50 mx-2" />
+                  <span>Connect Wallet</span>
                 </>
               )}
             </Button>
