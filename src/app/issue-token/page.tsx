@@ -12,11 +12,19 @@ import HeaderDynamic from '@/components/dashboard/header-dynamic';
 import IssueTokenForm, { TokenFormValues } from '@/components/issue-token/issue-token-form';
 import TokenOverview from '@/components/issue-token/token-overview';
 import { useToast } from '@/hooks/use-toast';
+import type { Metadata } from 'next';
 
 export interface TokenDetails extends TokenFormValues {
   id: string;
   publicKey: string;
 }
+
+// This is not used because metadata is exported from the page, but we keep it for consistency.
+// export const metadata: Metadata = {
+//   title: 'Workspace - SATS Dashboard',
+//   description: 'Create and manage your tokens.',
+// };
+
 
 export default function IssueTokenPage() {
   const [createdToken, setCreatedToken] = useState<TokenDetails | null>(null);
@@ -48,7 +56,7 @@ export default function IssueTokenPage() {
               <div className="w-full max-w-4xl">
                 {!createdToken ? (
                   <>
-                    <h1 className="text-3xl font-headline font-semibold mb-8">Issue Token</h1>
+                    <h1 className="text-3xl font-headline font-semibold mb-8">Workspace</h1>
                     <div className="flex justify-center pb-8">
                       <div className="w-full max-w-2xl">
                         <IssueTokenForm onSubmit={handleTokenCreate} />

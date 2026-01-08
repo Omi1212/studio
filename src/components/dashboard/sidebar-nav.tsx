@@ -21,6 +21,7 @@ import {
   Building,
   ShoppingBag,
   ClipboardList,
+  Wallet,
 } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
@@ -55,6 +56,13 @@ const investorMenu = [
     { href: '/my-tokens', label: 'Portfolio', icon: Briefcase },
 ];
 
+const issuerMenu = [
+  { href: '/', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/issue-token', label: 'Workspace', icon: Briefcase },
+  { href: '/investors', label: 'Investors', icon: Users },
+  { href: '/wallet', label: 'Wallet', icon: Wallet },
+];
+
 
 export default function SidebarNav() {
   const pathname = usePathname();
@@ -79,6 +87,8 @@ export default function SidebarNav() {
     menuItems = superAdminMenu;
   } else if (userRole === 'investor') {
     menuItems = investorMenu;
+  } else if (userRole === 'issuer') {
+    menuItems = issuerMenu;
   } else {
     menuItems = allMenuItems.filter(
       item => !item.roles || item.roles.includes(userRole || '')
