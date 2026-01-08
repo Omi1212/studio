@@ -1,8 +1,10 @@
+
 'use client';
 
 import {
   Bell,
   PlusCircle,
+  Wallet,
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -29,6 +31,10 @@ export default function Header() {
         <Button variant="ghost" size="icon" className="rounded-full">
           <Bell />
           <span className="sr-only">Notifications</span>
+        </Button>
+        <Button className="hidden sm:inline-flex bg-primary text-primary-foreground">
+            <Wallet className="mr-2 h-4 w-4" />
+            Connect Wallet
         </Button>
       </div>
     </header>
