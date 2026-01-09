@@ -21,7 +21,6 @@ import {
   Building,
   ShoppingBag,
   ClipboardList,
-  Wallet,
 } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
@@ -67,7 +66,8 @@ const issuerMenu = [
   { href: '/', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/issue-token', label: 'Workspace', icon: Briefcase },
   { href: '/investors', label: 'Investors', icon: Users },
-  { href: '/wallet', label: 'Wallet', icon: Wallet },
+  { href: '/whitelisting-requests', label: 'Whitelisting Requests', icon: ClipboardList },
+  { href: '/transfers', label: 'Transfers', icon: ArrowRightLeft },
 ];
 
 
