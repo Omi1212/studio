@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useForm } from 'react-hook-form';
@@ -39,26 +40,26 @@ export const formSchema = z.object({
   tokenIcon: z.any().optional(),
   network: z.string().min(1, 'Network selection is required'),
   whitepaper: z.any()
-    .refine((files) => files?.[0], "Whitepaper is required.")
-    .refine((files) => files?.[0]?.size <= MAX_FILE_SIZE, `Max file size is 5MB.`)
+    .optional()
+    .refine((files) => !files || files.length === 0 || files?.[0]?.size <= MAX_FILE_SIZE, `Max file size is 5MB.`)
     .refine(
-      (files) => ACCEPTED_FILE_TYPES.includes(files?.[0]?.type),
+      (files) => !files || files.length === 0 || ACCEPTED_FILE_TYPES.includes(files?.[0]?.type),
       ".pdf and .doc files are accepted."
-    ).optional(),
+    ),
   legalTokenizationDoc: z.any()
-    .refine((files) => files?.[0], "Document is required.")
-    .refine((files) => files?.[0]?.size <= MAX_FILE_SIZE, `Max file size is 5MB.`)
+    .optional()
+    .refine((files) => !files || files.length === 0 || files?.[0]?.size <= MAX_FILE_SIZE, `Max file size is 5MB.`)
     .refine(
-      (files) => ACCEPTED_FILE_TYPES.includes(files?.[0]?.type),
+      (files) => !files || files.length === 0 || ACCEPTED_FILE_TYPES.includes(files?.[0]?.type),
       ".pdf and .doc files are accepted."
-    ).optional(),
+    ),
   tokenIssuanceLegalDoc: z.any()
-    .refine((files) => files?.[0], "Document is required.")
-    .refine((files) => files?.[0]?.size <= MAX_FILE_SIZE, `Max file size is 5MB.`)
+    .optional()
+    .refine((files) => !files || files.length === 0 || files?.[0]?.size <= MAX_FILE_SIZE, `Max file size is 5MB.`)
     .refine(
-      (files) => ACCEPTED_FILE_TYPES.includes(files?.[0]?.type),
+      (files) => !files || files.length === 0 || ACCEPTED_FILE_TYPES.includes(files?.[0]?.type),
       ".pdf and .doc files are accepted."
-    ).optional(),
+    ),
 });
 
 export type TokenFormValues = z.infer<typeof formSchema>;

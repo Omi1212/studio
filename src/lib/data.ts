@@ -1,4 +1,5 @@
 
+
 export const volumeData = [
   {
     title: "Today's Volume",
@@ -192,5 +193,16 @@ export const cryptoData = [
     value: 0.00,
     icon: null,
     isToken: true,
+  },
+];
+
+export const exampleTokens = [
+  {
+    id: 'example-1',
+    tokenName: 'Digital Dollar',
+    tokenTicker: 'DUSD',
+    status: 'active',
+    network: 'liquid',
+    maxSupply: 100000000,
   },
 ];

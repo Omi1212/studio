@@ -2,6 +2,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   Sidebar,
   SidebarInset,
@@ -18,10 +19,13 @@ import Step2TokenDetails from '@/components/issue-token/step-2-token-details';
 import Step3Documents from '@/components/issue-token/step-3-documents';
 import Step4Network from '@/components/issue-token/step-4-network';
 import Step5Review from '@/components/issue-token/step-5-review';
+import { Button } from '@/components/ui/button';
+import { exampleTokens } from '@/lib/data';
 
 export interface TokenDetails extends TokenFormValues {
   id: string;
   publicKey: string;
+  status: 'pending' | 'active' | 'frozen';
 }
 
 export default function IssueTokenPage() {
@@ -37,6 +41,7 @@ export default function IssueTokenPage() {
     network: 'spark',
   });
   const { toast } = useToast();
+  const router = useRouter();
 
   const steps = [
     { id: 1, label: 'Token Information' },
@@ -62,11 +67,27 @@ export default function IssueTokenPage() {
     const newId = `btkn176av2...${Math.random().toString(36).substring(2, 10)}`;
     const newPublicKey = `03a0626e30...${Math.random().toString(36).substring(2, 10)}`;
     
-    setCreatedToken({ ...finalData, id: newId, publicKey: newPublicKey });
+    const newToken: TokenDetails = { 
+      ...finalData, 
+      id: newId, 
+      publicKey: newPublicKey,
+      status: 'pending',
+    };
+    
+    setCreatedToken(newToken);
+    
+    // Save to localStorage
+    const existingTokens = JSON.parse(localStorage.getItem('createdTokens') || '[]');
+    localStorage.setItem('createdTokens', JSON.stringify([...existingTokens, newToken]));
 
     toast({
-      title: 'Token Issued Successfully!',
-      description: `Your new token "${finalData.tokenName}" has been created on the network.`,
+      title: 'Request Submitted',
+      description: `Your new token "${finalData.tokenName}" has been submitted for review.`,
+      action: (
+         <Button variant="outline" size="sm" onClick={() => router.push('/workspace')}>
+            View in Workspace
+        </Button>
+      ),
     });
   };
 
@@ -89,7 +110,7 @@ export default function IssueTokenPage() {
                     <p className="text-muted-foreground mb-8">
                       Create and issue a new token on the network.
                     </p>
-                    <div className="mb-8">
+                    <div className="mb-8 hidden sm:block">
                       <Stepper totalSteps={steps.length}>
                         {steps.map((step) => (
                           <StepperItem
@@ -103,6 +124,9 @@ export default function IssueTokenPage() {
                           </StepperItem>
                         ))}
                       </Stepper>
+                    </div>
+                     <div className="sm:hidden mb-8">
+                      <p className="text-center text-sm text-muted-foreground">Step {currentStep} of {steps.length}: {steps[currentStep-1].label}</p>
                     </div>
 
                     <div className="flex justify-center pb-8">
