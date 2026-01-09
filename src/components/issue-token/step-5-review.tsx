@@ -4,7 +4,7 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import type { TokenFormValues } from './issue-token-form';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { FileText, HardDrive, Hash, Image as ImageIcon, Info, Loader2, Network, Tag, ToggleRight } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 
@@ -29,8 +29,9 @@ function ReviewRow({ icon, label, value }: { icon: React.ElementType, label: str
     )
 }
 
-function FilePreview({ file }: { file: File | null }) {
-    if (!file) return <span className="text-muted-foreground">Not provided</span>;
+function FilePreview({ fileList }: { fileList: FileList | null | undefined }) {
+    if (!fileList || fileList.length === 0) return <span className="text-muted-foreground">Not provided</span>;
+    const file = fileList[0];
     return (
         <div className="flex items-center gap-2 text-sm">
             <FileText className="h-4 w-4 text-muted-foreground" />
@@ -45,13 +46,18 @@ export default function Step5Review({ onSubmit, onBack, formData }: Step5ReviewP
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [iconPreview, setIconPreview] = useState<string | null>(null);
 
-  if (formData.tokenIcon && !iconPreview) {
+  useEffect(() => {
+    if (formData.tokenIcon && formData.tokenIcon instanceof File) {
       const reader = new FileReader();
       reader.onloadend = () => {
-          setIconPreview(reader.result as string);
+        setIconPreview(reader.result as string);
       }
       reader.readAsDataURL(formData.tokenIcon);
-  }
+    } else {
+        setIconPreview(null);
+    }
+  }, [formData.tokenIcon]);
+
 
   const handleSubmit = async () => {
     setIsSubmitting(true);
@@ -97,9 +103,9 @@ export default function Step5Review({ onSubmit, onBack, formData }: Step5ReviewP
         
         <div className="space-y-4 p-4 border rounded-lg">
             <h3 className="font-semibold text-lg mb-2">Documents</h3>
-            <ReviewRow icon={FileText} label="Whitepaper" value={<FilePreview file={formData.whitepaper?.[0]} />} />
-            <ReviewRow icon={FileText} label="Legal Tokenization Doc" value={<FilePreview file={formData.legalTokenizationDoc?.[0]} />} />
-            <ReviewRow icon={FileText} label="Token Issuance Legal Doc" value={<FilePreview file={formData.tokenIssuanceLegalDoc?.[0]} />} />
+            <ReviewRow icon={FileText} label="Whitepaper" value={<FilePreview fileList={formData.whitepaper} />} />
+            <ReviewRow icon={FileText} label="Legal Tokenization Doc" value={<FilePreview fileList={formData.legalTokenizationDoc} />} />
+            <ReviewRow icon={FileText} label="Token Issuance Legal Doc" value={<FilePreview fileList={formData.tokenIssuanceLegalDoc} />} />
         </div>
 
         <div className="space-y-4 p-4 border rounded-lg">
@@ -125,4 +131,3 @@ export default function Step5Review({ onSubmit, onBack, formData }: Step5ReviewP
     </Card>
   );
 }
-
