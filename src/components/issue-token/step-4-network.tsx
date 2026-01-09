@@ -22,6 +22,7 @@ import { Loader2 } from 'lucide-react';
 import type { TokenFormValues } from './issue-token-form';
 import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
 import { cn } from '@/lib/utils';
+import { Separator } from '../ui/separator';
 
 const step4Schema = z.object({
   network: z.string().min(1, 'Please select a network'),
@@ -36,9 +37,45 @@ interface Step4NetworkProps {
 }
 
 const networks = [
-    { id: 'spark', name: 'Spark Network', icon: <svg width="24" height="24" viewBox="0 0 68 64" fill="none" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" clipRule="evenodd" d="M39.68 24.656L40.836 0H26.398l1.156 24.656-23.092-8.718L0 29.668l23.807 6.52L8.38 55.457l11.68 8.487 13.558-20.628 13.558 20.627 11.68-8.486L43.43 36.188l23.804-6.52-4.461-13.73-23.092 8.718zM33.617 33v.001z" fill="currentColor"></path></svg> },
-    { id: 'liquid', name: 'Liquid Network', icon: <img src="https://liquid.net/_next/static/media/logo.28b5ba97.svg" alt="Liquid Network Logo" className="h-6 w-6" /> },
-    { id: 'rgb', name: 'RGB Protocol', icon: <img src="https://rgb.tech/logo/rgb-symbol-color.svg" alt="RGB Protocol Logo" className="h-6 w-6" /> },
+    { 
+        id: 'spark', 
+        name: 'Spark Network', 
+        icon: <svg width="24" height="24" viewBox="0 0 68 64" fill="none" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" clipRule="evenodd" d="M39.68 24.656L40.836 0H26.398l1.156 24.656-23.092-8.718L0 29.668l23.807 6.52L8.38 55.457l11.68 8.487 13.558-20.628 13.558 20.627 11.68-8.486L43.43 36.188l23.804-6.52-4.461-13.73-23.092 8.718zM33.617 33v.001z" fill="currentColor"></path></svg>,
+        description: {
+            whatIsIt: 'High-speed tokens built on the Bitcoin Lightning Network (using Taproot Assets). They enable instant, low-fee peer-to-peer transactions without waiting for block confirmations.',
+            bestFor: [
+                'Micro-payments: Paying for coffee, content, or tips.',
+                'Gaming: In-game currency and rewards.',
+                'Consumer Apps: High-frequency transactions where speed is critical.',
+            ]
+        }
+    },
+    { 
+        id: 'liquid', 
+        name: 'Liquid Network', 
+        icon: <img src="https://liquid.net/_next/static/media/logo.28b5ba97.svg" alt="Liquid Network Logo" className="h-6 w-6" />,
+        description: {
+            whatIsIt: 'A Bitcoin sidechain for the settlement and issuance of digital assets, such as stablecoins, security tokens, and other financial instruments.',
+            bestFor: [
+                'Security Tokens: Issuing regulated financial assets.',
+                'Stablecoins: Fast, confidential transactions.',
+                'Trading: Inter-exchange settlement for traders.',
+            ]
+        }
+    },
+    { 
+        id: 'rgb', 
+        name: 'RGB Protocol', 
+        icon: <img src="https://rgb.tech/logo/rgb-symbol-color.svg" alt="RGB Protocol Logo" className="h-6 w-6" />,
+        description: {
+            whatIsIt: 'A scalable & confidential smart contracts system for Bitcoin & Lightning. It allows for complex, private rights management over digital assets.',
+            bestFor: [
+                'Digital Collectibles (NFTs): Verifiable, private ownership.',
+                'Private Securities: Confidential asset issuance and transfer.',
+                'Decentralized Identity: Managing digital identities on Bitcoin.',
+            ]
+        }
+    },
 ]
 
 export default function Step4Network({ onNext, onBack, defaultValues }: Step4NetworkProps) {
@@ -79,14 +116,33 @@ export default function Step4Network({ onNext, onBack, defaultValues }: Step4Net
                                 <RadioGroupItem value={network.id} className="sr-only" />
                             </FormControl>
                             <FormLabel
-                                htmlFor={field.name}
+                                htmlFor={field.name + network.id}
                                 className={cn(
-                                'flex flex-row items-center justify-start gap-4 rounded-md border-2 border-muted bg-popover p-6 h-24 hover:bg-accent hover:text-accent-foreground cursor-pointer',
+                                'flex flex-col items-start justify-start gap-4 rounded-md border-2 border-muted bg-popover p-6 hover:bg-accent hover:text-accent-foreground cursor-pointer transition-all',
                                 field.value === network.id && 'border-primary'
                                 )}
                             >
-                                {network.icon}
-                                <span className="font-semibold">{network.name}</span>
+                                <div className="flex items-center gap-4">
+                                    {network.icon}
+                                    <span className="font-semibold">{network.name}</span>
+                                </div>
+                                {field.value === network.id && (
+                                    <div className="space-y-4 pt-4 text-sm w-full animate-in fade-in-0 duration-500">
+                                        <Separator />
+                                        <div className="text-muted-foreground space-y-4">
+                                            <div>
+                                                <h4 className="font-semibold text-foreground mb-1">What is it?</h4>
+                                                <p>{network.description.whatIsIt}</p>
+                                            </div>
+                                            <div>
+                                                <h4 className="font-semibold text-foreground mb-1">Best for:</h4>
+                                                <ul className="list-disc pl-5 space-y-1">
+                                                    {network.description.bestFor.map((item, i) => <li key={i}>{item}</li>)}
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
                             </FormLabel>
                         </FormItem>
                     ))}
