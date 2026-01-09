@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -13,10 +14,10 @@ import { Stepper, StepperItem } from '@/components/ui/stepper';
 import Step1TokenInfo from '@/components/issue-token/step-1-token-info';
 import { TokenFormValues } from '@/components/issue-token/issue-token-form';
 import TokenOverview from '@/components/issue-token/token-overview';
-import { Button } from '@/components/ui/button';
 import Step2TokenDetails from '@/components/issue-token/step-2-token-details';
 import Step3Documents from '@/components/issue-token/step-3-documents';
 import Step4Network from '@/components/issue-token/step-4-network';
+import Step5Review from '@/components/issue-token/step-5-review';
 
 export interface TokenDetails extends TokenFormValues {
   id: string;
@@ -42,7 +43,7 @@ export default function IssueTokenPage() {
     { id: 2, label: 'Token Details' },
     { id: 3, label: 'Documents' },
     { id: 4, label: 'Network' },
-    { id: 5, label: 'Confirmation' },
+    { id: 5, label: 'Review' },
   ];
 
   const handleNext = (data: Partial<TokenFormValues>) => {
@@ -54,12 +55,13 @@ export default function IssueTokenPage() {
     setCurrentStep((prev) => prev - 1);
   };
 
-  const handleTokenCreate = (data: TokenFormValues) => {
-    console.log('Creating token with:', data);
+  const handleFinalSubmit = (data: Partial<TokenFormValues>) => {
+    const finalData = { ...formData, ...data } as TokenFormValues;
+    console.log('Creating token with:', finalData);
+    
     const newId = `btkn176av2...${Math.random().toString(36).substring(2, 10)}`;
     const newPublicKey = `03a0626e30...${Math.random().toString(36).substring(2, 10)}`;
-
-    const finalData = { ...formData, ...data } as TokenFormValues;
+    
     setCreatedToken({ ...finalData, id: newId, publicKey: newPublicKey });
 
     toast({
@@ -133,13 +135,11 @@ export default function IssueTokenPage() {
                           />
                         )}
                          {currentStep === 5 && (
-                          <div>
-                            <h2 className="text-xl font-semibold mb-4">
-                              Step 5: Confirmation
-                            </h2>
-                            <p>Coming soon...</p>
-                             <Button onClick={handleBack} variant="outline">Back</Button>
-                          </div>
+                          <Step5Review
+                            onBack={handleBack}
+                            onSubmit={handleFinalSubmit}
+                            formData={formData as TokenFormValues}
+                          />
                         )}
                       </div>
                     </div>
