@@ -28,6 +28,8 @@ export default function NavUser() {
   const { state } = useSidebar();
 
   const handleLogout = () => {
+    localStorage.removeItem('userRole');
+    localStorage.removeItem('isWalletConnected');
     router.push('/login');
   };
 

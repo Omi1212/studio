@@ -16,16 +16,25 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet"
 import WalletOptions from './wallet-options';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function Header() {
   const [isConnected, setIsConnected] = useState(false);
 
+  useEffect(() => {
+    const storedConnection = localStorage.getItem('isWalletConnected');
+    if (storedConnection === 'true') {
+      setIsConnected(true);
+    }
+  }, []);
+
   const handleConnect = () => {
+    localStorage.setItem('isWalletConnected', 'true');
     setIsConnected(true);
   };
   
   const handleDisconnect = () => {
+    localStorage.removeItem('isWalletConnected');
     setIsConnected(false);
   };
 
