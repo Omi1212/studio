@@ -21,6 +21,7 @@ import {
   Building,
   ShoppingBag,
   ClipboardList,
+  Rocket,
 } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
@@ -64,7 +65,8 @@ const investorMenu = [
 
 const issuerMenu = [
   { href: '/', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/issue-token', label: 'Launchpad', icon: Briefcase },
+  { href: '/issue-token', label: 'Launchpad', icon: Rocket },
+  { href: '/workspace', label: 'Workspace', icon: Briefcase },
   { href: '/investors', label: 'Investors', icon: Users },
   { href: '/whitelisting-requests', label: 'Whitelisting Requests', icon: ClipboardList },
   { href: '/transfers', label: 'Transfers', icon: ArrowRightLeft },
