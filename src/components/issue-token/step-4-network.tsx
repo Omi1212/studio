@@ -55,11 +55,11 @@ const networks = [
         name: 'Liquid Network', 
         icon: <img src="https://liquid.net/_next/static/media/logo.28b5ba97.svg" alt="Liquid Network Logo" className="h-6 w-6" />,
         description: {
-            whatIsIt: 'A Bitcoin sidechain for the settlement and issuance of digital assets, such as stablecoins, security tokens, and other financial instruments.',
+            whatIsIt: 'A Bitcoin sidechain designed for high-performance asset issuance. It offers faster settlement than the main chain (2 minutes) and "Confidential Transactions," which hide asset amounts and types from the public eye.',
             bestFor: [
-                'Security Tokens: Issuing regulated financial assets.',
-                'Stablecoins: Fast, confidential transactions.',
-                'Trading: Inter-exchange settlement for traders.',
+                'Stablecoins: Digital fiat currencies (USD/EUR).',
+                'Security Tokens: Tokenized stocks, bonds, or real estate.',
+                'Trading: Moving funds between exchanges quickly and privately.',
             ]
         }
     },
@@ -68,11 +68,11 @@ const networks = [
         name: 'RGB Protocol', 
         icon: <img src="https://rgb.tech/logo/rgb-symbol-color.svg" alt="RGB Protocol Logo" className="h-6 w-6" />,
         description: {
-            whatIsIt: 'A scalable & confidential smart contracts system for Bitcoin & Lightning. It allows for complex, private rights management over digital assets.',
+            whatIsIt: 'A client-side validation protocol for smart contracts. RGB keeps token data off-chain (stored locally on your device) while using the Bitcoin blockchain only for commitment. It offers the highest level of privacy and scalability.',
             bestFor: [
-                'Digital Collectibles (NFTs): Verifiable, private ownership.',
-                'Private Securities: Confidential asset issuance and transfer.',
-                'Decentralized Identity: Managing digital identities on Bitcoin.',
+                'Maximum Privacy: Assets that leave no trace on the blockchain.',
+                'Complex Smart Contracts: DAOs and programmable assets.',
+                'Digital Collectibles: Unique assets with private metadata.',
             ]
         }
     },
