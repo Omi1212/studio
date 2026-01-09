@@ -64,7 +64,7 @@ const investorMenu = [
 
 const issuerMenu = [
   { href: '/', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/issue-token', label: 'Workspace', icon: Briefcase },
+  { href: '/issue-token', label: 'Launchpad', icon: Briefcase },
   { href: '/investors', label: 'Investors', icon: Users },
   { href: '/whitelisting-requests', label: 'Whitelisting Requests', icon: ClipboardList },
   { href: '/transfers', label: 'Transfers', icon: ArrowRightLeft },

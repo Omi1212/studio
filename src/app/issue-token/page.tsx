@@ -84,7 +84,7 @@ export default function IssueTokenPage() {
                 {!createdToken ? (
                   <>
                     <h1 className="text-3xl font-headline font-semibold mb-2">
-                      Workspace
+                      Launchpad
                     </h1>
                     <p className="text-muted-foreground mb-8">
                       Create and issue a new token on the network.
