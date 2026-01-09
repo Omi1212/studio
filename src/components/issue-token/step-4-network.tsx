@@ -105,48 +105,48 @@ export default function Step4Network({ onNext, onBack, defaultValues }: Step4Net
               name="network"
               render={({ field }) => (
                 <FormItem className="space-y-3">
-                  <RadioGroup
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                    className="grid grid-cols-1 gap-4"
-                  >
-                    {networks.map(network => (
-                        <FormItem key={network.id} className="w-full">
-                            <FormControl>
-                                <RadioGroupItem value={network.id} className="sr-only" />
-                            </FormControl>
-                            <FormLabel
-                                htmlFor={field.name + network.id}
-                                className={cn(
-                                'flex flex-col items-start justify-start gap-4 rounded-md border-2 border-muted bg-popover p-6 hover:bg-accent hover:text-accent-foreground cursor-pointer transition-all',
-                                field.value === network.id && 'border-primary'
-                                )}
-                            >
-                                <div className="flex items-center gap-4">
-                                    {network.icon}
-                                    <span className="font-semibold">{network.name}</span>
-                                </div>
-                                {field.value === network.id && (
-                                    <div className="space-y-4 pt-4 text-sm w-full animate-in fade-in-0 duration-500">
-                                        <Separator />
-                                        <div className="text-muted-foreground space-y-4">
-                                            <div>
-                                                <h4 className="font-semibold text-foreground mb-1">What is it?</h4>
-                                                <p>{network.description.whatIsIt}</p>
-                                            </div>
-                                            <div>
-                                                <h4 className="font-semibold text-foreground mb-1">Best for:</h4>
-                                                <ul className="list-disc pl-5 space-y-1">
-                                                    {network.description.bestFor.map((item, i) => <li key={i}>{item}</li>)}
-                                                </ul>
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
-                            </FormLabel>
-                        </FormItem>
-                    ))}
-                  </RadioGroup>
+                  <FormControl>
+                    <RadioGroup
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                      className="grid grid-cols-1 gap-4"
+                    >
+                      {networks.map(network => (
+                          <FormItem key={network.id} className="w-full">
+                              <FormLabel
+                                  htmlFor={network.id}
+                                  className={cn(
+                                  'flex flex-col items-start justify-start gap-4 rounded-md border-2 border-muted bg-popover p-6 hover:bg-accent hover:text-accent-foreground cursor-pointer transition-all',
+                                  field.value === network.id && 'border-primary'
+                                  )}
+                              >
+                                  <RadioGroupItem value={network.id} id={network.id} className="sr-only" />
+                                  <div className="flex items-center gap-4">
+                                      {network.icon}
+                                      <span className="font-semibold">{network.name}</span>
+                                  </div>
+                                  {field.value === network.id && (
+                                      <div className="space-y-4 pt-4 text-sm w-full animate-in fade-in-0 duration-500">
+                                          <Separator />
+                                          <div className="text-muted-foreground space-y-4">
+                                              <div>
+                                                  <h4 className="font-semibold text-foreground mb-1">What is it?</h4>
+                                                  <p>{network.description.whatIsIt}</p>
+                                              </div>
+                                              <div>
+                                                  <h4 className="font-semibold text-foreground mb-1">Best for:</h4>
+                                                  <ul className="list-disc pl-5 space-y-1">
+                                                      {network.description.bestFor.map((item, i) => <li key={i}>{item}</li>)}
+                                                  </ul>
+                                              </div>
+                                          </div>
+                                      </div>
+                                  )}
+                              </FormLabel>
+                          </FormItem>
+                      ))}
+                    </RadioGroup>
+                  </FormControl>
                 </FormItem>
               )}
             />
