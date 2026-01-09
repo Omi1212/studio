@@ -132,7 +132,7 @@ export default function TokenOverview({
             </Button>
             <Button variant="outline">
                 <Snowflake className="mr-2 h-4 w-4" />
-                Freeze Tokens
+                Freeze Address
             </Button>
         </CardContent>
       </Card>
