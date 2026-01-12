@@ -37,7 +37,7 @@ import { Button } from '../ui/button';
 import { exampleTokens } from '@/lib/data';
 import TokenIcon from '../ui/token-icon';
 import { cn } from '@/lib/utils';
-import type { TokenDetails } from '@/app/issue-token/page';
+import type { TokenDetails } from '@/lib/types';
 
 const allMenuItems = [
   { href: '/', label: 'Dashboard', icon: LayoutDashboard },
@@ -85,14 +85,12 @@ const issuerMenu = [
   { href: '/transfers', label: 'Transfers', icon: ArrowRightLeft },
 ];
 
-type WorkspaceToken = TokenDetails | (typeof exampleTokens)[0];
-
 export default function SidebarNav() {
   const pathname = usePathname();
   const [userRole, setUserRole] = useState<string | null>(null);
   const [isClient, setIsClient] = useState(false);
-  const [allTokens, setAllTokens] = useState<WorkspaceToken[]>([...exampleTokens]);
-  const [selectedToken, setSelectedToken] = useState<WorkspaceToken>(exampleTokens[0]);
+  const [allTokens, setAllTokens] = useState<TokenDetails[]>([]);
+  const [selectedToken, setSelectedToken] = useState<TokenDetails | null>(null);
 
 
   useEffect(() => {
@@ -102,7 +100,13 @@ export default function SidebarNav() {
     setUserRole(role);
 
     const storedTokens = JSON.parse(localStorage.getItem('createdTokens') || '[]');
-    const combinedTokens = [...exampleTokens, ...storedTokens];
+    const combinedTokens: TokenDetails[] = [...exampleTokens, ...storedTokens].map(t => ({
+      ...t,
+      // Ensure all tokens have the necessary fields for TokenDetails type
+      decimals: t.decimals ?? 0,
+      isFreezable: t.isFreezable ?? false,
+      publicKey: t.publicKey ?? `02f...${t.id.slice(-10)}`,
+    }));
     setAllTokens(combinedTokens);
 
     if (combinedTokens.length > 0) {
@@ -145,7 +149,7 @@ export default function SidebarNav() {
         <h2 className="text-2xl font-bold text-primary font-headline">BlockStratus</h2>
       </SidebarHeader>
 
-      {userRole !== 'superadmin' && userRole !== 'investor' && (
+      {isClient && userRole !== 'superadmin' && userRole !== 'investor' && selectedToken && (
         <div className="px-3 pb-3">
           <DropdownMenu>
               <DropdownMenuTrigger asChild>

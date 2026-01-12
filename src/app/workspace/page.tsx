@@ -6,21 +6,27 @@ import {
   SidebarProvider,
 } from '@/components/ui/sidebar';
 import SidebarNav from '@/components/dashboard/sidebar-nav';
-import type { Metadata } from 'next';
 import HeaderDynamic from '@/components/dashboard/header-dynamic';
 import { useEffect, useState } from 'react';
-import type { TokenDetails } from '../issue-token/page';
+import type { TokenDetails } from '@/lib/types';
 import TokenWorkspaceCard from '@/components/workspace/token-workspace-card';
 import { exampleTokens } from '@/lib/data';
 import { Rocket } from 'lucide-react';
 
 export default function WorkspacePage() {
-  const [tokens, setTokens] = useState<(TokenDetails | (typeof exampleTokens)[0])[]>([]);
+  const [tokens, setTokens] = useState<TokenDetails[]>([]);
 
   useEffect(() => {
     // This code runs only on the client
     const storedTokens = JSON.parse(localStorage.getItem('createdTokens') || '[]');
-    setTokens([...exampleTokens, ...storedTokens]);
+    const allTokens: TokenDetails[] = [...exampleTokens, ...storedTokens].map(t => ({
+      ...t,
+      // Ensure all tokens have the necessary fields for TokenDetails type
+      decimals: t.decimals ?? 0,
+      isFreezable: t.isFreezable ?? false,
+      publicKey: t.publicKey ?? `02f...${t.id.slice(-10)}`,
+    }));
+    setTokens(allTokens);
   }, []);
 
   return (

@@ -10,15 +10,15 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
+import { Avatar, AvatarImage, AvatarFallback } from '../ui/avatar';
 import { Badge } from '../ui/badge';
-import type { TokenDetails } from '@/app/issue-token/page';
+import type { TokenDetails } from '@/lib/types';
 import { exampleTokens } from '@/lib/data';
 import { useState, useEffect } from 'react';
 import TokenIcon from '../ui/token-icon';
 
 interface TokenCardProps {
-  token: TokenDetails | (typeof exampleTokens)[0];
+  token: TokenDetails;
 }
 
 const networkMap: { [key: string]: string } = {
@@ -79,7 +79,9 @@ export default function TokenWorkspaceCard({ token }: TokenCardProps) {
         </p>
       </CardContent>
       <CardFooter>
-        <Button variant="outline" className="w-full">View</Button>
+        <Button variant="outline" className="w-full" asChild>
+            <a href={`/workspace/${token.id}`}>View</a>
+        </Button>
       </CardFooter>
     </Card>
   );

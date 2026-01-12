@@ -21,12 +21,8 @@ import Step4Network from '@/components/issue-token/step-4-network';
 import Step5Review from '@/components/issue-token/step-5-review';
 import { Button } from '@/components/ui/button';
 import { exampleTokens } from '@/lib/data';
+import type { TokenDetails } from '@/lib/types';
 
-export interface TokenDetails extends TokenFormValues {
-  id: string;
-  publicKey: string;
-  status: 'pending' | 'active' | 'frozen';
-}
 
 export default function IssueTokenPage() {
   const [createdToken, setCreatedToken] = useState<TokenDetails | null>(null);
