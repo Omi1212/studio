@@ -66,7 +66,7 @@ function TokenCard({ token }: { token: TokenDetails }) {
         </div>
       </CardContent>
       <CardFooter>
-        <Button variant="outline" className="w-full" onClick={handleViewInWorkspace}>View in Workspace</Button>
+        <Button variant="outline" className="w-full" onClick={handleViewInWorkspace}>View</Button>
       </CardFooter>
     </Card>
   );
