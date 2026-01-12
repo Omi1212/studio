@@ -9,9 +9,10 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import TokenIcon from '../ui/token-icon';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
-import { Rocket } from 'lucide-react';
+import { Rocket, LayoutGrid, List } from 'lucide-react';
 import Link from 'next/link';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
+import type { ViewMode } from '@/app/issue-token/page';
 
 function getStatusBadge(status: TokenDetails['status']) {
   switch (status) {
@@ -123,7 +124,7 @@ function TokenTable({ tokens }: { tokens: TokenDetails[] }) {
     )
 }
 
-export default function ExistingTokens({ view = 'card' }: { view?: 'card' | 'table' }) {
+export default function ExistingTokens({ view, setView }: { view: ViewMode, setView: (mode: ViewMode) => void }) {
   const [allTokens, setAllTokens] = useState<TokenDetails[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -171,7 +172,27 @@ export default function ExistingTokens({ view = 'card' }: { view?: 'card' | 'tab
 
   return (
     <div className="mb-12">
-        <h2 className="text-2xl font-headline font-semibold mb-4">Your Tokens</h2>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-2xl font-headline font-semibold">Your Tokens</h2>
+        <div className="hidden sm:flex items-center gap-1 bg-muted p-1 rounded-lg">
+              <Button 
+                variant={view === 'card' ? 'secondary' : 'ghost'} 
+                size="icon" 
+                className="h-8 w-8"
+                onClick={() => setView('card')}
+                >
+                <LayoutGrid className="h-4 w-4" />
+            </Button>
+            <Button 
+                variant={view === 'table' ? 'secondary' : 'ghost'} 
+                size="icon" 
+                className="h-8 w-8"
+                onClick={() => setView('table')}
+                >
+                <List className="h-4 w-4" />
+            </Button>
+        </div>
+      </div>
         {view === 'card' ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {allTokens.map(token => (
