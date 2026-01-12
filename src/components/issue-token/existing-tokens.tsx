@@ -44,15 +44,15 @@ function TokenCard({ token }: { token: TokenDetails }) {
   return (
     <Card>
       <CardHeader>
-        <div className="flex justify-between items-start">
-          <div className="flex items-center gap-4">
-            <TokenIcon token={token} className="h-10 w-10" />
-            <div>
-              <CardTitle className="text-lg">{token.tokenName}</CardTitle>
+        <div className="flex items-center gap-4">
+          <TokenIcon token={token} className="h-10 w-10" />
+          <div>
+            <CardTitle className="text-lg">{token.tokenName}</CardTitle>
+            <div className="flex items-center gap-2 mt-1">
               <CardDescription className="text-primary font-bold">{token.tokenTicker}</CardDescription>
+              {getStatusBadge()}
             </div>
           </div>
-          {getStatusBadge()}
         </div>
       </CardHeader>
       <CardContent>
