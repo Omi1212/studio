@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, use } from 'react';
 import { notFound } from 'next/navigation';
 import {
   Sidebar,
@@ -16,7 +16,7 @@ import type { TokenDetails } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 
-export default function TokenDetailsPage({ params }: { params: { tokenId: string } }) {
+function TokenDetailsComponent({ params }: { params: { tokenId: string } }) {
   const [token, setToken] = useState<TokenDetails | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -87,4 +87,9 @@ export default function TokenDetailsPage({ params }: { params: { tokenId: string
       </SidebarInset>
     </SidebarProvider>
   );
+}
+
+export default function TokenDetailsPage({ params }: { params: Promise<{ tokenId: string }> }) {
+  const resolvedParams = use(params);
+  return <TokenDetailsComponent params={resolvedParams} />;
 }
