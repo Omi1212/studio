@@ -48,15 +48,16 @@ function TokenCard({ token }: { token: TokenDetails }) {
           <TokenIcon token={token} className="h-10 w-10" />
           <div>
             <CardTitle className="text-lg">{token.tokenName}</CardTitle>
-            <div className="flex items-center gap-2 mt-1">
-              <CardDescription className="text-primary font-bold">{token.tokenTicker}</CardDescription>
-              {getStatusBadge()}
-            </div>
+            <CardDescription className="text-primary font-bold">{token.tokenTicker}</CardDescription>
           </div>
         </div>
       </CardHeader>
       <CardContent>
         <div className="flex justify-between text-sm">
+            <span className="text-muted-foreground">Status</span>
+            {getStatusBadge()}
+        </div>
+        <div className="flex justify-between text-sm mt-2">
             <span className="text-muted-foreground">Network</span>
             <span className="font-medium">{networkMap[token.network] || token.network}</span>
         </div>
