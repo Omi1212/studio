@@ -155,6 +155,7 @@ export const tokenData = [
     publicKey: '03a0626e300a...3c753c732a20',
     maxSupply: 1000000,
     decimals: 10,
+    network: 'spark',
   },
   {
     id: 2,
@@ -166,6 +167,7 @@ export const tokenData = [
     publicKey: '03a0626e300a...anotherkey01',
     maxSupply: 2000000,
     decimals: 8,
+    network: 'rgb',
   },
 ];
 
@@ -201,7 +203,7 @@ export const exampleTokens = [
     id: 'example-1',
     tokenName: 'Digital Dollar',
     tokenTicker: 'DUSD',
-    status: 'active',
+    status: 'active' as const,
     network: 'liquid',
     maxSupply: 100000000,
   },

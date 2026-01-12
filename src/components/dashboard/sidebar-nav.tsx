@@ -22,9 +22,22 @@ import {
   ShoppingBag,
   ClipboardList,
   Rocket,
+  ChevronsUpDown,
+  Check,
 } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Button } from '../ui/button';
+import { tokenData, exampleTokens } from '@/lib/data';
+import TokenIcon from '../ui/token-icon';
+import { cn } from '@/lib/utils';
+import { Separator } from '../ui/separator';
 
 const allMenuItems = [
   { href: '/', label: 'Dashboard', icon: LayoutDashboard },
@@ -71,11 +84,14 @@ const issuerMenu = [
   { href: '/transfers', label: 'Transfers', icon: ArrowRightLeft },
 ];
 
+const allTokens = [...tokenData, ...exampleTokens.map(t => ({...t, name: t.tokenName, ticker: t.tokenTicker}))];
 
 export default function SidebarNav() {
   const pathname = usePathname();
   const [userRole, setUserRole] = useState<string | null>(null);
   const [isClient, setIsClient] = useState(false);
+  const [selectedToken, setSelectedToken] = useState(allTokens[0]);
+
 
   useEffect(() => {
     // This ensures the code runs only on the client, preventing hydration errors.
@@ -105,13 +121,50 @@ export default function SidebarNav() {
     );
   }
 
+  const networkMap: { [key: string]: string } = {
+    spark: 'Spark',
+    liquid: 'Liquid',
+    rgb: 'RGB',
+  };
+
 
   return (
     <>
       <SidebarHeader className="p-4">
         <h2 className="text-2xl font-bold text-primary font-headline">BlockStratus</h2>
       </SidebarHeader>
-      <SidebarContent className="p-4">
+
+      <div className="px-3 pb-3">
+        <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="w-full h-auto justify-between items-center p-2 text-left bg-sidebar-accent border-sidebar-border hover:bg-sidebar-accent/80">
+                    <div className="flex items-center gap-2">
+                        <TokenIcon network={selectedToken.network as string} className="h-8 w-8" />
+                        <div className="flex flex-col gap-0.5 leading-none">
+                            <span className="font-medium text-sm">{selectedToken.name}</span>
+                            <span className="text-xs text-muted-foreground">{selectedToken.ticker} on {networkMap[selectedToken.network as string] || selectedToken.network}</span>
+                        </div>
+                    </div>
+                    <ChevronsUpDown className="h-4 w-4 text-muted-foreground" />
+                </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-[--radix-dropdown-menu-trigger-width]">
+                {allTokens.map((token, index) => (
+                    <DropdownMenuItem key={index} onSelect={() => setSelectedToken(token)}>
+                        <TokenIcon network={token.network as string} className="h-5 w-5 mr-2" />
+                        <div className="flex-1 flex justify-between items-center">
+                            <span>{token.name}</span>
+                             {selectedToken.id === token.id && <Check className="h-4 w-4" />}
+                        </div>
+                    </DropdownMenuItem>
+                ))}
+            </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+
+      <Separator className="mb-2" />
+      
+      <SidebarContent className="p-4 pt-0">
         <SidebarMenu>
           {menuItems.map((item) => (
             <SidebarMenuItem key={item.href}>
@@ -150,3 +203,4 @@ export default function SidebarNav() {
     </>
   );
 }
+
