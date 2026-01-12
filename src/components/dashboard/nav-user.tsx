@@ -5,6 +5,7 @@ import {
   User,
   LogOut,
   Settings,
+  ChevronDown,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
@@ -31,10 +32,13 @@ export default function NavUser() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="relative h-9 w-9 rounded-full">
-            <Avatar className="h-9 w-9">
-              <AvatarFallback>JD</AvatarFallback>
-            </Avatar>
+        <Button variant="ghost" className="relative h-9 w-auto rounded-full px-2">
+            <div className="flex items-center gap-2">
+                <Avatar className="h-9 w-9">
+                  <AvatarFallback>JD</AvatarFallback>
+                </Avatar>
+                <ChevronDown className="h-4 w-4 text-muted-foreground" />
+            </div>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
