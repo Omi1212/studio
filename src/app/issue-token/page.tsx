@@ -27,6 +27,7 @@ import { Separator } from '@/components/ui/separator';
 
 export default function IssueTokenPage() {
   const [createdToken, setCreatedToken] = useState<TokenDetails | null>(null);
+  const [isCreating, setIsCreating] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState<Partial<TokenFormValues>>({
     tokenName: 'Ingeniería Coin',
@@ -73,7 +74,6 @@ export default function IssueTokenPage() {
     
     setCreatedToken(newToken);
     
-    // Save to localStorage
     const existingTokens = JSON.parse(localStorage.getItem('createdTokens') || '[]');
     localStorage.setItem('createdTokens', JSON.stringify([...existingTokens, newToken]));
 
@@ -88,6 +88,16 @@ export default function IssueTokenPage() {
     });
   };
 
+  const startCreation = () => {
+    setCreatedToken(null);
+    setIsCreating(true);
+    setCurrentStep(1);
+  };
+
+  const cancelCreation = () => {
+      setIsCreating(false);
+  }
+
   return (
     <SidebarProvider>
       <Sidebar className="border-r">
@@ -99,13 +109,25 @@ export default function IssueTokenPage() {
           <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-8 bg-background">
             <div className="flex justify-center">
               <div className="w-full max-w-6xl">
-                {!createdToken ? (
+                {!isCreating && !createdToken ? (
                   <>
-                    <ExistingTokens />
-                    <Separator className="my-8" />
-                    <h1 className="text-3xl font-headline font-semibold mb-2">
-                      Launchpad
-                    </h1>
+                    <div className="flex justify-between items-center mb-8">
+                        <h1 className="text-3xl font-headline font-semibold">
+                        Launchpad
+                        </h1>
+                        <Button onClick={startCreation}>Create New Token</Button>
+                    </div>
+                    <ExistingTokens onStartCreation={startCreation}/>
+                  </>
+                ) : !createdToken ? (
+                  <>
+                    <div className="flex justify-between items-center mb-8">
+                        <h1 className="text-3xl font-headline font-semibold">
+                        Create a New Token
+                        </h1>
+                        <Button variant="outline" onClick={cancelCreation}>Cancel</Button>
+                    </div>
+
                     <p className="text-muted-foreground mb-8">
                       Create and issue a new token on the network.
                     </p>
@@ -168,7 +190,15 @@ export default function IssueTokenPage() {
                     </div>
                   </>
                 ) : (
-                  <TokenOverview token={createdToken} />
+                  <>
+                    <div className="flex justify-between items-center mb-8">
+                        <h1 className="text-3xl font-headline font-semibold">
+                          Token Request Submitted
+                        </h1>
+                        <Button onClick={startCreation}>Create Another Token</Button>
+                    </div>
+                    <TokenOverview token={createdToken} />
+                  </>
                 )}
               </div>
             </div>
