@@ -12,12 +12,20 @@ import { useEffect, useState } from 'react';
 import type { TokenDetails } from '@/lib/types';
 import { exampleTokens } from '@/lib/data';
 import TokenDetailsView from '@/components/workspace/token-details-view';
+import PaymentSummaryDynamic from '@/components/dashboard/payment-summary-dynamic';
+import TransactionsList from '@/components/dashboard/transactions-list';
 
 
 function TokenDashboard({ token }: { token: TokenDetails }) {
   return (
     <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-8 bg-background">
         <TokenDetailsView token={token} view="dashboard" />
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+            <PaymentSummaryDynamic className="lg:col-span-3" />
+            <div className="lg:col-span-2">
+                <TransactionsList limit={5} />
+            </div>
+        </div>
     </main>
   );
 }
