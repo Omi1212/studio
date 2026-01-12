@@ -4,7 +4,7 @@ import {Toaster} from '@/components/ui/toaster';
 
 export const metadata: Metadata = {
   title: 'SATS Dashboard',
-  description: 'Dashboard for SATS payments',
+  description: 'A dashboard to manage your SATS payments and transactions.',
 };
 
 export default function RootLayout({

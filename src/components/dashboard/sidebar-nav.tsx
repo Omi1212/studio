@@ -40,7 +40,7 @@ import { cn } from '@/lib/utils';
 import type { TokenDetails } from '@/lib/types';
 
 const allMenuItems = [
-  { href: '/', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/issue-token', label: 'Issue Token', icon: CircleDollarSign },
   { href: '/my-tokens', label: 'My Tokens', icon: Briefcase },
   { href: '/transactions', label: 'Transactions', icon: ArrowRightLeft },
@@ -56,13 +56,13 @@ const helpMenuItems = [
 ];
 
 const superAdminMenu = [
-  { href: '/', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/issuer-management', label: 'Issuer Management', icon: Building },
   { href: '/user-management', label: 'User Management', icon: Users },
 ];
 
 const adminMenu = [
-    { href: '/', label: 'Dashboard', icon: LayoutDashboard },
+    { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { href: '/workspace', label: 'Workspace', icon: Briefcase },
     { href: '/requests', label: 'Token Requests', icon: ClipboardList },
     { href: '/orders', label: 'Orders', icon: ShoppingBag },
@@ -70,14 +70,14 @@ const adminMenu = [
 ];
 
 const investorMenu = [
-    { href: '/', label: 'Dashboard', icon: LayoutDashboard },
+    { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { href: '/marketplace', label: 'Marketplace', icon: ShoppingBag },
     { href: '/orders', label: 'Orders', icon: ClipboardList },
     { href: '/my-tokens', label: 'Portfolio', icon: Briefcase },
 ];
 
 const issuerMenu = [
-  { href: '/', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/issue-token', label: 'Launchpad', icon: Rocket },
   { href: '/workspace', label: 'Workspace', icon: Briefcase },
   { href: '/investors', label: 'Investors', icon: Users },
@@ -109,11 +109,23 @@ export default function SidebarNav() {
     }));
     setAllTokens(combinedTokens);
 
-    if (combinedTokens.length > 0) {
+    const storedTokenId = localStorage.getItem('selectedTokenId');
+    if (storedTokenId) {
+        const foundToken = combinedTokens.find(t => t.id === storedTokenId);
+        setSelectedToken(foundToken || (combinedTokens.length > 0 ? combinedTokens[0] : null));
+    } else if (combinedTokens.length > 0) {
       setSelectedToken(combinedTokens[0]);
+      localStorage.setItem('selectedTokenId', combinedTokens[0].id);
     }
 
+
   }, []);
+
+  const handleTokenSelect = (token: TokenDetails) => {
+    setSelectedToken(token);
+    localStorage.setItem('selectedTokenId', token.id);
+    window.dispatchEvent(new Event('tokenChanged'));
+  }
 
   let menuItems;
 
@@ -169,7 +181,7 @@ export default function SidebarNav() {
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-[--radix-dropdown-menu-trigger-width]">
                   {allTokens.map((token) => (
-                      <DropdownMenuItem key={token.id} onSelect={() => setSelectedToken(token)} className="p-2">
+                      <DropdownMenuItem key={token.id} onSelect={() => handleTokenSelect(token)} className="p-2">
                         <div className="flex items-center gap-3 w-full">
                           <TokenIcon token={token} className="h-8 w-8" />
                           <div className="flex-1 flex flex-col gap-0.5 leading-none">

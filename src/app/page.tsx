@@ -1,41 +1,6 @@
-import {
-  Sidebar,
-  SidebarInset,
-  SidebarProvider,
-} from '@/components/ui/sidebar';
-import SidebarNav from '@/components/dashboard/sidebar-nav';
-import VolumeCards from '@/components/dashboard/volume-cards';
-import TransactionsList from '@/components/dashboard/transactions-list';
-import type { Metadata } from 'next';
-import PaymentSummaryDynamic from '@/components/dashboard/payment-summary-dynamic';
-import HeaderDynamic from '@/components/dashboard/header-dynamic';
-import CryptocurrenciesList from '@/components/dashboard/cryptocurrencies-list';
 
-export const metadata: Metadata = {
-  title: 'SATS Dashboard',
-  description: 'A dashboard to manage your SATS payments and transactions.',
-};
+import { redirect } from 'next/navigation';
 
-export default function DashboardPage() {
-  return (
-    <SidebarProvider>
-      <Sidebar className="border-r">
-        <SidebarNav />
-      </Sidebar>
-      <SidebarInset>
-        <div className="flex flex-col min-h-screen">
-          <HeaderDynamic />
-          <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-8 bg-background">
-            <h1 className="text-3xl font-headline font-semibold">Dashboard</h1>
-            <VolumeCards />
-            <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-              <PaymentSummaryDynamic className="lg:col-span-3" />
-              <CryptocurrenciesList className="lg:col-span-2" />
-            </div>
-            <TransactionsList limit={7} />
-          </main>
-        </div>
-      </SidebarInset>
-    </SidebarProvider>
-  );
+export default function RootPage() {
+  redirect('/dashboard');
 }
