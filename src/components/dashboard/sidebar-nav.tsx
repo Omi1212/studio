@@ -34,9 +34,10 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '../ui/button';
-import { tokenData, exampleTokens } from '@/lib/data';
+import { exampleTokens } from '@/lib/data';
 import TokenIcon from '../ui/token-icon';
 import { cn } from '@/lib/utils';
+import type { TokenDetails } from '@/app/issue-token/page';
 
 const allMenuItems = [
   { href: '/', label: 'Dashboard', icon: LayoutDashboard },
@@ -83,13 +84,14 @@ const issuerMenu = [
   { href: '/transfers', label: 'Transfers', icon: ArrowRightLeft },
 ];
 
-const allTokens = [...tokenData, ...exampleTokens.map(t => ({...t, name: t.tokenName, ticker: t.tokenTicker}))];
+type WorkspaceToken = TokenDetails | (typeof exampleTokens)[0];
 
 export default function SidebarNav() {
   const pathname = usePathname();
   const [userRole, setUserRole] = useState<string | null>(null);
   const [isClient, setIsClient] = useState(false);
-  const [selectedToken, setSelectedToken] = useState(allTokens[0]);
+  const [allTokens, setAllTokens] = useState<WorkspaceToken[]>([...exampleTokens]);
+  const [selectedToken, setSelectedToken] = useState<WorkspaceToken>(exampleTokens[0]);
 
 
   useEffect(() => {
@@ -97,6 +99,15 @@ export default function SidebarNav() {
     setIsClient(true);
     const role = localStorage.getItem('userRole');
     setUserRole(role);
+
+    const storedTokens = JSON.parse(localStorage.getItem('createdTokens') || '[]');
+    const combinedTokens = [...exampleTokens, ...storedTokens];
+    setAllTokens(combinedTokens);
+
+    if (combinedTokens.length > 0) {
+      setSelectedToken(combinedTokens[0]);
+    }
+
   }, []);
 
   let menuItems;
@@ -140,9 +151,9 @@ export default function SidebarNav() {
                     <div className="flex items-center gap-3">
                         <TokenIcon network={selectedToken.network as string} className="h-8 w-8" />
                         <div className="flex-1 flex flex-col gap-0.5 leading-none">
-                          <span className="font-medium text-sm">{selectedToken.name}</span>
+                          <span className="font-medium text-sm">{selectedToken.tokenName}</span>
                           <div className="flex items-center gap-2">
-                             <span className="text-primary font-semibold text-xs">{selectedToken.ticker}</span>
+                             <span className="text-primary font-semibold text-xs">{selectedToken.tokenTicker}</span>
                              <span className="text-xs text-muted-foreground">({networkMap[selectedToken.network as string] || selectedToken.network})</span>
                           </div>
                         </div>
@@ -151,14 +162,14 @@ export default function SidebarNav() {
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-[--radix-dropdown-menu-trigger-width]">
-                {allTokens.map((token, index) => (
-                    <DropdownMenuItem key={index} onSelect={() => setSelectedToken(token)} className="p-2">
+                {allTokens.map((token) => (
+                    <DropdownMenuItem key={token.id} onSelect={() => setSelectedToken(token)} className="p-2">
                       <div className="flex items-center gap-3 w-full">
                         <TokenIcon network={token.network as string} className="h-8 w-8" />
                         <div className="flex-1 flex flex-col gap-0.5 leading-none">
-                          <span className="font-medium text-sm">{token.name}</span>
+                          <span className="font-medium text-sm">{token.tokenName}</span>
                           <div className="flex items-center gap-2">
-                             <span className="text-primary font-semibold text-xs">{token.ticker}</span>
+                             <span className="text-primary font-semibold text-xs">{token.tokenTicker}</span>
                              <span className="text-xs text-muted-foreground">({networkMap[token.network as string] || token.network})</span>
                           </div>
                         </div>
