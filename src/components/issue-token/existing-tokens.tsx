@@ -10,6 +10,7 @@ import TokenIcon from '../ui/token-icon';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
 import { Rocket } from 'lucide-react';
+import Link from 'next/link';
 
 function TokenCard({ token }: { token: TokenDetails }) {
   const router = useRouter();
@@ -71,11 +72,7 @@ function TokenCard({ token }: { token: TokenDetails }) {
   );
 }
 
-interface ExistingTokensProps {
-  onStartCreation: () => void;
-}
-
-export default function ExistingTokens({ onStartCreation }: ExistingTokensProps) {
+export default function ExistingTokens() {
   const [allTokens, setAllTokens] = useState<TokenDetails[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -110,7 +107,9 @@ export default function ExistingTokens({ onStartCreation }: ExistingTokensProps)
             <Rocket className="h-16 w-16 text-muted-foreground mb-4" />
             <h2 className="text-xl font-semibold mb-2">No tokens found</h2>
             <p className="text-muted-foreground mb-4">Get started by launching your first token.</p>
-            <Button onClick={onStartCreation}>Create New Token</Button>
+            <Button asChild>
+                <Link href="/issue-token/new">Create New Token</Link>
+            </Button>
         </div>
       );
   }

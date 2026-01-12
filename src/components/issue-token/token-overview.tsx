@@ -9,6 +9,8 @@ import {
 import { CheckCircle2 } from 'lucide-react';
 import type { TokenDetails } from '@/lib/types';
 import TokenDetailsView from '../workspace/token-details-view';
+import { Button } from '../ui/button';
+import Link from 'next/link';
 
 interface TokenOverviewProps {
   token: TokenDetails;
@@ -25,6 +27,16 @@ export default function TokenOverview({ token }: TokenOverviewProps) {
           workspace.
         </AlertDescription>
       </Alert>
+
+      <div className="flex gap-4">
+        <Button asChild className="w-full">
+            <Link href="/issue-token">Back to Launchpad</Link>
+        </Button>
+         <Button asChild variant="outline" className="w-full">
+            <Link href="/issue-token/new">Create Another Token</Link>
+        </Button>
+      </div>
+      
       <TokenDetailsView token={token} view="workspace" />
     </div>
   );
