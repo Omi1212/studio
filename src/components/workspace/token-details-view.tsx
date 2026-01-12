@@ -46,6 +46,16 @@ export default function TokenDetailsView({
   const { toast } = useToast();
   const [iconPreview, setIconPreview] = useState<string | null>(null);
 
+  const networkExplorerMap: { [key: string]: { name: string; url: string } } = {
+    spark: { name: 'Sparkscan', url: 'https://sparkscan.io' },
+    liquid: { name: 'Liquid Explorer', url: 'https://mempool.space/liquid' },
+    rgb: { name: 'RGB Explorer', url: 'https://rgb.tech' },
+    taproot: { name: 'Taproot Explorer', url: 'https://mempool.space' },
+  };
+
+  const explorer = networkExplorerMap[token.network] || { name: 'Explorer', url: '#'};
+
+
   useEffect(() => {
     if (token.tokenIcon && typeof token.tokenIcon !== 'string' && 'size' in token.tokenIcon) {
       const reader = new FileReader();
@@ -153,42 +163,44 @@ export default function TokenDetailsView({
              <div className="text-right text-sm text-muted-foreground">0%</div>
           </CardContent>
           <CardFooter>
-            <Button variant="outline" className="w-full">
-              <Globe className="mr-2 h-4 w-4" />
-              View on Sparkscan
+             <Button variant="outline" className="w-full" asChild>
+              <a href={explorer.url} target="_blank" rel="noopener noreferrer">
+                <Globe className="mr-2 h-4 w-4" />
+                View on {explorer.name}
+              </a>
             </Button>
           </CardFooter>
         </Card>
       </div>
 
-        {view === 'dashboard' ? (
-             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <KpiCard title="Volume (24h)" value="$0.00" icon={TrendingUp} />
-                <KpiCard title="Transactions (24h)" value="0" icon={BarChart} />
-                <KpiCard title="Market Cap" value="$0.00" icon={CircleDollarSign} />
-            </div>
-        ) : (
-            <Card>
-                <CardHeader>
-                    <CardTitle>Token Actions</CardTitle>
-                    <CardDescription>Perform actions on this token. (Available after approval)</CardDescription>
-                </CardHeader>
-                <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <Button variant="outline" disabled={token.status !== 'active'}>
-                        <Coins className="mr-2 h-4 w-4" />
-                        Mint Tokens
-                    </Button>
-                    <Button variant="outline" disabled={token.status !== 'active'}>
-                        <Flame className="mr-2 h-4 w-4" />
-                        Burn Tokens
-                    </Button>
-                    <Button variant="outline" disabled={token.status !== 'active'}>
-                        <Snowflake className="mr-2 h-4 w-4" />
-                        Freeze Address
-                    </Button>
-                </CardContent>
-            </Card>
-        )}
+      {view === 'dashboard' ? (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <KpiCard title="Volume (24h)" value="$0.00" icon={TrendingUp} />
+          <KpiCard title="Transactions (24h)" value="0" icon={BarChart} />
+          <KpiCard title="Market Cap" value="$0.00" icon={CircleDollarSign} />
+        </div>
+      ) : (
+        <Card>
+          <CardHeader>
+            <CardTitle>Token Actions</CardTitle>
+            <CardDescription>Perform actions on this token. (Available after approval)</CardDescription>
+          </CardHeader>
+          <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Button variant="outline" disabled={token.status !== 'active'}>
+              <Coins className="mr-2 h-4 w-4" />
+              Mint Tokens
+            </Button>
+            <Button variant="outline" disabled={token.status !== 'active'}>
+              <Flame className="mr-2 h-4 w-4" />
+              Burn Tokens
+            </Button>
+            <Button variant="outline" disabled={token.status !== 'active'}>
+              <Snowflake className="mr-2 h-4 w-4" />
+              Freeze Address
+            </Button>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
