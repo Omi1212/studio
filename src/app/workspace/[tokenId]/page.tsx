@@ -80,7 +80,7 @@ function TokenDetailsComponent({ params }: { params: { tokenId: string } }) {
                 </h1>
             </div>
             <div className="max-w-4xl mx-auto">
-             <TokenDetailsView token={token} />
+             <TokenDetailsView token={token} view="workspace" />
             </div>
           </main>
         </div>

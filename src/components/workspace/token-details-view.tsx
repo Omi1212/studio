@@ -10,7 +10,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Copy, Globe, Coins, Flame, Snowflake } from 'lucide-react';
+import { Copy, Globe, Coins, Flame, Snowflake, TrendingUp, BarChart, CircleDollarSign } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import type { TokenDetails } from '@/lib/types';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
@@ -21,10 +21,27 @@ import { useState, useEffect } from 'react';
 
 interface TokenDetailsViewProps {
   token: TokenDetails;
+  view?: 'dashboard' | 'workspace';
 }
 
+function KpiCard({ title, value, icon: Icon }: { title: string; value: string; icon: React.ElementType }) {
+    return (
+        <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">{title}</CardTitle>
+                <Icon className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+                <div className="text-2xl font-bold">{value}</div>
+            </CardContent>
+        </Card>
+    );
+}
+
+
 export default function TokenDetailsView({
-  token
+  token,
+  view = 'workspace'
 }: TokenDetailsViewProps) {
   const { toast } = useToast();
   const [iconPreview, setIconPreview] = useState<string | null>(null);
@@ -143,26 +160,35 @@ export default function TokenDetailsView({
           </CardFooter>
         </Card>
       </div>
-      <Card>
-        <CardHeader>
-            <CardTitle>Token Actions</CardTitle>
-            <CardDescription>Perform actions on this token. (Available after approval)</CardDescription>
-        </CardHeader>
-        <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Button variant="outline" disabled>
-                <Coins className="mr-2 h-4 w-4" />
-                Mint Tokens
-            </Button>
-            <Button variant="outline" disabled>
-                <Flame className="mr-2 h-4 w-4" />
-                Burn Tokens
-            </Button>
-            <Button variant="outline" disabled>
-                <Snowflake className="mr-2 h-4 w-4" />
-                Freeze Address
-            </Button>
-        </CardContent>
-      </Card>
+
+        {view === 'dashboard' ? (
+             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <KpiCard title="Volume (24h)" value="$0.00" icon={TrendingUp} />
+                <KpiCard title="Transactions (24h)" value="0" icon={BarChart} />
+                <KpiCard title="Market Cap" value="$0.00" icon={CircleDollarSign} />
+            </div>
+        ) : (
+            <Card>
+                <CardHeader>
+                    <CardTitle>Token Actions</CardTitle>
+                    <CardDescription>Perform actions on this token. (Available after approval)</CardDescription>
+                </CardHeader>
+                <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <Button variant="outline" disabled>
+                        <Coins className="mr-2 h-4 w-4" />
+                        Mint Tokens
+                    </Button>
+                    <Button variant="outline" disabled>
+                        <Flame className="mr-2 h-4 w-4" />
+                        Burn Tokens
+                    </Button>
+                    <Button variant="outline" disabled>
+                        <Snowflake className="mr-2 h-4 w-4" />
+                        Freeze Address
+                    </Button>
+                </CardContent>
+            </Card>
+        )}
     </div>
   );
 }

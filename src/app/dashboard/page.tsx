@@ -17,7 +17,7 @@ import TokenDetailsView from '@/components/workspace/token-details-view';
 function TokenDashboard({ token }: { token: TokenDetails }) {
   return (
     <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-8 bg-background">
-        <TokenDetailsView token={token} />
+        <TokenDetailsView token={token} view="dashboard" />
     </main>
   );
 }
