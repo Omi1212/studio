@@ -37,7 +37,6 @@ import { Button } from '../ui/button';
 import { tokenData, exampleTokens } from '@/lib/data';
 import TokenIcon from '../ui/token-icon';
 import { cn } from '@/lib/utils';
-import { Separator } from '../ui/separator';
 
 const allMenuItems = [
   { href: '/', label: 'Dashboard', icon: LayoutDashboard },
@@ -151,11 +150,17 @@ export default function SidebarNav() {
             <DropdownMenuContent className="w-[--radix-dropdown-menu-trigger-width]">
                 {allTokens.map((token, index) => (
                     <DropdownMenuItem key={index} onSelect={() => setSelectedToken(token)} className="p-2">
-                        <TokenIcon network={token.network as string} className="h-6 w-6 mr-2" />
-                        <div className="flex-1 flex justify-between items-center">
-                            <span>{token.name}</span>
-                             {selectedToken.id === token.id && <Check className="h-4 w-4" />}
+                      <div className="flex items-center gap-3 w-full">
+                        <TokenIcon network={token.network as string} className="h-8 w-8" />
+                        <div className="flex-1 flex flex-col gap-0.5 leading-none">
+                          <span className="font-medium text-sm">{token.name}</span>
+                          <div className="flex items-center gap-2">
+                             <span className="text-primary font-semibold text-xs">{token.ticker}</span>
+                             <span className="text-xs text-muted-foreground">({networkMap[token.network as string] || token.network})</span>
+                          </div>
                         </div>
+                        {selectedToken.id === token.id && <Check className="h-4 w-4" />}
+                      </div>
                     </DropdownMenuItem>
                 ))}
             </DropdownMenuContent>
