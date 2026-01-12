@@ -7,7 +7,6 @@ import {
   Settings,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -17,9 +16,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 
-const userAvatar = PlaceHolderImages.find((img) => img.id === 'user-avatar');
 
 export default function NavUser() {
   const router = useRouter();
@@ -35,13 +33,6 @@ export default function NavUser() {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-9 w-9 rounded-full">
             <Avatar className="h-9 w-9">
-              {userAvatar && (
-                <AvatarImage
-                  src={userAvatar.imageUrl}
-                  alt={userAvatar.description}
-                  data-ai-hint={userAvatar.imageHint}
-                />
-              )}
               <AvatarFallback>JD</AvatarFallback>
             </Avatar>
         </Button>

@@ -18,7 +18,6 @@ import {
 import WalletOptions from './wallet-options';
 import { useState, useEffect } from 'react';
 import NavUser from './nav-user';
-import { Badge } from '../ui/badge';
 
 export default function Header() {
   const [isConnected, setIsConnected] = useState(false);
@@ -95,7 +94,7 @@ export default function Header() {
         <div className="w-px h-6 bg-border" />
 
         {isClient && userRole && (
-          <Badge variant="outline" className="hidden lg:inline-flex">{formatRole(userRole)}</Badge>
+          <span className="hidden lg:inline-flex text-sm font-medium text-muted-foreground">{formatRole(userRole)}</span>
         )}
         
         <NavUser />
