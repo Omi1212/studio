@@ -20,8 +20,9 @@ import Step3Documents from '@/components/issue-token/step-3-documents';
 import Step4Network from '@/components/issue-token/step-4-network';
 import Step5Review from '@/components/issue-token/step-5-review';
 import { Button } from '@/components/ui/button';
-import { exampleTokens } from '@/lib/data';
 import type { TokenDetails } from '@/lib/types';
+import ExistingTokens from '@/components/issue-token/existing-tokens';
+import { Separator } from '@/components/ui/separator';
 
 
 export default function IssueTokenPage() {
@@ -97,9 +98,11 @@ export default function IssueTokenPage() {
           <HeaderDynamic />
           <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-8 bg-background">
             <div className="flex justify-center">
-              <div className="w-full max-w-4xl">
+              <div className="w-full max-w-6xl">
                 {!createdToken ? (
                   <>
+                    <ExistingTokens />
+                    <Separator className="my-8" />
                     <h1 className="text-3xl font-headline font-semibold mb-2">
                       Launchpad
                     </h1>
