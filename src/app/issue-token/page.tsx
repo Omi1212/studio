@@ -11,9 +11,14 @@ import HeaderDynamic from '@/components/dashboard/header-dynamic';
 import ExistingTokens from '@/components/issue-token/existing-tokens';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { Plus } from 'lucide-react';
+import { LayoutGrid, List, Plus } from 'lucide-react';
+import { useState } from 'react';
+import { cn } from '@/lib/utils';
+
+type ViewMode = 'card' | 'table';
 
 export default function IssueTokenPage() {
+  const [viewMode, setViewMode] = useState<ViewMode>('card');
   return (
     <SidebarProvider>
       <Sidebar className="border-r">
@@ -29,14 +34,34 @@ export default function IssueTokenPage() {
                     <h1 className="text-3xl font-headline font-semibold">
                     Launchpad
                     </h1>
-                    <Button asChild>
-                        <Link href="/issue-token/new">
-                            <Plus className="mr-2 h-4 w-4" />
-                            Create New Token
-                        </Link>
-                    </Button>
+                    <div className="flex items-center gap-2">
+                        <div className="hidden sm:flex items-center gap-1 bg-muted p-1 rounded-lg">
+                             <Button 
+                                variant={viewMode === 'card' ? 'secondary' : 'ghost'} 
+                                size="icon" 
+                                className="h-8 w-8"
+                                onClick={() => setViewMode('card')}
+                                >
+                                <LayoutGrid className="h-4 w-4" />
+                            </Button>
+                            <Button 
+                                variant={viewMode === 'table' ? 'secondary' : 'ghost'} 
+                                size="icon" 
+                                className="h-8 w-8"
+                                onClick={() => setViewMode('table')}
+                                >
+                                <List className="h-4 w-4" />
+                            </Button>
+                        </div>
+                        <Button asChild>
+                            <Link href="/issue-token/new">
+                                <Plus className="mr-2 h-4 w-4" />
+                                Create New Token
+                            </Link>
+                        </Button>
+                    </div>
                 </div>
-                <ExistingTokens />
+                <ExistingTokens view={viewMode} />
               </div>
             </div>
           </main>

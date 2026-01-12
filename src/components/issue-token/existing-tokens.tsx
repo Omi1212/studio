@@ -11,30 +11,31 @@ import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
 import { Rocket } from 'lucide-react';
 import Link from 'next/link';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
 
-function TokenCard({ token }: { token: TokenDetails }) {
-  const router = useRouter();
+function getStatusBadge(status: TokenDetails['status']) {
+  switch (status) {
+    case 'active':
+      return <Badge variant="outline" className="text-green-400 border-green-400">Active</Badge>;
+    case 'pending':
+      return <Badge variant="outline" className="text-yellow-400 border-yellow-400">Pending</Badge>;
+    case 'frozen':
+      return <Badge variant="destructive">Frozen</Badge>;
+    default:
+      return <Badge variant="secondary">Unknown</Badge>;
+  }
+};
 
-  const getStatusBadge = () => {
-    switch (token.status) {
-      case 'active':
-        return <Badge variant="outline" className="text-green-400 border-green-400">Active</Badge>;
-      case 'pending':
-        return <Badge variant="outline" className="text-yellow-400 border-yellow-400">Pending</Badge>;
-      case 'frozen':
-        return <Badge variant="destructive">Frozen</Badge>;
-      default:
-        return <Badge variant="secondary">Unknown</Badge>;
-    }
-  };
-
-  const networkMap: { [key: string]: string } = {
+const networkMap: { [key: string]: string } = {
     spark: 'Spark',
     liquid: 'Liquid',
     rgb: 'RGB',
     taproot: 'Taproot Assets',
-  };
+};
 
+function TokenCard({ token }: { token: TokenDetails }) {
+  const router = useRouter();
+  
   const handleViewInWorkspace = () => {
     localStorage.setItem('selectedTokenId', token.id);
     window.dispatchEvent(new Event('tokenChanged'));
@@ -55,7 +56,7 @@ function TokenCard({ token }: { token: TokenDetails }) {
       <CardContent>
         <div className="flex justify-between text-sm">
             <span className="text-muted-foreground">Status</span>
-            {getStatusBadge()}
+            {getStatusBadge(token.status)}
         </div>
         <div className="flex justify-between text-sm mt-2">
             <span className="text-muted-foreground">Network</span>
@@ -73,7 +74,56 @@ function TokenCard({ token }: { token: TokenDetails }) {
   );
 }
 
-export default function ExistingTokens() {
+function TokenTable({ tokens }: { tokens: TokenDetails[] }) {
+    const router = useRouter();
+
+    const handleViewInWorkspace = (token: TokenDetails) => {
+        localStorage.setItem('selectedTokenId', token.id);
+        window.dispatchEvent(new Event('tokenChanged'));
+        router.push('/workspace');
+    };
+    
+    return (
+        <Card>
+            <Table>
+                <TableHeader>
+                    <TableRow>
+                        <TableHead className="w-[40%]">Token</TableHead>
+                        <TableHead>Network</TableHead>
+                        <TableHead>Max Supply</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead className="text-right">Action</TableHead>
+                    </TableRow>
+                </TableHeader>
+                <TableBody>
+                    {tokens.map(token => (
+                        <TableRow key={token.id}>
+                            <TableCell>
+                                <div className="flex items-center gap-3">
+                                    <TokenIcon token={token} className="h-8 w-8" />
+                                    <div>
+                                        <p className="font-medium">{token.tokenName}</p>
+                                        <p className="text-sm text-primary">{token.tokenTicker}</p>
+                                    </div>
+                                </div>
+                            </TableCell>
+                            <TableCell>{networkMap[token.network] || token.network}</TableCell>
+                            <TableCell className="font-mono">{token.maxSupply.toLocaleString()}</TableCell>
+                            <TableCell>{getStatusBadge(token.status)}</TableCell>
+                            <TableCell className="text-right">
+                                <Button variant="outline" size="sm" onClick={() => handleViewInWorkspace(token)}>
+                                    View
+                                </Button>
+                            </TableCell>
+                        </TableRow>
+                    ))}
+                </TableBody>
+            </Table>
+        </Card>
+    )
+}
+
+export default function ExistingTokens({ view = 'card' }: { view?: 'card' | 'table' }) {
   const [allTokens, setAllTokens] = useState<TokenDetails[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -93,11 +143,15 @@ export default function ExistingTokens() {
     return (
         <div className="mb-12">
             <h2 className="text-2xl font-headline font-semibold mb-4">Your Tokens</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <Card className="h-56 animate-pulse bg-muted/50"></Card>
-                <Card className="h-56 animate-pulse bg-muted/50"></Card>
-                <Card className="h-56 animate-pulse bg-muted/50"></Card>
-            </div>
+             {view === 'card' ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <Card className="h-64 animate-pulse bg-muted/50"></Card>
+                    <Card className="h-64 animate-pulse bg-muted/50"></Card>
+                    <Card className="h-64 animate-pulse bg-muted/50"></Card>
+                </div>
+            ) : (
+                <Card className="h-64 animate-pulse bg-muted/50"></Card>
+            )}
       </div>
     );
   }
@@ -118,11 +172,15 @@ export default function ExistingTokens() {
   return (
     <div className="mb-12">
         <h2 className="text-2xl font-headline font-semibold mb-4">Your Tokens</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {allTokens.map(token => (
-                <TokenCard key={token.id} token={token} />
-            ))}
-        </div>
+        {view === 'card' ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {allTokens.map(token => (
+                    <TokenCard key={token.id} token={token} />
+                ))}
+            </div>
+        ) : (
+            <TokenTable tokens={allTokens} />
+        )}
     </div>
   );
 }
