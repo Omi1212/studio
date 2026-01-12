@@ -42,7 +42,7 @@ const networks = [
         name: 'Spark Network', 
         icon: <svg width="24" height="24" viewBox="0 0 68 64" fill="none" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" clipRule="evenodd" d="M39.68 24.656L40.836 0H26.398l1.156 24.656-23.092-8.718L0 29.668l23.807 6.52L8.38 55.457l11.68 8.487 13.558-20.628 13.558 20.627 11.68-8.486L43.43 36.188l23.804-6.52-4.461-13.73-23.092 8.718zM33.617 33v.001z" fill="currentColor"></path></svg>,
         description: {
-            whatIsIt: 'High-speed tokens built on the Bitcoin Lightning Network (using Taproot Assets). They enable instant, low-fee peer-to-peer transactions without waiting for block confirmations.',
+            whatIsIt: 'High-speed tokens built on the Bitcoin Lightning Network. They enable instant, low-fee peer-to-peer transactions without waiting for block confirmations.',
             bestFor: [
                 'Micro-payments: Paying for coffee, content, or tips.',
                 'Gaming: In-game currency and rewards.',
@@ -81,7 +81,7 @@ const networks = [
         name: 'Taproot Assets',
         icon: <img src="https://docs.lightning.engineering/~gitbook/image?url=https%3A%2F%2F2545062540-files.gitbook.io%2F~%2Ffiles%2Fv0%2Fb%2Fgitbook-legacy-files%2Fo%2Fspaces%252F-MIzyiDsFtJBYVyhr1nT%252Favatar-1602260100761.png%3Fgeneration%3D1602260100982225%26alt%3Dmedia&width=32&dpr=2&quality=100&sign=15d20b51&sv=2" alt="Taproot Assets Logo" className="h-6 w-6" />,
         description: {
-            whatIsIt: 'The modern standard for minting assets directly on the Bitcoin blockchain. It leverages the Taproot upgrade to embed asset metadata efficiently within Bitcoin transactions. It serves as the foundational bridge, allowing assets to be minted on Layer 1 and seamlessly transferred into the Lightning Network.',
+            whatIsIt: 'A standard for minting assets on Bitcoin using Taproot. It embeds asset data efficiently and acts as a bridge to move assets to the Lightning Network.',
             bestFor: [
                 'Asset Minting: The initial creation and issuance of tokens.',
                 'On-Chain Storage: Holding assets securely on the main Bitcoin blockchain.',
