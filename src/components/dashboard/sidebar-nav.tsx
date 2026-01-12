@@ -150,8 +150,8 @@ export default function SidebarNav() {
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-[--radix-dropdown-menu-trigger-width]">
                 {allTokens.map((token, index) => (
-                    <DropdownMenuItem key={index} onSelect={() => setSelectedToken(token)}>
-                        <TokenIcon network={token.network as string} className="h-5 w-5 mr-2" />
+                    <DropdownMenuItem key={index} onSelect={() => setSelectedToken(token)} className="p-2">
+                        <TokenIcon network={token.network as string} className="h-6 w-6 mr-2" />
                         <div className="flex-1 flex justify-between items-center">
                             <span>{token.name}</span>
                              {selectedToken.id === token.id && <Check className="h-4 w-4" />}
