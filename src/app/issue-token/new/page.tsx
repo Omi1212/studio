@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
   Sidebar,
@@ -22,6 +22,7 @@ import Step5Review from '@/components/issue-token/step-5-review';
 import { Button } from '@/components/ui/button';
 import type { TokenDetails } from '@/lib/types';
 import Link from 'next/link';
+import { useForm } from 'react-hook-form';
 
 
 export default function NewTokenPage() {
@@ -42,6 +43,8 @@ export default function NewTokenPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
+  const stepFormRef = useRef<HTMLFormElement>(null);
+  
   useEffect(() => {
     const draftTokenId = searchParams.get('draft_id');
     if (draftTokenId) {
@@ -137,6 +140,34 @@ export default function NewTokenPage() {
     });
   };
 
+  const onSaveDraftClick = () => {
+    if (stepFormRef.current) {
+        const currentForm = stepFormRef.current;
+        const formElements = Array.from(currentForm.elements);
+        const data: Partial<TokenFormValues> = {};
+        formElements.forEach((el) => {
+            const input = el as HTMLInputElement;
+            if (input.name) {
+                if (input.type === 'checkbox') {
+                    // @ts-ignore
+                    data[input.name] = input.checked;
+                } else if(input.type === 'file') {
+                    // @ts-ignore
+                    if (input.files && input.files.length > 0) {
+                        // @ts-ignore
+                        data[input.name] = input.files[0];
+                    }
+                }
+                else {
+                    // @ts-ignore
+                    data[input.name] = input.value;
+                }
+            }
+        });
+        handleSaveDraft(data);
+    }
+  };
+
   return (
     <SidebarProvider>
       <Sidebar className="border-r">
@@ -154,9 +185,12 @@ export default function NewTokenPage() {
                         <h1 className="text-3xl font-headline font-semibold">
                           {isDraft ? 'Edit Draft' : 'Create a New Token'}
                         </h1>
-                        <Button variant="outline" asChild>
-                            <Link href="/issue-token">Cancel</Link>
-                        </Button>
+                        <div className="flex items-center gap-2">
+                            <Button variant="outline" onClick={onSaveDraftClick}>Save as Draft</Button>
+                            <Button variant="outline" asChild>
+                                <Link href="/issue-token">Cancel</Link>
+                            </Button>
+                        </div>
                     </div>
 
                     <p className="text-muted-foreground mb-8">
@@ -185,32 +219,32 @@ export default function NewTokenPage() {
                       <div className="w-full max-w-2xl">
                         {currentStep === 1 && (
                           <Step1TokenInfo
+                            formRef={stepFormRef}
                             onNext={handleNext}
-                            onSaveDraft={handleSaveDraft}
                             defaultValues={formData}
                           />
                         )}
                         {currentStep === 2 && (
                           <Step2TokenDetails
+                            formRef={stepFormRef}
                             onBack={handleBack}
                             onNext={handleNext}
-                            onSaveDraft={handleSaveDraft}
                             defaultValues={formData}
                           />
                         )}
                          {currentStep === 3 && (
                           <Step3Documents
+                            formRef={stepFormRef}
                             onBack={handleBack}
                             onNext={handleNext}
-                             onSaveDraft={handleSaveDraft}
                             defaultValues={formData}
                           />
                         )}
                          {currentStep === 4 && (
                           <Step4Network
+                            formRef={stepFormRef}
                             onBack={handleBack}
                             onNext={handleNext}
-                             onSaveDraft={handleSaveDraft}
                             defaultValues={formData}
                           />
                         )}
@@ -219,7 +253,7 @@ export default function NewTokenPage() {
                             onBack={handleBack}
                             onSubmit={handleFinalSubmit}
                             formData={formData as TokenFormValues}
-                             onSaveDraft={() => handleSaveDraft(formData)}
+                            onSaveDraft={() => handleSaveDraft(formData)}
                           />
                         )}
                       </div>

@@ -17,7 +17,7 @@ import {
   CardContent,
   CardFooter,
 } from '@/components/ui/card';
-import { useState } from 'react';
+import { useState, Ref } from 'react';
 import { Loader2 } from 'lucide-react';
 import type { TokenFormValues } from './issue-token-form';
 import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
@@ -33,8 +33,8 @@ type Step4FormValues = z.infer<typeof step4Schema>;
 interface Step4NetworkProps {
   onNext: (data: Partial<TokenFormValues>) => void;
   onBack: () => void;
-  onSaveDraft: (data: Partial<TokenFormValues>) => void;
   defaultValues?: Partial<TokenFormValues>;
+  formRef: Ref<HTMLFormElement>;
 }
 
 const networks = [
@@ -92,7 +92,7 @@ const networks = [
     }
 ]
 
-export default function Step4Network({ onNext, onBack, onSaveDraft, defaultValues }: Step4NetworkProps) {
+export default function Step4Network({ onNext, onBack, defaultValues, formRef }: Step4NetworkProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const form = useForm<Step4FormValues>({
@@ -109,13 +109,9 @@ export default function Step4Network({ onNext, onBack, onSaveDraft, defaultValue
     setIsSubmitting(false);
   };
   
-  const handleSaveDraftClick = () => {
-    onSaveDraft(form.getValues());
-  }
-
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)}>
+      <form ref={formRef} onSubmit={form.handleSubmit(handleSubmit)}>
         <Card>
           <CardContent className="space-y-6 pt-6">
             <FormField
@@ -170,12 +166,9 @@ export default function Step4Network({ onNext, onBack, onSaveDraft, defaultValue
             />
           </CardContent>
           <CardFooter className="justify-between">
-            <div className='flex gap-2'>
-              <Button type="button" variant="outline" onClick={onBack}>
-                Back
-              </Button>
-               <Button type="button" variant="outline" onClick={handleSaveDraftClick}>Save as Draft</Button>
-            </div>
+            <Button type="button" variant="outline" onClick={onBack}>
+              Back
+            </Button>
             <Button type="submit" disabled={isSubmitting}>
               {isSubmitting ? (
                 <>

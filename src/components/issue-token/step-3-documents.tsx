@@ -20,7 +20,7 @@ import {
   CardContent,
   CardFooter,
 } from '@/components/ui/card';
-import { useState } from 'react';
+import { useState, Ref } from 'react';
 import { Loader2 } from 'lucide-react';
 import type { TokenFormValues } from './issue-token-form';
 
@@ -56,11 +56,11 @@ type Step3FormValues = z.infer<typeof step3Schema>;
 interface Step3DocumentsProps {
   onNext: (data: Partial<TokenFormValues>) => void;
   onBack: () => void;
-  onSaveDraft: (data: Partial<TokenFormValues>) => void;
   defaultValues?: Partial<TokenFormValues>;
+  formRef: Ref<HTMLFormElement>;
 }
 
-export default function Step3Documents({ onNext, onBack, onSaveDraft, defaultValues }: Step3DocumentsProps) {
+export default function Step3Documents({ onNext, onBack, defaultValues, formRef }: Step3DocumentsProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const form = useForm<Step3FormValues>({
@@ -79,10 +79,6 @@ export default function Step3Documents({ onNext, onBack, onSaveDraft, defaultVal
     setIsSubmitting(false);
   };
   
-  const handleSaveDraftClick = () => {
-    onSaveDraft(form.getValues());
-  }
-
   const FileInput = ({ field }: { field: any }) => (
     <Input 
       type="file" 
@@ -94,7 +90,7 @@ export default function Step3Documents({ onNext, onBack, onSaveDraft, defaultVal
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)}>
+      <form ref={formRef} onSubmit={form.handleSubmit(handleSubmit)}>
         <Card>
           <CardContent className="space-y-6 pt-6">
             <FormField
@@ -141,12 +137,9 @@ export default function Step3Documents({ onNext, onBack, onSaveDraft, defaultVal
             />
           </CardContent>
           <CardFooter className="justify-between">
-            <div className='flex gap-2'>
-              <Button type="button" variant="outline" onClick={onBack}>
-                Back
-              </Button>
-               <Button type="button" variant="outline" onClick={handleSaveDraftClick}>Save as Draft</Button>
-            </div>
+            <Button type="button" variant="outline" onClick={onBack}>
+              Back
+            </Button>
             <Button type="submit" disabled={isSubmitting}>
               {isSubmitting ? (
                 <>

@@ -20,7 +20,7 @@ import {
   CardContent,
   CardFooter,
 } from '@/components/ui/card';
-import { useState } from 'react';
+import { useState, Ref } from 'react';
 import { Loader2 } from 'lucide-react';
 import type { TokenFormValues } from './issue-token-form';
 
@@ -35,11 +35,11 @@ type Step1FormValues = z.infer<typeof step1Schema>;
 
 interface Step1TokenInfoProps {
   onNext: (data: Partial<TokenFormValues>) => void;
-  onSaveDraft: (data: Partial<TokenFormValues>) => void;
   defaultValues?: Partial<TokenFormValues>;
+  formRef: Ref<HTMLFormElement>;
 }
 
-export default function Step1TokenInfo({ onNext, onSaveDraft, defaultValues }: Step1TokenInfoProps) {
+export default function Step1TokenInfo({ onNext, defaultValues, formRef }: Step1TokenInfoProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const form = useForm<Step1FormValues>({
@@ -59,13 +59,9 @@ export default function Step1TokenInfo({ onNext, onSaveDraft, defaultValues }: S
     setIsSubmitting(false);
   };
   
-  const handleSaveDraftClick = () => {
-    onSaveDraft(form.getValues());
-  }
-
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)}>
+      <form ref={formRef} onSubmit={form.handleSubmit(handleSubmit)}>
         <Card>
           <CardContent className="space-y-6 pt-6">
             <FormField
@@ -136,8 +132,7 @@ export default function Step1TokenInfo({ onNext, onSaveDraft, defaultValues }: S
               )}
             />
           </CardContent>
-          <CardFooter className="justify-between">
-            <Button type="button" variant="outline" onClick={handleSaveDraftClick}>Save as Draft</Button>
+          <CardFooter className="justify-end">
             <Button type="submit" disabled={isSubmitting}>
               {isSubmitting ? (
                 <>

@@ -21,7 +21,7 @@ import {
   CardContent,
   CardFooter,
 } from '@/components/ui/card';
-import { useState } from 'react';
+import { useState, Ref } from 'react';
 import { Loader2 } from 'lucide-react';
 import type { TokenFormValues } from './issue-token-form';
 
@@ -36,11 +36,11 @@ type Step2FormValues = z.infer<typeof step2Schema>;
 interface Step2TokenDetailsProps {
   onNext: (data: Partial<TokenFormValues>) => void;
   onBack: () => void;
-  onSaveDraft: (data: Partial<TokenFormValues>) => void;
   defaultValues?: Partial<TokenFormValues>;
+  formRef: Ref<HTMLFormElement>;
 }
 
-export default function Step2TokenDetails({ onNext, onBack, onSaveDraft, defaultValues }: Step2TokenDetailsProps) {
+export default function Step2TokenDetails({ onNext, onBack, defaultValues, formRef }: Step2TokenDetailsProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const form = useForm<Step2FormValues>({
@@ -59,13 +59,9 @@ export default function Step2TokenDetails({ onNext, onBack, onSaveDraft, default
     setIsSubmitting(false);
   };
   
-  const handleSaveDraftClick = () => {
-    onSaveDraft(form.getValues());
-  }
-
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)}>
+      <form ref={formRef} onSubmit={form.handleSubmit(handleSubmit)}>
         <Card>
           <CardContent className="space-y-6 pt-6">
             <FormField
@@ -122,12 +118,9 @@ export default function Step2TokenDetails({ onNext, onBack, onSaveDraft, default
             />
           </CardContent>
           <CardFooter className="justify-between">
-            <div className='flex gap-2'>
-              <Button type="button" variant="outline" onClick={onBack}>
-                Back
-              </Button>
-               <Button type="button" variant="outline" onClick={handleSaveDraftClick}>Save as Draft</Button>
-            </div>
+            <Button type="button" variant="outline" onClick={onBack}>
+              Back
+            </Button>
             <Button type="submit" disabled={isSubmitting}>
               {isSubmitting ? (
                 <>

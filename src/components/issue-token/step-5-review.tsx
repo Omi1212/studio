@@ -63,7 +63,14 @@ export default function Step5Review({ onSubmit, onBack, onSaveDraft, formData }:
         setIconPreview(reader.result as string);
       }
       reader.readAsDataURL(formData.tokenIcon);
-    } else {
+    } else if (typeof formData.tokenIcon === 'object' && formData.tokenIcon && 'name' in formData.tokenIcon) { // Handle File object from draft
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setIconPreview(reader.result as string);
+      }
+      reader.readAsDataURL(formData.tokenIcon as File);
+    }
+    else {
         setIconPreview(null);
     }
   }, [formData.tokenIcon]);
@@ -76,10 +83,6 @@ export default function Step5Review({ onSubmit, onBack, onSaveDraft, formData }:
     setIsSubmitting(false);
   };
   
-  const handleSaveDraftClick = () => {
-    onSaveDraft(formData);
-  }
-
   const networkMap: { [key: string]: string } = {
     spark: 'Spark Network',
     liquid: 'Liquid Network',
@@ -127,12 +130,9 @@ export default function Step5Review({ onSubmit, onBack, onSaveDraft, formData }:
 
       </CardContent>
       <CardFooter className="justify-between">
-        <div className='flex gap-2'>
-          <Button type="button" variant="outline" onClick={onBack}>
-            Back
-          </Button>
-          <Button type="button" variant="outline" onClick={handleSaveDraftClick}>Save as Draft</Button>
-        </div>
+        <Button type="button" variant="outline" onClick={onBack}>
+          Back
+        </Button>
         <Button type="button" onClick={handleSubmit} disabled={isSubmitting}>
           {isSubmitting ? (
             <>
