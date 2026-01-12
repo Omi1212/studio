@@ -25,7 +25,6 @@ import {
 } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import NavUser from './nav-user';
 
 const allMenuItems = [
   { href: '/', label: 'Dashboard', icon: LayoutDashboard },
@@ -147,7 +146,6 @@ export default function SidebarNav() {
             </SidebarMenuItem>
           ))}
         </SidebarMenu>
-        <NavUser />
       </SidebarFooter>
     </>
   );

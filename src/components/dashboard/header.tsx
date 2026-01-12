@@ -17,15 +17,23 @@ import {
 } from "@/components/ui/sheet"
 import WalletOptions from './wallet-options';
 import { useState, useEffect } from 'react';
+import NavUser from './nav-user';
+import { Badge } from '../ui/badge';
 
 export default function Header() {
   const [isConnected, setIsConnected] = useState(false);
+  const [userRole, setUserRole] = useState<string | null>(null);
+  const [isClient, setIsClient] = useState(false);
+
 
   useEffect(() => {
+    setIsClient(true);
     const storedConnection = localStorage.getItem('isWalletConnected');
     if (storedConnection === 'true') {
       setIsConnected(true);
     }
+    const role = localStorage.getItem('userRole');
+    setUserRole(role);
   }, []);
 
   const handleConnect = () => {
@@ -38,13 +46,18 @@ export default function Header() {
     setIsConnected(false);
   };
 
+  const formatRole = (role: string | null) => {
+    if (!role) return '';
+    return role.charAt(0).toUpperCase() + role.slice(1);
+  }
+
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-card px-4 sm:px-6">
       <div className="md:hidden">
         <SidebarTrigger />
       </div>
 
-      <div className="flex items-center gap-2 md:gap-4 ml-auto">
+      <div className="flex items-center gap-4 ml-auto">
         <Button variant="ghost" size="icon" className="rounded-full">
           <Bell />
           <span className="sr-only">Notifications</span>
@@ -56,16 +69,13 @@ export default function Header() {
             >
               {isConnected ? (
                 <>
-                  <Wallet className="h-6 w-6" />
-                  <div className="w-px h-4 bg-white/50 mx-2" />
-                  <img src="https://spark.satsterminal.com/xverse.svg" alt="Xverse logo" className="h-6 w-6" />
-                  <span>spark1pg...92kjc</span>
+                  <Wallet className="h-5 w-5" />
+                  <span className="hidden lg:inline">spark1pg...92kjc</span>
                 </>
               ) : (
                 <>
-                  <Wallet className="h-6 w-6" />
-                  <div className="w-px h-4 bg-white/50 mx-2" />
-                  <span>Connect Wallet</span>
+                  <Wallet className="h-5 w-5" />
+                  <span className="hidden lg:inline">Connect Wallet</span>
                 </>
               )}
             </Button>
@@ -81,6 +91,15 @@ export default function Header() {
             />
           </SheetContent>
         </Sheet>
+        
+        <div className="w-px h-6 bg-border" />
+
+        {isClient && userRole && (
+          <Badge variant="outline" className="hidden lg:inline-flex">{formatRole(userRole)}</Badge>
+        )}
+        
+        <NavUser />
+
       </div>
     </header>
   );
