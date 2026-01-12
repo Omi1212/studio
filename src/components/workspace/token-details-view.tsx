@@ -174,15 +174,15 @@ export default function TokenDetailsView({
                     <CardDescription>Perform actions on this token. (Available after approval)</CardDescription>
                 </CardHeader>
                 <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <Button variant="outline" disabled>
+                    <Button variant="outline" disabled={token.status !== 'active'}>
                         <Coins className="mr-2 h-4 w-4" />
                         Mint Tokens
                     </Button>
-                    <Button variant="outline" disabled>
+                    <Button variant="outline" disabled={token.status !== 'active'}>
                         <Flame className="mr-2 h-4 w-4" />
                         Burn Tokens
                     </Button>
-                    <Button variant="outline" disabled>
+                    <Button variant="outline" disabled={token.status !== 'active'}>
                         <Snowflake className="mr-2 h-4 w-4" />
                         Freeze Address
                     </Button>
