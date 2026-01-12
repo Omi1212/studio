@@ -162,8 +162,6 @@ export default function SidebarNav() {
         </DropdownMenu>
       </div>
 
-      <Separator className="mb-2" />
-      
       <SidebarContent className="p-4 pt-0">
         <SidebarMenu>
           {menuItems.map((item) => (
@@ -203,4 +201,3 @@ export default function SidebarNav() {
     </>
   );
 }
-
