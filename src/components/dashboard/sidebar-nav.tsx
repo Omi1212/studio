@@ -152,6 +152,7 @@ export default function SidebarNav() {
     spark: 'Spark',
     liquid: 'Liquid',
     rgb: 'RGB',
+    taproot: 'Taproot Assets',
   };
 
 

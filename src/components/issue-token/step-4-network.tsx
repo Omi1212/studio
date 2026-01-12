@@ -76,6 +76,19 @@ const networks = [
             ]
         }
     },
+    {
+        id: 'taproot',
+        name: 'Taproot Assets',
+        icon: <img src="https://docs.lightning.engineering/~gitbook/image?url=https%3A%2F%2F2545062540-files.gitbook.io%2F~%2Ffiles%2Fv0%2Fb%2Fgitbook-legacy-files%2Fo%2Fspaces%252F-MIzyiDsFtJBYVyhr1nT%252Favatar-1602260100761.png%3Fgeneration%3D1602260100982225%26alt%3Dmedia&width=32&dpr=2&quality=100&sign=15d20b51&sv=2" alt="Taproot Assets Logo" className="h-6 w-6" />,
+        description: {
+            whatIsIt: 'The modern standard for minting assets directly on the Bitcoin blockchain. It leverages the Taproot upgrade to embed asset metadata efficiently within Bitcoin transactions. It serves as the foundational bridge, allowing assets to be minted on Layer 1 and seamlessly transferred into the Lightning Network.',
+            bestFor: [
+                'Asset Minting: The initial creation and issuance of tokens.',
+                'On-Chain Storage: Holding assets securely on the main Bitcoin blockchain.',
+                'Bridging: Developers building custom solutions to move assets between Layer 1 and Layer 2.',
+            ]
+        }
+    }
 ]
 
 export default function Step4Network({ onNext, onBack, defaultValues }: Step4NetworkProps) {

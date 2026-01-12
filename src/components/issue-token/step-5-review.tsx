@@ -79,6 +79,7 @@ export default function Step5Review({ onSubmit, onBack, formData }: Step5ReviewP
     spark: 'Spark Network',
     liquid: 'Liquid Network',
     rgb: 'RGB Protocol',
+    taproot: 'Taproot Assets',
   };
 
   return (

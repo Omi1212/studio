@@ -25,6 +25,7 @@ const networkMap: { [key: string]: string } = {
   spark: 'Spark',
   liquid: 'Liquid',
   rgb: 'RGB',
+  taproot: 'Taproot Assets',
 };
 
 export default function TokenWorkspaceCard({ token }: TokenCardProps) {
