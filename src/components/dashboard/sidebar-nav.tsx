@@ -24,6 +24,7 @@ import {
   Rocket,
   ChevronsUpDown,
   Check,
+  ChevronDown,
 } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
@@ -38,6 +39,7 @@ import { exampleTokens } from '@/lib/data';
 import TokenIcon from '../ui/token-icon';
 import { cn } from '@/lib/utils';
 import type { TokenDetails } from '@/lib/types';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../ui/collapsible';
 
 const allMenuItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -79,11 +81,17 @@ const investorMenu = [
 const issuerMenu = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/issue-token', label: 'Launchpad', icon: Rocket },
-  { href: '/workspace', label: 'Workspace', icon: Briefcase },
-  { href: '/investors', label: 'Investors', icon: Users },
-  { href: '/orders', label: 'Orders', icon: ShoppingBag },
-  { href: '/whitelisting-requests', label: 'Whitelisting Requests', icon: ClipboardList },
-  { href: '/transfers', label: 'Transfers', icon: ArrowRightLeft },
+  { 
+    href: '/workspace', 
+    label: 'Workspace', 
+    icon: Briefcase,
+    subItems: [
+        { href: '/investors', label: 'Investors', icon: Users },
+        { href: '/whitelisting-requests', label: 'Whitelisting Requests', icon: ClipboardList },
+        { href: '/orders', label: 'Orders', icon: ShoppingBag },
+        { href: '/transfers', label: 'Transfers', icon: ArrowRightLeft },
+    ]
+  },
 ];
 
 export default function SidebarNav() {
@@ -128,7 +136,7 @@ export default function SidebarNav() {
     window.dispatchEvent(new Event('tokenChanged'));
   }
 
-  let menuItems;
+  let menuItems: any[] = [];
 
   if (!isClient) {
     // Render nothing or a skeleton loader on the server/initial client render.
@@ -205,18 +213,62 @@ export default function SidebarNav() {
       <SidebarContent className="p-4 pt-0">
         <SidebarMenu>
           {menuItems.map((item) => (
-            <SidebarMenuItem key={item.href}>
-              <SidebarMenuButton
-                asChild
-                isActive={pathname === item.href}
-                tooltip={item.label}
-              >
-                <a href={item.href}>
-                  <item.icon />
-                  <span>{item.label}</span>
-                </a>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
+            item.subItems ? (
+                 <Collapsible key={item.href} asChild>
+                    <SidebarMenuItem>
+                        <div className="relative">
+                            <SidebarMenuButton
+                                asChild
+                                isActive={pathname.startsWith(item.href)}
+                                tooltip={item.label}
+                                className="pr-10"
+                            >
+                                <a href={item.href}>
+                                    <item.icon />
+                                    <span>{item.label}</span>
+                                </a>
+                            </SidebarMenuButton>
+                            <CollapsibleTrigger asChild>
+                                <Button variant="ghost" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7">
+                                    <ChevronDown className="h-4 w-4 transition-transform duration-200 group-data-[state=open]:rotate-180" />
+                                </Button>
+                            </CollapsibleTrigger>
+                        </div>
+                        <CollapsibleContent className="py-2 pl-6">
+                            <SidebarMenu>
+                                {item.subItems.map((subItem: any) => (
+                                    <SidebarMenuItem key={subItem.href}>
+                                        <SidebarMenuButton
+                                            asChild
+                                            isActive={pathname === subItem.href}
+                                            tooltip={subItem.label}
+                                            className="h-8"
+                                        >
+                                            <a href={subItem.href}>
+                                                <subItem.icon />
+                                                <span>{subItem.label}</span>
+                                            </a>
+                                        </SidebarMenuButton>
+                                    </SidebarMenuItem>
+                                ))}
+                            </SidebarMenu>
+                        </CollapsibleContent>
+                    </SidebarMenuItem>
+                </Collapsible>
+            ) : (
+                <SidebarMenuItem key={item.href}>
+                    <SidebarMenuButton
+                        asChild
+                        isActive={pathname === item.href}
+                        tooltip={item.label}
+                    >
+                        <a href={item.href}>
+                        <item.icon />
+                        <span>{item.label}</span>
+                        </a>
+                    </SidebarMenuButton>
+                </SidebarMenuItem>
+            )
           ))}
         </SidebarMenu>
       </SidebarContent>
