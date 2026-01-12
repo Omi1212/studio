@@ -137,11 +137,14 @@ export default function SidebarNav() {
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
                 <Button variant="outline" className="w-full h-auto justify-between items-center p-2 text-left bg-sidebar-accent border-sidebar-border hover:bg-sidebar-accent/80">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-3">
                         <TokenIcon network={selectedToken.network as string} className="h-8 w-8" />
-                        <div className="flex flex-col gap-0.5 leading-none">
-                            <span className="font-medium text-sm">{selectedToken.name}</span>
-                            <span className="text-xs text-muted-foreground">{selectedToken.ticker} on {networkMap[selectedToken.network as string] || selectedToken.network}</span>
+                        <div className="flex-1 flex flex-col gap-0.5 leading-none">
+                          <span className="font-medium text-sm">{selectedToken.name}</span>
+                          <div className="flex items-center gap-2">
+                             <span className="text-primary font-semibold text-xs">{selectedToken.ticker}</span>
+                             <span className="text-xs text-muted-foreground">({networkMap[selectedToken.network as string] || selectedToken.network})</span>
+                          </div>
                         </div>
                     </div>
                     <ChevronsUpDown className="h-4 w-4 text-muted-foreground" />
