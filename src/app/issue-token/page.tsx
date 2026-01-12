@@ -11,6 +11,7 @@ import HeaderDynamic from '@/components/dashboard/header-dynamic';
 import ExistingTokens from '@/components/issue-token/existing-tokens';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import { Plus } from 'lucide-react';
 
 export default function IssueTokenPage() {
   return (
@@ -29,7 +30,10 @@ export default function IssueTokenPage() {
                     Launchpad
                     </h1>
                     <Button asChild>
-                        <Link href="/issue-token/new">Create New Token</Link>
+                        <Link href="/issue-token/new">
+                            <Plus className="mr-2 h-4 w-4" />
+                            Create New Token
+                        </Link>
                     </Button>
                 </div>
                 <ExistingTokens />
