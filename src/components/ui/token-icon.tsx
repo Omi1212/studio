@@ -14,7 +14,7 @@ export default function TokenIcon({ token, className }: TokenIconProps) {
     const initial = token.tokenTicker ? token.tokenTicker.charAt(0) : token.tokenName.charAt(0);
 
     return (
-        <Avatar className={cn("flex items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground", className)}>
+        <Avatar className={cn("flex items-center justify-center bg-sidebar-primary text-sidebar-primary-foreground", className)}>
             <AvatarFallback>{initial}</AvatarFallback>
         </Avatar>
     );
