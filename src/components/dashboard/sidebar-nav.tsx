@@ -51,8 +51,8 @@ const superAdminMenu = [
 
 const adminMenu = [
     { href: '/', label: 'Dashboard', icon: LayoutDashboard },
-    { href: '/requests', label: 'Requests', icon: ClipboardList },
-    { href: '/tokens', label: 'Tokens', icon: CircleDollarSign },
+    { href: '/requests', label: 'Token Requests', icon: ClipboardList },
+    { href: '/orders', label: 'Orders', icon: ShoppingBag },
     { href: '/transfers', label: 'Transfers', icon: ArrowRightLeft },
 ];
 
