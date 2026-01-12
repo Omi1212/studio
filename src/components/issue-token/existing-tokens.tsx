@@ -22,6 +22,8 @@ function getStatusBadge(status: TokenDetails['status']) {
       return <Badge variant="outline" className="text-yellow-400 border-yellow-400">Pending</Badge>;
     case 'frozen':
       return <Badge variant="destructive">Frozen</Badge>;
+    case 'draft':
+      return <Badge variant="secondary">Draft</Badge>;
     default:
       return <Badge variant="secondary">Unknown</Badge>;
   }
@@ -37,10 +39,14 @@ const networkMap: { [key: string]: string } = {
 function TokenCard({ token }: { token: TokenDetails }) {
   const router = useRouter();
   
-  const handleViewInWorkspace = () => {
-    localStorage.setItem('selectedTokenId', token.id);
-    window.dispatchEvent(new Event('tokenChanged'));
-    router.push('/workspace');
+  const handleView = () => {
+    if (token.status === 'draft') {
+        router.push(`/issue-token/new?draft_id=${token.id}`);
+    } else {
+        localStorage.setItem('selectedTokenId', token.id);
+        window.dispatchEvent(new Event('tokenChanged'));
+        router.push('/workspace');
+    }
   };
 
   return (
@@ -65,11 +71,13 @@ function TokenCard({ token }: { token: TokenDetails }) {
         </div>
          <div className="flex justify-between text-sm mt-2">
             <span className="text-muted-foreground">Max Supply</span>
-            <span className="font-medium font-mono">{token.maxSupply.toLocaleString()}</span>
+            <span className="font-medium font-mono">{token.maxSupply ? token.maxSupply.toLocaleString() : '--'}</span>
         </div>
       </CardContent>
       <CardFooter>
-        <Button variant="outline" className="w-full" onClick={handleViewInWorkspace}>View</Button>
+        <Button variant="outline" className="w-full" onClick={handleView}>
+          {token.status === 'draft' ? 'Continue Editing' : 'View'}
+        </Button>
       </CardFooter>
     </Card>
   );
@@ -78,10 +86,14 @@ function TokenCard({ token }: { token: TokenDetails }) {
 function TokenTable({ tokens }: { tokens: TokenDetails[] }) {
     const router = useRouter();
 
-    const handleViewInWorkspace = (token: TokenDetails) => {
-        localStorage.setItem('selectedTokenId', token.id);
-        window.dispatchEvent(new Event('tokenChanged'));
-        router.push('/workspace');
+    const handleView = (token: TokenDetails) => {
+        if (token.status === 'draft') {
+            router.push(`/issue-token/new?draft_id=${token.id}`);
+        } else {
+            localStorage.setItem('selectedTokenId', token.id);
+            window.dispatchEvent(new Event('tokenChanged'));
+            router.push('/workspace');
+        }
     };
     
     return (
@@ -109,11 +121,11 @@ function TokenTable({ tokens }: { tokens: TokenDetails[] }) {
                                 </div>
                             </TableCell>
                             <TableCell>{networkMap[token.network] || token.network}</TableCell>
-                            <TableCell className="font-mono">{token.maxSupply.toLocaleString()}</TableCell>
+                            <TableCell className="font-mono">{token.maxSupply ? token.maxSupply.toLocaleString() : '--'}</TableCell>
                             <TableCell>{getStatusBadge(token.status)}</TableCell>
                             <TableCell className="text-right">
-                                <Button variant="outline" size="sm" onClick={() => handleViewInWorkspace(token)}>
-                                    View
+                                <Button variant="outline" size="sm" onClick={() => handleView(token)}>
+                                    {token.status === 'draft' ? 'Continue' : 'View'}
                                 </Button>
                             </TableCell>
                         </TableRow>
@@ -135,6 +147,10 @@ export default function ExistingTokens({ view, setView }: { view: ViewMode, setV
       decimals: t.decimals ?? 0,
       isFreezable: t.isFreezable ?? false,
       publicKey: t.publicKey ?? `02f...${t.id.slice(-10)}`,
+      tokenName: t.tokenName || 'Untitled Token',
+      tokenTicker: t.tokenTicker || '---',
+      network: t.network || 'unknown',
+      maxSupply: t.maxSupply || 0,
     }));
     setAllTokens(combinedTokens);
     setLoading(false);

@@ -1,8 +1,8 @@
 
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import {
   Sidebar,
   SidebarInset,
@@ -36,8 +36,25 @@ export default function NewTokenPage() {
     isFreezable: true,
     network: 'spark',
   });
+  const [isDraft, setIsDraft] = useState(false);
+  const [draftId, setDraftId] = useState<string | null>(null);
   const { toast } = useToast();
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const draftTokenId = searchParams.get('draft_id');
+    if (draftTokenId) {
+      const existingTokens: TokenDetails[] = JSON.parse(localStorage.getItem('createdTokens') || '[]');
+      const draftToken = existingTokens.find(token => token.id === draftTokenId && token.status === 'draft');
+      if (draftToken) {
+        setFormData(draftToken);
+        setCurrentStep(draftToken.savedStep || 1);
+        setIsDraft(true);
+        setDraftId(draftTokenId);
+      }
+    }
+  }, [searchParams]);
 
   const steps = [
     { id: 1, label: 'Token Information' },
@@ -55,12 +72,41 @@ export default function NewTokenPage() {
   const handleBack = () => {
     setCurrentStep((prev) => prev - 1);
   };
+  
+  const handleSaveDraft = (currentFormData: Partial<TokenFormValues>) => {
+    const finalData = { ...formData, ...currentFormData };
+    const id = draftId || `btkn176av2...${Math.random().toString(36).substring(2, 10)}`;
+    
+    const draftToken: TokenDetails = {
+      ...finalData,
+      id: id,
+      publicKey: finalData.publicKey || '',
+      status: 'draft',
+      savedStep: currentStep,
+    } as TokenDetails;
+
+    let existingTokens: TokenDetails[] = JSON.parse(localStorage.getItem('createdTokens') || '[]');
+    
+    if(draftId) {
+      existingTokens = existingTokens.map(token => token.id === draftId ? draftToken : token);
+    } else {
+      existingTokens.push(draftToken);
+    }
+    
+    localStorage.setItem('createdTokens', JSON.stringify(existingTokens));
+
+    toast({
+      title: 'Draft Saved!',
+      description: `Your token "${draftToken.tokenName}" has been saved as a draft.`,
+    });
+    router.push('/issue-token');
+  };
 
   const handleFinalSubmit = (data: Partial<TokenFormValues>) => {
     const finalData = { ...formData, ...data } as TokenFormValues;
     console.log('Creating token with:', finalData);
     
-    const newId = `btkn176av2...${Math.random().toString(36).substring(2, 10)}`;
+    const newId = draftId || `btkn176av2...${Math.random().toString(36).substring(2, 10)}`;
     const newPublicKey = `03a0626e30...${Math.random().toString(36).substring(2, 10)}`;
     
     const newToken: TokenDetails = { 
@@ -72,8 +118,13 @@ export default function NewTokenPage() {
     
     setCreatedToken(newToken);
     
-    const existingTokens = JSON.parse(localStorage.getItem('createdTokens') || '[]');
-    localStorage.setItem('createdTokens', JSON.stringify([...existingTokens, newToken]));
+    let existingTokens: TokenDetails[] = JSON.parse(localStorage.getItem('createdTokens') || '[]');
+    if (draftId) {
+      existingTokens = existingTokens.map(token => token.id === draftId ? newToken : token);
+    } else {
+      existingTokens.push(newToken);
+    }
+    localStorage.setItem('createdTokens', JSON.stringify(existingTokens));
 
     toast({
       title: 'Request Submitted',
@@ -101,7 +152,7 @@ export default function NewTokenPage() {
                   <>
                     <div className="flex justify-between items-center mb-8">
                         <h1 className="text-3xl font-headline font-semibold">
-                        Create a New Token
+                          {isDraft ? 'Edit Draft' : 'Create a New Token'}
                         </h1>
                         <Button variant="outline" asChild>
                             <Link href="/issue-token">Cancel</Link>
@@ -109,7 +160,7 @@ export default function NewTokenPage() {
                     </div>
 
                     <p className="text-muted-foreground mb-8">
-                      Create and issue a new token on the network.
+                      {isDraft ? 'Continue editing your token draft.' : 'Create and issue a new token on the network.'}
                     </p>
                     <div className="mb-8 hidden sm:block">
                       <Stepper totalSteps={steps.length}>
@@ -135,6 +186,7 @@ export default function NewTokenPage() {
                         {currentStep === 1 && (
                           <Step1TokenInfo
                             onNext={handleNext}
+                            onSaveDraft={handleSaveDraft}
                             defaultValues={formData}
                           />
                         )}
@@ -142,6 +194,7 @@ export default function NewTokenPage() {
                           <Step2TokenDetails
                             onBack={handleBack}
                             onNext={handleNext}
+                            onSaveDraft={handleSaveDraft}
                             defaultValues={formData}
                           />
                         )}
@@ -149,6 +202,7 @@ export default function NewTokenPage() {
                           <Step3Documents
                             onBack={handleBack}
                             onNext={handleNext}
+                             onSaveDraft={handleSaveDraft}
                             defaultValues={formData}
                           />
                         )}
@@ -156,6 +210,7 @@ export default function NewTokenPage() {
                           <Step4Network
                             onBack={handleBack}
                             onNext={handleNext}
+                             onSaveDraft={handleSaveDraft}
                             defaultValues={formData}
                           />
                         )}
@@ -164,6 +219,7 @@ export default function NewTokenPage() {
                             onBack={handleBack}
                             onSubmit={handleFinalSubmit}
                             formData={formData as TokenFormValues}
+                             onSaveDraft={() => handleSaveDraft(formData)}
                           />
                         )}
                       </div>

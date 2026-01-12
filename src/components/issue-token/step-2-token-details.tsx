@@ -36,10 +36,11 @@ type Step2FormValues = z.infer<typeof step2Schema>;
 interface Step2TokenDetailsProps {
   onNext: (data: Partial<TokenFormValues>) => void;
   onBack: () => void;
+  onSaveDraft: (data: Partial<TokenFormValues>) => void;
   defaultValues?: Partial<TokenFormValues>;
 }
 
-export default function Step2TokenDetails({ onNext, onBack, defaultValues }: Step2TokenDetailsProps) {
+export default function Step2TokenDetails({ onNext, onBack, onSaveDraft, defaultValues }: Step2TokenDetailsProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const form = useForm<Step2FormValues>({
@@ -57,6 +58,10 @@ export default function Step2TokenDetails({ onNext, onBack, defaultValues }: Ste
     onNext(data);
     setIsSubmitting(false);
   };
+  
+  const handleSaveDraftClick = () => {
+    onSaveDraft(form.getValues());
+  }
 
   return (
     <Form {...form}>
@@ -117,9 +122,12 @@ export default function Step2TokenDetails({ onNext, onBack, defaultValues }: Ste
             />
           </CardContent>
           <CardFooter className="justify-between">
-            <Button type="button" variant="outline" onClick={onBack}>
-              Back
-            </Button>
+            <div className='flex gap-2'>
+              <Button type="button" variant="outline" onClick={onBack}>
+                Back
+              </Button>
+               <Button type="button" variant="outline" onClick={handleSaveDraftClick}>Save as Draft</Button>
+            </div>
             <Button type="submit" disabled={isSubmitting}>
               {isSubmitting ? (
                 <>

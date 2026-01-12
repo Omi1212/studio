@@ -35,10 +35,11 @@ type Step1FormValues = z.infer<typeof step1Schema>;
 
 interface Step1TokenInfoProps {
   onNext: (data: Partial<TokenFormValues>) => void;
+  onSaveDraft: (data: Partial<TokenFormValues>) => void;
   defaultValues?: Partial<TokenFormValues>;
 }
 
-export default function Step1TokenInfo({ onNext, defaultValues }: Step1TokenInfoProps) {
+export default function Step1TokenInfo({ onNext, onSaveDraft, defaultValues }: Step1TokenInfoProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const form = useForm<Step1FormValues>({
@@ -57,6 +58,10 @@ export default function Step1TokenInfo({ onNext, defaultValues }: Step1TokenInfo
     onNext(data);
     setIsSubmitting(false);
   };
+  
+  const handleSaveDraftClick = () => {
+    onSaveDraft(form.getValues());
+  }
 
   return (
     <Form {...form}>
@@ -131,7 +136,8 @@ export default function Step1TokenInfo({ onNext, defaultValues }: Step1TokenInfo
               )}
             />
           </CardContent>
-          <CardFooter className="justify-end">
+          <CardFooter className="justify-between">
+            <Button type="button" variant="outline" onClick={handleSaveDraftClick}>Save as Draft</Button>
             <Button type="submit" disabled={isSubmitting}>
               {isSubmitting ? (
                 <>

@@ -33,6 +33,7 @@ type Step4FormValues = z.infer<typeof step4Schema>;
 interface Step4NetworkProps {
   onNext: (data: Partial<TokenFormValues>) => void;
   onBack: () => void;
+  onSaveDraft: (data: Partial<TokenFormValues>) => void;
   defaultValues?: Partial<TokenFormValues>;
 }
 
@@ -91,7 +92,7 @@ const networks = [
     }
 ]
 
-export default function Step4Network({ onNext, onBack, defaultValues }: Step4NetworkProps) {
+export default function Step4Network({ onNext, onBack, onSaveDraft, defaultValues }: Step4NetworkProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const form = useForm<Step4FormValues>({
@@ -108,6 +109,10 @@ export default function Step4Network({ onNext, onBack, defaultValues }: Step4Net
     setIsSubmitting(false);
   };
   
+  const handleSaveDraftClick = () => {
+    onSaveDraft(form.getValues());
+  }
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)}>
@@ -165,9 +170,12 @@ export default function Step4Network({ onNext, onBack, defaultValues }: Step4Net
             />
           </CardContent>
           <CardFooter className="justify-between">
-            <Button type="button" variant="outline" onClick={onBack}>
-              Back
-            </Button>
+            <div className='flex gap-2'>
+              <Button type="button" variant="outline" onClick={onBack}>
+                Back
+              </Button>
+               <Button type="button" variant="outline" onClick={handleSaveDraftClick}>Save as Draft</Button>
+            </div>
             <Button type="submit" disabled={isSubmitting}>
               {isSubmitting ? (
                 <>

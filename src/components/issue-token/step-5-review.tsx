@@ -11,6 +11,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 interface Step5ReviewProps {
   onSubmit: (data: Partial<TokenFormValues>) => void;
   onBack: () => void;
+  onSaveDraft: (data: Partial<TokenFormValues>) => void;
   formData: TokenFormValues;
 }
 
@@ -51,7 +52,7 @@ function FilePreview({ fileList }: { fileList: FileList | File[] | null | undefi
 }
 
 
-export default function Step5Review({ onSubmit, onBack, formData }: Step5ReviewProps) {
+export default function Step5Review({ onSubmit, onBack, onSaveDraft, formData }: Step5ReviewProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [iconPreview, setIconPreview] = useState<string | null>(null);
 
@@ -74,6 +75,10 @@ export default function Step5Review({ onSubmit, onBack, formData }: Step5ReviewP
     onSubmit(formData);
     setIsSubmitting(false);
   };
+  
+  const handleSaveDraftClick = () => {
+    onSaveDraft(formData);
+  }
 
   const networkMap: { [key: string]: string } = {
     spark: 'Spark Network',
@@ -122,9 +127,12 @@ export default function Step5Review({ onSubmit, onBack, formData }: Step5ReviewP
 
       </CardContent>
       <CardFooter className="justify-between">
-        <Button type="button" variant="outline" onClick={onBack}>
-          Back
-        </Button>
+        <div className='flex gap-2'>
+          <Button type="button" variant="outline" onClick={onBack}>
+            Back
+          </Button>
+          <Button type="button" variant="outline" onClick={handleSaveDraftClick}>Save as Draft</Button>
+        </div>
         <Button type="button" onClick={handleSubmit} disabled={isSubmitting}>
           {isSubmitting ? (
             <>

@@ -56,10 +56,11 @@ type Step3FormValues = z.infer<typeof step3Schema>;
 interface Step3DocumentsProps {
   onNext: (data: Partial<TokenFormValues>) => void;
   onBack: () => void;
+  onSaveDraft: (data: Partial<TokenFormValues>) => void;
   defaultValues?: Partial<TokenFormValues>;
 }
 
-export default function Step3Documents({ onNext, onBack, defaultValues }: Step3DocumentsProps) {
+export default function Step3Documents({ onNext, onBack, onSaveDraft, defaultValues }: Step3DocumentsProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const form = useForm<Step3FormValues>({
@@ -78,6 +79,10 @@ export default function Step3Documents({ onNext, onBack, defaultValues }: Step3D
     setIsSubmitting(false);
   };
   
+  const handleSaveDraftClick = () => {
+    onSaveDraft(form.getValues());
+  }
+
   const FileInput = ({ field }: { field: any }) => (
     <Input 
       type="file" 
@@ -136,9 +141,12 @@ export default function Step3Documents({ onNext, onBack, defaultValues }: Step3D
             />
           </CardContent>
           <CardFooter className="justify-between">
-            <Button type="button" variant="outline" onClick={onBack}>
-              Back
-            </Button>
+            <div className='flex gap-2'>
+              <Button type="button" variant="outline" onClick={onBack}>
+                Back
+              </Button>
+               <Button type="button" variant="outline" onClick={handleSaveDraftClick}>Save as Draft</Button>
+            </div>
             <Button type="submit" disabled={isSubmitting}>
               {isSubmitting ? (
                 <>
