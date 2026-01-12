@@ -15,6 +15,7 @@ import { Badge } from '../ui/badge';
 import type { TokenDetails } from '@/app/issue-token/page';
 import { exampleTokens } from '@/lib/data';
 import { useState, useEffect } from 'react';
+import TokenIcon from '../ui/token-icon';
 
 interface TokenCardProps {
   token: TokenDetails | (typeof exampleTokens)[0];
@@ -55,13 +56,14 @@ export default function TokenWorkspaceCard({ token }: TokenCardProps) {
   return (
     <Card className="flex flex-col">
       <CardHeader className="flex-row items-center gap-4 pb-4">
-        <Avatar className="h-12 w-12 text-xl font-bold">
-          {iconPreview ? (
-            <AvatarImage src={iconPreview} alt={token.tokenName} />
-          ) : (
-            <AvatarFallback>{token.tokenName.charAt(0)}</AvatarFallback>
-          )}
-        </Avatar>
+        {iconPreview ? (
+            <Avatar className="h-12 w-12 text-xl font-bold">
+                <AvatarImage src={iconPreview} alt={token.tokenName} />
+                <AvatarFallback>{token.tokenName.charAt(0)}</AvatarFallback>
+            </Avatar>
+         ) : (
+            <TokenIcon token={token} className="h-12 w-12 text-xl font-bold" />
+         )}
         <div className="flex-1">
           <CardTitle className="text-lg">{token.tokenName}</CardTitle>
           <CardDescription className="flex items-center gap-2">

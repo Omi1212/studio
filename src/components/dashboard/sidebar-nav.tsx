@@ -145,42 +145,44 @@ export default function SidebarNav() {
         <h2 className="text-2xl font-bold text-primary font-headline">BlockStratus</h2>
       </SidebarHeader>
 
-      <div className="px-3 pb-3">
-        <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="w-full h-auto justify-between items-center p-2 text-left bg-sidebar-accent border-sidebar-border hover:bg-sidebar-accent/80">
-                    <div className="flex items-center gap-3">
-                        <TokenIcon network={selectedToken.network as string} className="h-8 w-8" />
-                        <div className="flex-1 flex flex-col gap-0.5 leading-none">
-                          <span className="font-medium text-sm">{selectedToken.tokenName}</span>
-                          <div className="flex items-center gap-2">
-                             <span className="text-primary font-semibold text-xs">{selectedToken.tokenTicker}</span>
-                             <span className="text-xs text-muted-foreground">({networkMap[selectedToken.network as string] || selectedToken.network})</span>
+      {userRole !== 'superadmin' && userRole !== 'investor' && (
+        <div className="px-3 pb-3">
+          <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="w-full h-auto justify-between items-center p-2 text-left bg-sidebar-accent border-sidebar-border hover:bg-sidebar-accent/80">
+                      <div className="flex items-center gap-3">
+                          <TokenIcon token={selectedToken} className="h-8 w-8" />
+                          <div className="flex-1 flex flex-col gap-0.5 leading-none">
+                            <span className="font-medium text-sm">{selectedToken.tokenName}</span>
+                            <div className="flex items-center gap-2">
+                               <span className="text-primary font-semibold text-xs">{selectedToken.tokenTicker}</span>
+                               <span className="text-xs text-muted-foreground">({networkMap[selectedToken.network as string] || selectedToken.network})</span>
+                            </div>
                           </div>
-                        </div>
-                    </div>
-                    <ChevronsUpDown className="h-4 w-4 text-muted-foreground" />
-                </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-[--radix-dropdown-menu-trigger-width]">
-                {allTokens.map((token) => (
-                    <DropdownMenuItem key={token.id} onSelect={() => setSelectedToken(token)} className="p-2">
-                      <div className="flex items-center gap-3 w-full">
-                        <TokenIcon network={token.network as string} className="h-8 w-8" />
-                        <div className="flex-1 flex flex-col gap-0.5 leading-none">
-                          <span className="font-medium text-sm">{token.tokenName}</span>
-                          <div className="flex items-center gap-2">
-                             <span className="text-primary font-semibold text-xs">{token.tokenTicker}</span>
-                             <span className="text-xs text-muted-foreground">({networkMap[token.network as string] || token.network})</span>
-                          </div>
-                        </div>
-                        {selectedToken.id === token.id && <Check className="h-4 w-4" />}
                       </div>
-                    </DropdownMenuItem>
-                ))}
-            </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
+                      <ChevronsUpDown className="h-4 w-4 text-muted-foreground" />
+                  </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-[--radix-dropdown-menu-trigger-width]">
+                  {allTokens.map((token) => (
+                      <DropdownMenuItem key={token.id} onSelect={() => setSelectedToken(token)} className="p-2">
+                        <div className="flex items-center gap-3 w-full">
+                          <TokenIcon token={token} className="h-8 w-8" />
+                          <div className="flex-1 flex flex-col gap-0.5 leading-none">
+                            <span className="font-medium text-sm">{token.tokenName}</span>
+                            <div className="flex items-center gap-2">
+                               <span className="text-primary font-semibold text-xs">{token.tokenTicker}</span>
+                               <span className="text-xs text-muted-foreground">({networkMap[token.network as string] || token.network})</span>
+                            </div>
+                          </div>
+                          {selectedToken.id === token.id && <Check className="h-4 w-4" />}
+                        </div>
+                      </DropdownMenuItem>
+                  ))}
+              </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      )}
 
       <SidebarContent className="p-4 pt-0">
         <SidebarMenu>
