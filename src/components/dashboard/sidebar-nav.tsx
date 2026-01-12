@@ -65,10 +65,16 @@ const superAdminMenu = [
 
 const adminMenu = [
     { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { href: '/workspace', label: 'Workspace', icon: Briefcase },
-    { href: '/requests', label: 'Token Requests', icon: ClipboardList },
-    { href: '/orders', label: 'Orders', icon: ShoppingBag },
-    { href: '/transfers', label: 'Transfers', icon: ArrowRightLeft },
+    { 
+        href: '/workspace', 
+        label: 'Workspace', 
+        icon: Briefcase,
+        subItems: [
+            { href: '/requests', label: 'Token Requests', icon: ClipboardList },
+            { href: '/orders', label: 'Orders', icon: ShoppingBag },
+            { href: '/transfers', label: 'Transfers', icon: ArrowRightLeft },
+        ]
+    },
 ];
 
 const investorMenu = [
