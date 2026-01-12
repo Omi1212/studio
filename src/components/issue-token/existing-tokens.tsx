@@ -76,7 +76,7 @@ function TokenCard({ token }: { token: TokenDetails }) {
       </CardContent>
       <CardFooter>
         <Button variant="outline" className="w-full" onClick={handleView}>
-          {token.status === 'draft' ? 'Continue Editing' : 'View'}
+          {token.status === 'draft' ? 'Continue' : 'View'}
         </Button>
       </CardFooter>
     </Card>
