@@ -81,6 +81,7 @@ const issuerMenu = [
   { href: '/issue-token', label: 'Launchpad', icon: Rocket },
   { href: '/workspace', label: 'Workspace', icon: Briefcase },
   { href: '/investors', label: 'Investors', icon: Users },
+  { href: '/orders', label: 'Orders', icon: ShoppingBag },
   { href: '/whitelisting-requests', label: 'Whitelisting Requests', icon: ClipboardList },
   { href: '/transfers', label: 'Transfers', icon: ArrowRightLeft },
 ];
