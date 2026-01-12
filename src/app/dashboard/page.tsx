@@ -11,15 +11,13 @@ import DefaultDashboard from './default/page';
 import { useEffect, useState } from 'react';
 import type { TokenDetails } from '@/lib/types';
 import { exampleTokens } from '@/lib/data';
-import SupplyCards from '@/components/token-dashboard/supply-cards';
-import TokenSummaryCard from '@/components/token-dashboard/token-summary-card';
-import type { Metadata } from 'next';
+import TokenDetailsView from '@/components/workspace/token-details-view';
+
 
 function TokenDashboard({ token }: { token: TokenDetails }) {
   return (
     <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-8 bg-background">
-        <TokenSummaryCard token={token} />
-        <SupplyCards token={token} />
+        <TokenDetailsView token={token} />
     </main>
   );
 }
@@ -42,7 +40,19 @@ function DashboardRenderer() {
                 const foundToken = allTokens.find(t => t.id === storedTokenId);
                 setSelectedToken(foundToken || null);
             } else if (exampleTokens.length > 0) {
-              setSelectedToken(exampleTokens[0] as TokenDetails);
+              const firstToken = {
+                ...exampleTokens[0],
+                id: exampleTokens[0].id,
+                tokenName: exampleTokens[0].tokenName,
+                tokenTicker: exampleTokens[0].tokenTicker,
+                network: exampleTokens[0].network,
+                status: exampleTokens[0].status,
+                maxSupply: exampleTokens[0].maxSupply,
+                publicKey: `02f...${exampleTokens[0].id.slice(-10)}`,
+                decimals: 0,
+                isFreezable: false,
+              }
+              setSelectedToken(firstToken);
             }
         };
 
