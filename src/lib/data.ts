@@ -237,9 +237,9 @@ export const exampleTokens = [
   },
 ];
 
-const sharedTxToken1 = { tokenId: 'example-1', tokenName: 'Digital Dollar', tokenTicker: 'DUSD', value: 1.00 };
-const sharedTxToken2 = { tokenId: 'example-2', tokenName: 'Gold Token', tokenTicker: 'GLDT', value: 75.50 };
-const sharedTxToken4 = { tokenId: 'example-4', tokenName: 'Carbon Credit', tokenTicker: 'CRBN', value: 12.75 };
+const sharedTxToken1 = { tokenName: 'Digital Dollar', tokenTicker: 'DUSD' };
+const sharedTxToken2 = { tokenName: 'Gold Token', tokenTicker: 'GLDT' };
+const sharedTxToken4 = { tokenName: 'Carbon Credit', tokenTicker: 'CRBN' };
 
 
 export const investorsData = [
@@ -269,10 +269,15 @@ export const investorsData = [
         status: 'pending' as const,
         walletAddress: 'spark1q...e5f6g7h8',
         joinedDate: '2024-06-15',
-        totalInvested: 0,
+        totalInvested: 15000,
         isFrozen: false,
-        holdings: [],
-        transactions: []
+        holdings: [
+             { tokenId: 'example-1', tokenName: 'Digital Dollar', tokenTicker: 'DUSD', amount: 15000, value: 1.00 },
+        ],
+        transactions: [
+            { id: 'tx-2-1', type: 'Buy' as const, token: sharedTxToken1, amount: 15000, price: 1.00, date: '2024-07-20' },
+            { id: 'tx-2-2', type: 'Sell' as const, token: sharedTxToken1, amount: 5000, price: 1.00, date: '2024-07-25' },
+        ]
     },
     {
         id: 'inv-003',
@@ -290,6 +295,7 @@ export const investorsData = [
         transactions: [
             { id: 'tx-3-1', type: 'Buy' as const, token: sharedTxToken4, amount: 1500, price: 10.50, date: '2024-06-20' },
             { id: 'tx-3-2', type: 'Sell' as const, token: sharedTxToken4, amount: 300, price: 12.00, date: '2024-07-10' },
+            { id: 'tx-3-3', type: 'Buy' as const, token: sharedTxToken1, amount: 20000, price: 1.00, date: '2024-07-18' },
         ]
     },
     {
@@ -306,6 +312,7 @@ export const investorsData = [
         ],
         transactions: [
             { id: 'tx-4-1', type: 'Buy' as const, token: sharedTxToken2, amount: 100, price: 65.00, date: '2024-05-01' },
+            { id: 'tx-4-2', type: 'Sell' as const, token: sharedTxToken2, amount: 25, price: 78.00, date: '2024-07-22' },
         ]
     }
 ];
