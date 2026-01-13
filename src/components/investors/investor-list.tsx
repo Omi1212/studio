@@ -35,10 +35,12 @@ function getStatusBadge(investor: Investor) {
     return <Badge variant="secondary" className="bg-sky-600/20 text-sky-400 border-sky-400/50">Frozen</Badge>;
   }
   switch (investor.status) {
-    case 'whitelisted':
+    case 'accepted':
       return <Badge variant="outline" className="text-green-400 border-green-400">Whitelisted</Badge>;
     case 'pending':
       return <Badge variant="outline" className="text-yellow-400 border-yellow-400">Pending</Badge>;
+    case 'rejected':
+      return <Badge variant="destructive">Rejected</Badge>;
     default:
       return <Badge variant="secondary">Unknown</Badge>;
   }
@@ -212,8 +214,9 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
     if (statusFilter !== 'all') {
       filtered = filtered.filter(inv => {
         if (statusFilter === 'frozen') return inv.isFrozen;
-        if (statusFilter === 'whitelisted') return inv.status === 'whitelisted' && !inv.isFrozen;
+        if (statusFilter === 'whitelisted') return inv.status === 'accepted' && !inv.isFrozen;
         if (statusFilter === 'pending') return inv.status === 'pending' && !inv.isFrozen;
+        if (statusFilter === 'rejected') return inv.status === 'rejected' && !inv.isFrozen;
         return true;
       });
     }
@@ -249,7 +252,7 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
     const targetInvestor = updatedInvestors.find(inv => inv.id === id);
     if(targetInvestor) {
         toast({
-            title: `Address ${targetInvestor.isFrozen ? 'Unfrozen' : 'Unfrozen'}`,
+            title: `Address ${targetInvestor.isFrozen ? 'Frozen' : 'Unfrozen'}`,
             description: `The wallet address for "${targetInvestor.name}" has been ${targetInvestor.isFrozen ? 'frozen' : 'unfrozen'}.`,
         });
     }
@@ -299,6 +302,7 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
                     <SelectItem value="all">All Statuses</SelectItem>
                     <SelectItem value="whitelisted">Whitelisted</SelectItem>
                     <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="rejected">Rejected</SelectItem>
                     <SelectItem value="frozen">Frozen</SelectItem>
                 </SelectContent>
             </Select>

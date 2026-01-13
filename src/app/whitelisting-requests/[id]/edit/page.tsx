@@ -48,7 +48,7 @@ export default function EditRequestPage() {
       ...request,
       name: formData.get('name') as string,
       email: formData.get('email') as string,
-      status: formData.get('status') as 'whitelisted' | 'pending',
+      status: formData.get('status') as 'accepted' | 'pending' | 'rejected',
       walletAddress: formData.get('walletAddress') as string,
     };
     
@@ -111,7 +111,8 @@ export default function EditRequestPage() {
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="pending">Pending</SelectItem>
-                                    <SelectItem value="whitelisted">Whitelisted</SelectItem>
+                                    <SelectItem value="accepted">Accepted</SelectItem>
+                                    <SelectItem value="rejected">Rejected</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>

@@ -38,10 +38,12 @@ type Investor = typeof investorsData[0];
 
 function getStatusBadge(status: Investor['status']) {
   switch (status) {
-    case 'whitelisted':
+    case 'accepted':
       return <Badge variant="outline" className="text-green-400 border-green-400">Whitelisted</Badge>;
     case 'pending':
       return <Badge variant="outline" className="text-yellow-400 border-yellow-400">Pending</Badge>;
+    case 'rejected':
+      return <Badge variant="destructive">Rejected</Badge>;
     default:
       return <Badge variant="secondary">Unknown</Badge>;
   }
@@ -74,14 +76,11 @@ export default function InvestorDetailsPage() {
     let finalInvestor: Investor | null = null;
 
     if (defaultInvestorData) {
-      // Start with the base data from data.ts (which has transactions)
       finalInvestor = { ...defaultInvestorData };
-      // If there is stored data, merge it (e.g., for 'isFrozen' state)
       if (storedInvestorData) {
         finalInvestor = { ...finalInvestor, ...storedInvestorData };
       }
     } else if (storedInvestorData) {
-        // For new investors not in data.ts
         finalInvestor = storedInvestorData;
     }
     

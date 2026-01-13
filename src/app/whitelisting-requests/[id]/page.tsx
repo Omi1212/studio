@@ -23,10 +23,12 @@ type WhitelistRequest = typeof investorsData[0];
 
 function getStatusBadge(status: WhitelistRequest['status']) {
   switch (status) {
-    case 'whitelisted':
-      return <Badge variant="outline" className="text-green-400 border-green-400">Whitelisted</Badge>;
+    case 'accepted':
+      return <Badge variant="outline" className="text-green-400 border-green-400">Accepted</Badge>;
     case 'pending':
       return <Badge variant="outline" className="text-yellow-400 border-yellow-400">Pending</Badge>;
+    case 'rejected':
+      return <Badge variant="destructive">Rejected</Badge>;
     default:
       return <Badge variant="secondary">Unknown</Badge>;
   }
@@ -59,16 +61,16 @@ export default function RequestDetailsPage() {
     setLoading(false);
   }, [params]);
   
-  const handleUpdateStatus = (status: 'whitelisted' | 'rejected') => {
+  const handleUpdateStatus = (status: 'accepted' | 'rejected') => {
     if (!request) return;
-    const updatedRequest = { ...request, status: status === 'whitelisted' ? 'whitelisted' : 'pending' }; // Assuming reject keeps it pending for now
+    const updatedRequest = { ...request, status: status };
     
     const storedInvestors: WhitelistRequest[] = JSON.parse(localStorage.getItem('investors') || '[]');
     const updatedInvestors = storedInvestors.map(inv => inv.id === request.id ? updatedRequest : inv);
     localStorage.setItem('investors', JSON.stringify(updatedInvestors));
 
     toast({
-        title: `Request ${status === 'whitelisted' ? 'Approved' : 'Rejected'}`,
+        title: `Request ${status === 'accepted' ? 'Approved' : 'Rejected'}`,
         description: `The request for "${request.name}" has been updated.`
     });
     router.push('/whitelisting-requests');
@@ -133,19 +135,21 @@ export default function RequestDetailsPage() {
                 </CardContent>
             </Card>
 
+            {request.status === 'pending' && (
              <Card>
                 <CardHeader>
                     <CardTitle>Actions</CardTitle>
                 </CardHeader>
                 <CardContent className="flex flex-col sm:flex-row gap-2">
-                    <Button variant="outline" className="w-full" onClick={() => handleUpdateStatus('rejected')}>
+                    <Button variant="destructive" className="w-full" onClick={() => handleUpdateStatus('rejected')}>
                         <X className="mr-2 h-4 w-4" /> Reject Request
                     </Button>
-                    <Button className="w-full" onClick={() => handleUpdateStatus('whitelisted')}>
+                    <Button className="w-full" onClick={() => handleUpdateStatus('accepted')}>
                         <Check className="mr-2 h-4 w-4" /> Approve Request
                     </Button>
                 </CardContent>
              </Card>
+            )}
 
             </div>
           </main>

@@ -20,10 +20,12 @@ type WhitelistRequest = typeof investorsData[0];
 
 function getStatusBadge(investor: WhitelistRequest) {
   switch (investor.status) {
-    case 'whitelisted':
-      return <Badge variant="outline" className="text-green-400 border-green-400">Whitelisted</Badge>;
+    case 'accepted':
+      return <Badge variant="outline" className="text-green-400 border-green-400">Accepted</Badge>;
     case 'pending':
       return <Badge variant="outline" className="text-yellow-400 border-yellow-400">Pending</Badge>;
+    case 'rejected':
+      return <Badge variant="destructive">Rejected</Badge>;
     default:
       return <Badge variant="secondary">Unknown</Badge>;
   }
@@ -69,15 +71,21 @@ function RequestCard({ request, onApprove, onReject }: { request: WhitelistReque
           <span className="text-muted-foreground">Joined Date</span>
           <span className="font-medium">{new Date(request.joinedDate).toLocaleDateString()}</span>
         </div>
+         <div className="flex justify-between text-sm mt-2">
+            <span className="text-muted-foreground">Status</span>
+            {getStatusBadge(request)}
+        </div>
       </CardContent>
-      <CardFooter className="flex gap-2">
-        <Button variant="outline" className="w-full" onClick={() => onReject(request.id)}>
-            <X className="mr-2 h-4 w-4" /> Reject
-        </Button>
-        <Button className="w-full" onClick={() => onApprove(request.id)}>
-            <Check className="mr-2 h-4 w-4" /> Approve
-        </Button>
-      </CardFooter>
+      {request.status === 'pending' && (
+        <CardFooter className="flex gap-2">
+            <Button variant="outline" className="w-full" onClick={() => onReject(request.id)}>
+                <X className="mr-2 h-4 w-4" /> Reject
+            </Button>
+            <Button className="w-full" onClick={() => onApprove(request.id)}>
+                <Check className="mr-2 h-4 w-4" /> Approve
+            </Button>
+        </CardFooter>
+      )}
     </Card>
   );
 }
@@ -102,9 +110,14 @@ function RequestTableRow({ request, onApprove, onReject }: { request: WhitelistR
        <TableCell className="hidden md:table-cell">
         {new Date(request.joinedDate).toLocaleDateString()}
        </TableCell>
+       <TableCell className="hidden sm:table-cell">{getStatusBadge(request)}</TableCell>
       <TableCell className="text-right flex items-center justify-end gap-2">
-        <Button size="sm" variant="outline" onClick={() => onReject(request.id)}>Reject</Button>
-        <Button size="sm" onClick={() => onApprove(request.id)}>Approve</Button>
+        {request.status === 'pending' && (
+            <>
+                <Button size="sm" variant="outline" onClick={() => onReject(request.id)}>Reject</Button>
+                <Button size="sm" onClick={() => onApprove(request.id)}>Approve</Button>
+            </>
+        )}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -141,8 +154,12 @@ export default function RequestList({ view, setView }: { view: ViewMode, setView
   }, []);
 
   const filteredRequests = useMemo(() => {
-    let filtered = requests.filter(req => req.status === 'pending');
+    let filtered = [...requests];
 
+    if (statusFilter !== 'all') {
+        filtered = filtered.filter(req => req.status === statusFilter);
+    }
+    
     if (searchQuery) {
       const lowercasedQuery = searchQuery.toLowerCase();
       filtered = filtered.filter(req => 
@@ -153,43 +170,26 @@ export default function RequestList({ view, setView }: { view: ViewMode, setView
     }
 
     return filtered;
-  }, [requests, searchQuery]);
+  }, [requests, searchQuery, statusFilter]);
 
-  const updateRequestStatus = (id: string, status: 'whitelisted' | 'rejected') => {
-    const updatedRequests = requests.map(req => {
-      if (req.id === id) {
-        return { ...req, status: status === 'whitelisted' ? 'whitelisted' : 'pending' };
-      }
-      return req;
-    });
-
-    const allInvestors = JSON.parse(localStorage.getItem('investors') || '[]');
+  const updateRequestStatus = (id: string, status: 'accepted' | 'rejected') => {
+    const allInvestors: WhitelistRequest[] = JSON.parse(localStorage.getItem('investors') || '[]');
     const updatedInvestors = allInvestors.map((inv: WhitelistRequest) => inv.id === id ? { ...inv, status } : inv);
     localStorage.setItem('investors', JSON.stringify(updatedInvestors));
     setRequests(updatedInvestors);
 
     toast({
-        title: `Request ${status === 'whitelisted' ? 'Approved' : 'Rejected'}`,
-        description: `The request for ${requests.find(r=>r.id===id)?.name} has been ${status === 'whitelisted' ? 'approved' : 'rejected'}.`
+        title: `Request ${status.charAt(0).toUpperCase() + status.slice(1)}`,
+        description: `The request for ${requests.find(r=>r.id===id)?.name} has been ${status}.`
     });
   }
 
   const handleApprove = (id: string) => {
-    updateRequestStatus(id, 'whitelisted');
+    updateRequestStatus(id, 'accepted');
   };
   
   const handleReject = (id: string) => {
-    // For now, "rejecting" just keeps it as pending, but could be a different status
-    // To effectively remove it from this list, we change its status to 'whitelisted' or another status
-    const targetRequest = requests.find(req => req.id === id);
-    if (!targetRequest) return;
-    
-    // This is a placeholder for a real rejection logic
-    toast({
-        title: 'Request Rejected',
-        variant: 'destructive',
-        description: `The request for "${targetRequest.name}" has been rejected.`,
-    });
+    updateRequestStatus(id, 'rejected');
   };
 
   if (loading) {
@@ -218,6 +218,17 @@ export default function RequestList({ view, setView }: { view: ViewMode, setView
                     onChange={(e) => setSearchQuery(e.target.value)}
                 />
             </div>
+             <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-full sm:w-[180px]">
+                    <SelectValue placeholder="Filter by status" />
+                </SelectTrigger>
+                <SelectContent>
+                    <SelectItem value="all">All Requests</SelectItem>
+                    <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="accepted">Accepted</SelectItem>
+                    <SelectItem value="rejected">Rejected</SelectItem>
+                </SelectContent>
+            </Select>
             <div className="hidden sm:flex items-center gap-1 bg-muted p-1 rounded-lg ml-auto">
                 <Button
                     variant={view === 'card' ? 'secondary' : 'ghost'}
@@ -244,9 +255,9 @@ export default function RequestList({ view, setView }: { view: ViewMode, setView
        {filteredRequests.length === 0 ? (
         <div className="border-dashed border-2 border-muted-foreground/50 rounded-lg h-96 flex flex-col items-center justify-center text-center p-4">
             <FilePenLine className="h-16 w-16 text-muted-foreground mb-4" />
-            <h2 className="text-xl font-semibold mb-2">No Pending Requests</h2>
+            <h2 className="text-xl font-semibold mb-2">No Requests Found</h2>
             <p className="text-muted-foreground mb-4">
-                {searchQuery ? "No requests match your search." : "There are no new whitelisting requests at this time."}
+                {searchQuery || statusFilter !== 'all' ? "Try adjusting your search or filter." : "There are no new whitelisting requests at this time."}
             </p>
         </div>
       ) : view === 'card' ? (
@@ -263,6 +274,7 @@ export default function RequestList({ view, setView }: { view: ViewMode, setView
                 <TableHead>User</TableHead>
                 <TableHead className="hidden lg:table-cell">Wallet</TableHead>
                 <TableHead className="hidden md:table-cell">Request Date</TableHead>
+                <TableHead className="hidden sm:table-cell">Status</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>

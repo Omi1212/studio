@@ -242,10 +242,10 @@ export const exampleTokens: Omit<TokenDetails, 'tokenIcon' | 'destinationAddress
   },
 ];
 
-const txToken1 = exampleTokens.find(t => t.id === 'example-1')!;
-const txToken2 = exampleTokens.find(t => t.id === 'example-2')!;
-const txToken3 = exampleTokens.find(t => t.id === 'example-3')!;
-const txToken4 = exampleTokens.find(t => t.id === 'example-4')!;
+const txToken1 = { ...exampleTokens.find(t => t.id === 'example-1')!, id: 'example-1' };
+const txToken2 = { ...exampleTokens.find(t => t.id === 'example-2')!, id: 'example-2' };
+const txToken3 = { ...exampleTokens.find(t => t.id === 'example-3')!, id: 'example-3' };
+const txToken4 = { ...exampleTokens.find(t => t.id === 'example-4')!, id: 'example-4' };
 
 
 export const investorsData = [
@@ -253,7 +253,7 @@ export const investorsData = [
         id: 'inv-001',
         name: 'Alice Johnson',
         email: 'alice.j@example.com',
-        status: 'whitelisted' as const,
+        status: 'accepted' as const,
         walletAddress: 'spark1q...a4b3c2d1',
         joinedDate: '2024-05-10',
         totalInvested: 50000,
@@ -292,7 +292,7 @@ export const investorsData = [
         id: 'inv-003',
         name: 'Charlie Brown',
         email: 'charlie.b@example.com',
-        status: 'whitelisted' as const,
+        status: 'accepted' as const,
         walletAddress: 'spark1q...i9j0k1l2',
         joinedDate: '2024-03-22',
         totalInvested: 125000,
@@ -312,7 +312,7 @@ export const investorsData = [
         id: 'inv-004',
         name: 'Diana Miller',
         email: 'diana.m@example.com',
-        status: 'whitelisted' as const,
+        status: 'accepted' as const,
         walletAddress: 'spark1q...m3n4o5p6',
         joinedDate: '2024-02-01',
         totalInvested: 10000,
@@ -325,5 +325,17 @@ export const investorsData = [
             { id: 'tx-4-2', type: 'Sell' as const, token: txToken2, amount: 25, price: 78.00, date: '2024-07-22' },
             { id: 'tx-4-3', type: 'Buy' as const, token: txToken1, amount: 1000, price: 1.00, date: '2024-07-25' },
         ]
+    },
+    {
+        id: 'inv-005',
+        name: 'Ethan Hunt',
+        email: 'ethan.h@example.com',
+        status: 'rejected' as const,
+        walletAddress: 'spark1q...q7r8s9t0',
+        joinedDate: '2024-07-20',
+        totalInvested: 0,
+        isFrozen: false,
+        holdings: [],
+        transactions: []
     }
 ];
