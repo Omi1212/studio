@@ -75,7 +75,6 @@ function InvestorCard({ investor, onDelete, onToggleFreeze }: { investor: Invest
                 </DropdownMenuItem>
               </AlertDialogTrigger>
             </DropdownMenuContent>
-          </DropdownMenu>
         </div>
       </CardHeader>
       <CardContent>
@@ -276,29 +275,10 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
             </Link>
         </Button>
       </div>
-      <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
-        <h2 className="text-xl font-semibold">Your Investors</h2>
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-            <div className="relative w-full sm:w-auto">
-                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input
-                    placeholder="Search by name, email, wallet..."
-                    className="pl-8 w-full sm:w-64"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                />
-            </div>
-             <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-full sm:w-[180px]">
-                    <SelectValue placeholder="Filter by status" />
-                </SelectTrigger>
-                <SelectContent>
-                    <SelectItem value="all">All Statuses</SelectItem>
-                    <SelectItem value="whitelisted">Whitelisted</SelectItem>
-                    <SelectItem value="pending">Pending</SelectItem>
-                    <SelectItem value="frozen">Frozen</SelectItem>
-                </SelectContent>
-            </Select>
+
+      <div className="space-y-4">
+        <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+            <h2 className="text-xl font-semibold">Your Investors</h2>
             <div className="hidden sm:flex items-center gap-1 bg-muted p-1 rounded-lg">
                 <Button
                     variant={view === 'card' ? 'secondary' : 'ghost'}
@@ -320,7 +300,31 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
                 </Button>
             </div>
         </div>
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+            <div className="relative w-full sm:w-auto flex-grow sm:flex-grow-0">
+                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                    placeholder="Search by name, email, wallet..."
+                    className="pl-8 w-full sm:w-64"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                />
+            </div>
+             <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-full sm:w-[180px]">
+                    <SelectValue placeholder="Filter by status" />
+                </SelectTrigger>
+                <SelectContent>
+                    <SelectItem value="all">All Statuses</SelectItem>
+                    <SelectItem value="whitelisted">Whitelisted</SelectItem>
+                    <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="frozen">Frozen</SelectItem>
+                </SelectContent>
+            </Select>
+        </div>
       </div>
+
+
        {filteredInvestors.length === 0 ? (
         <div className="border-dashed border-2 border-muted-foreground/50 rounded-lg h-96 flex flex-col items-center justify-center text-center p-4">
             <UserPlus className="h-16 w-16 text-muted-foreground mb-4" />
@@ -367,3 +371,5 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
     </div>
   )
 }
+
+    
