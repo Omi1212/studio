@@ -59,8 +59,8 @@ const helpMenuItems = [
 
 const superAdminMenu = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/issuer-management', label: 'Issuer Management', icon: Building },
-  { href: '/user-management', label: 'User Management', icon: Users },
+  { href: '/issuer-management', label: 'Issuer', icon: Building },
+  { href: '/user-management', label: 'User', icon: Users },
 ];
 
 const agentMenu = [
