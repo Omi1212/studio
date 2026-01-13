@@ -62,8 +62,8 @@ export default function LoginForm() {
     <Card className="w-full max-w-md">
       <CardHeader className="text-center">
         <div className="flex justify-center items-center mb-4">
-            <div className="w-48 h-auto relative" style={{ aspectRatio: '170/41' }}>
-              <Image src="https://i.wpfc.ml/35/8gtsxa.png" alt="BlockStratus Logo" fill style={{objectFit: 'contain'}} sizes="12rem" priority />
+            <div className="w-72 h-auto relative" style={{ aspectRatio: '170/41' }}>
+              <Image src="https://i.wpfc.ml/35/8gtsxa.png" alt="BlockStratus Logo" fill style={{objectFit: 'contain'}} sizes="18rem" priority />
             </div>
         </div>
         <CardTitle className="text-2xl font-headline">Log in with Email</CardTitle>
