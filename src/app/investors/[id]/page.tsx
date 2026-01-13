@@ -68,11 +68,27 @@ export default function InvestorDetailsPage() {
   useEffect(() => {
     const { id } = params;
     const storedInvestors: Investor[] = JSON.parse(localStorage.getItem('investors') || '[]');
-    const foundInvestor = storedInvestors.find(inv => inv.id === id);
-    
-    if (foundInvestor) {
-      setInvestor(foundInvestor);
+    const defaultInvestorData = investorsData.find(inv => inv.id === id);
+    const storedInvestorData = storedInvestors.find(inv => inv.id === id);
+
+    let finalInvestor: Investor | null = null;
+
+    if (defaultInvestorData) {
+      // Start with the base data from data.ts (which has transactions)
+      finalInvestor = { ...defaultInvestorData };
+      // If there is stored data, merge it (e.g., for 'isFrozen' state)
+      if (storedInvestorData) {
+        finalInvestor = { ...finalInvestor, ...storedInvestorData };
+      }
+    } else if (storedInvestorData) {
+        // For new investors not in data.ts
+        finalInvestor = storedInvestorData;
     }
+    
+    if (finalInvestor) {
+      setInvestor(finalInvestor);
+    }
+    
     setLoading(false);
 
     const handleTokenChange = () => {
@@ -101,6 +117,7 @@ export default function InvestorDetailsPage() {
       const filtered = investor.transactions?.filter(tx => tx.token.id === selectedToken.id) || [];
       setFilteredTransactions(filtered);
     } else if (investor) {
+      // If no token is selected, show all transactions for that investor.
       setFilteredTransactions(investor.transactions || []);
     } else {
       setFilteredTransactions([]);
@@ -282,3 +299,5 @@ export default function InvestorDetailsPage() {
     </SidebarProvider>
   );
 }
+
+    
