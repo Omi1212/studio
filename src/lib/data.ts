@@ -206,6 +206,34 @@ export const exampleTokens = [
     status: 'active' as const,
     network: 'liquid',
     maxSupply: 100000000,
+    value: 1.00
+  },
+  {
+    id: 'example-2',
+    tokenName: 'Gold Token',
+    tokenTicker: 'GLDT',
+    status: 'active' as const,
+    network: 'spark',
+    maxSupply: 21000000,
+    value: 75.50
+  },
+  {
+    id: 'example-3',
+    tokenName: 'Real Estate Share',
+    tokenTicker: 'REIT',
+    status: 'pending' as const,
+    network: 'rgb',
+    maxSupply: 100000,
+    value: 250.00
+  },
+  {
+    id: 'example-4',
+    tokenName: 'Carbon Credit',
+    tokenTicker: 'CRBN',
+    status: 'active' as const,
+    network: 'taproot',
+    maxSupply: 50000000,
+    value: 12.75
   },
 ];
 
@@ -218,6 +246,11 @@ export const investorsData = [
         walletAddress: 'spark1q...a4b3c2d1',
         joinedDate: '2024-05-10',
         totalInvested: 50000,
+        isFrozen: false,
+        holdings: [
+            { tokenId: 'example-1', tokenName: 'Digital Dollar', tokenTicker: 'DUSD', amount: 25000, value: 1.00 },
+            { tokenId: 'example-2', tokenName: 'Gold Token', tokenTicker: 'GLDT', amount: 100, value: 75.50 },
+        ]
     },
     {
         id: 'inv-002',
@@ -227,6 +260,8 @@ export const investorsData = [
         walletAddress: 'spark1q...e5f6g7h8',
         joinedDate: '2024-06-15',
         totalInvested: 0,
+        isFrozen: false,
+        holdings: []
     },
     {
         id: 'inv-003',
@@ -236,6 +271,11 @@ export const investorsData = [
         walletAddress: 'spark1q...i9j0k1l2',
         joinedDate: '2024-03-22',
         totalInvested: 125000,
+        isFrozen: false,
+        holdings: [
+            { tokenId: 'example-1', tokenName: 'Digital Dollar', tokenTicker: 'DUSD', amount: 50000, value: 1.00 },
+            { tokenId: 'example-4', tokenName: 'Carbon Credit', tokenTicker: 'CRBN', amount: 2000, value: 12.75 },
+        ]
     },
     {
         id: 'inv-004',
@@ -245,5 +285,9 @@ export const investorsData = [
         walletAddress: 'spark1q...m3n4o5p6',
         joinedDate: '2024-02-01',
         totalInvested: 10000,
+        isFrozen: true,
+        holdings: [
+             { tokenId: 'example-2', tokenName: 'Gold Token', tokenTicker: 'GLDT', amount: 50, value: 75.50 },
+        ]
     }
 ];

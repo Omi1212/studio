@@ -12,7 +12,7 @@ import SidebarNav from '@/components/dashboard/sidebar-nav';
 import HeaderDynamic from '@/components/dashboard/header-dynamic';
 import { investorsData } from '@/lib/data';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Edit, Trash2 } from 'lucide-react';
+import { ArrowLeft, Edit, Trash2, Snowflake } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -29,6 +29,8 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import Link from 'next/link';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import TokenIcon from '@/components/ui/token-icon';
 
 type Investor = typeof investorsData[0];
 
@@ -71,6 +73,21 @@ export default function InvestorDetailsPage() {
     }
     setLoading(false);
   }, [params]);
+
+  const handleToggleFreeze = () => {
+    if (!investor) return;
+    const updatedInvestor = { ...investor, isFrozen: !investor.isFrozen };
+    setInvestor(updatedInvestor);
+
+    const storedInvestors: Investor[] = JSON.parse(localStorage.getItem('investors') || '[]');
+    const updatedInvestors = storedInvestors.map(inv => inv.id === investor.id ? updatedInvestor : inv);
+    localStorage.setItem('investors', JSON.stringify(updatedInvestors));
+
+    toast({
+        title: `Address ${updatedInvestor.isFrozen ? 'Frozen' : 'Unfrozen'}`,
+        description: `The wallet address for "${investor.name}" has been ${updatedInvestor.isFrozen ? 'frozen' : 'unfrozen'}.`,
+    });
+  }
 
   const handleDelete = () => {
     if (!investor) return;
@@ -115,6 +132,9 @@ export default function InvestorDetailsPage() {
                     </h1>
                 </div>
                 <div className="flex gap-2">
+                    <Button variant={investor.isFrozen ? "secondary" : "outline"} onClick={handleToggleFreeze}>
+                        <Snowflake className="mr-2 h-4 w-4" /> {investor.isFrozen ? 'Unfreeze' : 'Freeze'} Address
+                    </Button>
                     <Button variant="outline" asChild>
                         <Link href={`/investors/${investor.id}/edit`}>
                             <Edit className="mr-2 h-4 w-4" /> Edit
@@ -122,7 +142,7 @@ export default function InvestorDetailsPage() {
                     </Button>
                     <AlertDialog>
                         <AlertDialogTrigger asChild>
-                            <Button variant="destructive">
+                            <Button variant="destructive" disabled={!investor.isFrozen}>
                                 <Trash2 className="mr-2 h-4 w-4" /> Delete
                             </Button>
                         </AlertDialogTrigger>
@@ -142,7 +162,7 @@ export default function InvestorDetailsPage() {
                 </div>
             </div>
             
-            <div className="max-w-4xl mx-auto">
+            <div className="max-w-4xl mx-auto space-y-6">
              <Card>
                 <CardHeader>
                     <div className="flex items-center gap-4">
@@ -151,7 +171,10 @@ export default function InvestorDetailsPage() {
                         </Avatar>
                         <div>
                             <CardTitle className="text-2xl">{investor.name}</CardTitle>
-                            {getStatusBadge(investor.status)}
+                            <div className="flex items-center gap-2 mt-1">
+                                {getStatusBadge(investor.status)}
+                                {investor.isFrozen && <Badge variant="secondary" className="bg-sky-600/20 text-sky-400 border-sky-400/50">Frozen</Badge>}
+                            </div>
                         </div>
                     </div>
                 </CardHeader>
@@ -160,6 +183,46 @@ export default function InvestorDetailsPage() {
                     <InfoRow label="Wallet Address" value={<span className="font-mono">{investor.walletAddress}</span>} />
                     <InfoRow label="Joined Date" value={new Date(investor.joinedDate).toLocaleDateString()} />
                     <InfoRow label="Total Invested" value={<span className="font-mono">${investor.totalInvested.toLocaleString()}</span>} />
+                </CardContent>
+            </Card>
+
+            <Card>
+                <CardHeader>
+                    <CardTitle>Portfolio</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    {investor.holdings && investor.holdings.length > 0 ? (
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Token</TableHead>
+                                <TableHead className="text-right">Balance</TableHead>
+                                <TableHead className="text-right">Value</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {investor.holdings.map(holding => (
+                                <TableRow key={holding.tokenId}>
+                                    <TableCell>
+                                        <div className="flex items-center gap-3">
+                                            <TokenIcon token={{...holding}} className="h-8 w-8" />
+                                            <div>
+                                                <p className="font-medium">{holding.tokenName}</p>
+                                                <p className="text-sm text-primary">{holding.tokenTicker}</p>
+                                            </div>
+                                        </div>
+                                    </TableCell>
+                                    <TableCell className="text-right font-mono">{holding.amount.toLocaleString()}</TableCell>
+                                    <TableCell className="text-right font-mono">${(holding.amount * holding.value).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                    ) : (
+                         <div className="text-center text-muted-foreground py-8">
+                            This investor does not hold any tokens yet.
+                        </div>
+                    )}
                 </CardContent>
             </Card>
             </div>

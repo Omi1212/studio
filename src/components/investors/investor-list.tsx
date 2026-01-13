@@ -67,7 +67,7 @@ function InvestorCard({ investor, onDelete }: { investor: Investor, onDelete: (i
                 </Link>
               </DropdownMenuItem>
                <AlertDialogTrigger asChild>
-                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                <DropdownMenuItem onSelect={(e) => e.preventDefault()} disabled={!investor.isFrozen}>
                   <Trash2 className="mr-2 h-4 w-4 text-red-500" />
                   <span className="text-red-500">Delete</span>
                 </DropdownMenuItem>
@@ -147,7 +147,7 @@ function InvestorTableRow({ investor, onDelete }: { investor: Investor, onDelete
               <Link href={`/investors/${investor.id}/edit`}>Edit</Link>
             </DropdownMenuItem>
              <AlertDialogTrigger asChild>
-              <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-red-500 focus:text-red-500">
+              <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-red-500 focus:text-red-500" disabled={!investor.isFrozen}>
                 Delete
               </DropdownMenuItem>
             </AlertDialogTrigger>
@@ -209,9 +209,6 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
         <UserPlus className="h-16 w-16 text-muted-foreground mb-4" />
         <h2 className="text-xl font-semibold mb-2">No investors yet</h2>
         <p className="text-muted-foreground mb-4">Get started by adding your first investor.</p>
-        <Button asChild>
-          <Link href="/investors/new">Add Investor</Link>
-        </Button>
       </div>
     );
   }

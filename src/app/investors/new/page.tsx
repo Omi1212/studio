@@ -32,6 +32,8 @@ export default function NewInvestorPage() {
       walletAddress: formData.get('walletAddress') as string,
       joinedDate: new Date().toISOString().split('T')[0],
       totalInvested: 0,
+      holdings: [],
+      isFrozen: false,
     };
     
     const existingInvestors = JSON.parse(localStorage.getItem('investors') || '[]');
@@ -90,7 +92,6 @@ export default function NewInvestorPage() {
                          <Button variant="outline" asChild>
                             <Link href="/investors">Cancel</Link>
                         </Button>
-                        <Button type="submit">Add Investor</Button>
                     </CardContent>
                 </form>
             </Card>
