@@ -88,12 +88,6 @@ function InvestorCard({ investor, onDelete, onToggleFreeze }: { investor: Invest
             <span className="text-muted-foreground">Wallet</span>
             <span className="font-medium font-mono truncate">{investor.walletAddress.slice(0, 7)}...{investor.walletAddress.slice(-4)}</span>
         </div>
-        {investor.isFrozen && (
-          <div className="flex justify-between text-sm mt-2">
-              <span className="text-muted-foreground">Address State</span>
-              <Badge variant="secondary" className="bg-sky-600/20 text-sky-400 border-sky-400/50">Frozen</Badge>
-          </div>
-        )}
       </CardContent>
       <CardFooter>
         <Button variant="outline" className="w-full" asChild>
@@ -137,9 +131,6 @@ function InvestorTableRow({ investor, onDelete, onToggleFreeze }: { investor: In
         <span className="font-mono">{investor.walletAddress.slice(0, 7)}...{investor.walletAddress.slice(-4)}</span>
       </TableCell>
       <TableCell className="hidden sm:table-cell">{getStatusBadge(investor.status)}</TableCell>
-      <TableCell className="hidden lg:table-cell">
-        {investor.isFrozen && <Badge variant="secondary" className="bg-sky-600/20 text-sky-400 border-sky-400/50">Frozen</Badge>}
-      </TableCell>
       <TableCell className="text-right">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -283,7 +274,6 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
                 <TableHead className="hidden md:table-cell">Total Invested</TableHead>
                 <TableHead className="hidden lg:table-cell">Wallet</TableHead>
                 <TableHead className="hidden sm:table-cell">Status</TableHead>
-                <TableHead className="hidden lg:table-cell">Address State</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
