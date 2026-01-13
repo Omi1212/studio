@@ -1,14 +1,14 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { investorsData } from '@/lib/data';
 import type { ViewMode } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/card';
 import { Avatar, AvatarFallback } from '../ui/avatar';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
-import { MoreVertical, LayoutGrid, List, UserPlus, Edit, Trash2, Snowflake } from 'lucide-react';
+import { MoreVertical, LayoutGrid, List, UserPlus, Edit, Trash2, Snowflake, Search, Plus } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
 import Link from 'next/link';
@@ -24,6 +24,8 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { useToast } from '@/hooks/use-toast';
+import { Input } from '../ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 
 
 type Investor = typeof investorsData[0];
@@ -175,6 +177,8 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
   const [investors, setInvestors] = useState<Investor[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
 
   useEffect(() => {
     let finalInvestors: Investor[];
@@ -182,28 +186,17 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
     
     if (storedInvestorsRaw) {
       let storedInvestors: Investor[] = JSON.parse(storedInvestorsRaw);
-      // Check if the stored data has transactions, if not, it's old data or needs updating.
-      if (storedInvestors.length > 0 && (!storedInvestors[0].transactions || storedInvestors[0].transactions.length === 0)) {
-        // Old data, let's merge it with new data structure from investorsData
-        const updatedFromDefaults = investorsData.map(defaultInvestor => {
-          const stored = storedInvestors.find(s => s.id === defaultInvestor.id);
-          // If a stored version exists, merge it, otherwise use the default.
-          // The defaultInvestor now contains the transactions.
-          return stored ? { ...defaultInvestor, ...stored, transactions: defaultInvestor.transactions } : defaultInvestor;
-        });
-
-        // Also add any new investors from localStorage that are not in the default data
-        storedInvestors.forEach(stored => {
-          if (!updatedFromDefaults.find(u => u.id === stored.id)) {
-            updatedFromDefaults.push(stored);
-          }
-        });
-        
-        finalInvestors = updatedFromDefaults;
-        localStorage.setItem('investors', JSON.stringify(finalInvestors));
-      } else {
-        finalInvestors = storedInvestors;
-      }
+      const investorDataWithTransactions = investorsData.map(defaultInvestor => {
+        const stored = storedInvestors.find(s => s.id === defaultInvestor.id);
+        return stored ? { ...defaultInvestor, ...stored } : defaultInvestor;
+      });
+      storedInvestors.forEach(stored => {
+        if (!investorDataWithTransactions.find(u => u.id === stored.id)) {
+          investorDataWithTransactions.push(stored);
+        }
+      });
+      finalInvestors = investorDataWithTransactions;
+      localStorage.setItem('investors', JSON.stringify(finalInvestors));
     } else {
       finalInvestors = investorsData;
       localStorage.setItem('investors', JSON.stringify(investorsData));
@@ -212,6 +205,30 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
     setInvestors(finalInvestors);
     setLoading(false);
   }, []);
+
+  const filteredInvestors = useMemo(() => {
+    let filtered = [...investors];
+
+    if (statusFilter !== 'all') {
+      filtered = filtered.filter(inv => {
+        if (statusFilter === 'frozen') return inv.isFrozen;
+        if (statusFilter === 'whitelisted') return inv.status === 'whitelisted' && !inv.isFrozen;
+        if (statusFilter === 'pending') return inv.status === 'pending' && !inv.isFrozen;
+        return true;
+      });
+    }
+
+    if (searchQuery) {
+      const lowercasedQuery = searchQuery.toLowerCase();
+      filtered = filtered.filter(inv => 
+        inv.name.toLowerCase().includes(lowercasedQuery) ||
+        inv.email.toLowerCase().includes(lowercasedQuery) ||
+        inv.walletAddress.toLowerCase().includes(lowercasedQuery)
+      );
+    }
+
+    return filtered;
+  }, [investors, searchQuery, statusFilter]);
 
   const handleDelete = (id: string) => {
     const updatedInvestors = investors.filter(inv => inv.id !== id);
@@ -242,24 +259,45 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
   if (loading) {
     return (
       <div className="space-y-4">
-        <h2 className="text-2xl font-headline font-semibold">Your Investors</h2>
+        <h1 className="text-3xl font-headline font-semibold">Investors</h1>
         <Card className="h-64 animate-pulse bg-muted/50"></Card>
       </div>
     );
   }
 
-  if (investors.length === 0) {
-    return (
-      <div className="border-dashed border-2 border-muted-foreground/50 rounded-lg h-96 flex flex-col items-center justify-center text-center p-4">
-        <UserPlus className="h-16 w-16 text-muted-foreground mb-4" />
-        <h2 className="text-xl font-semibold mb-2">No investors yet</h2>
-        <p className="text-muted-foreground mb-4">Get started by adding your first investor.</p>
-      </div>
-    );
-  }
-  
   return (
     <div className="space-y-4">
+      <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+        <h1 className="text-3xl font-headline font-semibold">Investors</h1>
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+            <div className="relative w-full sm:w-auto">
+                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                    placeholder="Search by name, email, wallet..."
+                    className="pl-8 w-full sm:w-64"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                />
+            </div>
+             <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-full sm:w-[180px]">
+                    <SelectValue placeholder="Filter by status" />
+                </SelectTrigger>
+                <SelectContent>
+                    <SelectItem value="all">All Statuses</SelectItem>
+                    <SelectItem value="whitelisted">Whitelisted</SelectItem>
+                    <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="frozen">Frozen</SelectItem>
+                </SelectContent>
+            </Select>
+            <Button asChild className="w-full sm:w-auto">
+                <Link href="/investors/new">
+                    <Plus className="mr-2 h-4 w-4" />
+                    Add Investor
+                </Link>
+            </Button>
+        </div>
+      </div>
       <div className="flex justify-between items-center">
         <h2 className="text-xl font-semibold">Your Investors</h2>
         <div className="hidden sm:flex items-center gap-1 bg-muted p-1 rounded-lg">
@@ -283,9 +321,22 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
           </Button>
         </div>
       </div>
-      {view === 'card' ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {investors.map(investor => (
+       {filteredInvestors.length === 0 ? (
+        <div className="border-dashed border-2 border-muted-foreground/50 rounded-lg h-96 flex flex-col items-center justify-center text-center p-4">
+            <UserPlus className="h-16 w-16 text-muted-foreground mb-4" />
+            <h2 className="text-xl font-semibold mb-2">No investors found</h2>
+            <p className="text-muted-foreground mb-4">
+                {searchQuery || statusFilter !== 'all' ? "Try adjusting your search or filter." : "Get started by adding your first investor."}
+            </p>
+            {!(searchQuery || statusFilter !== 'all') && (
+                <Button asChild>
+                    <Link href="/investors/new">Add Investor</Link>
+                </Button>
+            )}
+        </div>
+      ) : view === 'card' ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {filteredInvestors.map(investor => (
              <AlertDialog key={investor.id}>
                 <InvestorCard investor={investor} onDelete={handleDelete} onToggleFreeze={handleToggleFreeze} />
              </AlertDialog>
@@ -304,7 +355,7 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
               </TableRow>
             </TableHeader>
             <TableBody>
-              {investors.map(investor => (
+              {filteredInvestors.map(investor => (
                 <AlertDialog key={investor.id}>
                   <InvestorTableRow investor={investor} onDelete={handleDelete} onToggleFreeze={handleToggleFreeze} />
                 </AlertDialog>
