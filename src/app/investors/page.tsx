@@ -17,7 +17,7 @@ import InvestorList from '@/components/investors/investor-list';
 import type { ViewMode } from '@/lib/types';
 
 export default function InvestorsPage() {
-  const [viewMode, setViewMode] = useState<ViewMode>('card');
+  const [viewMode, setViewMode] = useState<ViewMode>('table');
 
   return (
     <SidebarProvider>

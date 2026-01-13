@@ -87,7 +87,7 @@ function InvestorCard({ investor, onDelete }: { investor: Investor, onDelete: (i
         </div>
         <div className="flex justify-between text-sm mt-2">
             <span className="text-muted-foreground">Wallet</span>
-            <span className="font-medium font-mono truncate">{investor.walletAddress}</span>
+            <span className="font-medium font-mono truncate">{investor.walletAddress.slice(0, 7)}...{investor.walletAddress.slice(-4)}</span>
         </div>
       </CardContent>
       <CardFooter>
@@ -127,6 +127,9 @@ function InvestorTableRow({ investor, onDelete }: { investor: Investor, onDelete
       </TableCell>
       <TableCell className="hidden md:table-cell">
         <span className="font-mono">${investor.totalInvested.toLocaleString()}</span>
+      </TableCell>
+       <TableCell className="hidden lg:table-cell">
+        <span className="font-mono">{investor.walletAddress.slice(0, 7)}...{investor.walletAddress.slice(-4)}</span>
       </TableCell>
       <TableCell className="hidden sm:table-cell">{getStatusBadge(investor.status)}</TableCell>
       <TableCell className="text-right">
@@ -253,6 +256,7 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
               <TableRow>
                 <TableHead>Investor</TableHead>
                 <TableHead className="hidden md:table-cell">Total Invested</TableHead>
+                <TableHead className="hidden lg:table-cell">Wallet</TableHead>
                 <TableHead className="hidden sm:table-cell">Status</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
