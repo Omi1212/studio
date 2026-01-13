@@ -177,7 +177,7 @@ export default function SidebarNav() {
   return (
     <>
       <SidebarHeader className="p-4">
-        <Image src="https://i.wpfc.ml/35/8gtsxa.png" alt="BlockStratus Logo" width={150} height={36} />
+        <Image src="https://i.wpfc.ml/35/8gtsxa.png" alt="BlockStratus Logo" width={170} height={41} />
       </SidebarHeader>
 
       {isClient && userRole !== 'superadmin' && userRole !== 'investor' && selectedToken && (
