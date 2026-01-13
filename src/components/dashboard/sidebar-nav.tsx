@@ -75,6 +75,8 @@ const agentMenu = [
             { href: '/transfers', label: 'Transfers', icon: ArrowRightLeft },
         ]
     },
+    { href: '/issuer-management', label: 'Issuer', icon: Building },
+    { href: '/user-management', label: 'User', icon: Users },
 ];
 
 const investorMenu = [
