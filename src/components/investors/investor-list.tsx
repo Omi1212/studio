@@ -28,8 +28,11 @@ import { useToast } from '@/hooks/use-toast';
 
 type Investor = typeof investorsData[0];
 
-function getStatusBadge(status: Investor['status']) {
-  switch (status) {
+function getStatusBadge(investor: Investor) {
+  if (investor.isFrozen) {
+    return <Badge variant="secondary" className="bg-sky-600/20 text-sky-400 border-sky-400/50">Frozen</Badge>;
+  }
+  switch (investor.status) {
     case 'whitelisted':
       return <Badge variant="outline" className="text-green-400 border-green-400">Whitelisted</Badge>;
     case 'pending':
@@ -76,7 +79,7 @@ function InvestorCard({ investor, onDelete, onToggleFreeze }: { investor: Invest
       <CardContent>
         <div className="flex justify-between text-sm mt-2">
           <span className="text-muted-foreground">Status</span>
-          {getStatusBadge(investor.status)}
+          {getStatusBadge(investor)}
         </div>
         <div className="flex justify-between text-sm mt-2">
           <span className="text-muted-foreground">Invested</span>
@@ -128,7 +131,7 @@ function InvestorTableRow({ investor, onDelete, onToggleFreeze }: { investor: In
        <TableCell className="hidden lg:table-cell">
         <span className="font-mono">{investor.walletAddress.slice(0, 7)}...{investor.walletAddress.slice(-4)}</span>
       </TableCell>
-      <TableCell className="hidden sm:table-cell">{getStatusBadge(investor.status)}</TableCell>
+      <TableCell className="hidden sm:table-cell">{getStatusBadge(investor)}</TableCell>
       <TableCell className="text-right">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -174,14 +177,28 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
   const { toast } = useToast();
 
   useEffect(() => {
-    // Simulate fetching data
-    const storedInvestors = localStorage.getItem('investors');
-    if (storedInvestors) {
-      setInvestors(JSON.parse(storedInvestors));
+    let finalInvestors: Investor[];
+    const storedInvestorsRaw = localStorage.getItem('investors');
+    
+    if (storedInvestorsRaw) {
+      let storedInvestors: Investor[] = JSON.parse(storedInvestorsRaw);
+      // Check if the stored data has transactions, if not, it's old data.
+      if (storedInvestors.length > 0 && !storedInvestors[0].transactions) {
+        // Old data, let's merge it with new data structure
+        finalInvestors = investorsData.map(defaultInvestor => {
+          const stored = storedInvestors.find(s => s.id === defaultInvestor.id);
+          return stored ? { ...defaultInvestor, ...stored } : defaultInvestor;
+        });
+        localStorage.setItem('investors', JSON.stringify(finalInvestors));
+      } else {
+        finalInvestors = storedInvestors;
+      }
     } else {
-      setInvestors(investorsData);
+      finalInvestors = investorsData;
       localStorage.setItem('investors', JSON.stringify(investorsData));
     }
+    
+    setInvestors(finalInvestors);
     setLoading(false);
   }, []);
 
