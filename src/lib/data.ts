@@ -1,4 +1,5 @@
 
+import type { TokenDetails } from './types';
 
 export const volumeData = [
   {
@@ -198,7 +199,7 @@ export const cryptoData = [
   },
 ];
 
-export const exampleTokens = [
+export const exampleTokens: Omit<TokenDetails, 'tokenIcon' | 'destinationAddress' | 'whitepaper' | 'legalTokenizationDoc' | 'tokenIssuanceLegalDoc' | 'publicKey'>[] = [
   {
     id: 'example-1',
     tokenName: 'Digital Dollar',
@@ -206,7 +207,8 @@ export const exampleTokens = [
     status: 'active' as const,
     network: 'liquid',
     maxSupply: 100000000,
-    value: 1.00
+    decimals: 2,
+    isFreezable: true,
   },
   {
     id: 'example-2',
@@ -215,7 +217,8 @@ export const exampleTokens = [
     status: 'active' as const,
     network: 'spark',
     maxSupply: 21000000,
-    value: 75.50
+    decimals: 8,
+    isFreezable: false,
   },
   {
     id: 'example-3',
@@ -224,7 +227,8 @@ export const exampleTokens = [
     status: 'pending' as const,
     network: 'rgb',
     maxSupply: 100000,
-    value: 250.00
+    decimals: 0,
+    isFreezable: true,
   },
   {
     id: 'example-4',
@@ -233,13 +237,15 @@ export const exampleTokens = [
     status: 'active' as const,
     network: 'taproot',
     maxSupply: 50000000,
-    value: 12.75
+    decimals: 6,
+    isFreezable: true,
   },
 ];
 
-const sharedTxToken1 = { tokenName: 'Digital Dollar', tokenTicker: 'DUSD' };
-const sharedTxToken2 = { tokenName: 'Gold Token', tokenTicker: 'GLDT' };
-const sharedTxToken4 = { tokenName: 'Carbon Credit', tokenTicker: 'CRBN' };
+const txToken1 = exampleTokens.find(t => t.id === 'example-1')!;
+const txToken2 = exampleTokens.find(t => t.id === 'example-2')!;
+const txToken3 = exampleTokens.find(t => t.id === 'example-3')!;
+const txToken4 = exampleTokens.find(t => t.id === 'example-4')!;
 
 
 export const investorsData = [
@@ -257,9 +263,10 @@ export const investorsData = [
             { tokenId: 'example-2', tokenName: 'Gold Token', tokenTicker: 'GLDT', amount: 100, value: 75.50 },
         ],
         transactions: [
-            { id: 'tx-1-1', type: 'Buy' as const, token: sharedTxToken1, amount: 10000, price: 1.00, date: '2024-07-01' },
-            { id: 'tx-1-2', type: 'Buy' as const, token: sharedTxToken2, amount: 50, price: 70.20, date: '2024-07-05' },
-            { id: 'tx-1-3', type: 'Sell' as const, token: sharedTxToken1, amount: 2000, price: 1.01, date: '2024-07-15' },
+            { id: 'tx-1-1', type: 'Buy' as const, token: txToken1, amount: 10000, price: 1.00, date: '2024-07-01' },
+            { id: 'tx-1-2', type: 'Buy' as const, token: txToken2, amount: 50, price: 70.20, date: '2024-07-05' },
+            { id: 'tx-1-3', type: 'Sell' as const, token: txToken1, amount: 2000, price: 1.01, date: '2024-07-15' },
+            { id: 'tx-1-4', type: 'Buy' as const, token: txToken4, amount: 500, price: 12.50, date: '2024-07-18' },
         ]
     },
     {
@@ -269,14 +276,16 @@ export const investorsData = [
         status: 'pending' as const,
         walletAddress: 'spark1q...e5f6g7h8',
         joinedDate: '2024-06-15',
-        totalInvested: 15000,
+        totalInvested: 25000,
         isFrozen: false,
         holdings: [
              { tokenId: 'example-1', tokenName: 'Digital Dollar', tokenTicker: 'DUSD', amount: 15000, value: 1.00 },
+             { tokenId: 'example-3', tokenName: 'Real Estate Share', tokenTicker: 'REIT', amount: 40, value: 250.00 },
         ],
         transactions: [
-            { id: 'tx-2-1', type: 'Buy' as const, token: sharedTxToken1, amount: 15000, price: 1.00, date: '2024-07-20' },
-            { id: 'tx-2-2', type: 'Sell' as const, token: sharedTxToken1, amount: 5000, price: 1.00, date: '2024-07-25' },
+            { id: 'tx-2-1', type: 'Buy' as const, token: txToken1, amount: 15000, price: 1.00, date: '2024-07-20' },
+            { id: 'tx-2-2', type: 'Sell' as const, token: txToken1, amount: 5000, price: 1.00, date: '2024-07-25' },
+            { id: 'tx-2-3', type: 'Buy' as const, token: txToken3, amount: 40, price: 250.00, date: '2024-07-28' },
         ]
     },
     {
@@ -293,9 +302,10 @@ export const investorsData = [
             { tokenId: 'example-4', tokenName: 'Carbon Credit', tokenTicker: 'CRBN', amount: 2000, value: 12.75 },
         ],
         transactions: [
-            { id: 'tx-3-1', type: 'Buy' as const, token: sharedTxToken4, amount: 1500, price: 10.50, date: '2024-06-20' },
-            { id: 'tx-3-2', type: 'Sell' as const, token: sharedTxToken4, amount: 300, price: 12.00, date: '2024-07-10' },
-            { id: 'tx-3-3', type: 'Buy' as const, token: sharedTxToken1, amount: 20000, price: 1.00, date: '2024-07-18' },
+            { id: 'tx-3-1', type: 'Buy' as const, token: txToken4, amount: 1500, price: 10.50, date: '2024-06-20' },
+            { id: 'tx-3-2', type: 'Sell' as const, token: txToken4, amount: 300, price: 12.00, date: '2024-07-10' },
+            { id: 'tx-3-3', type: 'Buy' as const, token: txToken1, amount: 20000, price: 1.00, date: '2024-07-18' },
+            { id: 'tx-3-4', type: 'Buy' as const, token: txToken2, amount: 100, price: 72.00, date: '2024-07-21' },
         ]
     },
     {
@@ -311,8 +321,9 @@ export const investorsData = [
              { tokenId: 'example-2', tokenName: 'Gold Token', tokenTicker: 'GLDT', amount: 50, value: 75.50 },
         ],
         transactions: [
-            { id: 'tx-4-1', type: 'Buy' as const, token: sharedTxToken2, amount: 100, price: 65.00, date: '2024-05-01' },
-            { id: 'tx-4-2', type: 'Sell' as const, token: sharedTxToken2, amount: 25, price: 78.00, date: '2024-07-22' },
+            { id: 'tx-4-1', type: 'Buy' as const, token: txToken2, amount: 100, price: 65.00, date: '2024-05-01' },
+            { id: 'tx-4-2', type: 'Sell' as const, token: txToken2, amount: 25, price: 78.00, date: '2024-07-22' },
+            { id: 'tx-4-3', type: 'Buy' as const, token: txToken1, amount: 1000, price: 1.00, date: '2024-07-25' },
         ]
     }
 ];

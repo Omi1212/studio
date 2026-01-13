@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/sidebar';
 import SidebarNav from '@/components/dashboard/sidebar-nav';
 import HeaderDynamic from '@/components/dashboard/header-dynamic';
-import { investorsData } from '@/lib/data';
+import { investorsData, exampleTokens } from '@/lib/data';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Edit, Trash2, Snowflake, ArrowUpRight, ArrowDownLeft } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -32,6 +32,7 @@ import Link from 'next/link';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import TokenIcon from '@/components/ui/token-icon';
 import { cn } from '@/lib/utils';
+import type { TokenDetails } from '@/lib/types';
 
 type Investor = typeof investorsData[0];
 
@@ -61,6 +62,8 @@ export default function InvestorDetailsPage() {
   const { toast } = useToast();
   const [investor, setInvestor] = useState<Investor | null>(null);
   const [loading, setLoading] = useState(true);
+  const [selectedToken, setSelectedToken] = useState<TokenDetails | null>(null);
+  const [filteredTransactions, setFilteredTransactions] = useState<Investor['transactions']>([]);
 
   useEffect(() => {
     const { id } = params;
@@ -71,7 +74,39 @@ export default function InvestorDetailsPage() {
       setInvestor(foundInvestor);
     }
     setLoading(false);
+
+    const handleTokenChange = () => {
+        const storedTokenId = localStorage.getItem('selectedTokenId');
+        if (storedTokenId) {
+            const storedTokens: TokenDetails[] = JSON.parse(localStorage.getItem('createdTokens') || '[]');
+            const allTokens: TokenDetails[] = [...exampleTokens, ...storedTokens];
+            const foundToken = allTokens.find(t => t.id === storedTokenId);
+            setSelectedToken(foundToken || null);
+        } else {
+            setSelectedToken(null);
+        }
+    };
+
+    handleTokenChange();
+    window.addEventListener('tokenChanged', handleTokenChange);
+
+    return () => {
+        window.removeEventListener('tokenChanged', handleTokenChange);
+    };
+
   }, [params]);
+
+  useEffect(() => {
+    if (investor && selectedToken) {
+      const filtered = investor.transactions?.filter(tx => tx.token.id === selectedToken.id) || [];
+      setFilteredTransactions(filtered);
+    } else if (investor) {
+      setFilteredTransactions(investor.transactions || []);
+    } else {
+      setFilteredTransactions([]);
+    }
+  }, [investor, selectedToken]);
+
 
   const handleToggleFreeze = () => {
     if (!investor) return;
@@ -182,10 +217,12 @@ export default function InvestorDetailsPage() {
 
             <Card>
                 <CardHeader>
-                    <CardTitle>Transaction History</CardTitle>
+                    <CardTitle>
+                        Transaction History {selectedToken && `for ${selectedToken.tokenTicker}`}
+                    </CardTitle>
                 </CardHeader>
                 <CardContent>
-                    {investor.transactions && investor.transactions.length > 0 ? (
+                    {filteredTransactions.length > 0 ? (
                     <Table>
                         <TableHeader>
                             <TableRow>
@@ -197,7 +234,7 @@ export default function InvestorDetailsPage() {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {investor.transactions.map(tx => (
+                            {filteredTransactions.map(tx => (
                                 <TableRow key={tx.id}>
                                     <TableCell>
                                         <div className="flex items-center gap-3">
@@ -233,7 +270,7 @@ export default function InvestorDetailsPage() {
                     </Table>
                     ) : (
                          <div className="text-center text-muted-foreground py-8">
-                            This investor has no transaction history yet.
+                            This investor has no transaction history for the selected token.
                         </div>
                     )}
                 </CardContent>
