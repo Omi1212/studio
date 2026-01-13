@@ -208,3 +208,42 @@ export const exampleTokens = [
     maxSupply: 100000000,
   },
 ];
+
+export const investorsData = [
+    {
+        id: 'inv-001',
+        name: 'Alice Johnson',
+        email: 'alice.j@example.com',
+        status: 'whitelisted' as const,
+        walletAddress: 'spark1q...a4b3c2d1',
+        joinedDate: '2024-05-10',
+        totalInvested: 50000,
+    },
+    {
+        id: 'inv-002',
+        name: 'Bob Williams',
+        email: 'bob.w@example.com',
+        status: 'pending' as const,
+        walletAddress: 'spark1q...e5f6g7h8',
+        joinedDate: '2024-06-15',
+        totalInvested: 0,
+    },
+    {
+        id: 'inv-003',
+        name: 'Charlie Brown',
+        email: 'charlie.b@example.com',
+        status: 'whitelisted' as const,
+        walletAddress: 'spark1q...i9j0k1l2',
+        joinedDate: '2024-03-22',
+        totalInvested: 125000,
+    },
+    {
+        id: 'inv-004',
+        name: 'Diana Miller',
+        email: 'diana.m@example.com',
+        status: 'restricted' as const,
+        walletAddress: 'spark1q...m3n4o5p6',
+        joinedDate: '2024-02-01',
+        totalInvested: 10000,
+    }
+];
