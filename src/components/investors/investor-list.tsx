@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Avatar, AvatarFallback } from '../ui/avatar';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
-import { MoreVertical, LayoutGrid, List, UserPlus, Edit, Trash2, Snowflake, Search, Plus } from 'lucide-react';
+import { MoreVertical, LayoutGrid, List, UserPlus, Trash2, Snowflake, Search, Plus } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
 import Link from 'next/link';
@@ -34,16 +34,8 @@ function getStatusBadge(investor: Investor) {
   if (investor.isFrozen) {
     return <Badge variant="secondary" className="bg-sky-600/20 text-sky-400 border-sky-400/50">Frozen</Badge>;
   }
-  switch (investor.status) {
-    case 'accepted':
-      return <Badge variant="outline" className="text-green-400 border-green-400">Whitelisted</Badge>;
-    case 'pending':
-      return <Badge variant="outline" className="text-yellow-400 border-yellow-400">Pending</Badge>;
-    case 'rejected':
-      return <Badge variant="destructive">Rejected</Badge>;
-    default:
-      return <Badge variant="secondary">Unknown</Badge>;
-  }
+  // In this view, status will always be 'accepted', so we show 'Whitelisted'
+  return <Badge variant="outline" className="text-green-400 border-green-400">Whitelisted</Badge>;
 }
 
 function InvestorCard({ investor, onDelete, onToggleFreeze }: { investor: Investor, onDelete: (id: string) => void, onToggleFreeze: (id: string) => void }) {
@@ -60,7 +52,7 @@ function InvestorCard({ investor, onDelete, onToggleFreeze }: { investor: Invest
               <CardDescription>{investor.email}</CardDescription>
             </div>
           </div>
-          <DropdownMenu>
+           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="h-8 w-8">
                 <MoreVertical className="h-4 w-4" />
@@ -186,24 +178,34 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
     let finalInvestors: Investor[];
     const storedInvestorsRaw = localStorage.getItem('investors');
     
+    // Always start with the full data from data.ts to ensure transactions are included
+    let allData = investorsData;
+
     if (storedInvestorsRaw) {
-      let storedInvestors: Investor[] = JSON.parse(storedInvestorsRaw);
-      const investorDataWithTransactions = investorsData.map(defaultInvestor => {
-        const stored = storedInvestors.find(s => s.id === defaultInvestor.id);
-        return stored ? { ...defaultInvestor, ...stored } : defaultInvestor;
+      const storedInvestors: Investor[] = JSON.parse(storedInvestorsRaw);
+      // Create a map of stored investors for quick lookup
+      const storedMap = new Map(storedInvestors.map(item => [item.id, item]));
+      // Merge stored data into the full data, preserving transactions from investorsData
+      allData = investorsData.map(defaultInvestor => {
+        const stored = storedMap.get(defaultInvestor.id);
+        if (stored) {
+          // Merge stored changes but keep transactions from original data
+          return { ...defaultInvestor, ...stored };
+        }
+        return defaultInvestor;
       });
+       // Add any new investors from storage that aren't in the original data.ts
       storedInvestors.forEach(stored => {
-        if (!investorDataWithTransactions.find(u => u.id === stored.id)) {
-          investorDataWithTransactions.push(stored);
+        if (!allData.find(d => d.id === stored.id)) {
+          allData.push(stored);
         }
       });
-      finalInvestors = investorDataWithTransactions;
-      localStorage.setItem('investors', JSON.stringify(finalInvestors));
-    } else {
-      finalInvestors = investorsData;
-      localStorage.setItem('investors', JSON.stringify(investorsData));
     }
     
+    // This is the key change: only show whitelisted ('accepted') investors
+    finalInvestors = allData.filter(inv => inv.status === 'accepted');
+
+    localStorage.setItem('investors', JSON.stringify(allData));
     setInvestors(finalInvestors);
     setLoading(false);
   }, []);
@@ -214,9 +216,7 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
     if (statusFilter !== 'all') {
       filtered = filtered.filter(inv => {
         if (statusFilter === 'frozen') return inv.isFrozen;
-        if (statusFilter === 'whitelisted') return inv.status === 'accepted' && !inv.isFrozen;
-        if (statusFilter === 'pending') return inv.status === 'pending' && !inv.isFrozen;
-        if (statusFilter === 'rejected') return inv.status === 'rejected' && !inv.isFrozen;
+        if (statusFilter === 'whitelisted') return !inv.isFrozen; // 'whitelisted' means accepted and not frozen
         return true;
       });
     }
@@ -234,22 +234,33 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
   }, [investors, searchQuery, statusFilter]);
 
   const handleDelete = (id: string) => {
-    const updatedInvestors = investors.filter(inv => inv.id !== id);
-    setInvestors(updatedInvestors);
-    localStorage.setItem('investors', JSON.stringify(updatedInvestors));
+    // This should remove the investor from the main list in localStorage
+    const allInvestors: Investor[] = JSON.parse(localStorage.getItem('investors') || '[]');
+    const updatedAllInvestors = allInvestors.filter(inv => inv.id !== id);
+    localStorage.setItem('investors', JSON.stringify(updatedAllInvestors));
+    
+    // Also update the local state for the UI
+    const updatedUIInvestors = investors.filter(inv => inv.id !== id);
+    setInvestors(updatedUIInvestors);
   };
   
   const handleToggleFreeze = (id: string) => {
-    const updatedInvestors = investors.map(inv => {
+    // Update the main list in localStorage
+    const allInvestors: Investor[] = JSON.parse(localStorage.getItem('investors') || '[]');
+    let targetInvestor: Investor | undefined;
+    const updatedAllInvestors = allInvestors.map(inv => {
       if (inv.id === id) {
-        return { ...inv, isFrozen: !inv.isFrozen };
+        targetInvestor = { ...inv, isFrozen: !inv.isFrozen };
+        return targetInvestor;
       }
       return inv;
     });
-    setInvestors(updatedInvestors);
-    localStorage.setItem('investors', JSON.stringify(updatedInvestors));
+    localStorage.setItem('investors', JSON.stringify(updatedAllInvestors));
+
+    // Update the local UI state
+    const updatedUIInvestors = investors.map(inv => inv.id === id ? { ...inv, isFrozen: !inv.isFrozen } : inv);
+    setInvestors(updatedUIInvestors);
     
-    const targetInvestor = updatedInvestors.find(inv => inv.id === id);
     if(targetInvestor) {
         toast({
             title: `Address ${targetInvestor.isFrozen ? 'Frozen' : 'Unfrozen'}`,
@@ -281,8 +292,8 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
       </div>
 
       <div className="space-y-4">
-        <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
-            <h2 className="text-xl font-semibold">Your Investors</h2>
+        <div className="flex justify-between items-center">
+          <h2 className="text-xl font-semibold">Your Investors</h2>
         </div>
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
             <div className="relative w-full sm:w-auto flex-grow sm:flex-grow-0">
@@ -301,8 +312,6 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
                 <SelectContent>
                     <SelectItem value="all">All Statuses</SelectItem>
                     <SelectItem value="whitelisted">Whitelisted</SelectItem>
-                    <SelectItem value="pending">Pending</SelectItem>
-                    <SelectItem value="rejected">Rejected</SelectItem>
                     <SelectItem value="frozen">Frozen</SelectItem>
                 </SelectContent>
             </Select>
@@ -335,13 +344,8 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
             <UserPlus className="h-16 w-16 text-muted-foreground mb-4" />
             <h2 className="text-xl font-semibold mb-2">No investors found</h2>
             <p className="text-muted-foreground mb-4">
-                {searchQuery || statusFilter !== 'all' ? "Try adjusting your search or filter." : "Get started by adding your first investor."}
+                {searchQuery || statusFilter !== 'all' ? "Try adjusting your search or filter." : "You have no whitelisted investors yet."}
             </p>
-            {!(searchQuery || statusFilter !== 'all') && (
-                <Button asChild>
-                    <Link href="/investors/new">Add Investor</Link>
-                </Button>
-            )}
         </div>
       ) : view === 'card' ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
