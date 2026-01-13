@@ -249,7 +249,7 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
     const targetInvestor = updatedInvestors.find(inv => inv.id === id);
     if(targetInvestor) {
         toast({
-            title: `Address ${targetInvestor.isFrozen ? 'Frozen' : 'Unfrozen'}`,
+            title: `Address ${targetInvestor.isFrozen ? 'Unfrozen' : 'Unfrozen'}`,
             description: `The wallet address for "${targetInvestor.name}" has been ${targetInvestor.isFrozen ? 'frozen' : 'unfrozen'}.`,
         });
     }
@@ -280,26 +280,6 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
       <div className="space-y-4">
         <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
             <h2 className="text-xl font-semibold">Your Investors</h2>
-            <div className="hidden sm:flex items-center gap-1 bg-muted p-1 rounded-lg">
-                <Button
-                    variant={view === 'card' ? 'secondary' : 'ghost'}
-                    size="icon"
-                    className="h-8 w-8"
-                    onClick={() => setView('card')}
-                    aria-label="Card View"
-                >
-                    <LayoutGrid className="h-4 w-4" />
-                </Button>
-                <Button
-                    variant={view === 'table' ? 'secondary' : 'ghost'}
-                    size="icon"
-                    className="h-8 w-8"
-                    onClick={() => setView('table')}
-                    aria-label="Table View"
-                >
-                    <List className="h-4 w-4" />
-                </Button>
-            </div>
         </div>
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
             <div className="relative w-full sm:w-auto flex-grow sm:flex-grow-0">
@@ -322,6 +302,26 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
                     <SelectItem value="frozen">Frozen</SelectItem>
                 </SelectContent>
             </Select>
+            <div className="hidden sm:flex items-center gap-1 bg-muted p-1 rounded-lg ml-auto">
+                <Button
+                    variant={view === 'card' ? 'secondary' : 'ghost'}
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={() => setView('card')}
+                    aria-label="Card View"
+                >
+                    <LayoutGrid className="h-4 w-4" />
+                </Button>
+                <Button
+                    variant={view === 'table' ? 'secondary' : 'ghost'}
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={() => setView('table')}
+                    aria-label="Table View"
+                >
+                    <List className="h-4 w-4" />
+                </Button>
+            </div>
         </div>
       </div>
 
