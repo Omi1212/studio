@@ -182,13 +182,24 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
     
     if (storedInvestorsRaw) {
       let storedInvestors: Investor[] = JSON.parse(storedInvestorsRaw);
-      // Check if the stored data has transactions, if not, it's old data.
-      if (storedInvestors.length > 0 && !storedInvestors[0].transactions) {
-        // Old data, let's merge it with new data structure
-        finalInvestors = investorsData.map(defaultInvestor => {
+      // Check if the stored data has transactions, if not, it's old data or needs updating.
+      if (storedInvestors.length > 0 && (!storedInvestors[0].transactions || storedInvestors[0].transactions.length === 0)) {
+        // Old data, let's merge it with new data structure from investorsData
+        const updatedFromDefaults = investorsData.map(defaultInvestor => {
           const stored = storedInvestors.find(s => s.id === defaultInvestor.id);
-          return stored ? { ...defaultInvestor, ...stored } : defaultInvestor;
+          // If a stored version exists, merge it, otherwise use the default.
+          // The defaultInvestor now contains the transactions.
+          return stored ? { ...defaultInvestor, ...stored, transactions: defaultInvestor.transactions } : defaultInvestor;
         });
+
+        // Also add any new investors from localStorage that are not in the default data
+        storedInvestors.forEach(stored => {
+          if (!updatedFromDefaults.find(u => u.id === stored.id)) {
+            updatedFromDefaults.push(stored);
+          }
+        });
+        
+        finalInvestors = updatedFromDefaults;
         localStorage.setItem('investors', JSON.stringify(finalInvestors));
       } else {
         finalInvestors = storedInvestors;
