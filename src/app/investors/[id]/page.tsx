@@ -113,12 +113,11 @@ export default function InvestorDetailsPage() {
   }, [params]);
 
   useEffect(() => {
-    if (investor && selectedToken) {
-      const filtered = investor.transactions?.filter(tx => tx.token.id === selectedToken.id) || [];
+    if (selectedToken && investor?.transactions) {
+      const filtered = investor.transactions.filter(tx => tx.token.id === selectedToken.id);
       setFilteredTransactions(filtered);
-    } else if (investor) {
-      // If no token is selected, show all transactions for that investor.
-      setFilteredTransactions(investor.transactions || []);
+    } else if (investor?.transactions) {
+      setFilteredTransactions(investor.transactions);
     } else {
       setFilteredTransactions([]);
     }
