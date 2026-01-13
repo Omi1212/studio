@@ -71,7 +71,7 @@ function DashboardRenderer() {
         return <div className="flex-1 p-4 sm:p-6 lg:p-8">Loading...</div>; // Or a skeleton loader
     }
 
-    if ((role === 'admin' || role === 'issuer') && selectedToken) {
+    if ((role === 'agent' || role === 'issuer') && selectedToken) {
         return <TokenDashboard token={selectedToken} />;
     }
 

@@ -48,7 +48,7 @@ const allMenuItems = [
   { href: '/transactions', label: 'Transactions', icon: ArrowRightLeft },
   { href: '/issuer-management', label: 'Issuer Management', icon: Building, roles: ['superadmin'] },
   { href: '/user-management', label: 'User Management', icon: Users, roles: ['superadmin'] },
-  { href: '/users', label: 'Users', icon: Users, roles: ['admin', 'investor', 'issuer'] },
+  { href: '/users', label: 'Users', icon: Users, roles: ['agent', 'investor', 'issuer'] },
 ];
 
 const helpMenuItems = [
@@ -63,7 +63,7 @@ const superAdminMenu = [
   { href: '/user-management', label: 'User Management', icon: Users },
 ];
 
-const adminMenu = [
+const agentMenu = [
     { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { 
         href: '/workspace', 
@@ -155,8 +155,8 @@ export default function SidebarNav() {
     menuItems = investorMenu;
   } else if (userRole === 'issuer') {
     menuItems = issuerMenu;
-  } else if (userRole === 'admin') {
-    menuItems = adminMenu;
+  } else if (userRole === 'agent') {
+    menuItems = agentMenu;
   } else {
     menuItems = allMenuItems.filter(
       item => !item.roles || item.roles.includes(userRole || '')

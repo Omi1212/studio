@@ -17,10 +17,10 @@ import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Loader2, Triangle } from 'lucide-react';
 
-type Role = 'admin' | 'superadmin' | 'investor' | 'issuer';
+type Role = 'agent' | 'superadmin' | 'investor' | 'issuer';
 
 const roleEmails: Record<Role, string> = {
-  admin: 'admin@gmail.com',
+  agent: 'agent@gmail.com',
   superadmin: 'superadmin@gmail.com',
   investor: 'investor@gmail.com',
   issuer: 'issuer@gmail.com',
@@ -112,8 +112,8 @@ export default function LoginForm() {
           <Separator className="flex-1" />
         </div>
         <div className="grid grid-cols-2 gap-4 w-full">
-          <Button variant="outline" onClick={() => handleRoleSelect('admin')}>
-            Admin
+          <Button variant="outline" onClick={() => handleRoleSelect('agent')}>
+            Agent
           </Button>
           <Button variant="outline" onClick={() => handleRoleSelect('superadmin')}>
             Super Admin
