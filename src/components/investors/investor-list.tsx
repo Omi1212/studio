@@ -75,6 +75,7 @@ function InvestorCard({ investor, onDelete, onToggleFreeze }: { investor: Invest
                 </DropdownMenuItem>
               </AlertDialogTrigger>
             </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </CardHeader>
       <CardContent>
@@ -371,5 +372,3 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
     </div>
   )
 }
-
-    
