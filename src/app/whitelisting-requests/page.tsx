@@ -13,7 +13,7 @@ import RequestList from '@/components/whitelisting-requests/request-list';
 import type { ViewMode } from '@/lib/types';
 
 export default function WhitelistingRequestsPage() {
-  const [viewMode, setViewMode] = useState<ViewMode>('card');
+  const [viewMode, setViewMode] = useState<ViewMode>('table');
 
   return (
     <SidebarProvider>
