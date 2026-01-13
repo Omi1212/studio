@@ -337,5 +337,81 @@ export const investorsData = [
         isFrozen: false,
         holdings: [],
         transactions: []
+    },
+    {
+        id: 'inv-006',
+        name: 'Fiona Gallagher',
+        email: 'fiona.g@example.com',
+        status: 'pending' as const,
+        walletAddress: 'spark1q...u1v2w3x4',
+        joinedDate: '2024-07-21',
+        totalInvested: 0,
+        isFrozen: false,
+        holdings: [],
+        transactions: []
+    },
+    {
+        id: 'inv-007',
+        name: 'George Mason',
+        email: 'george.m@example.com',
+        status: 'pending' as const,
+        walletAddress: 'spark1q...y5z6a7b8',
+        joinedDate: '2024-07-22',
+        totalInvested: 0,
+        isFrozen: false,
+        holdings: [],
+        transactions: []
+    },
+    {
+        id: 'inv-008',
+        name: 'Hannah Abbott',
+        email: 'hannah.a@example.com',
+        status: 'pending' as const,
+        walletAddress: 'spark1q...c9d0e1f2',
+        joinedDate: '2024-07-23',
+        totalInvested: 0,
+        isFrozen: false,
+        holdings: [],
+        transactions: []
+    },
+    {
+        id: 'inv-009',
+        name: 'Ian Wright',
+        email: 'ian.w@example.com',
+        status: 'accepted' as const,
+        walletAddress: 'spark1q...g3h4i5j6',
+        joinedDate: '2024-01-15',
+        totalInvested: 75000,
+        isFrozen: false,
+        holdings: [],
+        transactions: [
+            { id: 'tx-9-1', type: 'Buy' as const, token: txToken1, amount: 75000, price: 1.00, date: '2024-01-20' },
+        ]
+    },
+    {
+        id: 'inv-010',
+        name: 'Jane Smith',
+        email: 'jane.s@example.com',
+        status: 'accepted' as const,
+        walletAddress: 'spark1q...k7l8m9n0',
+        joinedDate: '2024-04-05',
+        totalInvested: 200000,
+        isFrozen: false,
+        holdings: [],
+        transactions: [
+             { id: 'tx-10-1', type: 'Buy' as const, token: txToken2, amount: 1000, price: 70.00, date: '2024-04-10' },
+        ]
+    },
+    {
+        id: 'inv-011',
+        name: 'Kevin McCallister',
+        email: 'kevin.m@example.com',
+        status: 'rejected' as const,
+        walletAddress: 'spark1q...o1p2q3r4',
+        joinedDate: '2024-07-24',
+        totalInvested: 0,
+        isFrozen: false,
+        holdings: [],
+        transactions: []
     }
 ];
