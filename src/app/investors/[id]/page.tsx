@@ -12,7 +12,7 @@ import SidebarNav from '@/components/dashboard/sidebar-nav';
 import HeaderDynamic from '@/components/dashboard/header-dynamic';
 import { investorsData } from '@/lib/data';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Edit, Trash2, Snowflake } from 'lucide-react';
+import { ArrowLeft, Edit, Trash2, Snowflake, ArrowUpRight, ArrowDownLeft } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -31,6 +31,7 @@ import {
 import Link from 'next/link';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import TokenIcon from '@/components/ui/token-icon';
+import { cn } from '@/lib/utils';
 
 type Investor = typeof investorsData[0];
 
@@ -183,39 +184,58 @@ export default function InvestorDetailsPage() {
 
             <Card>
                 <CardHeader>
-                    <CardTitle>Portfolio</CardTitle>
+                    <CardTitle>Transaction History</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    {investor.holdings && investor.holdings.length > 0 ? (
+                    {investor.transactions && investor.transactions.length > 0 ? (
                     <Table>
                         <TableHeader>
                             <TableRow>
+                                <TableHead>Transaction</TableHead>
                                 <TableHead>Token</TableHead>
-                                <TableHead className="text-right">Balance</TableHead>
-                                <TableHead className="text-right">Value</TableHead>
+                                <TableHead className="hidden sm:table-cell">Date</TableHead>
+                                <TableHead className="text-right">Amount</TableHead>
+                                <TableHead className="text-right hidden md:table-cell">Total</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {investor.holdings.map(holding => (
-                                <TableRow key={holding.tokenId}>
+                            {investor.transactions.map(tx => (
+                                <TableRow key={tx.id}>
                                     <TableCell>
                                         <div className="flex items-center gap-3">
-                                            <TokenIcon token={{...holding}} className="h-8 w-8" />
-                                            <div>
-                                                <p className="font-medium">{holding.tokenName}</p>
-                                                <p className="text-sm text-primary">{holding.tokenTicker}</p>
+                                            <div
+                                                className={cn(
+                                                'flex-center h-8 w-8 rounded-full bg-muted shrink-0',
+                                                tx.type === 'Buy' ? 'text-green-500' : 'text-red-500'
+                                                )}
+                                            >
+                                                {tx.type === 'Buy' ? <ArrowDownLeft className="h-4 w-4" /> : <ArrowUpRight className="h-4 w-4" />}
                                             </div>
+                                            <span className="font-medium">{tx.type}</span>
                                         </div>
                                     </TableCell>
-                                    <TableCell className="text-right font-mono">{holding.amount.toLocaleString()}</TableCell>
-                                    <TableCell className="text-right font-mono">${(holding.amount * holding.value).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
+                                     <TableCell>
+                                        <div className="flex items-center gap-2">
+                                            <TokenIcon token={tx.token} className="h-6 w-6" />
+                                            <span className="font-medium text-primary">{tx.token.tokenTicker}</span>
+                                        </div>
+                                    </TableCell>
+                                    <TableCell className="hidden sm:table-cell text-muted-foreground">
+                                        {new Date(tx.date).toLocaleDateString()}
+                                    </TableCell>
+                                    <TableCell className="text-right font-mono">
+                                        {tx.amount.toLocaleString()}
+                                    </TableCell>
+                                    <TableCell className={cn("text-right font-mono hidden md:table-cell", tx.type === 'Buy' ? 'text-green-500' : 'text-red-500')}>
+                                       {tx.type === 'Buy' ? '+' : '-'} ${(tx.amount * tx.price).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                    </TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>
                     </Table>
                     ) : (
                          <div className="text-center text-muted-foreground py-8">
-                            This investor does not hold any tokens yet.
+                            This investor has no transaction history yet.
                         </div>
                     )}
                 </CardContent>

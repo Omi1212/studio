@@ -237,6 +237,11 @@ export const exampleTokens = [
   },
 ];
 
+const sharedTxToken1 = { tokenId: 'example-1', tokenName: 'Digital Dollar', tokenTicker: 'DUSD', value: 1.00 };
+const sharedTxToken2 = { tokenId: 'example-2', tokenName: 'Gold Token', tokenTicker: 'GLDT', value: 75.50 };
+const sharedTxToken4 = { tokenId: 'example-4', tokenName: 'Carbon Credit', tokenTicker: 'CRBN', value: 12.75 };
+
+
 export const investorsData = [
     {
         id: 'inv-001',
@@ -250,6 +255,11 @@ export const investorsData = [
         holdings: [
             { tokenId: 'example-1', tokenName: 'Digital Dollar', tokenTicker: 'DUSD', amount: 25000, value: 1.00 },
             { tokenId: 'example-2', tokenName: 'Gold Token', tokenTicker: 'GLDT', amount: 100, value: 75.50 },
+        ],
+        transactions: [
+            { id: 'tx-1-1', type: 'Buy' as const, token: sharedTxToken1, amount: 10000, price: 1.00, date: '2024-07-01' },
+            { id: 'tx-1-2', type: 'Buy' as const, token: sharedTxToken2, amount: 50, price: 70.20, date: '2024-07-05' },
+            { id: 'tx-1-3', type: 'Sell' as const, token: sharedTxToken1, amount: 2000, price: 1.01, date: '2024-07-15' },
         ]
     },
     {
@@ -261,7 +271,8 @@ export const investorsData = [
         joinedDate: '2024-06-15',
         totalInvested: 0,
         isFrozen: false,
-        holdings: []
+        holdings: [],
+        transactions: []
     },
     {
         id: 'inv-003',
@@ -275,6 +286,10 @@ export const investorsData = [
         holdings: [
             { tokenId: 'example-1', tokenName: 'Digital Dollar', tokenTicker: 'DUSD', amount: 50000, value: 1.00 },
             { tokenId: 'example-4', tokenName: 'Carbon Credit', tokenTicker: 'CRBN', amount: 2000, value: 12.75 },
+        ],
+        transactions: [
+            { id: 'tx-3-1', type: 'Buy' as const, token: sharedTxToken4, amount: 1500, price: 10.50, date: '2024-06-20' },
+            { id: 'tx-3-2', type: 'Sell' as const, token: sharedTxToken4, amount: 300, price: 12.00, date: '2024-07-10' },
         ]
     },
     {
@@ -288,6 +303,9 @@ export const investorsData = [
         isFrozen: true,
         holdings: [
              { tokenId: 'example-2', tokenName: 'Gold Token', tokenTicker: 'GLDT', amount: 50, value: 75.50 },
+        ],
+        transactions: [
+            { id: 'tx-4-1', type: 'Buy' as const, token: sharedTxToken2, amount: 100, price: 65.00, date: '2024-05-01' },
         ]
     }
 ];
