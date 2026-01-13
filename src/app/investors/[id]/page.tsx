@@ -135,11 +135,6 @@ export default function InvestorDetailsPage() {
                     <Button variant={investor.isFrozen ? "secondary" : "outline"} onClick={handleToggleFreeze}>
                         <Snowflake className="mr-2 h-4 w-4" /> {investor.isFrozen ? 'Unfreeze' : 'Freeze'} Address
                     </Button>
-                    <Button variant="outline" asChild>
-                        <Link href={`/investors/${investor.id}/edit`}>
-                            <Edit className="mr-2 h-4 w-4" /> Edit
-                        </Link>
-                    </Button>
                     <AlertDialog>
                         <AlertDialogTrigger asChild>
                             <Button variant="destructive" disabled={!investor.isFrozen}>

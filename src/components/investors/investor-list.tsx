@@ -65,11 +65,6 @@ function InvestorCard({ investor, onDelete, onToggleFreeze }: { investor: Invest
               <DropdownMenuItem onSelect={() => onToggleFreeze(investor.id)}>
                 <Snowflake className="mr-2 h-4 w-4" /> {investor.isFrozen ? 'Unfreeze' : 'Freeze'} Address
               </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link href={`/investors/${investor.id}/edit`}>
-                  <Edit className="mr-2 h-4 w-4" /> Edit
-                </Link>
-              </DropdownMenuItem>
                <AlertDialogTrigger asChild>
                 <DropdownMenuItem onSelect={(e) => e.preventDefault()} disabled={!investor.isFrozen}>
                   <Trash2 className="mr-2 h-4 w-4 text-red-500" />
@@ -158,9 +153,6 @@ function InvestorTableRow({ investor, onDelete, onToggleFreeze }: { investor: In
             </DropdownMenuItem>
              <DropdownMenuItem onSelect={() => onToggleFreeze(investor.id)}>
               {investor.isFrozen ? 'Unfreeze' : 'Freeze'} Address
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <Link href={`/investors/${investor.id}/edit`}>Edit</Link>
             </DropdownMenuItem>
              <AlertDialogTrigger asChild>
               <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-red-500 focus:text-red-500" disabled={!investor.isFrozen}>
