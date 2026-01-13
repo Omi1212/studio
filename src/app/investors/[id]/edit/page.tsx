@@ -48,7 +48,7 @@ export default function EditInvestorPage() {
       ...investor,
       name: formData.get('name') as string,
       email: formData.get('email') as string,
-      status: formData.get('status') as 'whitelisted' | 'pending' | 'restricted',
+      status: formData.get('status') as 'whitelisted' | 'pending',
       walletAddress: formData.get('walletAddress') as string,
     };
     
@@ -112,7 +112,6 @@ export default function EditInvestorPage() {
                                 <SelectContent>
                                     <SelectItem value="pending">Pending</SelectItem>
                                     <SelectItem value="whitelisted">Whitelisted</SelectItem>
-                                    <SelectItem value="restricted">Restricted</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>

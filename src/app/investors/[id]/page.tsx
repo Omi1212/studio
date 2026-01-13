@@ -41,8 +41,6 @@ function getStatusBadge(status: Investor['status']) {
       return <Badge variant="outline" className="text-green-400 border-green-400">Whitelisted</Badge>;
     case 'pending':
       return <Badge variant="outline" className="text-yellow-400 border-yellow-400">Pending</Badge>;
-    case 'restricted':
-      return <Badge variant="destructive">Restricted</Badge>;
     default:
       return <Badge variant="secondary">Unknown</Badge>;
   }

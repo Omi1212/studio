@@ -28,7 +28,7 @@ export default function NewInvestorPage() {
       id: `inv-${Math.random().toString(36).substring(2, 9)}`,
       name: formData.get('name') as string,
       email: formData.get('email') as string,
-      status: formData.get('status') as 'whitelisted' | 'pending' | 'restricted',
+      status: formData.get('status') as 'whitelisted' | 'pending',
       walletAddress: formData.get('walletAddress') as string,
       joinedDate: new Date().toISOString().split('T')[0],
       totalInvested: 0,
@@ -83,7 +83,6 @@ export default function NewInvestorPage() {
                                 <SelectContent>
                                     <SelectItem value="pending">Pending</SelectItem>
                                     <SelectItem value="whitelisted">Whitelisted</SelectItem>
-                                    <SelectItem value="restricted">Restricted</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>

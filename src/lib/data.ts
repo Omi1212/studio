@@ -296,7 +296,7 @@ export const investorsData = [
         id: 'inv-004',
         name: 'Diana Miller',
         email: 'diana.m@example.com',
-        status: 'restricted' as const,
+        status: 'whitelisted' as const,
         walletAddress: 'spark1q...m3n4o5p6',
         joinedDate: '2024-02-01',
         totalInvested: 10000,
