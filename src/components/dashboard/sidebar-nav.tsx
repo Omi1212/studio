@@ -225,7 +225,7 @@ export default function SidebarNav() {
         <SidebarMenu>
           {menuItems.map((item) => (
             item.subItems ? (
-                 <Collapsible key={item.href} asChild>
+                 <Collapsible key={item.href} asChild defaultOpen={true}>
                     <SidebarMenuItem>
                         <div className="relative">
                             <SidebarMenuButton
