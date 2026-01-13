@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Avatar, AvatarFallback } from '../ui/avatar';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
-import { MoreVertical, LayoutGrid, List, UserPlus, Edit, Trash2 } from 'lucide-react';
+import { MoreVertical, LayoutGrid, List, UserPlus, Edit, Trash2, Snowflake } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
 import Link from 'next/link';
@@ -23,6 +23,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import { useToast } from '@/hooks/use-toast';
 
 
 type Investor = typeof investorsData[0];
@@ -40,7 +41,7 @@ function getStatusBadge(status: Investor['status']) {
   }
 }
 
-function InvestorCard({ investor, onDelete }: { investor: Investor, onDelete: (id: string) => void }) {
+function InvestorCard({ investor, onDelete, onToggleFreeze }: { investor: Investor, onDelete: (id: string) => void, onToggleFreeze: (id: string) => void }) {
   return (
     <Card>
       <CardHeader>
@@ -61,6 +62,9 @@ function InvestorCard({ investor, onDelete }: { investor: Investor, onDelete: (i
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
+              <DropdownMenuItem onSelect={() => onToggleFreeze(investor.id)}>
+                <Snowflake className="mr-2 h-4 w-4" /> {investor.isFrozen ? 'Unfreeze' : 'Freeze'} Address
+              </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <Link href={`/investors/${investor.id}/edit`}>
                   <Edit className="mr-2 h-4 w-4" /> Edit
@@ -89,6 +93,12 @@ function InvestorCard({ investor, onDelete }: { investor: Investor, onDelete: (i
             <span className="text-muted-foreground">Wallet</span>
             <span className="font-medium font-mono truncate">{investor.walletAddress.slice(0, 7)}...{investor.walletAddress.slice(-4)}</span>
         </div>
+        {investor.isFrozen && (
+          <div className="flex justify-between text-sm mt-2">
+              <span className="text-muted-foreground">Address State</span>
+              <Badge variant="secondary" className="bg-sky-600/20 text-sky-400 border-sky-400/50">Frozen</Badge>
+          </div>
+        )}
       </CardContent>
       <CardFooter>
         <Button variant="outline" className="w-full" asChild>
@@ -111,7 +121,7 @@ function InvestorCard({ investor, onDelete }: { investor: Investor, onDelete: (i
   );
 }
 
-function InvestorTableRow({ investor, onDelete }: { investor: Investor, onDelete: (id: string) => void }) {
+function InvestorTableRow({ investor, onDelete, onToggleFreeze }: { investor: Investor, onDelete: (id: string) => void, onToggleFreeze: (id: string) => void }) {
   return (
     <TableRow>
       <TableCell>
@@ -132,6 +142,9 @@ function InvestorTableRow({ investor, onDelete }: { investor: Investor, onDelete
         <span className="font-mono">{investor.walletAddress.slice(0, 7)}...{investor.walletAddress.slice(-4)}</span>
       </TableCell>
       <TableCell className="hidden sm:table-cell">{getStatusBadge(investor.status)}</TableCell>
+      <TableCell className="hidden lg:table-cell">
+        {investor.isFrozen && <Badge variant="secondary" className="bg-sky-600/20 text-sky-400 border-sky-400/50">Frozen</Badge>}
+      </TableCell>
       <TableCell className="text-right">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -142,6 +155,9 @@ function InvestorTableRow({ investor, onDelete }: { investor: Investor, onDelete
           <DropdownMenuContent align="end">
             <DropdownMenuItem asChild>
               <Link href={`/investors/${investor.id}`}>View Details</Link>
+            </DropdownMenuItem>
+             <DropdownMenuItem onSelect={() => onToggleFreeze(investor.id)}>
+              {investor.isFrozen ? 'Unfreeze' : 'Freeze'} Address
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
               <Link href={`/investors/${investor.id}/edit`}>Edit</Link>
@@ -174,6 +190,7 @@ function InvestorTableRow({ investor, onDelete }: { investor: Investor, onDelete
 export default function InvestorList({ view, setView }: { view: ViewMode, setView: (mode: ViewMode) => void }) {
   const [investors, setInvestors] = useState<Investor[]>([]);
   const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
 
   useEffect(() => {
     // Simulate fetching data
@@ -191,6 +208,25 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
     const updatedInvestors = investors.filter(inv => inv.id !== id);
     setInvestors(updatedInvestors);
     localStorage.setItem('investors', JSON.stringify(updatedInvestors));
+  };
+  
+  const handleToggleFreeze = (id: string) => {
+    const updatedInvestors = investors.map(inv => {
+      if (inv.id === id) {
+        return { ...inv, isFrozen: !inv.isFrozen };
+      }
+      return inv;
+    });
+    setInvestors(updatedInvestors);
+    localStorage.setItem('investors', JSON.stringify(updatedInvestors));
+    
+    const targetInvestor = updatedInvestors.find(inv => inv.id === id);
+    if(targetInvestor) {
+        toast({
+            title: `Address ${targetInvestor.isFrozen ? 'Frozen' : 'Unfrozen'}`,
+            description: `The wallet address for "${targetInvestor.name}" has been ${targetInvestor.isFrozen ? 'frozen' : 'unfrozen'}.`,
+        });
+    }
   };
 
 
@@ -242,7 +278,7 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {investors.map(investor => (
              <AlertDialog key={investor.id}>
-                <InvestorCard investor={investor} onDelete={handleDelete} />
+                <InvestorCard investor={investor} onDelete={handleDelete} onToggleFreeze={handleToggleFreeze} />
              </AlertDialog>
           ))}
         </div>
@@ -255,13 +291,14 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
                 <TableHead className="hidden md:table-cell">Total Invested</TableHead>
                 <TableHead className="hidden lg:table-cell">Wallet</TableHead>
                 <TableHead className="hidden sm:table-cell">Status</TableHead>
+                <TableHead className="hidden lg:table-cell">Address State</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {investors.map(investor => (
                 <AlertDialog key={investor.id}>
-                  <InvestorTableRow investor={investor} onDelete={handleDelete} />
+                  <InvestorTableRow investor={investor} onDelete={handleDelete} onToggleFreeze={handleToggleFreeze} />
                 </AlertDialog>
               ))}
             </TableBody>
