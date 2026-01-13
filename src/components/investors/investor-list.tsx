@@ -267,8 +267,17 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+      <div className="flex justify-between items-center">
         <h1 className="text-3xl font-headline font-semibold">Investors</h1>
+        <Button asChild>
+            <Link href="/investors/new">
+                <Plus className="mr-2 h-4 w-4" />
+                Add Investor
+            </Link>
+        </Button>
+      </div>
+      <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+        <h2 className="text-xl font-semibold">Your Investors</h2>
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
             <div className="relative w-full sm:w-auto">
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -290,35 +299,26 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
                     <SelectItem value="frozen">Frozen</SelectItem>
                 </SelectContent>
             </Select>
-            <Button asChild className="w-full sm:w-auto">
-                <Link href="/investors/new">
-                    <Plus className="mr-2 h-4 w-4" />
-                    Add Investor
-                </Link>
-            </Button>
-        </div>
-      </div>
-      <div className="flex justify-between items-center">
-        <h2 className="text-xl font-semibold">Your Investors</h2>
-        <div className="hidden sm:flex items-center gap-1 bg-muted p-1 rounded-lg">
-          <Button
-            variant={view === 'card' ? 'secondary' : 'ghost'}
-            size="icon"
-            className="h-8 w-8"
-            onClick={() => setView('card')}
-            aria-label="Card View"
-          >
-            <LayoutGrid className="h-4 w-4" />
-          </Button>
-          <Button
-            variant={view === 'table' ? 'secondary' : 'ghost'}
-            size="icon"
-            className="h-8 w-8"
-            onClick={() => setView('table')}
-            aria-label="Table View"
-          >
-            <List className="h-4 w-4" />
-          </Button>
+            <div className="hidden sm:flex items-center gap-1 bg-muted p-1 rounded-lg">
+                <Button
+                    variant={view === 'card' ? 'secondary' : 'ghost'}
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={() => setView('card')}
+                    aria-label="Card View"
+                >
+                    <LayoutGrid className="h-4 w-4" />
+                </Button>
+                <Button
+                    variant={view === 'table' ? 'secondary' : 'ghost'}
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={() => setView('table')}
+                    aria-label="Table View"
+                >
+                    <List className="h-4 w-4" />
+                </Button>
+            </div>
         </div>
       </div>
        {filteredInvestors.length === 0 ? (
