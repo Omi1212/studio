@@ -40,6 +40,7 @@ import TokenIcon from '../ui/token-icon';
 import { cn } from '@/lib/utils';
 import type { TokenDetails } from '@/lib/types';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../ui/collapsible';
+import Image from 'next/image';
 
 const allMenuItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -176,7 +177,7 @@ export default function SidebarNav() {
   return (
     <>
       <SidebarHeader className="p-4">
-        <h2 className="text-2xl font-bold text-primary font-headline">BlockStratus</h2>
+        <Image src="https://i.wpfc.ml/35/8gtsxa.png" alt="BlockStratus Logo" width={150} height={36} />
       </SidebarHeader>
 
       {isClient && userRole !== 'superadmin' && userRole !== 'investor' && selectedToken && (
