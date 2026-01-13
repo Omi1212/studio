@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from 'react';
@@ -30,12 +29,6 @@ export default function InvestorsPage() {
           <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-8 bg-background">
             <div className="flex justify-between items-center">
               <h1 className="text-3xl font-headline font-semibold">Investors</h1>
-              <Button asChild>
-                <Link href="/investors/new">
-                  <Plus className="mr-2 h-4 w-4" />
-                  Add Investor
-                </Link>
-              </Button>
             </div>
             <InvestorList view={viewMode} setView={setViewMode} />
           </main>
