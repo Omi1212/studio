@@ -177,7 +177,9 @@ export default function SidebarNav() {
   return (
     <>
       <SidebarHeader className="p-4">
-        <Image src="https://i.wpfc.ml/35/8gtsxa.png" alt="BlockStratus Logo" width={170} height={41} />
+        <div className="w-full h-auto relative" style={{ aspectRatio: '170/41' }}>
+          <Image src="https://i.wpfc.ml/35/8gtsxa.png" alt="BlockStratus Logo" fill style={{objectFit: 'contain'}} sizes="14rem" />
+        </div>
       </SidebarHeader>
 
       {isClient && userRole !== 'superadmin' && userRole !== 'investor' && selectedToken && (
