@@ -1,3 +1,4 @@
+
 import type { Order, TokenDetails, Transfer } from './types';
 
 export const volumeData = [
@@ -502,4 +503,14 @@ export const transfersData: Transfer[] = [
     { txId: 'a1b2c3...d4e5f6', type: 'Burn', from: 'spark1...sasg4v', to: 'Burn Address', amount: 50, tokenTicker: 'DUSD', date: '2024-07-18' },
     { txId: 'd4e5f6...g7h8i9', type: 'Mint', from: 'Token Issuer', to: 'spark1...rq83he', amount: 10000, tokenTicker: 'CRBN', date: '2024-07-17' },
     { txId: 'g7h8i9...j0k1l2', type: 'Transfer', from: 'spark1...zxy987', to: 'spark1...6n7dvn', amount: 800, tokenTicker: 'GLDT', date: '2024-07-16' },
+];
+
+export const tokenPriceHistory = [
+  { month: 'Jan', price: 68.5 },
+  { month: 'Feb', price: 72.3 },
+  { month: 'Mar', price: 80.1 },
+  { month: 'Apr', price: 75.6 },
+  { month: 'May', price: 85.4 },
+  { month: 'Jun', price: 92.2 },
+  { month: 'Jul', price: 88.9 },
 ];

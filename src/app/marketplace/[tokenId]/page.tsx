@@ -10,15 +10,27 @@ import {
 } from '@/components/ui/sidebar';
 import SidebarNav from '@/components/dashboard/sidebar-nav';
 import HeaderDynamic from '@/components/dashboard/header-dynamic';
-import { exampleTokens, investorsData } from '@/lib/data';
+import { exampleTokens, tokenPriceHistory } from '@/lib/data';
 import type { TokenDetails } from '@/lib/types';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Banknote, Landmark, ExternalLink, ArrowRight } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
-import { Progress } from '@/components/ui/progress';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import TokenIcon from '@/components/ui/token-icon';
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  ChartConfig,
+} from '@/components/ui/chart';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+
+const chartConfig = {
+  price: {
+    label: 'Price',
+    color: 'hsl(var(--chart-1))',
+  },
+} satisfies ChartConfig;
 
 
 function InfoRow({ label, value, valueClassName }: { label: string; value: React.ReactNode, valueClassName?: string }) {
@@ -69,19 +81,9 @@ function TokenOfferingPage({ params }: { params: { tokenId: string } }) {
 
   // Example static data based on the image
   const offeringData = {
-    startDate: '28-01-2025 14:03:00',
-    endDate: '01-04-2025 01:00:00',
-    amountRaised: 276120.0,
-    softCap: 250000,
-    hardCap: 1200000.0,
-    previouslyRaised: 96297120.0,
     marketCap: 174700028.571,
     circulating: 1455833.571,
     maxSupplyRound: 0.0,
-    minInvestment: 120.0,
-    maxInvestment: 1200000.0,
-    price: 120.0,
-    investedSoFar: 120.0,
   };
 
 
@@ -103,106 +105,69 @@ function TokenOfferingPage({ params }: { params: { tokenId: string } }) {
                 </h1>
             </div>
             
-            <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-                <div className="xl:col-span-2 space-y-6">
-                    <Card>
-                        <CardHeader>
-                            <div className="flex flex-wrap items-center justify-between text-sm text-muted-foreground gap-x-4 gap-y-1">
-                                <span>Start Date: {offeringData.startDate}</span>
-                                <span>End Date: {offeringData.endDate}</span>
-                            </div>
-                            <div className="flex items-center gap-4 text-sm">
-                                <Link href="#" className="text-primary hover:underline flex items-center gap-1">Escrow Contract <ExternalLink className="h-3 w-3" /></Link>
-                                <Link href="#" className="text-primary hover:underline flex items-center gap-1">Digital Asset Contract <ExternalLink className="h-3 w-3" /></Link>
-                            </div>
-                        </CardHeader>
-                        <CardContent>
-                            <p className="text-sm text-muted-foreground">Amount raised in this offering</p>
-                            <p className="text-4xl font-bold font-headline">{offeringData.amountRaised.toLocaleString('en-US', {minimumFractionDigits: 1})} USDT</p>
-                            <div className="relative mt-2">
-                                <Progress value={(offeringData.amountRaised / offeringData.hardCap) * 100} className="h-2" />
-                                <div className="absolute h-4 w-1 bg-foreground -top-1" style={{ left: `${(offeringData.softCap / offeringData.hardCap) * 100}%` }}></div>
-                                <div className="flex justify-between text-xs text-muted-foreground mt-1">
-                                    <span>Soft Cap: {offeringData.softCap.toLocaleString()}</span>
-                                    <span>{offeringData.hardCap.toLocaleString()} USDT</span>
-                                </div>
-                            </div>
-                            <p className="text-sm text-muted-foreground mt-4">${offeringData.previouslyRaised.toLocaleString('en-US', {minimumFractionDigits: 1})} Amount previously raised</p>
-                        </CardContent>
-                    </Card>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <Card>
-                            <CardContent className="p-6 space-y-3">
-                                <InfoRow label="Market Cap" value={`${offeringData.marketCap.toLocaleString('en-US', {maximumFractionDigits: 3})} USDT`} />
-                                <InfoRow label="Circulating" value={`${offeringData.circulating.toLocaleString('en-US', {maximumFractionDigits: 3})} ${token.tokenTicker}`} />
-                                <InfoRow label="Max. Supply for this Round" value={`${offeringData.maxSupplyRound.toLocaleString('en-US', {maximumFractionDigits: 1})} ${token.tokenTicker}`} />
-                                <InfoRow label="Min Investment" value={`${offeringData.minInvestment.toLocaleString('en-US', {maximumFractionDigits: 1})} USDT`} />
-                                <InfoRow label="Max Investment" value={`${offeringData.maxInvestment.toLocaleString('en-US', {maximumFractionDigits: 1})} USDT`} />
-                                <InfoRow label="Price" value={`${offeringData.price.toLocaleString('en-US', {maximumFractionDigits: 1})} USDT`} valueClassName="text-primary" />
-                            </CardContent>
-                        </Card>
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Your Investment Breakdown</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <p className="text-sm text-muted-foreground">Amount invested so far</p>
-                                <p className="text-3xl font-bold mt-1">{offeringData.investedSoFar.toLocaleString('en-US', {minimumFractionDigits: 1})} USDT</p>
-                                <p className="text-sm text-muted-foreground mt-4">Amount in digital assets</p>
-                                <p className="text-3xl font-bold mt-1">{(offeringData.investedSoFar / offeringData.price).toLocaleString('en-US', {minimumFractionDigits: 1})} {token.tokenTicker}</p>
-                            </CardContent>
-                            <CardFooter>
-                                <Button variant="outline" className="w-full">
-                                    My Reports <ArrowRight className="ml-2 h-4 w-4" />
-                                </Button>
-                            </CardFooter>
-                        </Card>
-                    </div>
-                </div>
-                <div className="xl:col-span-1">
-                    <Card className="bg-muted/40">
-                        <CardHeader>
-                            <CardTitle>Select Payment Method</CardTitle>
-                            <CardDescription>The digital asset holder can use the following payment methods:</CardDescription>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                            <div className="space-y-2 text-sm">
-                                <div className="flex items-center gap-2"><Banknote className="h-4 w-4" /> Stablecoins in other blockchain networks</div>
-                                <div className="flex items-center gap-2"><Landmark className="h-4 w-4" /> Bank Transfers straight to the account of the Issuer</div>
-                            </div>
-                            <Separator />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <Card>
+                    <CardHeader>
+                        <div className="flex items-center gap-4">
+                            <TokenIcon token={token} className="h-12 w-12" />
                             <div>
-                                <p className="text-sm font-medium">Please take a look at all the options, and select the one that is best fit for you.</p>
-                                <ul className="text-xs text-muted-foreground mt-2 space-y-1 list-disc list-inside">
-                                    <li>If you pick the bank transfer option, please be ready to make the transfer and to provide the transaction ID so the Issuer can verify your transaction</li>
-                                    <li>If you wish to pay with a stablecoin that is in a different blockchain, please be ready to make the transfer and provide the TX hash as proof</li>
-                                </ul>
+                                <CardTitle>{token.tokenName}</CardTitle>
+                                <CardDescription className="text-primary font-bold">{token.tokenTicker}</CardDescription>
                             </div>
-                            <Card className="bg-background">
-                                <CardContent className="p-4 space-y-4">
-                                     <div className="flex justify-between items-center">
-                                        <div>
-                                            <p className="text-sm text-muted-foreground">You pay</p>
-                                            <p className="text-2xl font-bold">120</p>
-                                        </div>
-                                         <Button>Select investment method +</Button>
-                                    </div>
-                                    <div className="flex justify-between items-center">
-                                        <div>
-                                            <p className="text-sm text-muted-foreground">You get</p>
-                                            <p className="text-2xl font-bold">1.0</p>
-                                        </div>
-                                        <div className="flex items-center gap-2 font-bold">
-                                            <TokenIcon token={token} className="h-6 w-6" />
-                                            {token.tokenTicker}
-                                        </div>
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        </CardContent>
-                    </Card>
-                </div>
+                        </div>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <InfoRow label="Market Cap" value={`${offeringData.marketCap.toLocaleString('en-US', {maximumFractionDigits: 3})} USDT`} />
+                        <InfoRow label="Circulating" value={`${offeringData.circulating.toLocaleString('en-US', {maximumFractionDigits: 3})} ${token.tokenTicker}`} />
+                        <InfoRow label="Max. Supply for this Round" value={`${offeringData.maxSupplyRound.toLocaleString('en-US', {maximumFractionDigits: 1})} ${token.tokenTicker}`} />
+                    </CardContent>
+                </Card>
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Price History</CardTitle>
+                        <CardDescription>Price of {token.tokenTicker} over time.</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                         <ChartContainer config={chartConfig} className="h-[250px] w-full">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <LineChart
+                                    data={tokenPriceHistory}
+                                    margin={{ top: 5, right: 20, left: -10, bottom: 5 }}
+                                >
+                                    <CartesianGrid vertical={false} strokeDasharray="3 3" />
+                                    <XAxis
+                                        dataKey="month"
+                                        tickLine={false}
+                                        axisLine={false}
+                                        tickMargin={8}
+                                    />
+                                    <YAxis
+                                        tickLine={false}
+                                        axisLine={false}
+                                        tickMargin={8}
+                                        tickFormatter={(value) => `$${value.toFixed(2)}`}
+                                        domain={['dataMin - 10', 'dataMax + 10']}
+                                    />
+                                    <Tooltip
+                                        cursor={{
+                                            stroke: 'hsl(var(--border))',
+                                            strokeWidth: 2,
+                                            strokeDasharray: '3 3',
+                                        }}
+                                        content={<ChartTooltipContent />}
+                                    />
+                                    <Line
+                                        dataKey="price"
+                                        type="monotone"
+                                        stroke="hsl(var(--chart-1))"
+                                        strokeWidth={2}
+                                        dot={true}
+                                    />
+                                </LineChart>
+                            </ResponsiveContainer>
+                        </ChartContainer>
+                    </CardContent>
+                </Card>
             </div>
 
           </main>
