@@ -60,8 +60,8 @@ const helpMenuItems = [
 
 const superAdminMenu = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/issuer-management', label: 'Issuer', icon: Building },
-  { href: '/user-management', label: 'User', icon: Users },
+  { href: '/issuer-management', label: 'Issuers', icon: Building },
+  { href: '/user-management', label: 'Users', icon: Users },
 ];
 
 const agentMenu = [
@@ -76,8 +76,8 @@ const agentMenu = [
             { href: '/transfers', label: 'Transfers', icon: ArrowRightLeft },
         ]
     },
-    { href: '/issuer-management', label: 'Issuer', icon: Building },
-    { href: '/user-management', label: 'User', icon: Users },
+    { href: '/issuer-management', label: 'Issuers', icon: Building },
+    { href: '/user-management', label: 'Users', icon: Users },
 ];
 
 const investorMenu = [
