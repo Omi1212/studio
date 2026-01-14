@@ -136,8 +136,6 @@ function TokenOfferingPage({ params }: { params: { tokenId: string } }) {
                         <InfoRow label="Circulating" value={`${offeringData.circulating.toLocaleString('en-US', {maximumFractionDigits: 3})} ${token.tokenTicker}`} valueClassName="font-mono" />
                         <InfoRow label="Max. Supply" value={`${token.maxSupply.toLocaleString('en-US')} ${token.tokenTicker}`} valueClassName="font-mono" />
                         <InfoRow label="Network" value={networkMap[token.network] || token.network} />
-                        <InfoRow label="Decimals" value={token.decimals} />
-                        <InfoRow label="Is Freezable" value={token.isFreezable ? 'Yes' : 'No'} />
                     </CardContent>
                 </Card>
                 <Card className="lg:col-span-2 flex flex-col">
