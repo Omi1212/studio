@@ -15,21 +15,6 @@ import { useToast } from '@/hooks/use-toast';
 
 type SubscriptionStatus = 'none' | 'pending' | 'approved';
 
-function getStatusBadge(status: TokenDetails['status']) {
-  switch (status) {
-    case 'active':
-      return <Badge variant="outline" className="text-green-400 border-green-400">Active</Badge>;
-    case 'pending':
-      return <Badge variant="outline" className="text-yellow-400 border-yellow-400">Pending</Badge>;
-    case 'frozen':
-      return <Badge variant="destructive">Frozen</Badge>;
-    case 'draft':
-      return <Badge variant="secondary">Draft</Badge>;
-    default:
-      return <Badge variant="secondary">Unknown</Badge>;
-  }
-};
-
 const networkMap: { [key: string]: string } = {
     spark: 'Spark',
     liquid: 'Liquid',
@@ -71,10 +56,6 @@ function TokenCard({ token, onAction, subscriptionStatus }: { token: TokenDetail
         </div>
       </CardHeader>
       <CardContent>
-        <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">Status</span>
-            {getStatusBadge(token.status)}
-        </div>
         <div className="flex justify-between text-sm mt-2">
             <span className="text-muted-foreground">Network</span>
             <span className="font-medium">{networkMap[token.network] || token.network}</span>
@@ -129,7 +110,6 @@ function TokenTableRow({ token, onAction, subscriptionStatus }: { token: TokenDe
             </TableCell>
             <TableCell>{networkMap[token.network] || token.network}</TableCell>
             <TableCell className="font-mono">{token.maxSupply ? token.maxSupply.toLocaleString() : '--'}</TableCell>
-            <TableCell>{getStatusBadge(token.status)}</TableCell>
             <TableCell className="text-right space-x-2">
                 <Button variant="outline" size="sm" onClick={handleView}>
                     View
@@ -257,7 +237,6 @@ export default function TokenList({ view, setView }: { view: ViewMode, setView: 
                             <TableHead className="w-[30%]">Token</TableHead>
                             <TableHead>Network</TableHead>
                             <TableHead>Max Supply</TableHead>
-                            <TableHead>Status</TableHead>
                             <TableHead className="text-right w-[25%]">Action</TableHead>
                         </TableRow>
                     </TableHeader>
