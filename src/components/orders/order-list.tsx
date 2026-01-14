@@ -4,7 +4,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { ordersData, exampleTokens, investorsData } from '@/lib/data';
-import type { Order } from '@/lib/types';
+import type { Order, TokenDetails } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/card';
 import { Avatar, AvatarFallback } from '../ui/avatar';
 import { Badge } from '../ui/badge';
@@ -40,7 +40,7 @@ function OrderTableRow({ order, onApprove, onReject }: { order: Order, onApprove
 
   return (
     <TableRow>
-      <TableCell className="hidden md:table-cell">
+      <TableCell>
         {investor && (
              <div className="flex items-center gap-3">
                 <Avatar className="h-8 w-8">
@@ -120,16 +120,40 @@ export default function OrderList() {
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [selectedToken, setSelectedToken] = useState<TokenDetails | null>(null);
 
   useEffect(() => {
     const storedOrdersRaw = localStorage.getItem('orders');
     const allOrders = storedOrdersRaw ? JSON.parse(storedOrdersRaw) : ordersData;
     setOrders(allOrders);
+
+    const handleTokenChange = () => {
+        const storedTokenId = localStorage.getItem('selectedTokenId');
+        if (storedTokenId) {
+            const storedTokens: TokenDetails[] = JSON.parse(localStorage.getItem('createdTokens') || '[]');
+            const allTokens: TokenDetails[] = [...exampleTokens, ...storedTokens];
+            const foundToken = allTokens.find(t => t.id === storedTokenId);
+            setSelectedToken(foundToken || null);
+        } else {
+            setSelectedToken(null);
+        }
+    };
+
+    handleTokenChange();
+    window.addEventListener('tokenChanged', handleTokenChange);
     setLoading(false);
+
+     return () => {
+        window.removeEventListener('tokenChanged', handleTokenChange);
+    };
   }, []);
 
   const filteredOrders = useMemo(() => {
-    let filtered = [...orders];
+    if (!selectedToken) {
+      return [];
+    }
+
+    let filtered = orders.filter(order => order.tokenId === selectedToken.id);
 
     if (statusFilter !== 'all') {
         filtered = filtered.filter(req => req.status === statusFilter);
@@ -145,7 +169,7 @@ export default function OrderList() {
     }
 
     return filtered;
-  }, [orders, searchQuery, statusFilter]);
+  }, [orders, searchQuery, statusFilter, selectedToken]);
 
   const updateOrderStatus = (id: string, status: 'completed' | 'rejected') => {
     const allOrders: Order[] = JSON.parse(localStorage.getItem('orders') || JSON.stringify(ordersData));
@@ -179,7 +203,7 @@ export default function OrderList() {
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-headline font-semibold">Orders</h1>
+        <h1 className="text-3xl font-headline font-semibold">Orders {selectedToken && `for ${selectedToken.tokenTicker}`}</h1>
       </div>
 
       <div className="space-y-4">
@@ -207,12 +231,20 @@ export default function OrderList() {
         </div>
       </div>
 
-       {filteredOrders.length === 0 ? (
+       {!selectedToken ? (
+         <div className="border-dashed border-2 border-muted-foreground/50 rounded-lg h-96 flex flex-col items-center justify-center text-center p-4">
+            <ShoppingBag className="h-16 w-16 text-muted-foreground mb-4" />
+            <h2 className="text-xl font-semibold mb-2">No Token Selected</h2>
+            <p className="text-muted-foreground mb-4">
+                Please select a token from the sidebar to view its orders.
+            </p>
+        </div>
+      ) : filteredOrders.length === 0 ? (
         <div className="border-dashed border-2 border-muted-foreground/50 rounded-lg h-96 flex flex-col items-center justify-center text-center p-4">
             <ShoppingBag className="h-16 w-16 text-muted-foreground mb-4" />
             <h2 className="text-xl font-semibold mb-2">No Orders Found</h2>
             <p className="text-muted-foreground mb-4">
-                {searchQuery || statusFilter !== 'all' ? "Try adjusting your search or filter." : "There are no orders at this time."}
+                {searchQuery || statusFilter !== 'all' ? "Try adjusting your search or filter." : `There are no orders for ${selectedToken.tokenTicker} at this time.`}
             </p>
         </div>
       ) : (
@@ -220,7 +252,7 @@ export default function OrderList() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="hidden md:table-cell">Investor</TableHead>
+                <TableHead>Investor</TableHead>
                 <TableHead>Order</TableHead>
                 <TableHead className="hidden lg:table-cell">Token</TableHead>
                 <TableHead className="hidden sm:table-cell text-right">Amount</TableHead>
