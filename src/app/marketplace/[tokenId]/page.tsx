@@ -24,6 +24,7 @@ import {
   ChartConfig,
 } from '@/components/ui/chart';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import PlaceOrder from '@/components/marketplace/place-order';
 
 const chartConfig = {
   price: {
@@ -97,6 +98,7 @@ function TokenOfferingPage({ params }: { params: { tokenId: string } }) {
   const offeringData = {
     marketCap: 174700028.571,
     circulating: 1455833.571,
+    price: token.price || 0.12, // Use token price or default
   };
 
   const explorer = networkExplorerMap[token.network] || { name: 'Explorer', url: '#'};
@@ -120,7 +122,7 @@ function TokenOfferingPage({ params }: { params: { tokenId: string } }) {
                 </h1>
             </div>
             
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <Card className="lg:col-span-1">
                     <CardHeader>
                         <div className="flex items-center gap-4">
@@ -146,53 +148,57 @@ function TokenOfferingPage({ params }: { params: { tokenId: string } }) {
                         </Button>
                     </CardFooter>
                 </Card>
-                <Card className="lg:col-span-2 flex flex-col">
-                    <CardHeader>
-                        <CardTitle>Price History</CardTitle>
-                        <CardDescription>Price of {token.tokenTicker} over time.</CardDescription>
-                    </CardHeader>
-                    <CardContent className="flex-1">
-                         <ChartContainer config={chartConfig} className="h-[250px] w-full">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <LineChart
-                                    data={tokenPriceHistory}
-                                    margin={{ top: 5, right: 20, left: -10, bottom: 5 }}
-                                >
-                                    <CartesianGrid vertical={false} strokeDasharray="3 3" />
-                                    <XAxis
-                                        dataKey="month"
-                                        tickLine={false}
-                                        axisLine={false}
-                                        tickMargin={8}
-                                    />
-                                    <YAxis
-                                        tickLine={false}
-                                        axisLine={false}
-                                        tickMargin={8}
-                                        tickFormatter={(value) => `$${value.toFixed(2)}`}
-                                        domain={['dataMin - 10 > 0 ? dataMin - 10 : 0', 'dataMax + 10']}
-                                    />
-                                    <Tooltip
-                                        cursor={{
-                                            stroke: 'hsl(var(--border))',
-                                            strokeWidth: 2,
-                                            strokeDasharray: '3 3',
-                                        }}
-                                        content={<ChartTooltipContent />}
-                                    />
-                                    <Line
-                                        dataKey="price"
-                                        type="monotone"
-                                        stroke="hsl(var(--chart-1))"
-                                        strokeWidth={2}
-                                        dot={true}
-                                    />
-                                </LineChart>
-                            </ResponsiveContainer>
-                        </ChartContainer>
-                    </CardContent>
-                </Card>
+
+                <PlaceOrder token={token} price={offeringData.price} />
+
             </div>
+            
+            <Card>
+                <CardHeader>
+                    <CardTitle>Price History</CardTitle>
+                    <CardDescription>Price of {token.tokenTicker} over time.</CardDescription>
+                </CardHeader>
+                <CardContent className="flex-1">
+                      <ChartContainer config={chartConfig} className="h-[250px] w-full">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <LineChart
+                                data={tokenPriceHistory}
+                                margin={{ top: 5, right: 20, left: -10, bottom: 5 }}
+                            >
+                                <CartesianGrid vertical={false} strokeDasharray="3 3" />
+                                <XAxis
+                                    dataKey="month"
+                                    tickLine={false}
+                                    axisLine={false}
+                                    tickMargin={8}
+                                />
+                                <YAxis
+                                    tickLine={false}
+                                    axisLine={false}
+                                    tickMargin={8}
+                                    tickFormatter={(value) => `$${value.toFixed(2)}`}
+                                    domain={['dataMin - 10 > 0 ? dataMin - 10 : 0', 'dataMax + 10']}
+                                />
+                                <Tooltip
+                                    cursor={{
+                                        stroke: 'hsl(var(--border))',
+                                        strokeWidth: 2,
+                                        strokeDasharray: '3 3',
+                                    }}
+                                    content={<ChartTooltipContent />}
+                                />
+                                <Line
+                                    dataKey="price"
+                                    type="monotone"
+                                    stroke="hsl(var(--chart-1))"
+                                    strokeWidth={2}
+                                    dot={true}
+                                />
+                            </LineChart>
+                        </ResponsiveContainer>
+                    </ChartContainer>
+                </CardContent>
+            </Card>
 
           </main>
         </div>
