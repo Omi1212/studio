@@ -11,10 +11,12 @@ import TokenIcon from '../ui/token-icon';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { ordersData } from '@/lib/data';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 
 interface PlaceOrderProps {
     token: TokenDetails;
     price: number;
+    isSubscribed: boolean;
 }
 
 const UsdtIcon = () => (
@@ -26,7 +28,7 @@ const UsdtIcon = () => (
     </svg>
 )
 
-export default function PlaceOrder({ token, price }: PlaceOrderProps) {
+export default function PlaceOrder({ token, price, isSubscribed }: PlaceOrderProps) {
     const { toast } = useToast();
     const router = useRouter();
 
@@ -134,6 +136,12 @@ export default function PlaceOrder({ token, price }: PlaceOrderProps) {
         router.push('/orders');
     }
 
+    const OrderButton = (
+        <Button className="w-full" onClick={handlePlaceOrder} disabled={!isSubscribed}>
+            Place Order
+        </Button>
+    )
+
     return (
         <Card className="relative">
             <CardContent className="p-6 space-y-4">
@@ -197,10 +205,21 @@ export default function PlaceOrder({ token, price }: PlaceOrderProps) {
                     </div>
                     <p className="text-sm text-muted-foreground">1 {token.tokenTicker} ≈ ${price.toFixed(4)} USDT</p>
                 </div>
-
-                <Button className="w-full" onClick={handlePlaceOrder}>
-                    Place Order
-                </Button>
+                
+                 {isSubscribed ? OrderButton : (
+                    <TooltipProvider>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <div className="w-full">
+                                    {OrderButton}
+                                </div>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                <p>You must be subscribed to this offering to place an order.</p>
+                            </TooltipContent>
+                        </Tooltip>
+                    </TooltipProvider>
+                )}
             </CardContent>
         </Card>
     );

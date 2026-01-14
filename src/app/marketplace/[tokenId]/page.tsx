@@ -46,6 +46,7 @@ function InfoRow({ label, value, valueClassName }: { label: string; value: React
 function TokenOfferingPage({ params }: { params: { tokenId: string } }) {
   const [token, setToken] = useState<TokenDetails | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isSubscribed, setIsSubscribed] = useState(false);
 
    const networkMap: { [key: string]: string } = {
     spark: 'Spark',
@@ -63,6 +64,13 @@ function TokenOfferingPage({ params }: { params: { tokenId: string } }) {
 
   useEffect(() => {
     const { tokenId } = params;
+    
+    // In a real app, this would come from a global state or an API call
+    const subscriptions = {
+      'example-1': 'approved'
+    };
+    // @ts-ignore
+    setIsSubscribed(subscriptions[tokenId] === 'approved');
     
     const storedTokens: TokenDetails[] = JSON.parse(localStorage.getItem('createdTokens') || '[]');
     const allTokens: TokenDetails[] = [...exampleTokens, ...storedTokens].map(t => ({
@@ -152,7 +160,7 @@ function TokenOfferingPage({ params }: { params: { tokenId: string } }) {
                     </CardFooter>
                 </Card>
 
-                <PlaceOrder token={token} price={offeringData.price} />
+                <PlaceOrder token={token} price={offeringData.price} isSubscribed={isSubscribed} />
 
             </div>
             
