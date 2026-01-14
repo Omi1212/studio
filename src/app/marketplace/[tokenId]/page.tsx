@@ -83,7 +83,6 @@ function TokenOfferingPage({ params }: { params: { tokenId: string } }) {
   const offeringData = {
     marketCap: 174700028.571,
     circulating: 1455833.571,
-    maxSupplyRound: 0.0,
   };
 
 
@@ -105,8 +104,8 @@ function TokenOfferingPage({ params }: { params: { tokenId: string } }) {
                 </h1>
             </div>
             
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <Card>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <Card className="lg:col-span-1">
                     <CardHeader>
                         <div className="flex items-center gap-4">
                             <TokenIcon token={token} className="h-12 w-12" />
@@ -119,10 +118,10 @@ function TokenOfferingPage({ params }: { params: { tokenId: string } }) {
                     <CardContent className="space-y-4">
                         <InfoRow label="Market Cap" value={`${offeringData.marketCap.toLocaleString('en-US', {maximumFractionDigits: 3})} USDT`} />
                         <InfoRow label="Circulating" value={`${offeringData.circulating.toLocaleString('en-US', {maximumFractionDigits: 3})} ${token.tokenTicker}`} />
-                        <InfoRow label="Max. Supply for this Round" value={`${offeringData.maxSupplyRound.toLocaleString('en-US', {maximumFractionDigits: 1})} ${token.tokenTicker}`} />
+                        <InfoRow label="Max. Supply" value={`${token.maxSupply.toLocaleString('en-US')} ${token.tokenTicker}`} />
                     </CardContent>
                 </Card>
-                <Card>
+                <Card className="lg:col-span-2">
                     <CardHeader>
                         <CardTitle>Price History</CardTitle>
                         <CardDescription>Price of {token.tokenTicker} over time.</CardDescription>
@@ -146,7 +145,7 @@ function TokenOfferingPage({ params }: { params: { tokenId: string } }) {
                                         axisLine={false}
                                         tickMargin={8}
                                         tickFormatter={(value) => `$${value.toFixed(2)}`}
-                                        domain={['dataMin - 10', 'dataMax + 10']}
+                                        domain={['dataMin - 10 > 0 ? dataMin - 10 : 0', 'dataMax + 10']}
                                     />
                                     <Tooltip
                                         cursor={{
