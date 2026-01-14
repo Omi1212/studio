@@ -134,10 +134,10 @@ function TokenOfferingPage({ params }: { params: { tokenId: string } }) {
                         </div>
                     </CardHeader>
                     <CardContent className="space-y-4">
+                        <InfoRow label="Network" value={networkMap[token.network] || token.network} />
                         <InfoRow label="Market Cap" value={`${offeringData.marketCap.toLocaleString('en-US', {maximumFractionDigits: 3})} USDT`} valueClassName="font-mono" />
                         <InfoRow label="Circulating" value={`${offeringData.circulating.toLocaleString('en-US', {maximumFractionDigits: 3})} ${token.tokenTicker}`} valueClassName="font-mono" />
                         <InfoRow label="Max. Supply" value={`${token.maxSupply.toLocaleString('en-US')} ${token.tokenTicker}`} valueClassName="font-mono" />
-                        <InfoRow label="Network" value={networkMap[token.network] || token.network} />
                     </CardContent>
                     <CardFooter>
                         <Button variant="outline" className="w-full" asChild>
