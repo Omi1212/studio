@@ -4,12 +4,16 @@
 import { useState, useEffect, useMemo } from 'react';
 import { transfersData } from '@/lib/data';
 import type { Transfer } from '@/lib/types';
-import { Card, CardContent } from '../ui/card';
+import { Card, CardContent, CardHeader } from '../ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Search } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Badge } from '../ui/badge';
+import { Input } from '../ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { Button } from '../ui/button';
 
+const ITEMS_PER_PAGE = 5;
 
 function getAmountClass(type: Transfer['type']) {
     switch (type) {
@@ -38,11 +42,46 @@ function getTypeBadge(type: Transfer['type']) {
 export default function TransferList() {
   const [transfers, setTransfers] = useState<Transfer[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [typeFilter, setTypeFilter] = useState('all');
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     setTransfers(transfersData);
     setLoading(false);
   }, []);
+
+  const filteredTransfers = useMemo(() => {
+    let filtered = [...transfers];
+
+    if (typeFilter !== 'all') {
+        filtered = filtered.filter(t => t.type === typeFilter);
+    }
+    
+    if (searchQuery) {
+      const lowercasedQuery = searchQuery.toLowerCase();
+      filtered = filtered.filter(t => 
+        t.from.toLowerCase().includes(lowercasedQuery) ||
+        t.to.toLowerCase().includes(lowercasedQuery)
+      );
+    }
+
+    return filtered;
+  }, [transfers, searchQuery, typeFilter]);
+
+  const totalPages = Math.ceil(filteredTransfers.length / ITEMS_PER_PAGE);
+
+  const paginatedTransfers = useMemo(() => {
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filteredTransfers.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  }, [filteredTransfers, currentPage]);
+
+  const handlePageChange = (page: number) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+  };
+
 
   if (loading) {
     return (
@@ -52,12 +91,43 @@ export default function TransferList() {
 
   return (
     <Card>
+      <CardHeader>
+        <div className="flex flex-col sm:flex-row items-center gap-4">
+          <div className="relative w-full sm:max-w-xs">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input 
+              placeholder="Search by wallet..." 
+              className="pl-8"
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setCurrentPage(1);
+              }}
+            />
+          </div>
+          <div className="flex gap-2 w-full sm:w-auto sm:ml-auto">
+            <Select value={typeFilter} onValueChange={(value) => {
+              setTypeFilter(value);
+              setCurrentPage(1);
+            }}>
+              <SelectTrigger className="w-full sm:w-[180px]">
+                <SelectValue placeholder="Filter by type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Types</SelectItem>
+                <SelectItem value="Transfer">Transfer</SelectItem>
+                <SelectItem value="Mint">Mint</SelectItem>
+                <SelectItem value="Burn">Burn</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+      </CardHeader>
       <CardContent className="p-0">
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Tx Id</TableHead>
                 <TableHead>Type</TableHead>
                 <TableHead>From</TableHead>
                 <TableHead></TableHead>
@@ -67,9 +137,8 @@ export default function TransferList() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {transfers.map((transfer) => (
+              {paginatedTransfers.map((transfer) => (
                 <TableRow key={transfer.txId}>
-                  <TableCell className="font-mono">{transfer.txId}</TableCell>
                   <TableCell>{getTypeBadge(transfer.type)}</TableCell>
                   <TableCell className="font-mono">{transfer.from}</TableCell>
                   <TableCell className="px-0 text-muted-foreground"><ArrowRight className="h-4 w-4" /></TableCell>
@@ -77,12 +146,37 @@ export default function TransferList() {
                   <TableCell className={cn("font-mono text-right", getAmountClass(transfer.type))}>
                     {transfer.amount.toLocaleString()} {transfer.tokenTicker}
                   </TableCell>
-                  <TableCell className="text-right text-muted-foreground">{transfer.date}</TableCell>
+                  <TableCell className="text-right text-muted-foreground">{new Date(transfer.date).toLocaleDateString()}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
         </div>
+         {totalPages > 1 && (
+          <div className="flex justify-between items-center p-4">
+            <span className="text-sm text-muted-foreground">
+              Page {currentPage} of {totalPages}
+            </span>
+            <div className="flex gap-2">
+              <Button 
+                variant="outline"
+                size="sm"
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+              >
+                Previous
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === totalPages}
+              >
+                Next
+              </Button>
+            </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
