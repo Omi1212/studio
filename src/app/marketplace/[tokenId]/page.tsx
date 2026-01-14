@@ -137,6 +137,14 @@ function TokenOfferingPage({ params }: { params: { tokenId: string } }) {
                         <InfoRow label="Max. Supply" value={`${token.maxSupply.toLocaleString('en-US')} ${token.tokenTicker}`} valueClassName="font-mono" />
                         <InfoRow label="Network" value={networkMap[token.network] || token.network} />
                     </CardContent>
+                    <CardFooter>
+                        <Button variant="outline" className="w-full" asChild>
+                            <a href={explorer.url} target="_blank" rel="noopener noreferrer">
+                                <Globe className="mr-2 h-4 w-4" />
+                                View on {explorer.name}
+                            </a>
+                        </Button>
+                    </CardFooter>
                 </Card>
                 <Card className="lg:col-span-2 flex flex-col">
                     <CardHeader>
@@ -183,14 +191,6 @@ function TokenOfferingPage({ params }: { params: { tokenId: string } }) {
                             </ResponsiveContainer>
                         </ChartContainer>
                     </CardContent>
-                    <CardFooter>
-                        <Button variant="outline" className="w-full" asChild>
-                            <a href={explorer.url} target="_blank" rel="noopener noreferrer">
-                                <Globe className="mr-2 h-4 w-4" />
-                                View on {explorer.name}
-                            </a>
-                        </Button>
-                    </CardFooter>
                 </Card>
             </div>
 
