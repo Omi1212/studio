@@ -122,7 +122,9 @@ function TokenTableRow({ token, onAction, subscriptionStatus }: { token: TokenDe
 export default function TokenList({ view, setView }: { view: ViewMode, setView: (mode: ViewMode) => void }) {
   const [allTokens, setAllTokens] = useState<TokenDetails[]>([]);
   const [loading, setLoading] = useState(true);
-  const [subscriptions, setSubscriptions] = useState<Record<string, SubscriptionStatus>>({});
+  const [subscriptions, setSubscriptions] = useState<Record<string, SubscriptionStatus>>({
+    'example-1': 'approved'
+  });
   const { toast } = useToast();
 
   useEffect(() => {
@@ -139,14 +141,6 @@ export default function TokenList({ view, setView }: { view: ViewMode, setView: 
     })).filter(t => t.status === 'active'); // Only show active tokens in marketplace
     
     setAllTokens(combinedTokens);
-    
-    const storedSubscriptions = JSON.parse(localStorage.getItem('tokenSubscriptions') || '{}');
-    // Set a default for demonstration
-    if (!storedSubscriptions['example-1']) {
-      storedSubscriptions['example-1'] = 'approved';
-    }
-    setSubscriptions(storedSubscriptions);
-
     setLoading(false);
   }, []);
   
@@ -163,9 +157,7 @@ export default function TokenList({ view, setView }: { view: ViewMode, setView: 
         return;
     }
 
-    const newSubscriptions = { ...subscriptions, [tokenId]: newStatus };
-    setSubscriptions(newSubscriptions);
-    localStorage.setItem('tokenSubscriptions', JSON.stringify(newSubscriptions));
+    setSubscriptions(prev => ({...prev, [tokenId]: newStatus }));
   };
 
 
