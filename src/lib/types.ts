@@ -1,5 +1,3 @@
-
-
 import type { TokenFormValues } from "@/components/issue-token/issue-token-form";
 
 export interface TokenDetails extends TokenFormValues {
@@ -10,3 +8,16 @@ export interface TokenDetails extends TokenFormValues {
 }
 
 export type ViewMode = 'card' | 'table';
+
+export type Order = {
+  id: string;
+  investorId: string;
+  investorName: string;
+  tokenId: string;
+  tokenTicker: string;
+  type: 'Buy' | 'Sell';
+  amount: number;
+  price: number;
+  date: string;
+  status: 'pending' | 'completed' | 'rejected';
+}
