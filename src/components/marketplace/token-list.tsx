@@ -2,7 +2,7 @@
 
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { exampleTokens } from '@/lib/data';
 import type { TokenDetails, ViewMode } from '@/lib/types';
@@ -120,7 +120,14 @@ function TokenTableRow({ token, onAction, subscriptionStatus }: { token: TokenDe
     )
 }
 
-export default function TokenList({ view, setView }: { view: ViewMode, setView: (mode: ViewMode) => void }) {
+interface TokenListProps {
+  view: ViewMode;
+  setView: (mode: ViewMode) => void;
+  searchQuery: string;
+  filterStatus: string;
+}
+
+export default function TokenList({ view, setView, searchQuery, filterStatus }: TokenListProps) {
   const [allTokens, setAllTokens] = useState<TokenDetails[]>([]);
   const [loading, setLoading] = useState(true);
   const [subscriptions, setSubscriptions] = useState<Record<string, SubscriptionStatus>>({});
@@ -147,6 +154,24 @@ export default function TokenList({ view, setView }: { view: ViewMode, setView: 
     setAllTokens(combinedTokens);
     setLoading(false);
   }, []);
+
+  const filteredTokens = useMemo(() => {
+    let filtered = [...allTokens];
+    
+    if (filterStatus !== 'all') {
+      filtered = filtered.filter(token => (subscriptions[token.id] || 'none') === filterStatus);
+    }
+    
+    if (searchQuery) {
+      const lowercasedQuery = searchQuery.toLowerCase();
+      filtered = filtered.filter(token => 
+        token.tokenName.toLowerCase().includes(lowercasedQuery) ||
+        token.tokenTicker.toLowerCase().includes(lowercasedQuery)
+      );
+    }
+
+    return filtered;
+  }, [allTokens, searchQuery, filterStatus, subscriptions]);
   
   const handleSubscriptionAction = (tokenId: string) => {
     const currentStatus = subscriptions[tokenId] || 'none';
@@ -217,9 +242,15 @@ export default function TokenList({ view, setView }: { view: ViewMode, setView: 
             </Button>
         </div>
       </div>
-        {view === 'card' ? (
+       {filteredTokens.length === 0 ? (
+         <div className="border-dashed border-2 border-muted-foreground/50 rounded-lg h-96 flex flex-col items-center justify-center text-center p-4">
+            <ShoppingBag className="h-16 w-16 text-muted-foreground mb-4" />
+            <h2 className="text-xl font-semibold mb-2">No tokens match your search</h2>
+            <p className="text-muted-foreground mb-4">Try adjusting your search or filters to find what you're looking for.</p>
+        </div>
+       ) : view === 'card' ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {allTokens.map(token => (
+                {filteredTokens.map(token => (
                     <TokenCard 
                         key={token.id} 
                         token={token} 
@@ -240,7 +271,7 @@ export default function TokenList({ view, setView }: { view: ViewMode, setView: 
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {allTokens.map(token => (
+                        {filteredTokens.map(token => (
                            <TokenTableRow 
                                 key={token.id} 
                                 token={token} 
