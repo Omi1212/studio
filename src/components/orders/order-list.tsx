@@ -32,7 +32,7 @@ function getStatusBadge(status: Order['status']) {
   }
 }
 
-function OrderTableRow({ order, onApprove, onReject }: { order: Order, onApprove: (id: string) => void, onReject: (id: string) => void }) {
+function OrderTableRow({ order, onApprove, onReject, userRole }: { order: Order, onApprove: (id: string) => void, onReject: (id: string) => void, userRole: string | null }) {
   
   const token = exampleTokens.find(t => t.id === order.tokenId);
   const investor = investorsData.find(i => i.id === order.investorId);
@@ -89,7 +89,7 @@ function OrderTableRow({ order, onApprove, onReject }: { order: Order, onApprove
        <TableCell className="hidden sm:table-cell">{getStatusBadge(order.status)}</TableCell>
       <TableCell className="text-right">
         <div className="flex items-center justify-end gap-2">
-            {order.status === 'pending' && (
+            {order.status === 'pending' && userRole === 'issuer' && (
                 <>
                     <Button size="sm" variant="outline" onClick={() => onReject(order.id)}>Reject</Button>
                     <Button size="sm" onClick={() => onApprove(order.id)}>Accept</Button>
@@ -121,8 +121,12 @@ export default function OrderList() {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [selectedToken, setSelectedToken] = useState<TokenDetails | null>(null);
+  const [userRole, setUserRole] = useState<string | null>(null);
 
   useEffect(() => {
+    const role = localStorage.getItem('userRole');
+    setUserRole(role);
+
     const storedOrdersRaw = localStorage.getItem('orders');
     const allOrders = storedOrdersRaw ? JSON.parse(storedOrdersRaw) : ordersData;
     setOrders(allOrders);
@@ -149,11 +153,19 @@ export default function OrderList() {
   }, []);
 
   const filteredOrders = useMemo(() => {
-    if (!selectedToken) {
-      return [];
-    }
+    let filtered = [...orders];
 
-    let filtered = orders.filter(order => order.tokenId === selectedToken.id);
+    // Issuer role sees orders for the selected token
+    if (userRole === 'issuer' && selectedToken) {
+        filtered = orders.filter(order => order.tokenId === selectedToken.id);
+    }
+    // Investor role sees their own orders
+    else if (userRole === 'investor') {
+        filtered = orders.filter(order => order.investorId === 'inv-001'); // Hardcoded for demo
+    } else {
+        // Default to no orders if role/token doesn't match
+        filtered = userRole === 'investor' ? filtered : [];
+    }
 
     if (statusFilter !== 'all') {
         filtered = filtered.filter(req => req.status === statusFilter);
@@ -169,7 +181,7 @@ export default function OrderList() {
     }
 
     return filtered;
-  }, [orders, searchQuery, statusFilter, selectedToken]);
+  }, [orders, searchQuery, statusFilter, selectedToken, userRole]);
 
   const updateOrderStatus = (id: string, status: 'completed' | 'rejected') => {
     const allOrders: Order[] = JSON.parse(localStorage.getItem('orders') || JSON.stringify(ordersData));
@@ -200,10 +212,40 @@ export default function OrderList() {
     );
   }
 
+  const pageTitle = userRole === 'investor' 
+    ? "My Orders" 
+    : `Orders ${selectedToken ? `for ${selectedToken.tokenTicker}` : ''}`;
+
+
+  const noOrdersMessage = () => {
+      if (userRole === 'issuer' && !selectedToken) {
+          return {
+              title: "No Token Selected",
+              description: "Please select a token from the sidebar to view its orders."
+          }
+      }
+      if (searchQuery || statusFilter !== 'all') {
+          return {
+              title: "No Orders Found",
+              description: "Try adjusting your search or filter."
+          }
+      }
+      if (userRole === 'investor') {
+          return {
+              title: "You have no orders yet",
+              description: "Your buy and sell orders will appear here."
+          }
+      }
+      return {
+          title: "No Orders Found",
+          description: `There are no orders for ${selectedToken?.tokenTicker} at this time.`
+      }
+  }
+
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-headline font-semibold">Orders {selectedToken && `for ${selectedToken.tokenTicker}`}</h1>
+        <h1 className="text-3xl font-headline font-semibold">{pageTitle}</h1>
       </div>
 
       <div className="space-y-4">
@@ -231,20 +273,12 @@ export default function OrderList() {
         </div>
       </div>
 
-       {!selectedToken ? (
+       {filteredOrders.length === 0 ? (
          <div className="border-dashed border-2 border-muted-foreground/50 rounded-lg h-96 flex flex-col items-center justify-center text-center p-4">
             <ShoppingBag className="h-16 w-16 text-muted-foreground mb-4" />
-            <h2 className="text-xl font-semibold mb-2">No Token Selected</h2>
+            <h2 className="text-xl font-semibold mb-2">{noOrdersMessage().title}</h2>
             <p className="text-muted-foreground mb-4">
-                Please select a token from the sidebar to view its orders.
-            </p>
-        </div>
-      ) : filteredOrders.length === 0 ? (
-        <div className="border-dashed border-2 border-muted-foreground/50 rounded-lg h-96 flex flex-col items-center justify-center text-center p-4">
-            <ShoppingBag className="h-16 w-16 text-muted-foreground mb-4" />
-            <h2 className="text-xl font-semibold mb-2">No Orders Found</h2>
-            <p className="text-muted-foreground mb-4">
-                {searchQuery || statusFilter !== 'all' ? "Try adjusting your search or filter." : `There are no orders for ${selectedToken.tokenTicker} at this time.`}
+                {noOrdersMessage().description}
             </p>
         </div>
       ) : (
@@ -263,7 +297,7 @@ export default function OrderList() {
             </TableHeader>
             <TableBody>
               {filteredOrders.map(order => (
-                  <OrderTableRow key={order.id} order={order} onApprove={handleApprove} onReject={handleReject} />
+                  <OrderTableRow key={order.id} order={order} onApprove={handleApprove} onReject={handleReject} userRole={userRole} />
               ))}
             </TableBody>
           </Table>

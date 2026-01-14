@@ -5,12 +5,12 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { ArrowDown, Wallet } from 'lucide-react';
+import { ArrowDown, Wallet, ArrowDownUp } from 'lucide-react';
 import type { TokenDetails } from '@/lib/types';
 import TokenIcon from '../ui/token-icon';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
+import { ordersData } from '@/lib/data';
 
 interface PlaceOrderProps {
     token: TokenDetails;
@@ -29,26 +29,70 @@ const UsdtIcon = () => (
 export default function PlaceOrder({ token, price }: PlaceOrderProps) {
     const { toast } = useToast();
     const router = useRouter();
-    const [usdtAmount, setUsdtAmount] = useState('');
-    const [tokenAmount, setTokenAmount] = useState('');
+
+    const [isSwapped, setIsSwapped] = useState(false);
+    const [amountA, setAmountA] = useState(''); // Top field
+    const [amountB, setAmountB] = useState(''); // Bottom field
+    const [lastEdited, setLastEdited] = useState<'A' | 'B'>('A');
+
     const [userBalance] = useState(50000); // Static balance for demo
 
+    const tokenA = isSwapped ? token : { tokenName: 'Tether', tokenTicker: 'USDT' };
+    const tokenB = isSwapped ? { tokenName: 'Tether', tokenTicker: 'USDT' } : token;
+    
+    const balanceA = isSwapped ? 0 : userBalance; // Assuming 0 balance for the offered token
+
     useEffect(() => {
-        if (usdtAmount && !isNaN(Number(usdtAmount)) && price > 0) {
-            const calculatedTokenAmount = Number(usdtAmount) / price;
-            setTokenAmount(calculatedTokenAmount.toLocaleString('en-US', { maximumFractionDigits: 6 }));
-        } else if (usdtAmount === '') {
-            setTokenAmount('');
+        if (price > 0) {
+            if (lastEdited === 'A') {
+                const numA = parseFloat(amountA);
+                if (!isNaN(numA)) {
+                    const resultB = isSwapped ? numA * price : numA / price;
+                    setAmountB(resultB.toLocaleString('en-US', { maximumFractionDigits: 6, useGrouping: false }));
+                } else {
+                    setAmountB('');
+                }
+            } else if (lastEdited === 'B') {
+                const numB = parseFloat(amountB);
+                if (!isNaN(numB)) {
+                    const resultA = isSwapped ? numB / price : numB * price;
+                    setAmountA(resultA.toLocaleString('en-US', { maximumFractionDigits: 2, useGrouping: false }));
+                } else {
+                    setAmountA('');
+                }
+            }
         }
-    }, [usdtAmount, price]);
+    }, [amountA, amountB, isSwapped, price, lastEdited]);
+
+    const handleAmountAChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setAmountA(e.target.value);
+        setLastEdited('A');
+    };
+
+    const handleAmountBChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setAmountB(e.target.value);
+        setLastEdited('B');
+    };
 
     const handlePercentage = (percentage: number) => {
-        const amount = userBalance * (percentage / 100);
-        setUsdtAmount(amount.toString());
+        if (!isSwapped) {
+            const amount = userBalance * (percentage / 100);
+            setAmountA(amount.toString());
+            setLastEdited('A');
+        }
+    };
+    
+    const handleSwap = () => {
+        setIsSwapped(!isSwapped);
+        setAmountA(amountB);
+        setAmountB(amountA);
     };
 
     const handlePlaceOrder = () => {
-        if (!usdtAmount || Number(usdtAmount) <= 0) {
+        const usdtAmount = isSwapped ? parseFloat(amountB) : parseFloat(amountA);
+        const tokenAmount = isSwapped ? parseFloat(amountA) : parseFloat(amountB);
+
+        if (!usdtAmount || usdtAmount <= 0) {
             toast({
                 variant: "destructive",
                 title: "Invalid Amount",
@@ -57,7 +101,7 @@ export default function PlaceOrder({ token, price }: PlaceOrderProps) {
             return;
         }
 
-        if (Number(usdtAmount) > userBalance) {
+        if (usdtAmount > userBalance) {
              toast({
                 variant: "destructive",
                 title: "Insufficient Balance",
@@ -66,28 +110,25 @@ export default function PlaceOrder({ token, price }: PlaceOrderProps) {
             return;
         }
 
-        console.log(`Placing order for ${tokenAmount} ${token.tokenTicker} with ${usdtAmount} USDT`);
-
         toast({
             title: "Order Placed Successfully!",
-            description: `Your order for ${tokenAmount} ${token.tokenTicker} has been submitted.`,
+            description: `Your order for ${tokenAmount.toLocaleString()} ${token.tokenTicker} has been submitted.`,
         });
 
-        // Add a new pending order to localStorage
         const newOrder = {
              id: `order-${Math.random().toString(36).substring(2, 9)}`,
-            investorId: 'inv-001', // Example investor ID
-            investorName: 'Alice Johnson', // Example investor name
+            investorId: 'inv-001',
+            investorName: 'Alice Johnson',
             tokenId: token.id,
             tokenTicker: token.tokenTicker,
             type: 'Buy',
-            amount: Number(usdtAmount) / price,
+            amount: tokenAmount,
             price: price,
             date: new Date().toISOString(),
             status: 'pending'
         };
         
-        const existingOrders = JSON.parse(localStorage.getItem('orders') || '[]');
+        const existingOrders = JSON.parse(localStorage.getItem('orders') || JSON.stringify(ordersData));
         localStorage.setItem('orders', JSON.stringify([newOrder, ...existingOrders]));
 
         router.push('/orders');
@@ -96,18 +137,20 @@ export default function PlaceOrder({ token, price }: PlaceOrderProps) {
     return (
         <Card className="relative">
             <CardContent className="p-6 space-y-4">
-                {/* You Pay Section */}
+                {/* Field A */}
                 <div className="rounded-lg border bg-card text-card-foreground shadow-sm p-4 space-y-2">
                     <div className="flex justify-between items-center text-sm text-muted-foreground">
                         <div className="flex items-center gap-2">
                             <Wallet className="h-4 w-4" />
-                            <span>Balance: {userBalance.toLocaleString()} USDT</span>
+                            <span>Balance: {balanceA.toLocaleString()} {tokenA.tokenTicker}</span>
                         </div>
-                         <div className="flex items-center gap-2">
-                            <button onClick={() => handlePercentage(25)} className="hover:text-primary">25%</button>
-                            <button onClick={() => handlePercentage(50)} className="hover:text-primary">50%</button>
-                            <button onClick={() => handlePercentage(100)} className="hover:text-primary">Max</button>
-                        </div>
+                        {!isSwapped && (
+                            <div className="flex items-center gap-2">
+                                <button onClick={() => handlePercentage(25)} className="hover:text-primary">25%</button>
+                                <button onClick={() => handlePercentage(50)} className="hover:text-primary">50%</button>
+                                <button onClick={() => handlePercentage(100)} className="hover:text-primary">Max</button>
+                            </div>
+                        )}
                     </div>
                     <div className="flex justify-between items-end">
                         <div>
@@ -115,35 +158,41 @@ export default function PlaceOrder({ token, price }: PlaceOrderProps) {
                             <Input
                                 type="number"
                                 placeholder="0.0"
-                                value={usdtAmount}
-                                onChange={(e) => setUsdtAmount(e.target.value)}
+                                value={amountA}
+                                onChange={handleAmountAChange}
                                 className="text-3xl font-bold border-none shadow-none p-0 h-auto focus-visible:ring-0 focus-visible:ring-offset-0"
                             />
                         </div>
                         <div className="flex items-center gap-2 bg-muted p-2 rounded-full">
-                            <UsdtIcon />
-                            <span className="font-semibold">USDT</span>
+                            {isSwapped ? <TokenIcon token={tokenA} className="h-6 w-6" /> : <UsdtIcon />}
+                            <span className="font-semibold">{tokenA.tokenTicker}</span>
                         </div>
                     </div>
                 </div>
 
                 {/* Swap Icon */}
                 <div className="flex justify-center -my-6 z-10">
-                    <div className="flex-center h-8 w-8 rounded-full bg-muted border">
-                        <ArrowDown className="h-4 w-4 text-muted-foreground" />
-                    </div>
+                    <Button variant="outline" size="icon" className="flex-center h-8 w-8 rounded-full bg-muted border" onClick={handleSwap}>
+                        <ArrowDownUp className="h-4 w-4 text-muted-foreground" />
+                    </Button>
                 </div>
 
-                {/* You Receive Section */}
+                {/* Field B */}
                 <div className="rounded-lg border bg-card text-card-foreground shadow-sm p-4 space-y-2">
                     <div className="flex justify-between items-end">
                        <div>
                             <p className="text-sm text-muted-foreground">You Receive</p>
-                            <p className="text-3xl font-bold h-auto p-0">{tokenAmount || '0.0'}</p>
+                             <Input
+                                type="number"
+                                placeholder="0.0"
+                                value={amountB}
+                                onChange={handleAmountBChange}
+                                className="text-3xl font-bold border-none shadow-none p-0 h-auto focus-visible:ring-0 focus-visible:ring-offset-0"
+                            />
                         </div>
                         <div className="flex items-center gap-2 bg-muted p-2 rounded-full">
-                            <TokenIcon token={token} className="h-6 w-6" />
-                            <span className="font-semibold">{token.tokenTicker}</span>
+                            {isSwapped ? <UsdtIcon /> : <TokenIcon token={tokenB} className="h-6 w-6" />}
+                            <span className="font-semibold">{tokenB.tokenTicker}</span>
                         </div>
                     </div>
                     <p className="text-sm text-muted-foreground">1 {token.tokenTicker} ≈ ${price.toFixed(4)} USDT</p>
