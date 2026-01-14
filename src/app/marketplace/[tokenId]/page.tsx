@@ -13,7 +13,7 @@ import HeaderDynamic from '@/components/dashboard/header-dynamic';
 import { exampleTokens, tokenPriceHistory } from '@/lib/data';
 import type { TokenDetails } from '@/lib/types';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Globe } from 'lucide-react';
+import { ArrowLeft, Globe, FileText } from 'lucide-react';
 import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import TokenIcon from '@/components/ui/token-icon';
@@ -94,7 +94,6 @@ function TokenOfferingPage({ params }: { params: { tokenId: string } }) {
     notFound();
   }
 
-  // Example static data based on the image
   const offeringData = {
     marketCap: 174700028.571,
     circulating: 1455833.571,
@@ -139,12 +138,16 @@ function TokenOfferingPage({ params }: { params: { tokenId: string } }) {
                         <InfoRow label="Circulating" value={`${offeringData.circulating.toLocaleString('en-US', {maximumFractionDigits: 3})} ${token.tokenTicker}`} valueClassName="font-mono" />
                         <InfoRow label="Max. Supply" value={`${token.maxSupply.toLocaleString('en-US')} ${token.tokenTicker}`} valueClassName="font-mono" />
                     </CardContent>
-                    <CardFooter>
+                    <CardFooter className="flex-col items-stretch space-y-2">
                         <Button variant="outline" className="w-full" asChild>
                             <a href={explorer.url} target="_blank" rel="noopener noreferrer">
                                 <Globe className="mr-2 h-4 w-4" />
                                 View on {explorer.name}
                             </a>
+                        </Button>
+                        <Button variant="secondary" className="w-full">
+                            <FileText className="mr-2 h-4 w-4" />
+                            View Token Documents
                         </Button>
                     </CardFooter>
                 </Card>
