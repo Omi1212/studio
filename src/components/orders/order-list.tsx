@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
@@ -39,6 +40,19 @@ function OrderTableRow({ order, onApprove, onReject }: { order: Order, onApprove
 
   return (
     <TableRow>
+      <TableCell className="hidden md:table-cell">
+        {investor && (
+             <div className="flex items-center gap-3">
+                <Avatar className="h-8 w-8">
+                    <AvatarFallback>{investor.name.charAt(0)}</AvatarFallback>
+                </Avatar>
+                <div>
+                    <p className="font-medium">{investor.name}</p>
+                    <p className="text-sm text-muted-foreground">{investor.email}</p>
+                </div>
+            </div>
+        )}
+      </TableCell>
         <TableCell>
             <div className="flex items-center gap-3">
                 <div
@@ -54,19 +68,6 @@ function OrderTableRow({ order, onApprove, onReject }: { order: Order, onApprove
                   <span className="text-sm text-muted-foreground">{new Date(order.date).toLocaleDateString()}</span>
                 </div>
             </div>
-      </TableCell>
-      <TableCell className="hidden md:table-cell">
-        {investor && (
-             <div className="flex items-center gap-3">
-                <Avatar className="h-8 w-8">
-                    <AvatarFallback>{investor.name.charAt(0)}</AvatarFallback>
-                </Avatar>
-                <div>
-                    <p className="font-medium">{investor.name}</p>
-                    <p className="text-sm text-muted-foreground">{investor.email}</p>
-                </div>
-            </div>
-        )}
       </TableCell>
       <TableCell className="hidden lg:table-cell">
         {token && (
@@ -219,8 +220,8 @@ export default function OrderList() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Order</TableHead>
                 <TableHead className="hidden md:table-cell">Investor</TableHead>
+                <TableHead>Order</TableHead>
                 <TableHead className="hidden lg:table-cell">Token</TableHead>
                 <TableHead className="hidden sm:table-cell text-right">Amount</TableHead>
                 <TableHead className="hidden md:table-cell text-right">Total</TableHead>
