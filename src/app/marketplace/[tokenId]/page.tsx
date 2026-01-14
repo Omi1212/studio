@@ -15,7 +15,7 @@ import type { TokenDetails } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Banknote, Landmark, ExternalLink, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Progress } from '@/components/ui/progress';
 import TokenIcon from '@/components/ui/token-icon';
@@ -221,5 +221,3 @@ export default function TokenDetailsUsePage({ params }: { params: Promise<{ toke
   const resolvedParams = use(params);
   return <TokenOfferingPage params={resolvedParams} />;
 }
-
-    
