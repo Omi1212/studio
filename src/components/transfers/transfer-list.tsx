@@ -2,6 +2,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import { transfersData } from '@/lib/data';
 import type { Transfer } from '@/lib/types';
 import { Card, CardContent, CardHeader } from '../ui/card';
@@ -39,11 +40,10 @@ function getTypeBadge(type: Transfer['type']) {
     }
 }
 
-export default function TransferList() {
+export default function TransferList({ searchQuery, typeFilter }: { searchQuery: string, typeFilter: string }) {
+  const router = useRouter();
   const [transfers, setTransfers] = useState<Transfer[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [typeFilter, setTypeFilter] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
@@ -69,6 +69,10 @@ export default function TransferList() {
     return filtered;
   }, [transfers, searchQuery, typeFilter]);
 
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, typeFilter]);
+
   const totalPages = Math.ceil(filteredTransfers.length / ITEMS_PER_PAGE);
 
   const paginatedTransfers = useMemo(() => {
@@ -91,38 +95,6 @@ export default function TransferList() {
 
   return (
     <Card>
-      <CardHeader>
-        <div className="flex flex-col sm:flex-row items-center gap-4">
-          <div className="relative w-full sm:max-w-xs">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input 
-              placeholder="Search by wallet..." 
-              className="pl-8"
-              value={searchQuery}
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                setCurrentPage(1);
-              }}
-            />
-          </div>
-          <div className="flex gap-2 w-full sm:w-auto sm:ml-auto">
-            <Select value={typeFilter} onValueChange={(value) => {
-              setTypeFilter(value);
-              setCurrentPage(1);
-            }}>
-              <SelectTrigger className="w-full sm:w-[180px]">
-                <SelectValue placeholder="Filter by type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Types</SelectItem>
-                <SelectItem value="Transfer">Transfer</SelectItem>
-                <SelectItem value="Mint">Mint</SelectItem>
-                <SelectItem value="Burn">Burn</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-      </CardHeader>
       <CardContent className="p-0">
         <div className="overflow-x-auto">
           <Table>
@@ -138,7 +110,11 @@ export default function TransferList() {
             </TableHeader>
             <TableBody>
               {paginatedTransfers.map((transfer) => (
-                <TableRow key={transfer.txId}>
+                <TableRow 
+                  key={transfer.txId} 
+                  onClick={() => router.push(`/transfers/${transfer.txId}`)}
+                  className="cursor-pointer"
+                >
                   <TableCell>{getTypeBadge(transfer.type)}</TableCell>
                   <TableCell className="font-mono">{transfer.from}</TableCell>
                   <TableCell className="px-0 text-muted-foreground"><ArrowRight className="h-4 w-4" /></TableCell>
