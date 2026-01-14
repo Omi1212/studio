@@ -7,7 +7,6 @@ import { exampleTokens } from '@/lib/data';
 import type { TokenDetails, ViewMode } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/card';
 import TokenIcon from '../ui/token-icon';
-import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
 import { ShoppingBag, LayoutGrid, List } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
@@ -142,6 +141,10 @@ export default function TokenList({ view, setView }: { view: ViewMode, setView: 
     setAllTokens(combinedTokens);
     
     const storedSubscriptions = JSON.parse(localStorage.getItem('tokenSubscriptions') || '{}');
+    // Set a default for demonstration
+    if (!storedSubscriptions['example-1']) {
+      storedSubscriptions['example-1'] = 'approved';
+    }
     setSubscriptions(storedSubscriptions);
 
     setLoading(false);
