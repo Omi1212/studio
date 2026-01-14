@@ -1,4 +1,4 @@
-import type { Order, TokenDetails } from './types';
+import type { Order, TokenDetails, Transfer } from './types';
 
 export const volumeData = [
   {
@@ -488,4 +488,14 @@ export const ordersData: Order[] = [
         date: '2024-07-29',
         status: 'pending'
     }
-]
+];
+
+export const transfersData: Transfer[] = [
+    { txId: '033b1f...f227ae', type: 'Transfer', from: 'spark1...6n7dvn', to: 'spark1...sasg4v', amount: 1000, tokenTicker: 'OMI', date: '1d ago' },
+    { txId: '968d13...a0a404', type: 'Mint', from: 'Token Issuer', to: 'spark1...6n7dvn', amount: 5001, tokenTicker: 'OMI', date: '8d ago' },
+    { txId: '695742...3c7e43', type: 'Transfer', from: 'spark1...6n7dvn', to: 'spark1...rq83he', amount: 10000, tokenTicker: 'OMI', date: '8d ago' },
+    { txId: '6e64a6...bf83f2', type: 'Mint', from: 'Token Issuer', to: 'spark1...6n7dvn', amount: 10000, tokenTicker: 'OMI', date: '8d ago' },
+    { txId: '594513...e6be8c', type: 'Burn', from: 'spark1...6n7dvn', to: 'Burn Address', amount: 91000, tokenTicker: 'OMI', date: '9d ago' },
+    { txId: '69cd80...6e953a', type: 'Transfer', from: 'spark1...6n7dvn', to: 'spark1...7yq91g', amount: 10000, tokenTicker: 'OMI', date: '9d ago' },
+    { txId: '82c0f5...f8ed27', type: 'Mint', from: 'Token Issuer', to: 'spark1...6n7dvn', amount: 1000, tokenTicker: 'OMI', date: '9d ago' },
+];

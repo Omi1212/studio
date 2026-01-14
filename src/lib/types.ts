@@ -21,3 +21,13 @@ export type Order = {
   date: string;
   status: 'pending' | 'completed' | 'rejected';
 }
+
+export type Transfer = {
+    txId: string;
+    type: 'Transfer' | 'Mint' | 'Burn';
+    from: string;
+    to: string;
+    amount: number;
+    tokenTicker: string;
+    date: string;
+}
