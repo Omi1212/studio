@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -33,11 +34,11 @@ function TokenCard({ token, onAction, subscriptionStatus }: { token: TokenDetail
   const getActionButton = () => {
     switch (subscriptionStatus) {
       case 'none':
-        return <Button className="w-full" onClick={onAction}>Subscribe</Button>;
+        return <Button variant="outline" className="w-full" onClick={onAction}>Subscribe</Button>;
       case 'pending':
         return <Button className="w-full" variant="outline" disabled>Pending</Button>;
       case 'approved':
-        return <Button className="w-full bg-green-600 hover:bg-green-700" onClick={onAction}>Invest</Button>;
+        return <Button className="w-full" onClick={onAction}>Invest</Button>;
       default:
         return null;
     }
@@ -86,11 +87,11 @@ function TokenTableRow({ token, onAction, subscriptionStatus }: { token: TokenDe
     const getActionButton = () => {
         switch (subscriptionStatus) {
             case 'none':
-                return <Button size="sm" onClick={onAction}>Subscribe</Button>;
+                return <Button variant="outline" size="sm" onClick={onAction}>Subscribe</Button>;
             case 'pending':
                 return <Button size="sm" variant="outline" disabled>Pending</Button>;
             case 'approved':
-                return <Button size="sm" className="bg-green-600 hover:bg-green-700" onClick={onAction}>Invest</Button>;
+                return <Button size="sm" onClick={onAction}>Invest</Button>;
             default:
                 return null;
         }
@@ -122,12 +123,15 @@ function TokenTableRow({ token, onAction, subscriptionStatus }: { token: TokenDe
 export default function TokenList({ view, setView }: { view: ViewMode, setView: (mode: ViewMode) => void }) {
   const [allTokens, setAllTokens] = useState<TokenDetails[]>([]);
   const [loading, setLoading] = useState(true);
-  const [subscriptions, setSubscriptions] = useState<Record<string, SubscriptionStatus>>({
-    'example-1': 'approved'
-  });
+  const [subscriptions, setSubscriptions] = useState<Record<string, SubscriptionStatus>>({});
   const { toast } = useToast();
 
   useEffect(() => {
+    // We re-initialize the state every time the component mounts (page load).
+    setSubscriptions({
+        'example-1': 'approved'
+    });
+
     const storedTokens: TokenDetails[] = JSON.parse(localStorage.getItem('createdTokens') || '[]');
     const combinedTokens: TokenDetails[] = [...exampleTokens, ...storedTokens].map(t => ({
       ...t,
