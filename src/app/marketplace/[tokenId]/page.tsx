@@ -137,10 +137,6 @@ function TokenOfferingPage({ params }: { params: { tokenId: string } }) {
                                 <InfoRow label="Market Cap" value={`${offeringData.marketCap.toLocaleString('en-US', {maximumFractionDigits: 3})} USDT`} />
                                 <InfoRow label="Circulating" value={`${offeringData.circulating.toLocaleString('en-US', {maximumFractionDigits: 3})} ${token.tokenTicker}`} />
                                 <InfoRow label="Max. Supply for this Round" value={`${offeringData.maxSupplyRound.toLocaleString('en-US', {maximumFractionDigits: 1})} ${token.tokenTicker}`} />
-                                <Separator />
-                                <InfoRow label="Soft Cap" value={`${offeringData.softCap.toLocaleString('en-US', {maximumFractionDigits: 1})} USDT`} />
-                                <InfoRow label="Hard cap" value={`${offeringData.hardCap.toLocaleString('en-US', {maximumFractionDigits: 1})} USDT`} />
-                                <Separator />
                                 <InfoRow label="Min Investment" value={`${offeringData.minInvestment.toLocaleString('en-US', {maximumFractionDigits: 1})} USDT`} />
                                 <InfoRow label="Max Investment" value={`${offeringData.maxInvestment.toLocaleString('en-US', {maximumFractionDigits: 1})} USDT`} />
                                 <InfoRow label="Price" value={`${offeringData.price.toLocaleString('en-US', {maximumFractionDigits: 1})} USDT`} valueClassName="text-primary" />
