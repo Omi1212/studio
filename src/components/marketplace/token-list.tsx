@@ -122,18 +122,14 @@ function TokenTableRow({ token, onAction, subscriptionStatus }: { token: TokenDe
     )
 }
 
-interface TokenListProps {
-  view: ViewMode;
-  setView: (mode: ViewMode) => void;
-}
-
-export default function TokenList({ view, setView }: TokenListProps) {
+export default function TokenList() {
   const [allTokens, setAllTokens] = useState<TokenDetails[]>([]);
   const [loading, setLoading] = useState(true);
   const [subscriptions, setSubscriptions] = useState<Record<string, SubscriptionStatus>>({});
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
+  const [view, setView] = useState<ViewMode>('card');
 
   useEffect(() => {
     // We re-initialize the state every time the component mounts (page load).
@@ -221,30 +217,10 @@ export default function TokenList({ view, setView }: TokenListProps) {
 
   return (
     <div className="mb-12 space-y-4">
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-headline font-semibold">Available Tokens</h2>
-        <div className="hidden sm:flex items-center gap-1 bg-muted p-1 rounded-lg">
-              <Button 
-                variant={view === 'card' ? 'secondary' : 'ghost'} 
-                size="icon" 
-                className="h-8 w-8"
-                onClick={() => setView('card')}
-                aria-label="Card View"
-                >
-                <LayoutGrid className="h-4 w-4" />
-            </Button>
-            <Button 
-                variant={view === 'table' ? 'secondary' : 'ghost'} 
-                size="icon" 
-                className="h-8 w-8"
-                onClick={() => setView('table')}
-                aria-label="Table View"
-                >
-                <List className="h-4 w-4" />
-            </Button>
-        </div>
       </div>
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+       <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
             <div className="relative w-full sm:w-auto flex-grow sm:flex-grow-0">
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
@@ -265,6 +241,26 @@ export default function TokenList({ view, setView }: TokenListProps) {
                     <SelectItem value="approved">Invest</SelectItem>
                 </SelectContent>
             </Select>
+            <div className="hidden sm:flex items-center gap-1 bg-muted p-1 rounded-lg ml-auto">
+              <Button 
+                variant={view === 'card' ? 'secondary' : 'ghost'} 
+                size="icon" 
+                className="h-8 w-8"
+                onClick={() => setView('card')}
+                aria-label="Card View"
+                >
+                <LayoutGrid className="h-4 w-4" />
+            </Button>
+            <Button 
+                variant={view === 'table' ? 'secondary' : 'ghost'} 
+                size="icon" 
+                className="h-8 w-8"
+                onClick={() => setView('table')}
+                aria-label="Table View"
+                >
+                <List className="h-4 w-4" />
+            </Button>
+        </div>
         </div>
        {filteredTokens.length === 0 ? (
          <div className="border-dashed border-2 border-muted-foreground/50 rounded-lg h-96 flex flex-col items-center justify-center text-center p-4">

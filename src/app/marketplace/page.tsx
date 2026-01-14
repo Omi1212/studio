@@ -1,7 +1,6 @@
 
 'use client';
 
-import { useState } from 'react';
 import {
   Sidebar,
   SidebarInset,
@@ -10,11 +9,9 @@ import {
 import SidebarNav from '@/components/dashboard/sidebar-nav';
 import HeaderDynamic from '@/components/dashboard/header-dynamic';
 import TokenList from '@/components/marketplace/token-list';
-import type { ViewMode } from '@/lib/types';
 
 
 export default function MarketplacePage() {
-  const [viewMode, setViewMode] = useState<ViewMode>('card');
 
   return (
     <SidebarProvider>
@@ -32,10 +29,7 @@ export default function MarketplacePage() {
                     Marketplace
                     </h1>
                 </div>
-                <TokenList 
-                    view={viewMode} 
-                    setView={setViewMode} 
-                />
+                <TokenList />
               </div>
             </div>
           </main>
@@ -44,4 +38,5 @@ export default function MarketplacePage() {
     </SidebarProvider>
   );
 }
+
 
