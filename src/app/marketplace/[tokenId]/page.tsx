@@ -13,9 +13,9 @@ import HeaderDynamic from '@/components/dashboard/header-dynamic';
 import { exampleTokens, tokenPriceHistory } from '@/lib/data';
 import type { TokenDetails } from '@/lib/types';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Globe } from 'lucide-react';
 import Link from 'next/link';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import TokenIcon from '@/components/ui/token-icon';
 import {
   ChartContainer,
@@ -37,7 +37,7 @@ function InfoRow({ label, value, valueClassName }: { label: string; value: React
   return (
     <div className="flex items-center justify-between">
       <p className="text-sm text-muted-foreground">{label}</p>
-      <div className={`text-sm font-medium font-mono ${valueClassName}`}>{value}</div>
+      <div className={`text-sm font-medium ${valueClassName}`}>{value}</div>
     </div>
   );
 }
@@ -45,6 +45,20 @@ function InfoRow({ label, value, valueClassName }: { label: string; value: React
 function TokenOfferingPage({ params }: { params: { tokenId: string } }) {
   const [token, setToken] = useState<TokenDetails | null>(null);
   const [loading, setLoading] = useState(true);
+
+   const networkMap: { [key: string]: string } = {
+    spark: 'Spark',
+    liquid: 'Liquid',
+    rgb: 'RGB',
+    taproot: 'Taproot Assets',
+  };
+
+  const networkExplorerMap: { [key: string]: { name: string; url: string } } = {
+    spark: { name: 'Sparkscan', url: 'https://sparkscan.io' },
+    liquid: { name: 'Liquid Explorer', url: 'https://mempool.space/liquid' },
+    rgb: { name: 'RGB Explorer', url: 'https://rgb.tech' },
+    taproot: { name: 'Taproot Explorer', url: 'https://mempool.space' },
+  };
 
   useEffect(() => {
     const { tokenId } = params;
@@ -85,6 +99,8 @@ function TokenOfferingPage({ params }: { params: { tokenId: string } }) {
     circulating: 1455833.571,
   };
 
+  const explorer = networkExplorerMap[token.network] || { name: 'Explorer', url: '#'};
+
 
   return (
     <SidebarProvider>
@@ -116,17 +132,20 @@ function TokenOfferingPage({ params }: { params: { tokenId: string } }) {
                         </div>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                        <InfoRow label="Market Cap" value={`${offeringData.marketCap.toLocaleString('en-US', {maximumFractionDigits: 3})} USDT`} />
-                        <InfoRow label="Circulating" value={`${offeringData.circulating.toLocaleString('en-US', {maximumFractionDigits: 3})} ${token.tokenTicker}`} />
-                        <InfoRow label="Max. Supply" value={`${token.maxSupply.toLocaleString('en-US')} ${token.tokenTicker}`} />
+                        <InfoRow label="Market Cap" value={`${offeringData.marketCap.toLocaleString('en-US', {maximumFractionDigits: 3})} USDT`} valueClassName="font-mono" />
+                        <InfoRow label="Circulating" value={`${offeringData.circulating.toLocaleString('en-US', {maximumFractionDigits: 3})} ${token.tokenTicker}`} valueClassName="font-mono" />
+                        <InfoRow label="Max. Supply" value={`${token.maxSupply.toLocaleString('en-US')} ${token.tokenTicker}`} valueClassName="font-mono" />
+                        <InfoRow label="Network" value={networkMap[token.network] || token.network} />
+                        <InfoRow label="Decimals" value={token.decimals} />
+                        <InfoRow label="Is Freezable" value={token.isFreezable ? 'Yes' : 'No'} />
                     </CardContent>
                 </Card>
-                <Card className="lg:col-span-2">
+                <Card className="lg:col-span-2 flex flex-col">
                     <CardHeader>
                         <CardTitle>Price History</CardTitle>
                         <CardDescription>Price of {token.tokenTicker} over time.</CardDescription>
                     </CardHeader>
-                    <CardContent>
+                    <CardContent className="flex-1">
                          <ChartContainer config={chartConfig} className="h-[250px] w-full">
                             <ResponsiveContainer width="100%" height="100%">
                                 <LineChart
@@ -166,6 +185,14 @@ function TokenOfferingPage({ params }: { params: { tokenId: string } }) {
                             </ResponsiveContainer>
                         </ChartContainer>
                     </CardContent>
+                    <CardFooter>
+                        <Button variant="outline" className="w-full" asChild>
+                            <a href={explorer.url} target="_blank" rel="noopener noreferrer">
+                                <Globe className="mr-2 h-4 w-4" />
+                                View on {explorer.name}
+                            </a>
+                        </Button>
+                    </CardFooter>
                 </Card>
             </div>
 
