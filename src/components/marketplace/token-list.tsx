@@ -28,9 +28,7 @@ function TokenCard({ token, onAction, subscriptionStatus }: { token: TokenDetail
   const router = useRouter();
 
   const handleView = () => {
-    localStorage.setItem('selectedTokenId', token.id);
-    window.dispatchEvent(new Event('tokenChanged'));
-    router.push(`/workspace/${token.id}`);
+    router.push(`/marketplace/${token.id}`);
   };
 
   const getActionButton = () => {
@@ -81,9 +79,7 @@ function TokenTableRow({ token, onAction, subscriptionStatus }: { token: TokenDe
     const router = useRouter();
 
     const handleView = () => {
-      localStorage.setItem('selectedTokenId', token.id);
-      window.dispatchEvent(new Event('tokenChanged'));
-      router.push(`/workspace/${token.id}`);
+      router.push(`/marketplace/${token.id}`);
     };
     
     const getActionButton = () => {
@@ -306,3 +302,5 @@ export default function TokenList() {
     </div>
   );
 }
+
+    
