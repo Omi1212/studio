@@ -9,9 +9,11 @@ import type { TokenDetails, ViewMode } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/card';
 import TokenIcon from '../ui/token-icon';
 import { Button } from '../ui/button';
-import { ShoppingBag, LayoutGrid, List } from 'lucide-react';
+import { ShoppingBag, LayoutGrid, List, Search } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
 import { useToast } from '@/hooks/use-toast';
+import { Input } from '../ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 
 type SubscriptionStatus = 'none' | 'pending' | 'approved';
 
@@ -123,15 +125,15 @@ function TokenTableRow({ token, onAction, subscriptionStatus }: { token: TokenDe
 interface TokenListProps {
   view: ViewMode;
   setView: (mode: ViewMode) => void;
-  searchQuery: string;
-  filterStatus: string;
 }
 
-export default function TokenList({ view, setView, searchQuery, filterStatus }: TokenListProps) {
+export default function TokenList({ view, setView }: TokenListProps) {
   const [allTokens, setAllTokens] = useState<TokenDetails[]>([]);
   const [loading, setLoading] = useState(true);
   const [subscriptions, setSubscriptions] = useState<Record<string, SubscriptionStatus>>({});
   const { toast } = useToast();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterStatus, setFilterStatus] = useState('all');
 
   useEffect(() => {
     // We re-initialize the state every time the component mounts (page load).
@@ -218,8 +220,8 @@ export default function TokenList({ view, setView, searchQuery, filterStatus }: 
   }
 
   return (
-    <div className="mb-12">
-      <div className="flex justify-between items-center mb-4">
+    <div className="mb-12 space-y-4">
+      <div className="flex justify-between items-center">
         <h2 className="text-2xl font-headline font-semibold">Available Tokens</h2>
         <div className="hidden sm:flex items-center gap-1 bg-muted p-1 rounded-lg">
               <Button 
@@ -242,6 +244,28 @@ export default function TokenList({ view, setView, searchQuery, filterStatus }: 
             </Button>
         </div>
       </div>
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+            <div className="relative w-full sm:w-auto flex-grow sm:flex-grow-0">
+                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                    placeholder="Search by name or ticker..."
+                    className="pl-8 w-full sm:w-64"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                />
+            </div>
+            <Select value={filterStatus} onValueChange={setFilterStatus}>
+                <SelectTrigger className="w-full sm:w-[180px]">
+                    <SelectValue placeholder="Filter by status" />
+                </SelectTrigger>
+                <SelectContent>
+                    <SelectItem value="all">All Statuses</SelectItem>
+                    <SelectItem value="none">Subscribe</SelectItem>
+                    <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="approved">Invest</SelectItem>
+                </SelectContent>
+            </Select>
+        </div>
        {filteredTokens.length === 0 ? (
          <div className="border-dashed border-2 border-muted-foreground/50 rounded-lg h-96 flex flex-col items-center justify-center text-center p-4">
             <ShoppingBag className="h-16 w-16 text-muted-foreground mb-4" />
