@@ -172,7 +172,7 @@ export default function IssuerList() {
   if (loading) {
     return (
       <div className="space-y-4">
-        <h1 className="text-3xl font-headline font-semibold">Issuer Management</h1>
+        <h1 className="text-3xl font-headline font-semibold">Issuers Management</h1>
         <Card className="h-64 animate-pulse bg-muted/50"></Card>
       </div>
     );
@@ -210,7 +210,7 @@ export default function IssuerList() {
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-headline font-semibold">Issuer Management</h1>
+        <h1 className="text-3xl font-headline font-semibold">Issuers Management</h1>
          <Button asChild>
           <Link href="/issuer-management/new">
             <Plus className="mr-2 h-4 w-4" /> Add Issuer
