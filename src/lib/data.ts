@@ -200,7 +200,7 @@ export const cryptoData = [
   },
 ];
 
-export const exampleTokens: Omit<TokenDetails, 'tokenIcon' | 'destinationAddress' | 'whitepaper' | 'legalTokenizationDoc' | 'tokenIssuanceLegalDoc' | 'publicKey'>[] = [
+export const exampleTokens: Omit<TokenDetails, 'tokenIcon' | 'whitepaper' | 'legalTokenizationDoc' | 'tokenIssuanceLegalDoc' | 'publicKey'>[] = [
   {
     id: 'example-1',
     tokenName: 'Digital Dollar',
@@ -211,6 +211,8 @@ export const exampleTokens: Omit<TokenDetails, 'tokenIcon' | 'destinationAddress
     price: 1.00,
     decimals: 2,
     isFreezable: true,
+    issuerId: 'iss-001',
+    destinationAddress: 'spark1q...iss1pr',
   },
   {
     id: 'example-2',
@@ -222,6 +224,8 @@ export const exampleTokens: Omit<TokenDetails, 'tokenIcon' | 'destinationAddress
     price: 75.50,
     decimals: 8,
     isFreezable: false,
+    issuerId: 'iss-002',
+    destinationAddress: 'spark1q...iss2tf',
   },
   {
     id: 'example-3',
@@ -233,6 +237,8 @@ export const exampleTokens: Omit<TokenDetails, 'tokenIcon' | 'destinationAddress
     price: 250.00,
     decimals: 0,
     isFreezable: true,
+    issuerId: 'iss-001',
+    destinationAddress: 'spark1q...iss1pr',
   },
   {
     id: 'example-4',
@@ -244,6 +250,8 @@ export const exampleTokens: Omit<TokenDetails, 'tokenIcon' | 'destinationAddress
     price: 12.75,
     decimals: 6,
     isFreezable: true,
+    issuerId: 'iss-003',
+    destinationAddress: 'spark1q...iss3da',
   },
 ];
 
@@ -597,5 +605,6 @@ export const usersData: User[] = [
         status: 'active',
     }
 ]
+
 
 
