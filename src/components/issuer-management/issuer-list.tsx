@@ -5,11 +5,11 @@
 import { useState, useEffect, useMemo } from 'react';
 import { issuersData } from '@/lib/data';
 import type { Issuer } from '@/lib/types';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/card';
+import { Card } from '../ui/card';
 import { Avatar, AvatarFallback } from '../ui/avatar';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
-import { MoreVertical, Plus, Search, Copy, CheckSquare, Clock } from 'lucide-react';
+import { MoreVertical, Plus, Search, Copy } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
 import Link from 'next/link';
@@ -57,7 +57,7 @@ function IssuerTableRow({ issuer, onDelete, onCopy }: { issuer: Issuer, onDelete
       </TableCell>
       <TableCell className="hidden lg:table-cell">
         <div className="flex items-center gap-1">
-            <span className="font-mono">{issuer.walletAddress.slice(0, 15)}...{issuer.walletAddress.slice(-4)}</span>
+            <span className="font-mono">{issuer.walletAddress.slice(0, 7)}...{issuer.walletAddress.slice(-4)}</span>
              <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => onCopy(issuer.walletAddress)}>
                 <Copy className="h-3 w-3" />
             </Button>
