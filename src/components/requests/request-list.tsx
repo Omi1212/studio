@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
@@ -43,7 +44,7 @@ function getStatusBadge(status: TokenDetails['status']) {
   }
 };
 
-function RequestCard({ request, onApprove, onReject }: { request: CombinedRequest, onApprove: (id: string) => void, onReject: (id: string) => void }) {
+function RequestCard({ request }: { request: CombinedRequest }) {
   return (
     <Card>
       <CardHeader>
@@ -79,21 +80,16 @@ function RequestCard({ request, onApprove, onReject }: { request: CombinedReques
           <span className="font-medium font-mono">{request.maxSupply.toLocaleString()}</span>
         </div>
       </CardContent>
-      {request.status === 'pending' && (
-        <CardFooter className="flex gap-2">
-          <Button variant="outline" className="w-full" onClick={() => onReject(request.id)}>
-            <X className="mr-2 h-4 w-4" /> Reject
+      <CardFooter>
+          <Button variant="outline" className="w-full" asChild>
+            <Link href={`/requests/${request.id}`}>View</Link>
           </Button>
-          <Button className="w-full" onClick={() => onApprove(request.id)}>
-            <Check className="mr-2 h-4 w-4" /> Approve
-          </Button>
-        </CardFooter>
-      )}
+      </CardFooter>
     </Card>
   );
 }
 
-function RequestTableRow({ request, onApprove, onReject }: { request: CombinedRequest, onApprove: (id: string) => void, onReject: (id: string) => void }) {
+function RequestTableRow({ request }: { request: CombinedRequest }) {
   return (
     <TableRow>
       <TableCell>
@@ -130,18 +126,18 @@ function RequestTableRow({ request, onApprove, onReject }: { request: CombinedRe
         {getStatusBadge(request.status)}
        </TableCell>
       <TableCell className="text-right">
-        {request.status === 'pending' ? (
-          <div className="flex items-center justify-end gap-2">
-            <Button size="sm" variant="outline" onClick={() => onReject(request.id)}>
-              <X className="mr-2 h-4 w-4" /> Reject
-            </Button>
-            <Button size="sm" onClick={() => onApprove(request.id)}>
-              <Check className="mr-2 h-4 w-4" /> Approve
-            </Button>
-          </div>
-        ) : (
-          <span>-</span>
-        )}
+        <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-8 w-8">
+                <MoreVertical className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+                <DropdownMenuItem asChild>
+                    <Link href={`/requests/${request.id}`}>View</Link>
+                </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
       </TableCell>
     </TableRow>
   );
@@ -338,7 +334,7 @@ export default function RequestList({ view, setView }: { view: ViewMode, setView
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {paginatedRequests.map(request => (
-              <RequestCard key={request.id} request={request} onApprove={handleApprove} onReject={handleReject} />
+              <RequestCard key={request.id} request={request} />
             ))}
           </div>
           {renderPagination()}
@@ -358,7 +354,7 @@ export default function RequestList({ view, setView }: { view: ViewMode, setView
             </TableHeader>
             <TableBody>
               {paginatedRequests.map(request => (
-                  <RequestTableRow key={request.id} request={request} onApprove={handleApprove} onReject={handleReject} />
+                  <RequestTableRow key={request.id} request={request} />
               ))}
             </TableBody>
           </Table>
