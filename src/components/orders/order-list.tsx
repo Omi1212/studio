@@ -155,15 +155,14 @@ export default function OrderList() {
   const filteredOrders = useMemo(() => {
     let filtered = [...orders];
 
-    // Issuer role sees orders for the selected token
-    if (userRole === 'issuer' && selectedToken) {
+    if ((userRole === 'issuer' || userRole === 'agent') && selectedToken) {
         filtered = orders.filter(order => order.tokenId === selectedToken.id);
     }
-    // Investor role sees their own orders
     else if (userRole === 'investor') {
         filtered = orders.filter(order => order.investorId === 'inv-001'); // Hardcoded for demo
     } else {
-        // Default to no orders if role/token doesn't match
+        // Issuers and agents see no orders if no token is selected.
+        // Investors see all their orders regardless of token selection.
         filtered = userRole === 'investor' ? filtered : [];
     }
 
@@ -218,7 +217,7 @@ export default function OrderList() {
 
 
   const noOrdersMessage = () => {
-      if (userRole === 'issuer' && !selectedToken) {
+      if ((userRole === 'issuer' || userRole === 'agent') && !selectedToken) {
           return {
               title: "No Token Selected",
               description: "Please select a token from the sidebar to view its orders."
