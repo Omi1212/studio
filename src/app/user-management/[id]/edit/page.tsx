@@ -52,12 +52,14 @@ export default function EditUserPage() {
     const formData = new FormData(event.currentTarget);
     const updatedUser = {
       ...user,
-      name: formData.get('name') as string,
-      email: formData.get('email') as string,
-      status: formData.get('status') as 'active' | 'inactive',
+      // Keep original values for disabled fields
+      name: user.name,
+      email: user.email,
+      walletAddress: user.walletAddress,
+      // Update from form data
       role: formData.get('role') as 'investor' | 'issuer' | 'agent' | 'superadmin',
+      status: formData.get('status') as 'active' | 'inactive',
       kycStatus: formData.get('kycStatus') as 'verified' | 'pending' | 'rejected',
-      walletAddress: formData.get('walletAddress') as string,
     };
     
     const storedUsers: User[] = JSON.parse(localStorage.getItem('users') || '[]');
@@ -101,15 +103,15 @@ export default function EditUserPage() {
                     <CardContent className="space-y-4">
                         <div className="space-y-2">
                             <Label htmlFor="name">Full Name</Label>
-                            <Input id="name" name="name" defaultValue={user.name} required />
+                            <Input id="name" name="name" defaultValue={user.name} disabled />
                         </div>
                          <div className="space-y-2">
                             <Label htmlFor="email">Email Address</Label>
-                            <Input id="email" name="email" type="email" defaultValue={user.email} required />
+                            <Input id="email" name="email" type="email" defaultValue={user.email} disabled />
                         </div>
                          <div className="space-y-2">
                             <Label htmlFor="walletAddress">Wallet Address</Label>
-                            <Input id="walletAddress" name="walletAddress" defaultValue={user.walletAddress} required />
+                            <Input id="walletAddress" name="walletAddress" defaultValue={user.walletAddress} disabled />
                         </div>
                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div className="space-y-2">
