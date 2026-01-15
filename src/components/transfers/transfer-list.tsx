@@ -3,18 +3,18 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { transfersData } from '@/lib/data';
-import type { Transfer } from '@/lib/types';
+import { transfersData, exampleTokens } from '@/lib/data';
+import type { Transfer, TokenDetails } from '@/lib/types';
 import { Card, CardContent, CardHeader } from '../ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
-import { ArrowRight, Search } from 'lucide-react';
+import { ArrowRight, Search, ArrowRightLeft } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Badge } from '../ui/badge';
 import { Input } from '../ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Button } from '../ui/button';
 
-const ITEMS_PER_PAGE = 5;
+const ITEMS_PER_PAGE = 10;
 
 function getAmountClass(type: Transfer['type']) {
     switch (type) {
@@ -45,14 +45,46 @@ export default function TransferList({ searchQuery, typeFilter }: { searchQuery:
   const [transfers, setTransfers] = useState<Transfer[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
+  const [selectedToken, setSelectedToken] = useState<TokenDetails | null>(null);
+  const [userRole, setUserRole] = useState<string | null>(null);
+
 
   useEffect(() => {
+    const role = localStorage.getItem('userRole');
+    setUserRole(role);
     setTransfers(transfersData);
+    
+    const handleTokenChange = () => {
+        const storedTokenId = localStorage.getItem('selectedTokenId');
+        if (storedTokenId) {
+            const storedTokens: TokenDetails[] = JSON.parse(localStorage.getItem('createdTokens') || '[]');
+            const allTokens: TokenDetails[] = [...exampleTokens, ...storedTokens];
+            const foundToken = allTokens.find(t => t.id === storedTokenId);
+            setSelectedToken(foundToken || null);
+        } else {
+            setSelectedToken(null);
+        }
+    };
+
+    handleTokenChange();
+    window.addEventListener('tokenChanged', handleTokenChange);
     setLoading(false);
+
+    return () => {
+        window.removeEventListener('tokenChanged', handleTokenChange);
+    };
+
   }, []);
 
   const filteredTransfers = useMemo(() => {
     let filtered = [...transfers];
+
+    if ((userRole === 'issuer' || userRole === 'agent') && selectedToken) {
+        filtered = filtered.filter(t => t.tokenTicker === selectedToken.tokenTicker);
+    } else if ((userRole === 'issuer' || userRole === 'agent') && !selectedToken) {
+        return []; // No token selected, show no transfers for these roles
+    }
+    // Investor role sees all their transfers, so no token filtering is applied here.
 
     if (typeFilter !== 'all') {
         filtered = filtered.filter(t => t.type === typeFilter);
@@ -67,11 +99,11 @@ export default function TransferList({ searchQuery, typeFilter }: { searchQuery:
     }
 
     return filtered;
-  }, [transfers, searchQuery, typeFilter]);
+  }, [transfers, searchQuery, typeFilter, selectedToken, userRole]);
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery, typeFilter]);
+  }, [searchQuery, typeFilter, selectedToken]);
 
   const totalPages = Math.ceil(filteredTransfers.length / ITEMS_PER_PAGE);
 
@@ -91,6 +123,36 @@ export default function TransferList({ searchQuery, typeFilter }: { searchQuery:
     return (
       <Card className="h-96 animate-pulse bg-muted/50"></Card>
     );
+  }
+
+  if (paginatedTransfers.length === 0) {
+      const noTransfersMessage = () => {
+          if ((userRole === 'issuer' || userRole === 'agent') && !selectedToken) {
+              return {
+                  title: "No Token Selected",
+                  description: "Please select a token from the sidebar to view its transfers."
+              }
+          }
+          if (searchQuery || typeFilter !== 'all') {
+              return {
+                  title: "No Transfers Found",
+                  description: "Try adjusting your search or filter."
+              }
+          }
+          return {
+              title: "No Transfers Found",
+              description: `There are no transfers for ${selectedToken?.tokenTicker} at this time.`
+          }
+      }
+      return (
+        <div className="border-dashed border-2 border-muted-foreground/50 rounded-lg h-96 flex flex-col items-center justify-center text-center p-4">
+            <ArrowRightLeft className="h-16 w-16 text-muted-foreground mb-4" />
+            <h2 className="text-xl font-semibold mb-2">{noTransfersMessage().title}</h2>
+            <p className="text-muted-foreground mb-4">
+                {noTransfersMessage().description}
+            </p>
+        </div>
+      )
   }
 
   return (
