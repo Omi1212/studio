@@ -12,7 +12,7 @@ import SidebarNav from '@/components/dashboard/sidebar-nav';
 import HeaderDynamic from '@/components/dashboard/header-dynamic';
 import { transfersData } from '@/lib/data';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Copy, Clock, Tag, ArrowRight } from 'lucide-react';
+import { ArrowLeft, Copy, Clock, Tag, ArrowRight, ArrowDown, ArrowUp } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
@@ -34,6 +34,21 @@ function InfoRow({ label, value, onCopy }: { label: string; value: string; onCop
         )}
       </div>
     </div>
+  );
+}
+
+function AddressInfoRow({ label, value, icon: Icon, onCopy }: { label: string; value: string; icon: React.ElementType, onCopy: () => void }) {
+  return (
+      <div>
+          <p className="text-sm text-muted-foreground mb-1">{label}</p>
+          <div className="flex items-center gap-2">
+              <Icon className="h-4 w-4 text-muted-foreground" />
+              <p className="font-mono text-sm break-all">{value}</p>
+              <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0" onClick={onCopy}>
+                  <Copy className="h-4 w-4" />
+              </Button>
+          </div>
+      </div>
   );
 }
 
@@ -142,16 +157,19 @@ export default function TransferDetailsPage() {
                 <Card>
                     <CardContent className="p-6 space-y-4">
                         <h3 className="text-lg font-semibold text-muted-foreground">Details</h3>
-                        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                            <div className="flex-1">
-                                <p className="text-sm text-muted-foreground mb-1">From</p>
-                                <InfoRow value={transfer.from} onCopy={() => copyToClipboard(transfer.from, 'From Address')} />
-                            </div>
-                            <ArrowRight className="h-5 w-5 text-muted-foreground self-center rotate-90 md:rotate-0" />
-                            <div className={cn("flex-1", transfer.type === 'Burn' && 'text-red-500')}>
-                                <p className="text-sm text-muted-foreground mb-1">To</p>
-                                <InfoRow value={transfer.to} onCopy={() => copyToClipboard(transfer.to, 'To Address')} />
-                            </div>
+                         <div className="space-y-4">
+                            <AddressInfoRow 
+                                label="From"
+                                value={transfer.from}
+                                icon={ArrowUp}
+                                onCopy={() => copyToClipboard(transfer.from, 'From Address')}
+                            />
+                             <AddressInfoRow
+                                label="To"
+                                value={transfer.to}
+                                icon={ArrowDown}
+                                onCopy={() => copyToClipboard(transfer.to, 'To Address')}
+                            />
                         </div>
                         <Separator />
                         <div className="grid grid-cols-2 gap-4 text-sm">
@@ -187,3 +205,4 @@ export default function TransferDetailsPage() {
     </SidebarProvider>
   );
 }
+
