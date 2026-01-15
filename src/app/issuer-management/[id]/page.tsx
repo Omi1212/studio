@@ -13,7 +13,7 @@ import SidebarNav from '@/components/dashboard/sidebar-nav';
 import HeaderDynamic from '@/components/dashboard/header-dynamic';
 import { issuersData } from '@/lib/data';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Edit, Trash2 } from 'lucide-react';
+import { ArrowLeft, Edit, Power, PowerOff } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -78,16 +78,20 @@ export default function IssuerDetailsPage() {
     setLoading(false);
   }, [params]);
 
-  const handleDelete = () => {
+  const handleToggleStatus = () => {
     if (!issuer) return;
+    const newStatus = issuer.status === 'active' ? 'inactive' : 'active';
+    const updatedIssuer = { ...issuer, status: newStatus };
+    
     const storedIssuers: Issuer[] = JSON.parse(localStorage.getItem('issuers') || '[]');
-    const updatedIssuers = storedIssuers.filter(i => i.id !== issuer.id);
+    const updatedIssuers = storedIssuers.map(i => i.id === issuer.id ? updatedIssuer : i);
     localStorage.setItem('issuers', JSON.stringify(updatedIssuers));
+    setIssuer(updatedIssuer);
+    
     toast({
-        title: "Issuer Deleted",
-        description: `"${issuer.name}" has been deleted.`,
+        title: "Status Updated",
+        description: `Issuer "${issuer.name}" is now ${newStatus}.`,
     });
-    router.push('/issuer-management');
   };
 
   if (loading) {
@@ -126,20 +130,23 @@ export default function IssuerDetailsPage() {
                     </Button>
                     <AlertDialog>
                         <AlertDialogTrigger asChild>
-                            <Button variant="destructive">
-                                <Trash2 className="mr-2 h-4 w-4" /> Delete
+                             <Button variant={issuer.status === 'active' ? 'destructive' : 'outline'}>
+                                {issuer.status === 'active' ? 
+                                    <><PowerOff className="mr-2 h-4 w-4" /> Set Inactive</> : 
+                                    <><Power className="mr-2 h-4 w-4" /> Set Active</>
+                                }
                             </Button>
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                             <AlertDialogHeader>
                                 <AlertDialogTitle>Are you sure?</AlertDialogTitle>
                                 <AlertDialogDescription>
-                                This action cannot be undone. This will permanently delete the issuer "{issuer.name}".
+                                This will change the status of the issuer "{issuer.name}" to {issuer.status === 'active' ? 'Inactive' : 'Active'}.
                                 </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
                                 <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction onClick={handleDelete} className="bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction>
+                                <AlertDialogAction onClick={handleToggleStatus}>Confirm</AlertDialogAction>
                             </AlertDialogFooter>
                         </AlertDialogContent>
                     </AlertDialog>

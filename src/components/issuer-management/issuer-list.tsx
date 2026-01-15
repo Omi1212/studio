@@ -41,7 +41,7 @@ function getStatusBadge(status: Issuer['status']) {
   }
 }
 
-function IssuerTableRow({ issuer, onDelete, onCopy }: { issuer: Issuer, onDelete: (id: string) => void, onCopy: (text: string) => void }) {
+function IssuerTableRow({ issuer, onToggleStatus, onCopy }: { issuer: Issuer, onToggleStatus: (id: string) => void, onCopy: (text: string) => void }) {
   return (
     <TableRow>
       <TableCell>
@@ -81,8 +81,8 @@ function IssuerTableRow({ issuer, onDelete, onCopy }: { issuer: Issuer, onDelete
                 <Link href={`/issuer-management/${issuer.id}/edit`}>Edit</Link>
             </DropdownMenuItem>
              <AlertDialogTrigger asChild>
-              <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-red-500 focus:text-red-500">
-                Delete
+              <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                {issuer.status === 'active' ? 'Set as Inactive' : 'Set as Active'}
               </DropdownMenuItem>
             </AlertDialogTrigger>
           </DropdownMenuContent>
@@ -91,12 +91,12 @@ function IssuerTableRow({ issuer, onDelete, onCopy }: { issuer: Issuer, onDelete
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the issuer "{issuer.name}".
+              This will change the status of the issuer "{issuer.name}" to {issuer.status === 'active' ? 'Inactive' : 'Active'}.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={() => onDelete(issuer.id)} className="bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction>
+            <AlertDialogAction onClick={() => onToggleStatus(issuer.id)}>Confirm</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </TableCell>
@@ -154,10 +154,23 @@ export default function IssuerList() {
     }
   };
 
-  const handleDelete = (id: string) => {
-    const updatedIssuers = issuers.filter(issuer => issuer.id !== id);
+  const handleToggleStatus = (id: string) => {
+    let updatedIssuer: Issuer | undefined;
+    const updatedIssuers = issuers.map(issuer => {
+      if (issuer.id === id) {
+        updatedIssuer = { ...issuer, status: issuer.status === 'active' ? 'inactive' : 'active' };
+        return updatedIssuer;
+      }
+      return issuer;
+    });
     setIssuers(updatedIssuers);
     localStorage.setItem('issuers', JSON.stringify(updatedIssuers));
+    if (updatedIssuer) {
+        toast({
+            title: "Status Updated",
+            description: `Issuer "${updatedIssuer.name}" is now ${updatedIssuer.status}.`
+        });
+    }
   };
   
   const handleCopy = (text: string) => {
@@ -270,7 +283,7 @@ export default function IssuerList() {
             <TableBody>
               {paginatedIssuers.map(issuer => (
                 <AlertDialog key={issuer.id}>
-                  <IssuerTableRow issuer={issuer} onDelete={handleDelete} onCopy={handleCopy} />
+                  <IssuerTableRow issuer={issuer} onToggleStatus={handleToggleStatus} onCopy={handleCopy} />
                 </AlertDialog>
               ))}
             </TableBody>
