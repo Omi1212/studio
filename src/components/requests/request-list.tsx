@@ -66,7 +66,6 @@ function RequestCard({ request }: { request: CombinedRequest }) {
               <CardDescription className="text-primary font-bold">{request.tokenTicker}</CardDescription>
             </div>
           </div>
-          {getStatusBadge(request.status)}
         </div>
       </CardHeader>
       <CardContent>
@@ -95,8 +94,8 @@ function RequestCard({ request }: { request: CombinedRequest }) {
             </div>
         )}
         <div className="flex justify-between text-sm mt-2">
-          <span className="text-muted-foreground">Max Supply</span>
-          <span className="font-medium font-mono">{request.maxSupply.toLocaleString()}</span>
+          <span className="text-muted-foreground">Status</span>
+          {getStatusBadge(request.status)}
         </div>
       </CardContent>
       <CardFooter>
@@ -157,9 +156,6 @@ function RequestTableRow({ request }: { request: CombinedRequest }) {
             <span className="text-muted-foreground">--</span>
         )}
       </TableCell>
-       <TableCell className="hidden sm:table-cell font-mono">
-        {request.maxSupply.toLocaleString()}
-       </TableCell>
        <TableCell>
         {getStatusBadge(request.status)}
        </TableCell>
@@ -385,7 +381,6 @@ export default function RequestList({ view, setView }: { view: ViewMode, setView
                 <TableHead>Token</TableHead>
                 <TableHead className="hidden md:table-cell">Issuer</TableHead>
                 <TableHead className="hidden lg:table-cell">Wallet</TableHead>
-                <TableHead className="hidden sm:table-cell">Max Supply</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
@@ -402,3 +397,4 @@ export default function RequestList({ view, setView }: { view: ViewMode, setView
     </div>
   )
 }
+
