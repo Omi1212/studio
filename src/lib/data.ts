@@ -206,7 +206,7 @@ export const exampleTokens: Omit<TokenDetails, 'tokenIcon' | 'destinationAddress
     tokenName: 'Digital Dollar',
     tokenTicker: 'DUSD',
     status: 'active' as const,
-    network: 'liquid',
+    network: 'spark',
     maxSupply: 100000000,
     price: 1.00,
     decimals: 2,
@@ -549,4 +549,5 @@ export const issuersData: Issuer[] = [
         status: 'inactive',
     },
 ];
+
 
