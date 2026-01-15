@@ -17,6 +17,7 @@ interface PlaceOrderProps {
     token: TokenDetails;
     price: number;
     isSubscribed: boolean;
+    onOrderPlaced: () => void;
 }
 
 const UsdtIcon = () => (
@@ -28,7 +29,7 @@ const UsdtIcon = () => (
     </svg>
 )
 
-export default function PlaceOrder({ token, price, isSubscribed }: PlaceOrderProps) {
+export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced }: PlaceOrderProps) {
     const { toast } = useToast();
     const router = useRouter();
 
@@ -133,6 +134,7 @@ export default function PlaceOrder({ token, price, isSubscribed }: PlaceOrderPro
         const existingOrders = JSON.parse(localStorage.getItem('orders') || JSON.stringify(ordersData));
         localStorage.setItem('orders', JSON.stringify([newOrder, ...existingOrders]));
 
+        onOrderPlaced();
         router.push('/orders');
     }
 
@@ -143,84 +145,82 @@ export default function PlaceOrder({ token, price, isSubscribed }: PlaceOrderPro
     )
 
     return (
-        <Card className="relative">
-            <CardContent className="p-6 space-y-4">
-                {/* Field A */}
-                <div className="rounded-lg border bg-card text-card-foreground shadow-sm p-4 space-y-2">
-                    <div className="flex justify-between items-center text-sm text-muted-foreground">
+        <div className="relative space-y-4">
+            {/* Field A */}
+            <div className="rounded-lg border bg-card text-card-foreground shadow-sm p-4 space-y-2">
+                <div className="flex justify-between items-center text-sm text-muted-foreground">
+                    <div className="flex items-center gap-2">
+                        <Wallet className="h-4 w-4" />
+                        <span>Balance: {balanceA.toLocaleString()} {tokenA.tokenTicker}</span>
+                    </div>
+                    {!isSwapped && (
                         <div className="flex items-center gap-2">
-                            <Wallet className="h-4 w-4" />
-                            <span>Balance: {balanceA.toLocaleString()} {tokenA.tokenTicker}</span>
+                            <button onClick={() => handlePercentage(25)} className="hover:text-primary">25%</button>
+                            <button onClick={() => handlePercentage(50)} className="hover:text-primary">50%</button>
+                            <button onClick={() => handlePercentage(100)} className="hover:text-primary">Max</button>
                         </div>
-                        {!isSwapped && (
-                            <div className="flex items-center gap-2">
-                                <button onClick={() => handlePercentage(25)} className="hover:text-primary">25%</button>
-                                <button onClick={() => handlePercentage(50)} className="hover:text-primary">50%</button>
-                                <button onClick={() => handlePercentage(100)} className="hover:text-primary">Max</button>
+                    )}
+                </div>
+                <div className="flex justify-between items-end">
+                    <div>
+                         <p className="text-sm text-muted-foreground">You Pay</p>
+                        <Input
+                            type="number"
+                            placeholder="0.0"
+                            value={amountA}
+                            onChange={handleAmountAChange}
+                            className="text-3xl font-bold border-none shadow-none p-0 h-auto focus-visible:ring-0 focus-visible:ring-offset-0"
+                        />
+                    </div>
+                    <div className="flex items-center gap-2 bg-muted p-2 rounded-full">
+                        {isSwapped ? <TokenIcon token={tokenA} className="h-6 w-6" /> : <UsdtIcon />}
+                        <span className="font-semibold">{tokenA.tokenTicker}</span>
+                    </div>
+                </div>
+            </div>
+
+            {/* Swap Icon */}
+            <div className="flex justify-center -my-6 z-10">
+                <Button variant="outline" size="icon" className="flex-center h-8 w-8 rounded-full bg-muted border" onClick={handleSwap}>
+                    <ArrowDownUp className="h-4 w-4 text-muted-foreground" />
+                </Button>
+            </div>
+
+            {/* Field B */}
+            <div className="rounded-lg border bg-card text-card-foreground shadow-sm p-4 space-y-2">
+                <div className="flex justify-between items-end">
+                   <div>
+                        <p className="text-sm text-muted-foreground">You Receive</p>
+                         <Input
+                            type="number"
+                            placeholder="0.0"
+                            value={amountB}
+                            onChange={handleAmountBChange}
+                            className="text-3xl font-bold border-none shadow-none p-0 h-auto focus-visible:ring-0 focus-visible:ring-offset-0"
+                        />
+                    </div>
+                    <div className="flex items-center gap-2 bg-muted p-2 rounded-full">
+                        {isSwapped ? <UsdtIcon /> : <TokenIcon token={tokenB} className="h-6 w-6" />}
+                        <span className="font-semibold">{tokenB.tokenTicker}</span>
+                    </div>
+                </div>
+                <p className="text-sm text-muted-foreground">1 {token.tokenTicker} ≈ ${price.toFixed(4)} USDT</p>
+            </div>
+            
+             {isSubscribed ? OrderButton : (
+                <TooltipProvider>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <div className="w-full">
+                                {OrderButton}
                             </div>
-                        )}
-                    </div>
-                    <div className="flex justify-between items-end">
-                        <div>
-                             <p className="text-sm text-muted-foreground">You Pay</p>
-                            <Input
-                                type="number"
-                                placeholder="0.0"
-                                value={amountA}
-                                onChange={handleAmountAChange}
-                                className="text-3xl font-bold border-none shadow-none p-0 h-auto focus-visible:ring-0 focus-visible:ring-offset-0"
-                            />
-                        </div>
-                        <div className="flex items-center gap-2 bg-muted p-2 rounded-full">
-                            {isSwapped ? <TokenIcon token={tokenA} className="h-6 w-6" /> : <UsdtIcon />}
-                            <span className="font-semibold">{tokenA.tokenTicker}</span>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Swap Icon */}
-                <div className="flex justify-center -my-6 z-10">
-                    <Button variant="outline" size="icon" className="flex-center h-8 w-8 rounded-full bg-muted border" onClick={handleSwap}>
-                        <ArrowDownUp className="h-4 w-4 text-muted-foreground" />
-                    </Button>
-                </div>
-
-                {/* Field B */}
-                <div className="rounded-lg border bg-card text-card-foreground shadow-sm p-4 space-y-2">
-                    <div className="flex justify-between items-end">
-                       <div>
-                            <p className="text-sm text-muted-foreground">You Receive</p>
-                             <Input
-                                type="number"
-                                placeholder="0.0"
-                                value={amountB}
-                                onChange={handleAmountBChange}
-                                className="text-3xl font-bold border-none shadow-none p-0 h-auto focus-visible:ring-0 focus-visible:ring-offset-0"
-                            />
-                        </div>
-                        <div className="flex items-center gap-2 bg-muted p-2 rounded-full">
-                            {isSwapped ? <UsdtIcon /> : <TokenIcon token={tokenB} className="h-6 w-6" />}
-                            <span className="font-semibold">{tokenB.tokenTicker}</span>
-                        </div>
-                    </div>
-                    <p className="text-sm text-muted-foreground">1 {token.tokenTicker} ≈ ${price.toFixed(4)} USDT</p>
-                </div>
-                
-                 {isSubscribed ? OrderButton : (
-                    <TooltipProvider>
-                        <Tooltip>
-                            <TooltipTrigger asChild>
-                                <div className="w-full">
-                                    {OrderButton}
-                                </div>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                                <p>You must be subscribed to this offering to place an order.</p>
-                            </TooltipContent>
-                        </Tooltip>
-                    </TooltipProvider>
-                )}
-            </CardContent>
-        </Card>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                            <p>You must be subscribed to this offering to place an order.</p>
+                        </TooltipContent>
+                    </Tooltip>
+                </TooltipProvider>
+            )}
+        </div>
     );
 }

@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useEffect, useState, useMemo } from 'react';
@@ -15,7 +14,8 @@ import { useToast } from '@/hooks/use-toast';
 import { Input } from '../ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { cn } from '@/lib/utils';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
+import PlaceOrder from './place-order';
 
 
 type SubscriptionStatus = 'none' | 'pending' | 'approved';
@@ -27,7 +27,7 @@ const networkMap: { [key: string]: string } = {
     taproot: 'Taproot Assets',
 };
 
-function TokenCard({ token, onAction, subscriptionStatus }: { token: TokenDetails, onAction: () => void, subscriptionStatus: SubscriptionStatus }) {
+function TokenCard({ token, onAction, subscriptionStatus }: { token: TokenDetails, onAction: (token: TokenDetails) => void, subscriptionStatus: SubscriptionStatus }) {
   const router = useRouter();
 
   const handleView = () => {
@@ -37,11 +37,15 @@ function TokenCard({ token, onAction, subscriptionStatus }: { token: TokenDetail
   const getActionButton = () => {
     switch (subscriptionStatus) {
       case 'none':
-        return <Button variant="outline" className="w-full" onClick={onAction}>Subscribe</Button>;
+        return <Button variant="outline" className="w-full" onClick={() => onAction(token)}>Subscribe</Button>;
       case 'pending':
         return <Button className="w-full text-yellow-400 border-yellow-400" variant="outline" disabled>Pending</Button>;
       case 'approved':
-        return <Button className="w-full bg-green-600 hover:bg-green-700" onClick={onAction}>Invest</Button>;
+         return (
+            <DialogTrigger asChild>
+                <Button className="w-full bg-green-600 hover:bg-green-700" onClick={() => onAction(token)}>Invest</Button>
+            </DialogTrigger>
+        )
       default:
         return null;
     }
@@ -78,7 +82,7 @@ function TokenCard({ token, onAction, subscriptionStatus }: { token: TokenDetail
   );
 }
 
-function TokenTableRow({ token, onAction, subscriptionStatus }: { token: TokenDetails, onAction: () => void, subscriptionStatus: SubscriptionStatus }) {
+function TokenTableRow({ token, onAction, subscriptionStatus }: { token: TokenDetails, onAction: (token: TokenDetails) => void, subscriptionStatus: SubscriptionStatus }) {
     const router = useRouter();
 
     const handleView = () => {
@@ -88,11 +92,15 @@ function TokenTableRow({ token, onAction, subscriptionStatus }: { token: TokenDe
     const getActionButton = () => {
         switch (subscriptionStatus) {
             case 'none':
-                return <Button variant="outline" size="sm" onClick={onAction}>Subscribe</Button>;
+                return <Button variant="outline" size="sm" onClick={() => onAction(token)}>Subscribe</Button>;
             case 'pending':
                 return <Button size="sm" variant="outline" className="text-yellow-400 border-yellow-400" disabled>Pending</Button>;
             case 'approved':
-                return <Button size="sm" className="bg-green-600 hover:bg-green-700" onClick={onAction}>Invest</Button>;
+                return (
+                    <DialogTrigger asChild>
+                        <Button size="sm" className="bg-green-600 hover:bg-green-700" onClick={() => onAction(token)}>Invest</Button>
+                    </DialogTrigger>
+                );
             default:
                 return null;
         }
@@ -129,13 +137,12 @@ export default function TokenList() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [view, setView] = useState<ViewMode>('card');
+  const [selectedToken, setSelectedToken] = useState<TokenDetails | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
-    // We re-initialize the state every time the component mounts (page load).
-    setSubscriptions({
-        'example-1': 'approved'
-    });
+    setSubscriptions({ 'example-1': 'approved' });
 
     const storedTokens: TokenDetails[] = JSON.parse(localStorage.getItem('createdTokens') || '[]');
     const combinedTokens: TokenDetails[] = [...exampleTokens, ...storedTokens].map(t => ({
@@ -147,7 +154,8 @@ export default function TokenList() {
       tokenTicker: t.tokenTicker || '---',
       network: t.network || 'unknown',
       maxSupply: t.maxSupply || 0,
-    })).filter(t => t.status === 'active'); // Only show active tokens in marketplace
+      price: t.price || 0,
+    })).filter(t => t.status === 'active');
     
     setAllTokens(combinedTokens);
     setLoading(false);
@@ -171,19 +179,16 @@ export default function TokenList() {
     return filtered;
   }, [allTokens, searchQuery, filterStatus, subscriptions]);
   
-  const handleSubscriptionAction = (tokenId: string) => {
-    const currentStatus = subscriptions[tokenId] || 'none';
-    let newStatus: SubscriptionStatus = 'none';
-
+  const handleSubscriptionAction = (token: TokenDetails) => {
+    const currentStatus = subscriptions[token.id] || 'none';
+    
     if (currentStatus === 'none') {
-        newStatus = 'pending';
+        setSubscriptions(prev => ({...prev, [token.id]: 'pending' }));
         toast({ title: 'Subscribed!', description: "Your subscription request has been sent and is now pending." });
     } else if (currentStatus === 'approved') {
-        router.push(`/marketplace/${tokenId}`);
-        return;
+        setSelectedToken(token);
+        setIsModalOpen(true);
     }
-
-    setSubscriptions(prev => ({...prev, [tokenId]: newStatus }));
   };
 
 
@@ -215,94 +220,112 @@ export default function TokenList() {
   }
 
   return (
-    <div className="mb-12 space-y-4">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl font-headline font-semibold">Available Tokens</h2>
-      </div>
-       <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-            <div className="relative w-full sm:w-auto flex-grow sm:flex-grow-0">
-                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input
-                    placeholder="Search by name or ticker..."
-                    className="pl-8 w-full sm:w-64"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                />
-            </div>
-            <Select value={filterStatus} onValueChange={setFilterStatus}>
-                <SelectTrigger className="w-full sm:w-[180px]">
-                    <SelectValue placeholder="Filter by status" />
-                </SelectTrigger>
-                <SelectContent>
-                    <SelectItem value="all">All Statuses</SelectItem>
-                    <SelectItem value="none">Subscribe</SelectItem>
-                    <SelectItem value="pending">Pending</SelectItem>
-                    <SelectItem value="approved">Invest</SelectItem>
-                </SelectContent>
-            </Select>
-            <div className="hidden sm:flex items-center gap-1 bg-muted p-1 rounded-lg ml-auto">
-              <Button 
-                variant={view === 'card' ? 'secondary' : 'ghost'} 
-                size="icon" 
-                className="h-8 w-8"
-                onClick={() => setView('card')}
-                aria-label="Card View"
-                >
-                <LayoutGrid className="h-4 w-4" />
-            </Button>
-            <Button 
-                variant={view === 'table' ? 'secondary' : 'ghost'} 
-                size="icon" 
-                className="h-8 w-8"
-                onClick={() => setView('table')}
-                aria-label="Table View"
-                >
-                <List className="h-4 w-4" />
-            </Button>
+    <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <div className="mb-12 space-y-4">
+        <div className="flex justify-between items-center mb-4">
+            <h2 className="text-2xl font-headline font-semibold">Available Tokens</h2>
         </div>
-        </div>
-       {filteredTokens.length === 0 ? (
-         <div className="border-dashed border-2 border-muted-foreground/50 rounded-lg h-96 flex flex-col items-center justify-center text-center p-4">
-            <ShoppingBag className="h-16 w-16 text-muted-foreground mb-4" />
-            <h2 className="text-xl font-semibold mb-2">No tokens match your search</h2>
-            <p className="text-muted-foreground mb-4">Try adjusting your search or filters to find what you're looking for.</p>
-        </div>
-       ) : view === 'card' ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredTokens.map(token => (
-                    <TokenCard 
-                        key={token.id} 
-                        token={token} 
-                        onAction={() => handleSubscriptionAction(token.id)}
-                        subscriptionStatus={subscriptions[token.id] || 'none'}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                <div className="relative w-full sm:w-auto flex-grow sm:flex-grow-0">
+                    <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <Input
+                        placeholder="Search by name or ticker..."
+                        className="pl-8 w-full sm:w-64"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
                     />
-                ))}
+                </div>
+                <Select value={filterStatus} onValueChange={setFilterStatus}>
+                    <SelectTrigger className="w-full sm:w-[180px]">
+                        <SelectValue placeholder="Filter by status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectIte'm value="all">All Statuses</SelectItem>
+                        <SelectItem value="none">Subscribe</SelectItem>
+                        <SelectItem value="pending">Pending</SelectItem>
+                        <SelectItem value="approved">Invest</SelectItem>
+                    </SelectContent>
+                </Select>
+                <div className="hidden sm:flex items-center gap-1 bg-muted p-1 rounded-lg ml-auto">
+                <Button 
+                    variant={view === 'card' ? 'secondary' : 'ghost'} 
+                    size="icon" 
+                    className="h-8 w-8"
+                    onClick={() => setView('card')}
+                    aria-label="Card View"
+                    >
+                    <LayoutGrid className="h-4 w-4" />
+                </Button>
+                <Button 
+                    variant={view === 'table' ? 'secondary' : 'ghost'} 
+                    size="icon" 
+                    className="h-8 w-8"
+                    onClick={() => setView('table')}
+                    aria-label="Table View"
+                    >
+                    <List className="h-4 w-4" />
+                </Button>
             </div>
-        ) : (
-            <Card>
-                <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead className="w-[30%]">Token</TableHead>
-                            <TableHead>Network</TableHead>
-                            <TableHead>Max Supply</TableHead>
-                            <TableHead className="text-right w-[25%]">Action</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {filteredTokens.map(token => (
-                           <TokenTableRow 
-                                key={token.id} 
-                                token={token} 
-                                onAction={() => handleSubscriptionAction(token.id)}
-                                subscriptionStatus={subscriptions[token.id] || 'none'}
-                            />
-                        ))}
-                    </TableBody>
-                </Table>
-            </Card>
+            </div>
+        {filteredTokens.length === 0 ? (
+            <div className="border-dashed border-2 border-muted-foreground/50 rounded-lg h-96 flex flex-col items-center justify-center text-center p-4">
+                <ShoppingBag className="h-16 w-16 text-muted-foreground mb-4" />
+                <h2 className="text-xl font-semibold mb-2">No tokens match your search</h2>
+                <p className="text-muted-foreground mb-4">Try adjusting your search or filters to find what you're looking for.</p>
+            </div>
+        ) : view === 'card' ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {filteredTokens.map(token => (
+                        <TokenCard 
+                            key={token.id} 
+                            token={token} 
+                            onAction={handleSubscriptionAction}
+                            subscriptionStatus={subscriptions[token.id] || 'none'}
+                        />
+                    ))}
+                </div>
+            ) : (
+                <Card>
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead className="w-[30%]">Token</TableHead>
+                                <TableHead>Network</TableHead>
+                                <TableHead>Max Supply</TableHead>
+                                <TableHead className="text-right w-[25%]">Action</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {filteredTokens.map(token => (
+                            <TokenTableRow 
+                                    key={token.id} 
+                                    token={token} 
+                                    onAction={handleSubscriptionAction}
+                                    subscriptionStatus={subscriptions[token.id] || 'none'}
+                                />
+                            ))}
+                        </TableBody>
+                    </Table>
+                </Card>
+            )}
+        </div>
+         {selectedToken && (
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>Invest in {selectedToken.tokenName}</DialogTitle>
+                    <DialogDescription>
+                        Place your order for {selectedToken.tokenTicker}.
+                    </DialogDescription>
+                </DialogHeader>
+                <PlaceOrder 
+                    token={selectedToken} 
+                    price={selectedToken.price || 0} 
+                    isSubscribed={true}
+                    onOrderPlaced={() => setIsModalOpen(false)}
+                />
+            </DialogContent>
         )}
-    </div>
+    </Dialog>
   );
 }
 

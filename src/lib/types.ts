@@ -33,3 +33,4 @@ export type Transfer = {
     tokenTicker: string;
     date: string;
 }
+
