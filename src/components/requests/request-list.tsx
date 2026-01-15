@@ -3,15 +3,19 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { exampleTokens, issuersData } from '@/lib/data';
-import type { TokenDetails, Issuer } from '@/lib/types';
-import { Card } from '../ui/card';
+import type { TokenDetails, Issuer, ViewMode } from '@/lib/types';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/card';
 import { Avatar, AvatarFallback } from '../ui/avatar';
 import { Button } from '../ui/button';
-import { Search, Check, X, FilePenLine } from 'lucide-react';
+import { Search, Check, X, FilePenLine, MoreVertical, LayoutGrid, List } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
 import { useToast } from '@/hooks/use-toast';
 import { Input } from '../ui/input';
 import TokenIcon from '../ui/token-icon';
+import { Badge } from '../ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
+import Link from 'next/link';
 
 type CombinedRequest = TokenDetails & { issuer?: Issuer };
 
@@ -23,6 +27,71 @@ const networkMap: { [key: string]: string } = {
     rgb: 'RGB',
     taproot: 'Taproot Assets',
 };
+
+function getStatusBadge(status: TokenDetails['status']) {
+  switch (status) {
+    case 'active':
+      return <Badge variant="outline" className="text-green-400 border-green-400">Approved</Badge>;
+    case 'pending':
+      return <Badge variant="outline" className="text-yellow-400 border-yellow-400">Pending</Badge>;
+    case 'rejected':
+      return <Badge variant="destructive">Rejected</Badge>;
+     case 'draft':
+      return <Badge variant="secondary">Draft</Badge>;
+    default:
+      return <Badge variant="secondary">Unknown</Badge>;
+  }
+};
+
+function RequestCard({ request, onApprove, onReject }: { request: CombinedRequest, onApprove: (id: string) => void, onReject: (id: string) => void }) {
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex items-start justify-between">
+          <div className="flex items-center gap-4">
+            <TokenIcon token={request} className="h-10 w-10" />
+            <div>
+              <CardTitle className="text-lg">{request.tokenName}</CardTitle>
+              <CardDescription className="text-primary font-bold">{request.tokenTicker}</CardDescription>
+            </div>
+          </div>
+          {getStatusBadge(request.status)}
+        </div>
+      </CardHeader>
+      <CardContent>
+        {request.issuer && (
+            <div className="flex items-center gap-3 mb-4">
+              <Avatar className="h-8 w-8">
+                <AvatarFallback>{request.issuer.name.charAt(0)}</AvatarFallback>
+              </Avatar>
+              <div>
+                <p className="text-sm font-medium">{request.issuer.name}</p>
+                <p className="text-xs text-muted-foreground">{request.issuer.email}</p>
+              </div>
+            </div>
+        )}
+        <div className="flex justify-between text-sm mt-2">
+          <span className="text-muted-foreground">Network</span>
+          <span className="font-medium">{networkMap[request.network] || request.network}</span>
+        </div>
+        <div className="flex justify-between text-sm mt-2">
+          <span className="text-muted-foreground">Max Supply</span>
+          <span className="font-medium font-mono">{request.maxSupply.toLocaleString()}</span>
+        </div>
+      </CardContent>
+      {request.status === 'pending' && (
+        <CardFooter className="flex gap-2">
+          <Button variant="outline" className="w-full" onClick={() => onReject(request.id)}>
+            <X className="mr-2 h-4 w-4" /> Reject
+          </Button>
+          <Button className="w-full" onClick={() => onApprove(request.id)}>
+            <Check className="mr-2 h-4 w-4" /> Approve
+          </Button>
+        </CardFooter>
+      )}
+    </Card>
+  );
+}
 
 function RequestTableRow({ request, onApprove, onReject }: { request: CombinedRequest, onApprove: (id: string) => void, onReject: (id: string) => void }) {
   return (
@@ -57,34 +126,42 @@ function RequestTableRow({ request, onApprove, onReject }: { request: CombinedRe
        <TableCell className="hidden sm:table-cell font-mono">
         {request.maxSupply.toLocaleString()}
        </TableCell>
+       <TableCell>
+        {getStatusBadge(request.status)}
+       </TableCell>
       <TableCell className="text-right">
-        <div className="flex items-center justify-end gap-2">
+        {request.status === 'pending' ? (
+          <div className="flex items-center justify-end gap-2">
             <Button size="sm" variant="outline" onClick={() => onReject(request.id)}>
-                 <X className="mr-2 h-4 w-4" /> Reject
+              <X className="mr-2 h-4 w-4" /> Reject
             </Button>
             <Button size="sm" onClick={() => onApprove(request.id)}>
-                <Check className="mr-2 h-4 w-4" /> Approve
+              <Check className="mr-2 h-4 w-4" /> Approve
             </Button>
-        </div>
+          </div>
+        ) : (
+          <span>-</span>
+        )}
       </TableCell>
     </TableRow>
   );
 }
 
 
-export default function RequestList() {
+export default function RequestList({ view, setView }: { view: ViewMode, setView: (mode: ViewMode) => void }) {
   const [requests, setRequests] = useState<CombinedRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     const storedTokens: TokenDetails[] = JSON.parse(localStorage.getItem('createdTokens') || '[]');
-    const allTokens: TokenDetails[] = [...exampleTokens, ...storedTokens];
-    const pendingTokens = allTokens.filter(token => token.status === 'pending');
+    // We combine example tokens for demo purposes, filtering out drafts
+    const allTokens: TokenDetails[] = [...exampleTokens, ...storedTokens].filter(token => token.status !== 'draft');
     
-    const combinedRequests: CombinedRequest[] = pendingTokens.map(token => ({
+    const combinedRequests: CombinedRequest[] = allTokens.map(token => ({
       ...token,
       issuer: issuersData.find(issuer => issuer.id === token.issuerId)
     }));
@@ -95,6 +172,10 @@ export default function RequestList() {
 
   const filteredRequests = useMemo(() => {
     let filtered = [...requests];
+
+    if (statusFilter !== 'all') {
+      filtered = filtered.filter(req => req.status === statusFilter);
+    }
     
     if (searchQuery) {
       const lowercasedQuery = searchQuery.toLowerCase();
@@ -107,11 +188,11 @@ export default function RequestList() {
     }
 
     return filtered;
-  }, [requests, searchQuery]);
+  }, [requests, searchQuery, statusFilter]);
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery]);
+  }, [searchQuery, statusFilter]);
 
   const totalPages = Math.ceil(filteredRequests.length / ITEMS_PER_PAGE);
 
@@ -129,17 +210,22 @@ export default function RequestList() {
 
   const updateRequestStatus = (id: string, status: 'active' | 'rejected') => {
     const allTokens: TokenDetails[] = JSON.parse(localStorage.getItem('createdTokens') || '[]');
-    const updatedTokens = allTokens.map((token: TokenDetails) => 
-        token.id === id ? { ...token, status } : token
-    );
+    let tokenName = '';
+    const updatedTokens = allTokens.map((token: TokenDetails) => {
+        if (token.id === id) {
+          tokenName = token.tokenName;
+          return { ...token, status };
+        }
+        return token;
+    });
     localStorage.setItem('createdTokens', JSON.stringify(updatedTokens));
 
-    // Update local state to remove the processed request
-    setRequests(prev => prev.filter(req => req.id !== id));
+    // Update local state
+    setRequests(prev => prev.map(req => req.id === id ? { ...req, status } : req));
 
     toast({
         title: `Request ${status === 'active' ? 'Approved' : 'Rejected'}`,
-        description: `The token request has been ${status === 'active' ? 'approved' : 'rejected'}.`
+        description: `The token "${tokenName}" has been ${status === 'active' ? 'approved' : 'rejected'}.`
     });
   }
 
@@ -206,17 +292,57 @@ export default function RequestList() {
                     onChange={(e) => setSearchQuery(e.target.value)}
                 />
             </div>
+             <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-full sm:w-[180px]">
+                    <SelectValue placeholder="Filter by status" />
+                </SelectTrigger>
+                <SelectContent>
+                    <SelectItem value="all">All Statuses</SelectItem>
+                    <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="active">Approved</SelectItem>
+                    <SelectItem value="rejected">Rejected</SelectItem>
+                </SelectContent>
+            </Select>
+            <div className="hidden sm:flex items-center gap-1 bg-muted p-1 rounded-lg ml-auto">
+                <Button
+                    variant={view === 'card' ? 'secondary' : 'ghost'}
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={() => setView('card')}
+                    aria-label="Card View"
+                >
+                    <LayoutGrid className="h-4 w-4" />
+                </Button>
+                <Button
+                    variant={view === 'table' ? 'secondary' : 'ghost'}
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={() => setView('table')}
+                    aria-label="Table View"
+                >
+                    <List className="h-4 w-4" />
+                </Button>
+            </div>
         </div>
       </div>
 
        {paginatedRequests.length === 0 ? (
         <div className="border-dashed border-2 border-muted-foreground/50 rounded-lg h-96 flex flex-col items-center justify-center text-center p-4">
             <FilePenLine className="h-16 w-16 text-muted-foreground mb-4" />
-            <h2 className="text-xl font-semibold mb-2">No Pending Requests</h2>
+            <h2 className="text-xl font-semibold mb-2">No Requests Found</h2>
             <p className="text-muted-foreground mb-4">
-                {searchQuery ? "Try adjusting your search or filter." : "There are no new token requests awaiting approval."}
+                {searchQuery || statusFilter !== 'all' ? "Try adjusting your search or filter." : "There are no token requests at this time."}
             </p>
         </div>
+      ) : view === 'card' ? (
+        <>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {paginatedRequests.map(request => (
+              <RequestCard key={request.id} request={request} onApprove={handleApprove} onReject={handleReject} />
+            ))}
+          </div>
+          {renderPagination()}
+        </>
       ) : (
         <Card>
           <Table>
@@ -226,6 +352,7 @@ export default function RequestList() {
                 <TableHead className="hidden md:table-cell">Issuer</TableHead>
                 <TableHead className="hidden lg:table-cell">Network</TableHead>
                 <TableHead className="hidden sm:table-cell">Max Supply</TableHead>
+                <TableHead>Status</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
