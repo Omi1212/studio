@@ -304,11 +304,6 @@ export default function UserList({ view, setView }: { view: ViewMode, setView: (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-headline font-semibold">User Management</h1>
-         <Button asChild>
-          <Link href="/user-management/new">
-            <Plus className="mr-2 h-4 w-4" /> Add User
-          </Link>
-        </Button>
       </div>
 
       <div className="space-y-4">
@@ -417,3 +412,5 @@ export default function UserList({ view, setView }: { view: ViewMode, setView: (
     </div>
   )
 }
+
+    
