@@ -47,14 +47,6 @@ function getStatusBadge(status: TokenDetails['status']) {
 function RequestCard({ request }: { request: CombinedRequest }) {
   const { toast } = useToast();
   
-  const handleCopy = (text: string) => {
-    navigator.clipboard.writeText(text);
-    toast({
-        title: "Copied!",
-        description: "Wallet address copied to clipboard."
-    });
-  }
-
   return (
     <Card>
       <CardHeader>
@@ -69,24 +61,11 @@ function RequestCard({ request }: { request: CombinedRequest }) {
         </div>
       </CardHeader>
       <CardContent>
-        {request.issuer ? (
+        {request.issuer && (
           <div className="flex justify-between text-sm mt-2">
             <span className="text-muted-foreground">Issuer:</span>
             <span className="font-medium">{request.issuer.name}</span>
           </div>
-        ) : (
-            <div className="text-sm text-muted-foreground mb-4">Unknown Issuer</div>
-        )}
-        {request.issuer && (
-            <div className="flex justify-between items-center text-sm mt-2">
-                <span className="text-muted-foreground">Wallet</span>
-                 <div className="flex items-center gap-1">
-                    <span className="font-medium font-mono truncate">{request.issuer.walletAddress.slice(0, 7)}...{request.issuer.walletAddress.slice(-4)}</span>
-                    <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleCopy(request.issuer!.walletAddress)}>
-                        <Copy className="h-3 w-3" />
-                    </Button>
-                </div>
-            </div>
         )}
         <div className="flex justify-between text-sm mt-2">
           <span className="text-muted-foreground">Status</span>
@@ -183,13 +162,19 @@ export default function RequestList({ view, setView }: { view: ViewMode, setView
 
   useEffect(() => {
     const storedTokens: TokenDetails[] = JSON.parse(localStorage.getItem('createdTokens') || '[]');
-    // We combine example tokens for demo purposes, filtering out drafts
     const allTokens: TokenDetails[] = [...exampleTokens, ...storedTokens].filter(token => token.status !== 'draft');
     
-    const combinedRequests: CombinedRequest[] = allTokens.map(token => ({
+    let combinedRequests: CombinedRequest[] = allTokens.map(token => ({
       ...token,
       issuer: issuersData.find(issuer => issuer.id === token.issuerId)
     }));
+
+    const statusOrder = { 'pending': 1, 'active': 2, 'rejected': 3 };
+    combinedRequests.sort((a, b) => {
+        const orderA = statusOrder[a.status as keyof typeof statusOrder] || 4;
+        const orderB = statusOrder[b.status as keyof typeof statusOrder] || 4;
+        return orderA - orderB;
+    });
 
     setRequests(combinedRequests);
     setLoading(false);
