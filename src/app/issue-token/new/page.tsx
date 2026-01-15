@@ -23,6 +23,7 @@ import { Button } from '@/components/ui/button';
 import type { TokenDetails } from '@/lib/types';
 import Link from 'next/link';
 import { useForm } from 'react-hook-form';
+import { issuersData } from '@/lib/data';
 
 
 export default function NewTokenPage() {
@@ -86,6 +87,7 @@ export default function NewTokenPage() {
       publicKey: finalData.publicKey || '',
       status: 'draft',
       savedStep: currentStep,
+      issuerId: issuersData[0].id, // For demo purposes
     } as TokenDetails;
 
     let existingTokens: TokenDetails[] = JSON.parse(localStorage.getItem('createdTokens') || '[]');
@@ -117,6 +119,7 @@ export default function NewTokenPage() {
       id: newId, 
       publicKey: newPublicKey,
       status: 'pending',
+      issuerId: issuersData[0].id, // For demo purposes
     };
     
     setCreatedToken(newToken);

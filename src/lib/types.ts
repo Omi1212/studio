@@ -8,6 +8,7 @@ export interface TokenDetails extends TokenFormValues {
   status: 'pending' | 'active' | 'frozen' | 'draft';
   price?: number;
   savedStep?: number;
+  issuerId?: string;
 }
 
 export type ViewMode = 'card' | 'table';
@@ -54,4 +55,5 @@ export type User = {
   kycStatus: 'verified' | 'pending' | 'rejected';
   status: 'active' | 'inactive';
 };
+
 
