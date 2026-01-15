@@ -13,7 +13,7 @@ import HeaderDynamic from '@/components/dashboard/header-dynamic';
 import { exampleTokens, issuersData } from '@/lib/data';
 import type { TokenDetails, Issuer } from '@/lib/types';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Check, FileText, HardDrive, Hash, Image as ImageIcon, Info, Network, ToggleRight, User, X } from 'lucide-react';
+import { ArrowLeft, Check, FileText, HardDrive, Hash, Image as ImageIcon, Info, Network, Tag, ToggleRight, User, X } from 'lucide-react';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -256,5 +256,3 @@ export default function RequestDetailsUsePage({ params }: { params: Promise<{ id
   const resolvedParams = use(params);
   return <RequestDetailsPage params={resolvedParams} />;
 }
-
-    
