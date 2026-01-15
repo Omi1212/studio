@@ -14,6 +14,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '.
 import { useToast } from '@/hooks/use-toast';
 import { Input } from '../ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { cn } from '@/lib/utils';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
+
 
 type SubscriptionStatus = 'none' | 'pending' | 'approved';
 
@@ -36,9 +39,9 @@ function TokenCard({ token, onAction, subscriptionStatus }: { token: TokenDetail
       case 'none':
         return <Button variant="outline" className="w-full" onClick={onAction}>Subscribe</Button>;
       case 'pending':
-        return <Button className="w-full" variant="outline" disabled>Pending</Button>;
+        return <Button className="w-full text-yellow-400 border-yellow-400" variant="outline" disabled>Pending</Button>;
       case 'approved':
-        return <Button className="w-full" onClick={onAction}>Invest</Button>;
+        return <Button className="w-full bg-green-600 hover:bg-green-700" onClick={onAction}>Invest</Button>;
       default:
         return null;
     }
@@ -87,9 +90,9 @@ function TokenTableRow({ token, onAction, subscriptionStatus }: { token: TokenDe
             case 'none':
                 return <Button variant="outline" size="sm" onClick={onAction}>Subscribe</Button>;
             case 'pending':
-                return <Button size="sm" variant="outline" disabled>Pending</Button>;
+                return <Button size="sm" variant="outline" className="text-yellow-400 border-yellow-400" disabled>Pending</Button>;
             case 'approved':
-                return <Button size="sm" onClick={onAction}>Invest</Button>;
+                return <Button size="sm" className="bg-green-600 hover:bg-green-700" onClick={onAction}>Invest</Button>;
             default:
                 return null;
         }
@@ -126,6 +129,7 @@ export default function TokenList() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [view, setView] = useState<ViewMode>('card');
+  const router = useRouter();
 
   useEffect(() => {
     // We re-initialize the state every time the component mounts (page load).
@@ -175,8 +179,7 @@ export default function TokenList() {
         newStatus = 'pending';
         toast({ title: 'Subscribed!', description: "Your subscription request has been sent and is now pending." });
     } else if (currentStatus === 'approved') {
-        // Here you would navigate to an "Invest" page or open a modal
-        toast({ title: 'Invest Action', description: "Redirecting to investment page..." });
+        router.push(`/marketplace/${tokenId}`);
         return;
     }
 
