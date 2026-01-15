@@ -89,7 +89,7 @@ function OrderTableRow({ order, onApprove, onReject, userRole }: { order: Order,
        <TableCell className="hidden sm:table-cell">{getStatusBadge(order.status)}</TableCell>
       <TableCell className="text-right">
         <div className="flex items-center justify-end gap-2">
-            {order.status === 'pending' && userRole === 'issuer' && (
+            {order.status === 'pending' && (userRole === 'issuer' || userRole === 'agent') && (
                 <>
                     <Button size="sm" variant="outline" onClick={() => onReject(order.id)}>Reject</Button>
                     <Button size="sm" onClick={() => onApprove(order.id)}>Accept</Button>
@@ -163,7 +163,7 @@ export default function OrderList() {
     } else {
         // Issuers and agents see no orders if no token is selected.
         // Investors see all their orders regardless of token selection.
-        filtered = userRole === 'investor' ? filtered : [];
+        filtered = (userRole === 'issuer' || userRole === 'agent') ? [] : (userRole === 'investor' ? filtered : []);
     }
 
     if (statusFilter !== 'all') {
