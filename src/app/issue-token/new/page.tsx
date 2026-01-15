@@ -87,7 +87,7 @@ export default function NewTokenPage() {
       publicKey: finalData.publicKey || '',
       status: 'draft',
       savedStep: currentStep,
-      issuerId: issuersData[0].id, // For demo purposes
+      issuerId: issuersData[1].id, // For demo purposes, assign to TokenForge
     } as TokenDetails;
 
     let existingTokens: TokenDetails[] = JSON.parse(localStorage.getItem('createdTokens') || '[]');
@@ -119,7 +119,7 @@ export default function NewTokenPage() {
       id: newId, 
       publicKey: newPublicKey,
       status: 'pending',
-      issuerId: issuersData[0].id, // For demo purposes
+      issuerId: issuersData[1].id, // For demo purposes, assign to TokenForge
     };
     
     setCreatedToken(newToken);
