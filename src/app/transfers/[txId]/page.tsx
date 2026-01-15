@@ -162,9 +162,6 @@ export default function TransferDetailsPage() {
                                 value={transfer.from}
                                 onCopy={() => copyToClipboard(transfer.from, 'From Address')}
                             />
-                             <div className="flex-shrink-0 text-muted-foreground md:rotate-0 rotate-90">
-                                <ArrowRight className="h-5 w-5" />
-                            </div>
                              <AddressInfo
                                 label="To"
                                 value={transfer.to}
