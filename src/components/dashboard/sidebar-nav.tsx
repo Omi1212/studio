@@ -212,7 +212,11 @@ export default function SidebarNav() {
         <SidebarMenu>
           {menuItems.map((item) => (
             item.subItems ? (
-                 <Collapsible key={item.href} asChild defaultOpen={pathname.startsWith(item.href) || item.subItems.some((sub:any) => pathname.startsWith(sub.href))}>
+                 <Collapsible 
+                    key={item.href} 
+                    asChild 
+                    defaultOpen={item.href === '/workspace'}
+                >
                     <SidebarMenuItem>
                         <div className="relative">
                             <SidebarMenuButton
