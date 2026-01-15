@@ -56,11 +56,11 @@ const agentMenu = [
         label: 'Workspace', 
         icon: Briefcase,
         subItems: [
-            { href: '/requests', label: 'Token Requests', icon: ClipboardList },
             { href: '/orders', label: 'Orders', icon: ShoppingBag },
             { href: '/transfers', label: 'Transfers', icon: ArrowRightLeft },
         ]
     },
+    { href: '/requests', label: 'Token Requests', icon: ClipboardList },
     { href: '/issuer-management', label: 'Issuers', icon: Building },
     { href: '/user-management', label: 'Users', icon: Users },
 ];
