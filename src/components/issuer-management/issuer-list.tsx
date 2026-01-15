@@ -4,12 +4,12 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { issuersData } from '@/lib/data';
-import type { Issuer, ViewMode } from '@/lib/types';
+import type { Issuer } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/card';
 import { Avatar, AvatarFallback } from '../ui/avatar';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
-import { MoreVertical, LayoutGrid, List, Plus, Search, Copy, CheckSquare, Clock } from 'lucide-react';
+import { MoreVertical, Plus, Search, Copy, CheckSquare, Clock } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
 import Link from 'next/link';
@@ -27,8 +27,6 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { cn } from '@/lib/utils';
-
 
 const ITEMS_PER_PAGE = 10;
 
@@ -41,88 +39,6 @@ function getStatusBadge(status: Issuer['status']) {
     default:
       return <Badge variant="secondary">Unknown</Badge>;
   }
-}
-
-function IssuerCard({ issuer, onDelete, onCopy }: { issuer: Issuer, onDelete: (id: string) => void, onCopy: (text: string) => void }) {
-  return (
-    <Card className="flex flex-col">
-      <CardHeader>
-        <div className="flex items-start justify-between">
-          <div className="flex items-center gap-4">
-            <Avatar>
-              <AvatarFallback>{issuer.name.charAt(0)}</AvatarFallback>
-            </Avatar>
-            <div>
-              <CardTitle className="text-lg">{issuer.name}</CardTitle>
-              <CardDescription>{issuer.email}</CardDescription>
-            </div>
-          </div>
-           <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
-                <MoreVertical className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-                <DropdownMenuItem asChild>
-                    <Link href={`/issuer-management/${issuer.id}/edit`}>Edit</Link>
-                </DropdownMenuItem>
-               <AlertDialogTrigger asChild>
-                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                  <span className="text-red-500">Delete</span>
-                </DropdownMenuItem>
-              </AlertDialogTrigger>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </CardHeader>
-      <CardContent className="flex-grow space-y-4">
-        <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">Wallet</span>
-            <div className="flex items-center gap-1">
-                <span className="font-medium font-mono">{issuer.walletAddress.slice(0, 7)}...{issuer.walletAddress.slice(-4)}</span>
-                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => onCopy(issuer.walletAddress)}>
-                    <Copy className="h-3 w-3" />
-                </Button>
-            </div>
-        </div>
-        <div className="grid grid-cols-2 gap-4">
-            <div className="flex items-center gap-2">
-                <CheckSquare className="h-4 w-4 text-green-500" />
-                <div>
-                    <p className="text-xs text-muted-foreground">Issued</p>
-                    <p className="font-semibold">{issuer.issuedTokens}</p>
-                </div>
-            </div>
-             <div className="flex items-center gap-2">
-                <Clock className="h-4 w-4 text-yellow-500" />
-                <div>
-                    <p className="text-xs text-muted-foreground">Pending</p>
-                    <p className="font-semibold">{issuer.pendingTokens}</p>
-                </div>
-            </div>
-        </div>
-      </CardContent>
-      <CardFooter className="flex-col items-stretch gap-2">
-        {getStatusBadge(issuer)}
-        <Button variant="outline" className="w-full" asChild>
-           <Link href={`/issuer-management/${issuer.id}`}>View Details</Link>
-        </Button>
-      </CardFooter>
-       <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-          <AlertDialogDescription>
-            This action cannot be undone. This will permanently delete the issuer "{issuer.name}".
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction onClick={() => onDelete(issuer.id)} className="bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </Card>
-  );
 }
 
 function IssuerTableRow({ issuer, onDelete, onCopy }: { issuer: Issuer, onDelete: (id: string) => void, onCopy: (text: string) => void }) {
@@ -189,7 +105,7 @@ function IssuerTableRow({ issuer, onDelete, onCopy }: { issuer: Issuer, onDelete
 }
 
 
-export default function IssuerList({ view, setView }: { view: ViewMode, setView: (mode: ViewMode) => void }) {
+export default function IssuerList() {
   const [issuers, setIssuers] = useState<Issuer[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
@@ -323,26 +239,6 @@ export default function IssuerList({ view, setView }: { view: ViewMode, setView:
                     <SelectItem value="inactive">Inactive</SelectItem>
                 </SelectContent>
             </Select>
-            <div className="hidden sm:flex items-center gap-1 bg-muted p-1 rounded-lg ml-auto">
-                <Button
-                    variant={view === 'card' ? 'secondary' : 'ghost'}
-                    size="icon"
-                    className="h-8 w-8"
-                    onClick={() => setView('card')}
-                    aria-label="Card View"
-                >
-                    <LayoutGrid className="h-4 w-4" />
-                </Button>
-                <Button
-                    variant={view === 'table' ? 'secondary' : 'ghost'}
-                    size="icon"
-                    className="h-8 w-8"
-                    onClick={() => setView('table')}
-                    aria-label="Table View"
-                >
-                    <List className="h-4 w-4" />
-                </Button>
-            </div>
         </div>
       </div>
 
@@ -358,17 +254,6 @@ export default function IssuerList({ view, setView }: { view: ViewMode, setView:
                 <Link href="/issuer-management/new">Add Issuer</Link>
             </Button>
         </div>
-      ) : view === 'card' ? (
-        <>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {paginatedIssuers.map(issuer => (
-              <AlertDialog key={issuer.id}>
-                  <IssuerCard issuer={issuer} onDelete={handleDelete} onCopy={handleCopy} />
-              </AlertDialog>
-            ))}
-          </div>
-          {renderPagination()}
-        </>
       ) : (
         <Card>
           <Table>
