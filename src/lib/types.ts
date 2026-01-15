@@ -45,3 +45,13 @@ export type Issuer = {
   status: 'active' | 'inactive';
 };
 
+export type User = {
+  id: string;
+  name: string;
+  email: string;
+  role: 'investor' | 'issuer' | 'agent' | 'superadmin';
+  walletAddress: string;
+  kycStatus: 'verified' | 'pending' | 'rejected';
+  status: 'active' | 'inactive';
+};
+

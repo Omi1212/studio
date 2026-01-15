@@ -42,21 +42,6 @@ import type { TokenDetails } from '@/lib/types';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../ui/collapsible';
 import Image from 'next/image';
 
-const allMenuItems = [
-  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/issue-token', label: 'Issue Token', icon: CircleDollarSign },
-  { href: '/my-tokens', label: 'My Tokens', icon: Briefcase },
-  { href: '/transactions', label: 'Transactions', icon: ArrowRightLeft },
-  { href: '/issuer-management', label: 'Issuer Management', icon: Building, roles: ['superadmin'] },
-  { href: '/user-management', label: 'User Management', icon: Users, roles: ['superadmin'] },
-  { href: '/users', label: 'Users', icon: Users, roles: ['agent', 'investor', 'issuer'] },
-];
-
-const helpMenuItems = [
-  { href: '/settings', label: 'Settings', icon: Settings },
-  { href: '/security', label: 'Security', icon: ShieldCheck },
-  { href: '/help', label: 'Help', icon: LifeBuoy },
-];
 
 const superAdminMenu = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -101,6 +86,12 @@ const issuerMenu = [
         { href: '/transfers', label: 'Transfers', icon: ArrowRightLeft },
     ]
   },
+];
+
+const helpMenuItems = [
+  { href: '/settings', label: 'Settings', icon: Settings },
+  { href: '/security', label: 'Security', icon: ShieldCheck },
+  { href: '/help', label: 'Help', icon: LifeBuoy },
 ];
 
 export default function SidebarNav() {
@@ -160,10 +151,6 @@ export default function SidebarNav() {
     menuItems = issuerMenu;
   } else if (userRole === 'agent') {
     menuItems = agentMenu;
-  } else {
-    menuItems = allMenuItems.filter(
-      item => !item.roles || item.roles.includes(userRole || '')
-    );
   }
 
   const networkMap: { [key: string]: string } = {
@@ -225,12 +212,12 @@ export default function SidebarNav() {
         <SidebarMenu>
           {menuItems.map((item) => (
             item.subItems ? (
-                 <Collapsible key={item.href} asChild defaultOpen={true}>
+                 <Collapsible key={item.href} asChild defaultOpen={pathname.startsWith(item.href) || item.subItems.some((sub:any) => pathname.startsWith(sub.href))}>
                     <SidebarMenuItem>
                         <div className="relative">
                             <SidebarMenuButton
                                 asChild
-                                isActive={pathname.startsWith(item.href)}
+                                isActive={pathname.startsWith(item.href) && item.subItems.every((sub:any) => !pathname.startsWith(sub.href))}
                                 tooltip={item.label}
                                 className="pr-10"
                             >
@@ -251,7 +238,7 @@ export default function SidebarNav() {
                                     <SidebarMenuItem key={subItem.href}>
                                         <SidebarMenuButton
                                             asChild
-                                            isActive={pathname === subItem.href}
+                                            isActive={pathname.startsWith(subItem.href)}
                                             tooltip={subItem.label}
                                             className="h-8"
                                         >
@@ -270,7 +257,7 @@ export default function SidebarNav() {
                 <SidebarMenuItem key={item.href}>
                     <SidebarMenuButton
                         asChild
-                        isActive={pathname === item.href}
+                        isActive={pathname.startsWith(item.href)}
                         tooltip={item.label}
                     >
                         <a href={item.href}>
@@ -289,7 +276,7 @@ export default function SidebarNav() {
             <SidebarMenuItem key={item.href}>
               <SidebarMenuButton
                 asChild
-                isActive={pathname === item.href}
+                isActive={pathname.startsWith(item.href)}
                 tooltip={item.label}
               >
                 <a href={item.href}>

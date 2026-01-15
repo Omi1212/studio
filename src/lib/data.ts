@@ -1,6 +1,6 @@
 
 
-import type { Order, TokenDetails, Transfer, Issuer } from './types';
+import type { Order, TokenDetails, Transfer, Issuer, User } from './types';
 
 export const volumeData = [
   {
@@ -549,5 +549,53 @@ export const issuersData: Issuer[] = [
         status: 'inactive',
     },
 ];
+
+export const usersData: User[] = [
+    {
+        id: 'user-001',
+        name: 'John Doe',
+        email: 'john.doe@example.com',
+        role: 'agent',
+        walletAddress: 'spark1q...user01',
+        kycStatus: 'verified',
+        status: 'active',
+    },
+    {
+        id: 'user-002',
+        name: 'Jane Smith',
+        email: 'jane.smith@example.com',
+        role: 'issuer',
+        walletAddress: 'spark1q...user02',
+        kycStatus: 'pending',
+        status: 'active',
+    },
+    {
+        id: 'user-003',
+        name: 'Peter Jones',
+        email: 'peter.jones@example.com',
+        role: 'investor',
+        walletAddress: 'spark1q...user03',
+        kycStatus: 'verified',
+        status: 'inactive',
+    },
+    {
+        id: 'user-004',
+        name: 'Mary Poppins',
+        email: 'mary.poppins@example.com',
+        role: 'agent',
+        walletAddress: 'spark1q...user04',
+        kycStatus: 'rejected',
+        status: 'active',
+    },
+     {
+        id: 'user-005',
+        name: 'Super Admin',
+        email: 'superadmin@example.com',
+        role: 'superadmin',
+        walletAddress: 'spark1q...superadmin',
+        kycStatus: 'verified',
+        status: 'active',
+    }
+]
 
 
