@@ -507,6 +507,21 @@ export const transfersData: Transfer[] = [
     { txId: 'a1b2c3...d4e5f6', type: 'Burn', from: 'spark1...sasg4v', to: 'Burn Address', amount: 50, tokenTicker: 'DUSD', date: '2024-07-18' },
     { txId: 'd4e5f6...g7h8i9', type: 'Mint', from: 'Token Issuer', to: 'spark1...rq83he', amount: 10000, tokenTicker: 'CRBN', date: '2024-07-17' },
     { txId: 'g7h8i9...j0k1l2', type: 'Transfer', from: 'spark1...zxy987', to: 'spark1...6n7dvn', amount: 800, tokenTicker: 'GLDT', date: '2024-07-16' },
+    { txId: 'dd0001...txid01', type: 'Mint', from: 'Token Issuer', to: 'spark1...a4b3c2', amount: 10000, tokenTicker: 'DUSD', date: '2024-07-30' },
+    { txId: 'dd0002...txid02', type: 'Transfer', from: 'spark1...a4b3c2', to: 'spark1...e5f6g7', amount: 500, tokenTicker: 'DUSD', date: '2024-07-30' },
+    { txId: 'dd0003...txid03', type: 'Transfer', from: 'spark1...a4b3c2', to: 'spark1...i9j0k1', amount: 1200, tokenTicker: 'DUSD', date: '2024-07-29' },
+    { txId: 'dd0004...txid04', type: 'Burn', from: 'spark1...e5f6g7', to: 'Burn Address', amount: 100, tokenTicker: 'DUSD', date: '2024-07-29' },
+    { txId: 'dd0005...txid05', type: 'Transfer', from: 'spark1...i9j0k1', to: 'spark1...a4b3c2', amount: 200, tokenTicker: 'DUSD', date: '2024-07-28' },
+    { txId: 'dd0006...txid06', type: 'Mint', from: 'Token Issuer', to: 'spark1...m3n4o5', amount: 5000, tokenTicker: 'DUSD', date: '2024-07-28' },
+    { txId: 'dd0007...txid07', type: 'Transfer', from: 'spark1...m3n4o5', to: 'spark1...a4b3c2', amount: 1500, tokenTicker: 'DUSD', date: '2024-07-27' },
+    { txId: 'dd0008...txid08', type: 'Transfer', from: 'spark1...a4b3c2', to: 'spark1...g3h4i5', amount: 3000, tokenTicker: 'DUSD', date: '2024-07-27' },
+    { txId: 'dd0009...txid09', type: 'Transfer', from: 'spark1...g3h4i5', to: 'spark1...k7l8m9', amount: 500, tokenTicker: 'DUSD', date: '2024-07-26' },
+    { txId: 'dd0010...txid10', type: 'Burn', from: 'spark1...k7l8m9', to: 'Burn Address', amount: 50, tokenTicker: 'DUSD', date: '2024-07-26' },
+    { txId: 'dd0011...txid11', type: 'Mint', from: 'Token Issuer', to: 'spark1...a4b3c2', amount: 20000, tokenTicker: 'DUSD', date: '2024-07-25' },
+    { txId: 'dd0012...txid12', type: 'Transfer', from: 'spark1...a4b3c2', to: 'spark1...e5f6g7', amount: 750, tokenTicker: 'DUSD', date: '2024-07-25' },
+    { txId: 'dd0013...txid13', type: 'Transfer', from: 'spark1...a4b3c2', to: 'spark1...i9j0k1', amount: 2300, tokenTicker: 'DUSD', date: '2024-07-24' },
+    { txId: 'dd0014...txid14', type: 'Transfer', from: 'spark1...i9j0k1', to: 'spark1...a4b3c2', amount: 300, tokenTicker: 'DUSD', date: '2024-07-24' },
+    { txId: 'dd0015...txid15', type: 'Mint', from: 'Token Issuer', to: 'spark1...m3n4o5', amount: 8000, tokenTicker: 'DUSD', date: '2024-07-23' },
 ];
 
 export const tokenPriceHistory = [
