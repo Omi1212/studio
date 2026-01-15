@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -184,25 +185,6 @@ export default function InvestorDetailsPage() {
                     <Button variant={investor.isFrozen ? "secondary" : "outline"} onClick={handleToggleFreeze}>
                         <Snowflake className="mr-2 h-4 w-4" /> {investor.isFrozen ? 'Unfreeze' : 'Freeze'} Address
                     </Button>
-                    <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                            <Button variant="destructive" disabled={!investor.isFrozen}>
-                                <Trash2 className="mr-2 h-4 w-4" /> Delete
-                            </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                            <AlertDialogHeader>
-                                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                This action cannot be undone. This will permanently delete the investor "{investor.name}".
-                                </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction onClick={handleDelete} className="bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction>
-                            </AlertDialogFooter>
-                        </AlertDialogContent>
-                    </AlertDialog>
                 </div>
             </div>
             
@@ -224,7 +206,7 @@ export default function InvestorDetailsPage() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                     <InfoRow label="Email" value={investor.email} />
-                    <InfoRow label="Wallet Address" value={<span className="font-mono">{investor.walletAddress}</span>} />
+                    <InfoRow label="Wallet Address" value={<span className="font-mono">{investor.walletAddress.slice(0, 7)}...{investor.walletAddress.slice(-4)}</span>} />
                     <InfoRow label="Joined Date" value={new Date(investor.joinedDate).toLocaleDateString()} />
                     <InfoRow label="Total Invested" value={<span className="font-mono">${investor.totalInvested.toLocaleString()}</span>} />
                 </CardContent>

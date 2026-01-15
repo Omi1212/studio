@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
@@ -63,12 +64,6 @@ function InvestorCard({ investor, onDelete, onToggleFreeze }: { investor: Invest
               <DropdownMenuItem onSelect={() => onToggleFreeze(investor.id)}>
                 <Snowflake className="mr-2 h-4 w-4" /> {investor.isFrozen ? 'Unfreeze' : 'Freeze'} Address
               </DropdownMenuItem>
-               <AlertDialogTrigger asChild>
-                <DropdownMenuItem onSelect={(e) => e.preventDefault()} disabled={!investor.isFrozen}>
-                  <Trash2 className="mr-2 h-4 w-4 text-red-500" />
-                  <span className="text-red-500">Delete</span>
-                </DropdownMenuItem>
-              </AlertDialogTrigger>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
@@ -92,18 +87,6 @@ function InvestorCard({ investor, onDelete, onToggleFreeze }: { investor: Invest
            <Link href={`/investors/${investor.id}`}>View Details</Link>
         </Button>
       </CardFooter>
-       <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-          <AlertDialogDescription>
-            This action cannot be undone. This will permanently delete the investor "{investor.name}" and remove their data from our servers.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction onClick={() => onDelete(investor.id)} className="bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
     </Card>
   );
 }
@@ -143,25 +126,8 @@ function InvestorTableRow({ investor, onDelete, onToggleFreeze }: { investor: In
              <DropdownMenuItem onSelect={() => onToggleFreeze(investor.id)}>
               {investor.isFrozen ? 'Unfreeze' : 'Freeze'} Address
             </DropdownMenuItem>
-             <AlertDialogTrigger asChild>
-              <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-red-500 focus:text-red-500" disabled={!investor.isFrozen}>
-                Delete
-              </DropdownMenuItem>
-            </AlertDialogTrigger>
           </DropdownMenuContent>
         </DropdownMenu>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the investor "{investor.name}".
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={() => onDelete(investor.id)} className="bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
       </TableCell>
     </TableRow>
   );
