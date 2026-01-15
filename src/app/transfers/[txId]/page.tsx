@@ -37,12 +37,11 @@ function InfoRow({ label, value, onCopy }: { label: string; value: string; onCop
   );
 }
 
-function AddressInfoRow({ label, value, icon: Icon, onCopy }: { label: string; value: string; icon: React.ElementType, onCopy: () => void }) {
+function AddressInfo({ label, value, onCopy }: { label: string; value: string; onCopy: () => void }) {
   return (
-      <div>
+      <div className="flex-1">
           <p className="text-sm text-muted-foreground mb-1">{label}</p>
           <div className="flex items-center gap-2">
-              <Icon className="h-4 w-4 text-muted-foreground" />
               <p className="font-mono text-sm break-all">{value}</p>
               <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0" onClick={onCopy}>
                   <Copy className="h-4 w-4" />
@@ -157,17 +156,18 @@ export default function TransferDetailsPage() {
                 <Card>
                     <CardContent className="p-6 space-y-4">
                         <h3 className="text-lg font-semibold text-muted-foreground">Details</h3>
-                         <div className="space-y-4">
-                            <AddressInfoRow 
+                         <div className="flex flex-col md:flex-row items-center gap-4">
+                            <AddressInfo 
                                 label="From"
                                 value={transfer.from}
-                                icon={ArrowUp}
                                 onCopy={() => copyToClipboard(transfer.from, 'From Address')}
                             />
-                             <AddressInfoRow
+                             <div className="flex-shrink-0 text-muted-foreground md:rotate-0 rotate-90">
+                                <ArrowRight className="h-5 w-5" />
+                            </div>
+                             <AddressInfo
                                 label="To"
                                 value={transfer.to}
-                                icon={ArrowDown}
                                 onCopy={() => copyToClipboard(transfer.to, 'To Address')}
                             />
                         </div>
@@ -205,4 +205,3 @@ export default function TransferDetailsPage() {
     </SidebarProvider>
   );
 }
-
