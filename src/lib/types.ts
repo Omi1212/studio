@@ -1,4 +1,5 @@
 
+
 import type { TokenFormValues } from "@/components/issue-token/issue-token-form";
 
 export interface TokenDetails extends TokenFormValues {
@@ -33,4 +34,14 @@ export type Transfer = {
     tokenTicker: string;
     date: string;
 }
+
+export type Issuer = {
+  id: string;
+  name: string;
+  email: string;
+  walletAddress: string;
+  issuedTokens: number;
+  pendingTokens: number;
+  status: 'active' | 'inactive';
+};
 
