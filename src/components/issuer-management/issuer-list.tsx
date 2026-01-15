@@ -1,5 +1,3 @@
-
-
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
@@ -9,7 +7,7 @@ import { Card } from '../ui/card';
 import { Avatar, AvatarFallback } from '../ui/avatar';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
-import { MoreVertical, Plus, Search, Copy } from 'lucide-react';
+import { MoreVertical, Plus, Search, Copy, Edit, Power, PowerOff } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
 import Link from 'next/link';
@@ -185,7 +183,7 @@ export default function IssuerList() {
   if (loading) {
     return (
       <div className="space-y-4">
-        <h1 className="text-3xl font-headline font-semibold">Issuers Management</h1>
+        <h1 className="text-3xl font-headline font-semibold">Issuer Management</h1>
         <Card className="h-64 animate-pulse bg-muted/50"></Card>
       </div>
     );
@@ -223,12 +221,7 @@ export default function IssuerList() {
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-headline font-semibold">Issuers Management</h1>
-         <Button asChild>
-          <Link href="/issuer-management/new">
-            <Plus className="mr-2 h-4 w-4" /> Add Issuer
-          </Link>
-        </Button>
+        <h1 className="text-3xl font-headline font-semibold">Issuer Management</h1>
       </div>
 
       <div className="space-y-4">
