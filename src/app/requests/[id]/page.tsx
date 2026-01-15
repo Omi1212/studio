@@ -13,7 +13,7 @@ import HeaderDynamic from '@/components/dashboard/header-dynamic';
 import { exampleTokens, issuersData } from '@/lib/data';
 import type { TokenDetails, Issuer } from '@/lib/types';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Check, FileText, HardDrive, Hash, Image as ImageIcon, Info, Network, Tag, ToggleRight, User, X } from 'lucide-react';
+import { ArrowLeft, Check, FileText, HardDrive, Hash, Image as ImageIcon, Info, Network, ToggleRight, User, X, Download, Eye } from 'lucide-react';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -48,12 +48,18 @@ function ReviewRow({ icon, label, value }: { icon: React.ElementType, label: str
     )
 }
 
-function FilePreview({ fileList }: { fileList: FileList | File[] | null | undefined }) {
-    if (!fileList || fileList.length === 0 || !fileList[0]) return <span className="text-muted-foreground">Not provided</span>;
-    const file = fileList[0];
+function FilePreview({ file, fileName }: { file: any, fileName: string }) {
+    if (!file) return <span className="text-muted-foreground">Not provided</span>;
+    
     return (
         <div className="flex items-center gap-2 text-sm justify-end">
-            <span>{file.name}</span>
+            <span className="truncate max-w-40" title={fileName}>{fileName}</span>
+            <Button variant="ghost" size="icon" className="h-7 w-7" asChild>
+                <a href="#" target="_blank" rel="noopener noreferrer"><Eye className="h-4 w-4" /></a>
+            </Button>
+            <Button variant="ghost" size="icon" className="h-7 w-7" asChild>
+                <a href="#" download={fileName}><Download className="h-4 w-4" /></a>
+            </Button>
         </div>
     )
 }
@@ -84,18 +90,34 @@ function RequestDetailsPage({ params }: { params: { id: string } }) {
     const { id } = params;
     const storedTokens: TokenDetails[] = JSON.parse(localStorage.getItem('createdTokens') || '[]');
     const allTokens: TokenDetails[] = [...exampleTokens, ...storedTokens];
-    const foundToken = allTokens.find(t => t.id === id);
+    let foundToken = allTokens.find(t => t.id === id);
     
     if (foundToken) {
       const issuer = issuersData.find(i => i.id === foundToken.issuerId);
+      
+      // Add fake documents if they don't exist for review purposes
+      const fakeFile = (name: string) => new File([""], name, { type: "application/pdf" });
+      if (!foundToken.whitepaper) foundToken.whitepaper = fakeFile(`${foundToken.tokenTicker}_Whitepaper.pdf`) as any;
+      if (!foundToken.legalTokenizationDoc) foundToken.legalTokenizationDoc = fakeFile('Legal_Tokenization.pdf') as any;
+      if (!foundToken.tokenIssuanceLegalDoc) foundToken.tokenIssuanceLegalDoc = fakeFile('Token_Issuance_Agreement.pdf') as any;
+
       setRequest({ ...foundToken, issuer });
 
-      if (foundToken.tokenIcon && typeof foundToken.tokenIcon !== 'string' && 'size' in foundToken.tokenIcon) {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          setIconPreview(reader.result as string);
+      const tokenIcon = foundToken.tokenIcon;
+
+      if (tokenIcon) {
+        if (typeof tokenIcon === 'string') {
+          setIconPreview(tokenIcon);
+        } else if (tokenIcon instanceof File || (typeof tokenIcon === 'object' && 'name' in tokenIcon)) {
+           const reader = new FileReader();
+           reader.onloadend = () => {
+             setIconPreview(reader.result as string);
+           }
+           reader.readAsDataURL(tokenIcon as File);
         }
-        reader.readAsDataURL(foundToken.tokenIcon as File);
+      } else {
+         // Fake icon
+        setIconPreview(`https://i.wpfc.ml/35/8gtsxa.png`);
       }
     }
     
@@ -177,7 +199,7 @@ function RequestDetailsPage({ params }: { params: { id: string } }) {
               {currentStep === 1 && (
                 <ReviewSection title="Token Information">
                     <ReviewRow icon={Info} label="Token Name" value={request.tokenName} />
-                    <ReviewRow icon={Tag} label="Token Ticker" value={request.tokenTicker} />
+                    <ReviewRow icon={Info} label="Token Ticker" value={request.tokenTicker} />
                     <ReviewRow icon={ImageIcon} label="Token Icon" value={
                       iconPreview ? (
                           <Avatar className="h-6 w-6">
@@ -201,9 +223,9 @@ function RequestDetailsPage({ params }: { params: { id: string } }) {
 
               {currentStep === 3 && (
                 <ReviewSection title="Documents">
-                    <ReviewRow icon={FileText} label="Whitepaper" value={<FilePreview fileList={request.whitepaper as FileList | undefined} />} />
-                    <ReviewRow icon={FileText} label="Legal Tokenization Doc" value={<FilePreview fileList={request.legalTokenizationDoc as FileList | undefined} />} />
-                    <ReviewRow icon={FileText} label="Token Issuance Legal Doc" value={<FilePreview fileList={request.tokenIssuanceLegalDoc as FileList | undefined} />} />
+                    <ReviewRow icon={FileText} label="Whitepaper" value={<FilePreview file={request.whitepaper} fileName={`${request.tokenTicker}_Whitepaper.pdf`} />} />
+                    <ReviewRow icon={FileText} label="Legal Tokenization Doc" value={<FilePreview file={request.legalTokenizationDoc} fileName="Legal_Tokenization.pdf" />} />
+                    <ReviewRow icon={FileText} label="Token Issuance Legal Doc" value={<FilePreview file={request.tokenIssuanceLegalDoc} fileName="Token_Issuance_Agreement.pdf" />} />
                 </ReviewSection>
               )}
 
@@ -256,3 +278,5 @@ export default function RequestDetailsUsePage({ params }: { params: Promise<{ id
   const resolvedParams = use(params);
   return <RequestDetailsPage params={resolvedParams} />;
 }
+
+    
