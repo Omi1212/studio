@@ -70,15 +70,10 @@ function RequestCard({ request }: { request: CombinedRequest }) {
       </CardHeader>
       <CardContent>
         {request.issuer ? (
-            <div className="flex items-center gap-3 mb-4">
-              <Avatar className="h-8 w-8">
-                <AvatarFallback>{request.issuer.name.charAt(0)}</AvatarFallback>
-              </Avatar>
-              <div>
-                <p className="text-sm font-medium">{request.issuer.name}</p>
-                <p className="text-xs text-muted-foreground">{request.issuer.email}</p>
-              </div>
-            </div>
+          <div className="flex justify-between text-sm mt-2">
+            <span className="text-muted-foreground">Issuer:</span>
+            <span className="font-medium">{request.issuer.name}</span>
+          </div>
         ) : (
             <div className="text-sm text-muted-foreground mb-4">Unknown Issuer</div>
         )}
@@ -397,4 +392,3 @@ export default function RequestList({ view, setView }: { view: ViewMode, setView
     </div>
   )
 }
-
