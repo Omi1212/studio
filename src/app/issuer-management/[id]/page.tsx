@@ -31,6 +31,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import Link from 'next/link';
 import type { Issuer } from '@/lib/types';
+import IssuerTokens from '@/components/issuer-management/issuer-tokens';
 
 function getStatusBadge(status: Issuer['status']) {
   switch (status) {
@@ -175,6 +176,8 @@ export default function IssuerDetailsPage() {
                     <InfoRow label="Pending Tokens" value={<span className="font-mono">{issuer.pendingTokens}</span>} />
                 </CardContent>
             </Card>
+
+            <IssuerTokens issuerId={issuer.id} />
 
             </div>
           </main>
