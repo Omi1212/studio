@@ -29,6 +29,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 
 
 type Investor = typeof investorsData[0];
+const ITEMS_PER_PAGE = 10;
 
 function getStatusBadge(investor: Investor) {
   if (investor.isFrozen) {
@@ -173,6 +174,7 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     let finalInvestors: Investor[];
@@ -232,6 +234,22 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
 
     return filtered;
   }, [investors, searchQuery, statusFilter]);
+  
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, statusFilter]);
+
+  const totalPages = Math.ceil(filteredInvestors.length / ITEMS_PER_PAGE);
+  const paginatedInvestors = useMemo(() => {
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filteredInvestors.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  }, [filteredInvestors, currentPage]);
+
+  const handlePageChange = (page: number) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+  };
 
   const handleDelete = (id: string) => {
     // This should remove the investor from the main list in localStorage
@@ -275,6 +293,35 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
       <div className="space-y-4">
         <h1 className="text-3xl font-headline font-semibold">Investors</h1>
         <Card className="h-64 animate-pulse bg-muted/50"></Card>
+      </div>
+    );
+  }
+  
+  const renderPagination = () => {
+    if (totalPages <= 1) return null;
+    return (
+      <div className="flex justify-between items-center p-4">
+        <span className="text-sm text-muted-foreground">
+          Page {currentPage} of {totalPages}
+        </span>
+        <div className="flex gap-2">
+          <Button 
+            variant="outline"
+            size="sm"
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+          >
+            Previous
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
+          >
+            Next
+          </Button>
+        </div>
       </div>
     );
   }
@@ -333,7 +380,7 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
       </div>
 
 
-       {filteredInvestors.length === 0 ? (
+       {paginatedInvestors.length === 0 ? (
         <div className="border-dashed border-2 border-muted-foreground/50 rounded-lg h-96 flex flex-col items-center justify-center text-center p-4">
             <UserPlus className="h-16 w-16 text-muted-foreground mb-4" />
             <h2 className="text-xl font-semibold mb-2">No investors found</h2>
@@ -342,13 +389,16 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
             </p>
         </div>
       ) : view === 'card' ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {filteredInvestors.map(investor => (
-             <AlertDialog key={investor.id}>
-                <InvestorCard investor={investor} onDelete={handleDelete} onToggleFreeze={handleToggleFreeze} />
-             </AlertDialog>
-          ))}
-        </div>
+        <>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {paginatedInvestors.map(investor => (
+              <AlertDialog key={investor.id}>
+                  <InvestorCard investor={investor} onDelete={handleDelete} onToggleFreeze={handleToggleFreeze} />
+              </AlertDialog>
+            ))}
+          </div>
+          {renderPagination()}
+        </>
       ) : (
         <Card>
           <Table>
@@ -362,17 +412,16 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredInvestors.map(investor => (
+              {paginatedInvestors.map(investor => (
                 <AlertDialog key={investor.id}>
                   <InvestorTableRow investor={investor} onDelete={handleDelete} onToggleFreeze={handleToggleFreeze} />
                 </AlertDialog>
               ))}
             </TableBody>
           </Table>
+          {renderPagination()}
         </Card>
       )}
     </div>
   )
 }
-
-    

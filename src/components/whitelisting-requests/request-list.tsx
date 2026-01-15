@@ -17,6 +17,7 @@ import { Input } from '../ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 
 type WhitelistRequest = typeof investorsData[0];
+const ITEMS_PER_PAGE = 10;
 
 function getStatusBadge(investor: WhitelistRequest) {
   switch (investor.status) {
@@ -106,7 +107,7 @@ function RequestTableRow({ request, onApprove, onReject }: { request: WhitelistR
       </TableCell>
        <TableCell className="hidden lg:table-cell">
         <span className="font-mono">{request.walletAddress.slice(0, 15)}...{request.walletAddress.slice(-4)}</span>
-      </TableCell>
+       </TableCell>
        <TableCell className="hidden md:table-cell">
         {new Date(request.joinedDate).toLocaleDateString()}
        </TableCell>
@@ -145,6 +146,7 @@ export default function RequestList({ view, setView }: { view: ViewMode, setView
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('pending');
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     const storedInvestorsRaw = localStorage.getItem('investors');
@@ -172,6 +174,24 @@ export default function RequestList({ view, setView }: { view: ViewMode, setView
     return filtered;
   }, [requests, searchQuery, statusFilter]);
 
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, statusFilter]);
+
+  const totalPages = Math.ceil(filteredRequests.length / ITEMS_PER_PAGE);
+
+  const paginatedRequests = useMemo(() => {
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filteredRequests.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  }, [filteredRequests, currentPage]);
+
+  const handlePageChange = (page: number) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+  };
+
+
   const updateRequestStatus = (id: string, status: 'accepted' | 'rejected') => {
     const allInvestors: WhitelistRequest[] = JSON.parse(localStorage.getItem('investors') || '[]');
     const updatedInvestors = allInvestors.map((inv: WhitelistRequest) => inv.id === id ? { ...inv, status } : inv);
@@ -197,6 +217,35 @@ export default function RequestList({ view, setView }: { view: ViewMode, setView
       <div className="space-y-4">
         <h1 className="text-3xl font-headline font-semibold">Whitelisting Requests</h1>
         <Card className="h-64 animate-pulse bg-muted/50"></Card>
+      </div>
+    );
+  }
+  
+  const renderPagination = () => {
+    if (totalPages <= 1) return null;
+    return (
+       <div className="flex justify-between items-center p-4">
+        <span className="text-sm text-muted-foreground">
+          Page {currentPage} of {totalPages}
+        </span>
+        <div className="flex gap-2">
+          <Button 
+            variant="outline"
+            size="sm"
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+          >
+            Previous
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
+          >
+            Next
+          </Button>
+        </div>
       </div>
     );
   }
@@ -252,7 +301,7 @@ export default function RequestList({ view, setView }: { view: ViewMode, setView
         </div>
       </div>
 
-       {filteredRequests.length === 0 ? (
+       {paginatedRequests.length === 0 ? (
         <div className="border-dashed border-2 border-muted-foreground/50 rounded-lg h-96 flex flex-col items-center justify-center text-center p-4">
             <FilePenLine className="h-16 w-16 text-muted-foreground mb-4" />
             <h2 className="text-xl font-semibold mb-2">No Requests Found</h2>
@@ -261,11 +310,14 @@ export default function RequestList({ view, setView }: { view: ViewMode, setView
             </p>
         </div>
       ) : view === 'card' ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {filteredRequests.map(request => (
-             <RequestCard key={request.id} request={request} onApprove={handleApprove} onReject={handleReject} />
-          ))}
-        </div>
+        <>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {paginatedRequests.map(request => (
+              <RequestCard key={request.id} request={request} onApprove={handleApprove} onReject={handleReject} />
+            ))}
+          </div>
+          {renderPagination()}
+        </>
       ) : (
         <Card>
           <Table>
@@ -279,11 +331,12 @@ export default function RequestList({ view, setView }: { view: ViewMode, setView
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredRequests.map(request => (
+              {paginatedRequests.map(request => (
                   <RequestTableRow key={request.id} request={request} onApprove={handleApprove} onReject={handleReject} />
               ))}
             </TableBody>
           </Table>
+          {renderPagination()}
         </Card>
       )}
     </div>

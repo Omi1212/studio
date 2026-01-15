@@ -19,6 +19,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { cn } from '@/lib/utils';
 import TokenIcon from '../ui/token-icon';
 
+const ITEMS_PER_PAGE = 10;
+
 function getStatusBadge(status: Order['status']) {
   switch (status) {
     case 'completed':
@@ -122,6 +124,7 @@ export default function OrderList() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [selectedToken, setSelectedToken] = useState<TokenDetails | null>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     const role = localStorage.getItem('userRole');
@@ -162,7 +165,6 @@ export default function OrderList() {
         filtered = orders.filter(order => order.investorId === 'inv-001'); // Hardcoded for demo
     } else {
         // Issuers and agents see no orders if no token is selected.
-        // Investors see all their orders regardless of token selection.
         filtered = (userRole === 'issuer' || userRole === 'agent') ? [] : (userRole === 'investor' ? filtered : []);
     }
 
@@ -181,6 +183,23 @@ export default function OrderList() {
 
     return filtered;
   }, [orders, searchQuery, statusFilter, selectedToken, userRole]);
+  
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, statusFilter, selectedToken]);
+
+  const totalPages = Math.ceil(filteredOrders.length / ITEMS_PER_PAGE);
+
+  const paginatedOrders = useMemo(() => {
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filteredOrders.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  }, [filteredOrders, currentPage]);
+
+  const handlePageChange = (page: number) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+  };
 
   const updateOrderStatus = (id: string, status: 'completed' | 'rejected') => {
     const allOrders: Order[] = JSON.parse(localStorage.getItem('orders') || JSON.stringify(ordersData));
@@ -207,6 +226,35 @@ export default function OrderList() {
       <div className="space-y-4">
         <h1 className="text-3xl font-headline font-semibold">Orders</h1>
         <Card className="h-64 animate-pulse bg-muted/50"></Card>
+      </div>
+    );
+  }
+  
+  const renderPagination = () => {
+    if (totalPages <= 1) return null;
+    return (
+      <div className="flex justify-between items-center p-4">
+        <span className="text-sm text-muted-foreground">
+          Page {currentPage} of {totalPages}
+        </span>
+        <div className="flex gap-2">
+          <Button 
+            variant="outline"
+            size="sm"
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+          >
+            Previous
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
+          >
+            Next
+          </Button>
+        </div>
       </div>
     );
   }
@@ -272,7 +320,7 @@ export default function OrderList() {
         </div>
       </div>
 
-       {filteredOrders.length === 0 ? (
+       {paginatedOrders.length === 0 ? (
          <div className="border-dashed border-2 border-muted-foreground/50 rounded-lg h-96 flex flex-col items-center justify-center text-center p-4">
             <ShoppingBag className="h-16 w-16 text-muted-foreground mb-4" />
             <h2 className="text-xl font-semibold mb-2">{noOrdersMessage().title}</h2>
@@ -295,11 +343,12 @@ export default function OrderList() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredOrders.map(order => (
+              {paginatedOrders.map(order => (
                   <OrderTableRow key={order.id} order={order} onApprove={handleApprove} onReject={handleReject} userRole={userRole} />
               ))}
             </TableBody>
           </Table>
+          {renderPagination()}
         </Card>
       )}
     </div>
