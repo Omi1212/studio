@@ -4,7 +4,7 @@
 
 import { useEffect, useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { exampleTokens } from '@/lib/data';
+import { exampleTokens, investorsData } from '@/lib/data';
 import type { TokenDetails, ViewMode } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/card';
 import TokenIcon from '../ui/token-icon';
@@ -20,6 +20,7 @@ import PlaceOrder from './place-order';
 
 
 type SubscriptionStatus = 'none' | 'pending' | 'approved';
+type WhitelistRequest = typeof investorsData[0];
 
 const networkMap: { [key: string]: string } = {
     spark: 'Spark',
@@ -184,8 +185,24 @@ export default function TokenList() {
     const currentStatus = subscriptions[token.id] || 'none';
     
     if (currentStatus === 'none') {
+        const newRequest: WhitelistRequest = {
+            id: `inv-req-${Math.random().toString(36).substring(2, 9)}`,
+            name: 'Market Subscriber',
+            email: `subscriber.${Math.floor(Math.random() * 1000)}@example.com`,
+            status: 'pending' as const,
+            walletAddress: `spark1q-market-${Math.random().toString(36).substring(2, 9)}`,
+            joinedDate: new Date().toISOString(),
+            totalInvested: 0,
+            isFrozen: false,
+            holdings: [],
+            transactions: [],
+        };
+
+        const existingInvestors = JSON.parse(localStorage.getItem('investors') || JSON.stringify(investorsData));
+        localStorage.setItem('investors', JSON.stringify([newRequest, ...existingInvestors]));
+        
         setSubscriptions(prev => ({...prev, [token.id]: 'pending' }));
-        toast({ title: 'Subscribed!', description: "Your subscription request has been sent and is now pending." });
+        toast({ title: 'Whitelisting Request Sent!', description: "Your request to be whitelisted on the platform is now pending approval." });
     } else if (currentStatus === 'approved') {
         setSelectedToken(token);
         setIsModalOpen(true);
@@ -331,5 +348,6 @@ export default function TokenList() {
 }
 
     
+
 
 
