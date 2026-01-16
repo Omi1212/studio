@@ -229,7 +229,6 @@ export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced, 
         return (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <div className="space-y-4">
-                     <p className="text-sm text-muted-foreground">Invest &gt; Payment option</p>
                     <h3 className="text-xl font-bold">Payment option</h3>
                     <p className="text-muted-foreground">Choose payment method</p>
 
