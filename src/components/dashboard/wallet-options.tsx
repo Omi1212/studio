@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Asterisk, ExternalLink, Plus, Power, Copy, ArrowDownToLine, ArrowUpFromLine } from "lucide-react";
@@ -6,9 +7,9 @@ import { useToast } from "@/hooks/use-toast";
 import {
   SheetClose,
 } from "@/components/ui/sheet"
-import { Avatar, AvatarFallback } from "../ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Separator } from "../ui/separator";
-import { investorsData } from "@/lib/data";
+import { investorsData, cryptoData } from "@/lib/data";
 import TokenIcon from "../ui/token-icon";
 import { ScrollArea } from "../ui/scroll-area";
 
@@ -26,6 +27,7 @@ function ConnectedView({ onDisconnect }: { onDisconnect: () => void }) {
     const { toast } = useToast();
     const investor = investorsData.find(inv => inv.id === 'inv-001');
     const totalValue = investor?.holdings.reduce((acc, token) => acc + token.amount * token.value, 0) || 0;
+    const bitcoin = cryptoData.find(c => c.ticker === 'BTC');
 
 
     const copyAddress = () => {
@@ -78,8 +80,21 @@ function ConnectedView({ onDisconnect }: { onDisconnect: () => void }) {
         <h3 className="font-semibold mb-4">Portfolio</h3>
         <ScrollArea className="flex-1 -mx-4">
             <div className="space-y-4 px-4">
-            {investor?.holdings && investor.holdings.length > 0 ? (
-                investor.holdings.map(token => (
+                {bitcoin && (
+                    <div key={bitcoin.ticker} className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                                <Avatar className="h-10 w-10">
+                                <AvatarImage src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Bitcoin.svg/1200px-Bitcoin.svg.png" alt="Bitcoin logo" />
+                            </Avatar>
+                            <div>
+                                <p className="font-semibold">{bitcoin.name}</p>
+                                <p className="text-sm text-muted-foreground">{bitcoin.balance.toLocaleString()} {bitcoin.ticker}</p>
+                            </div>
+                        </div>
+                        <p className="font-mono">${(bitcoin.balance * bitcoin.value).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                    </div>
+                )}
+                {investor?.holdings?.map(token => (
                     <div key={token.tokenId} className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                             <TokenIcon token={token} className="h-10 w-10" />
@@ -90,12 +105,12 @@ function ConnectedView({ onDisconnect }: { onDisconnect: () => void }) {
                         </div>
                         <p className="font-mono">${(token.amount * token.value).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                     </div>
-                ))
-            ) : (
-                 <div className="text-center text-muted-foreground py-8">
-                    No tokens in portfolio.
-                </div>
-            )}
+                ))}
+                {!bitcoin && (!investor?.holdings || investor.holdings.length === 0) && (
+                    <div className="text-center text-muted-foreground py-8">
+                        No assets in portfolio.
+                    </div>
+                )}
             </div>
         </ScrollArea>
       </div>
