@@ -245,7 +245,7 @@ export const exampleTokens: Omit<TokenDetails, 'tokenIcon' | 'whitepaper' | 'leg
     tokenName: 'Carbon Credit',
     tokenTicker: 'CRBN',
     status: 'active' as const,
-    network: 'taproot',
+    network: 'rgb',
     maxSupply: 50000000,
     price: 12.75,
     decimals: 6,
@@ -720,6 +720,7 @@ export const usersData: User[] = [
         status: 'active',
     }
 ]
+
 
 
 
