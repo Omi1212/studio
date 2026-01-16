@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Asterisk, ExternalLink, Plus, Power, Copy, ArrowDownToLine, ArrowUpFromLine } from "lucide-react";
@@ -7,8 +6,11 @@ import { useToast } from "@/hooks/use-toast";
 import {
   SheetClose,
 } from "@/components/ui/sheet"
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { Avatar, AvatarFallback } from "../ui/avatar";
 import { Separator } from "../ui/separator";
+import { investorsData } from "@/lib/data";
+import TokenIcon from "../ui/token-icon";
+import { ScrollArea } from "../ui/scroll-area";
 
 const XverseIcon = () => (
     <img src="https://spark.satsterminal.com/xverse.svg" alt="Xverse logo" className="h-8 w-8" />
@@ -22,9 +24,12 @@ interface WalletOptionsProps {
 
 function ConnectedView({ onDisconnect }: { onDisconnect: () => void }) {
     const { toast } = useToast();
+    const investor = investorsData.find(inv => inv.id === 'inv-001');
+    const totalValue = investor?.holdings.reduce((acc, token) => acc + token.amount * token.value, 0) || 0;
+
 
     const copyAddress = () => {
-        const address = 'spark1pgssyd5f0685tu3v2hpqv2rx9cxu6vskyzjulwepzq79kd583gyw4z0gp92kjc';
+        const address = investor?.walletAddress || 'spark1pgssyd5f0685tu3v2hpqv2rx9cxu6vskyzjulwepzq79kd583gyw4z0gp92kjc';
         navigator.clipboard.writeText(address);
         toast({
             title: 'Address Copied!',
@@ -36,10 +41,9 @@ function ConnectedView({ onDisconnect }: { onDisconnect: () => void }) {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Avatar className="h-10 w-10">
-            <AvatarImage src="https://placehold.co/40x40/7c3aed/ffffff/png?text=A" alt="User Avatar" />
-            <AvatarFallback>A</AvatarFallback>
+             <AvatarFallback>{investor ? investor.name.charAt(0) : 'A'}</AvatarFallback>
           </Avatar>
-          <span className="font-semibold">spark1pg...92kjc</span>
+          <span className="font-semibold font-mono text-sm">{investor ? `${investor.walletAddress.slice(0, 10)}...${investor.walletAddress.slice(-4)}` : 'spark1pg...92kjc'}</span>
         </div>
         <div className="flex items-center gap-1">
           <SheetClose asChild>
@@ -50,7 +54,7 @@ function ConnectedView({ onDisconnect }: { onDisconnect: () => void }) {
       
       <div className="flex flex-col items-center justify-center text-center py-4">
         <p className="text-muted-foreground">Portfolio Balance</p>
-        <p className="text-5xl font-bold">$0.00</p>
+        <p className="text-5xl font-bold">${totalValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
       </div>
 
       <div className="grid grid-cols-3 gap-4 text-center mb-8">
@@ -70,21 +74,30 @@ function ConnectedView({ onDisconnect }: { onDisconnect: () => void }) {
 
       <Separator />
 
-      <div className="pt-4">
+      <div className="pt-4 flex-1 flex flex-col min-h-0">
         <h3 className="font-semibold mb-4">Portfolio</h3>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Avatar className="h-10 w-10">
-              <AvatarImage src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Bitcoin.svg/1200px-Bitcoin.svg.png" alt="Bitcoin" />
-              <AvatarFallback>BTC</AvatarFallback>
-            </Avatar>
-            <div>
-              <p className="font-semibold">Bitcoin</p>
-              <p className="text-sm text-muted-foreground">0 BTC</p>
+        <ScrollArea className="flex-1 -mx-4">
+            <div className="space-y-4 px-4">
+            {investor?.holdings && investor.holdings.length > 0 ? (
+                investor.holdings.map(token => (
+                    <div key={token.tokenId} className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                            <TokenIcon token={token} className="h-10 w-10" />
+                            <div>
+                            <p className="font-semibold">{token.tokenName}</p>
+                            <p className="text-sm text-muted-foreground">{token.amount.toLocaleString()} {token.tokenTicker}</p>
+                            </div>
+                        </div>
+                        <p className="font-mono">${(token.amount * token.value).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                    </div>
+                ))
+            ) : (
+                 <div className="text-center text-muted-foreground py-8">
+                    No tokens in portfolio.
+                </div>
+            )}
             </div>
-          </div>
-          <p className="font-mono">$0.00</p>
-        </div>
+        </ScrollArea>
       </div>
     </div>
   );
