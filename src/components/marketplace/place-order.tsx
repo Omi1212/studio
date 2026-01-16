@@ -122,6 +122,7 @@ export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced }
                 </div>
                 <div className="text-xs text-muted-foreground flex justify-between px-1">
                     <span>Min limit: {minLimit} {token.tokenTicker}</span>
+                    <span>Price: ${price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                     <span>Max limit: {maxLimit} {token.tokenTicker}</span>
                 </div>
             </div>
