@@ -3,6 +3,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import { exampleTokens, issuersData } from '@/lib/data';
 import type { TokenDetails, Issuer, ViewMode } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/card';
@@ -83,6 +84,7 @@ function RequestCard({ request }: { request: CombinedRequest }) {
 
 function RequestTableRow({ request }: { request: CombinedRequest }) {
   const { toast } = useToast();
+  const router = useRouter();
   
   const handleCopy = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -93,7 +95,7 @@ function RequestTableRow({ request }: { request: CombinedRequest }) {
   }
 
   return (
-    <TableRow>
+    <TableRow onClick={() => router.push(`/requests/${request.id}`)} className="cursor-pointer">
       <TableCell>
         <div className="flex items-center gap-3">
             <TokenIcon token={request} className="h-8 w-8" />
@@ -122,7 +124,7 @@ function RequestTableRow({ request }: { request: CombinedRequest }) {
         {request.issuer ? (
             <div className="flex items-center gap-1">
                 <span className="font-mono">{request.issuer.walletAddress.slice(0, 7)}...{request.issuer.walletAddress.slice(-4)}</span>
-                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleCopy(request.issuer!.walletAddress)}>
+                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={(e) => { e.stopPropagation(); handleCopy(request.issuer!.walletAddress);}}>
                     <Copy className="h-3 w-3" />
                 </Button>
             </div>
@@ -133,7 +135,7 @@ function RequestTableRow({ request }: { request: CombinedRequest }) {
        <TableCell>
         {getStatusBadge(request.status)}
        </TableCell>
-      <TableCell className="text-right">
+      <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="h-8 w-8">

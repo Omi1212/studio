@@ -3,6 +3,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import { ordersData, exampleTokens, investorsData } from '@/lib/data';
 import type { Order, TokenDetails } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/card';
@@ -35,13 +36,13 @@ function getStatusBadge(status: Order['status']) {
 }
 
 function OrderTableRow({ order, onApprove, onReject, userRole }: { order: Order, onApprove: (id: string) => void, onReject: (id: string) => void, userRole: string | null }) {
-  
+  const router = useRouter();
   const token = exampleTokens.find(t => t.id === order.tokenId);
   const investor = investorsData.find(i => i.id === order.investorId);
   const total = order.amount * order.price;
 
   return (
-    <TableRow>
+    <TableRow onClick={() => router.push(`/orders/${order.id}`)} className="cursor-pointer">
       <TableCell>
         {investor && (
              <div className="flex items-center gap-3">
@@ -90,7 +91,7 @@ function OrderTableRow({ order, onApprove, onReject, userRole }: { order: Order,
       </TableCell>
        <TableCell className="hidden sm:table-cell">{getStatusBadge(order.status)}</TableCell>
       <TableCell className="text-right">
-        <div className="flex items-center justify-end gap-2">
+        <div className="flex items-center justify-end gap-2" onClick={(e) => e.stopPropagation()}>
             {order.status === 'pending' && (userRole === 'issuer' || userRole === 'agent') && (
                 <>
                     <Button size="sm" variant="outline" onClick={() => onReject(order.id)}>Reject</Button>

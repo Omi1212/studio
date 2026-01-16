@@ -1,7 +1,9 @@
 
+
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import { investorsData } from '@/lib/data';
 import type { ViewMode } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/card';
@@ -92,8 +94,9 @@ function RequestCard({ request, onApprove, onReject }: { request: WhitelistReque
 }
 
 function RequestTableRow({ request, onApprove, onReject }: { request: WhitelistRequest, onApprove: (id: string) => void, onReject: (id: string) => void }) {
+  const router = useRouter();
   return (
-    <TableRow>
+    <TableRow onClick={() => router.push(`/whitelisting-requests/${request.id}`)} className="cursor-pointer">
       <TableCell>
         <div className="flex items-center gap-3">
           <Avatar className="h-8 w-8">
@@ -112,28 +115,30 @@ function RequestTableRow({ request, onApprove, onReject }: { request: WhitelistR
         {new Date(request.joinedDate).toLocaleDateString()}
        </TableCell>
        <TableCell className="hidden sm:table-cell">{getStatusBadge(request)}</TableCell>
-      <TableCell className="text-right flex items-center justify-end gap-2">
-        {request.status === 'pending' && (
-            <>
-                <Button size="sm" variant="outline" onClick={() => onReject(request.id)}>Reject</Button>
-                <Button size="sm" onClick={() => onApprove(request.id)}>Approve</Button>
-            </>
-        )}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-8 w-8">
-              <MoreVertical className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem asChild>
-              <Link href={`/whitelisting-requests/${request.id}`}>View Details</Link>
-            </DropdownMenuItem>
-             <DropdownMenuItem asChild>
-              <Link href={`/whitelisting-requests/${request.id}/edit`}>Edit</Link>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+      <TableCell className="text-right">
+        <div className="flex items-center justify-end gap-2" onClick={(e) => e.stopPropagation()}>
+            {request.status === 'pending' && (
+                <>
+                    <Button size="sm" variant="outline" onClick={() => onReject(request.id)}>Reject</Button>
+                    <Button size="sm" onClick={() => onApprove(request.id)}>Approve</Button>
+                </>
+            )}
+            <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-8 w-8">
+                <MoreVertical className="h-4 w-4" />
+                </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+                <DropdownMenuItem asChild>
+                <Link href={`/whitelisting-requests/${request.id}`}>View Details</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                <Link href={`/whitelisting-requests/${request.id}/edit`}>Edit</Link>
+                </DropdownMenuItem>
+            </DropdownMenuContent>
+            </DropdownMenu>
+        </div>
       </TableCell>
     </TableRow>
   );

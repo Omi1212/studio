@@ -108,7 +108,7 @@ function TokenTableRow({ token, onAction, subscriptionStatus }: { token: TokenDe
     }
 
     return (
-        <TableRow>
+        <TableRow onClick={handleView} className="cursor-pointer">
             <TableCell>
                 <div className="flex items-center gap-3">
                     <TokenIcon token={token} className="h-8 w-8" />
@@ -120,7 +120,7 @@ function TokenTableRow({ token, onAction, subscriptionStatus }: { token: TokenDe
             </TableCell>
             <TableCell>{networkMap[token.network] || token.network}</TableCell>
             <TableCell className="font-mono">{token.maxSupply ? token.maxSupply.toLocaleString() : '--'}</TableCell>
-            <TableCell className="text-right space-x-2">
+            <TableCell className="text-right space-x-2" onClick={(e) => e.stopPropagation()}>
                 <Button variant="outline" size="sm" onClick={handleView}>
                     View
                 </Button>
@@ -331,4 +331,5 @@ export default function TokenList() {
 }
 
     
+
 

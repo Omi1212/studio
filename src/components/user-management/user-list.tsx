@@ -1,7 +1,9 @@
 
+
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import { usersData } from '@/lib/data';
 import type { ViewMode, User } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/card';
@@ -119,8 +121,9 @@ function UserCard({ user, onToggleStatus, onCopy }: { user: User, onToggleStatus
 }
 
 function UserTableRow({ user, onToggleStatus, onCopy }: { user: User, onToggleStatus: (id: string) => void, onCopy: (text: string) => void }) {
+  const router = useRouter();
   return (
-    <TableRow>
+    <TableRow onClick={() => router.push(`/user-management/${user.id}`)} className="cursor-pointer">
       <TableCell>
         <div className="flex items-center gap-3">
           <Avatar className="h-8 w-8">
@@ -136,14 +139,14 @@ function UserTableRow({ user, onToggleStatus, onCopy }: { user: User, onToggleSt
       <TableCell className="hidden lg:table-cell">
         <div className="flex items-center gap-1">
             <span className="font-mono">{user.walletAddress.slice(0, 7)}...{user.walletAddress.slice(-4)}</span>
-             <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => onCopy(user.walletAddress)}>
+             <Button variant="ghost" size="icon" className="h-6 w-6" onClick={(e) => { e.stopPropagation(); onCopy(user.walletAddress);}}>
                 <Copy className="h-3 w-3" />
             </Button>
         </div>
       </TableCell>
       <TableCell className="hidden md:table-cell">{getKycBadge(user.kycStatus)}</TableCell>
       <TableCell className="hidden sm:table-cell">{getStatusBadge(user.status)}</TableCell>
-      <TableCell className="text-right">
+      <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" className="h-8 w-8">
