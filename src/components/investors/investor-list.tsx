@@ -1,15 +1,13 @@
-
-
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { investorsData } from '@/lib/data';
-import type { ViewMode } from '@/lib/types';
+import { investorsData, exampleTokens } from '@/lib/data';
+import type { ViewMode, TokenDetails } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/card';
 import { Avatar, AvatarFallback } from '../ui/avatar';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
-import { MoreVertical, LayoutGrid, List, UserPlus, Trash2, Snowflake, Search, Plus } from 'lucide-react';
+import { MoreVertical, LayoutGrid, List, UserPlus, Snowflake, Search, Plus } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
 import Link from 'next/link';
@@ -27,6 +25,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { Input } from '../ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import TokenIcon from '../ui/token-icon';
 
 
 type Investor = typeof investorsData[0];
@@ -40,7 +39,7 @@ function getStatusBadge(investor: Investor) {
   return <Badge variant="outline" className="text-green-400 border-green-400">Whitelisted</Badge>;
 }
 
-function InvestorCard({ investor, onDelete, onToggleFreeze }: { investor: Investor, onDelete: (id: string) => void, onToggleFreeze: (id: string) => void }) {
+function InvestorCard({ investor, onToggleFreeze }: { investor: Investor, onToggleFreeze: (id: string) => void }) {
   return (
     <Card>
       <CardHeader>
@@ -91,7 +90,7 @@ function InvestorCard({ investor, onDelete, onToggleFreeze }: { investor: Invest
   );
 }
 
-function InvestorTableRow({ investor, onDelete, onToggleFreeze }: { investor: Investor, onDelete: (id: string) => void, onToggleFreeze: (id: string) => void }) {
+function InvestorTableRow({ investor, selectedToken, onToggleFreeze }: { investor: Investor, selectedToken: TokenDetails | null, onToggleFreeze: (id: string) => void }) {
   return (
     <TableRow>
       <TableCell>
@@ -104,6 +103,14 @@ function InvestorTableRow({ investor, onDelete, onToggleFreeze }: { investor: In
             <p className="text-sm text-muted-foreground">{investor.email}</p>
           </div>
         </div>
+      </TableCell>
+      <TableCell className="hidden sm:table-cell">
+        {selectedToken && (
+             <div className="flex items-center gap-2">
+                <TokenIcon token={selectedToken} className="h-6 w-6" />
+                <span className="font-medium text-primary">{selectedToken.tokenTicker}</span>
+            </div>
+        )}
       </TableCell>
       <TableCell className="hidden md:table-cell">
         <span className="font-mono">${investor.totalInvested.toLocaleString()}</span>
@@ -141,50 +148,63 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
+  const [selectedToken, setSelectedToken] = useState<TokenDetails | null>(null);
 
   useEffect(() => {
-    let finalInvestors: Investor[];
+    let allData: Investor[] = [...investorsData];
     const storedInvestorsRaw = localStorage.getItem('investors');
     
-    // Always start with the full data from data.ts to ensure transactions are included
-    let allData = investorsData;
-
     if (storedInvestorsRaw) {
       const storedInvestors: Investor[] = JSON.parse(storedInvestorsRaw);
-      // Create a map of stored investors for quick lookup
       const storedMap = new Map(storedInvestors.map(item => [item.id, item]));
-      // Merge stored data into the full data, preserving transactions from investorsData
-      allData = investorsData.map(defaultInvestor => {
+      
+      allData = allData.map(defaultInvestor => {
         const stored = storedMap.get(defaultInvestor.id);
-        if (stored) {
-          // Merge stored changes but keep transactions from original data
-          return { ...defaultInvestor, ...stored };
-        }
-        return defaultInvestor;
+        return stored ? { ...defaultInvestor, ...stored } : defaultInvestor;
       });
-       // Add any new investors from storage that aren't in the original data.ts
+
       storedInvestors.forEach(stored => {
         if (!allData.find(d => d.id === stored.id)) {
           allData.push(stored);
         }
       });
     }
-    
-    // This is the key change: only show whitelisted ('accepted') investors
-    finalInvestors = allData.filter(inv => inv.status === 'accepted');
+    setInvestors(allData);
 
-    localStorage.setItem('investors', JSON.stringify(allData));
-    setInvestors(finalInvestors);
+    const handleTokenChange = () => {
+        const storedTokenId = localStorage.getItem('selectedTokenId');
+        if (storedTokenId) {
+            const storedTokens: TokenDetails[] = JSON.parse(localStorage.getItem('createdTokens') || '[]');
+            const allAvailableTokens: TokenDetails[] = [...exampleTokens, ...storedTokens];
+            const foundToken = allAvailableTokens.find(t => t.id === storedTokenId);
+            setSelectedToken(foundToken || null);
+        } else {
+            setSelectedToken(null);
+        }
+    };
+
+    handleTokenChange();
+    window.addEventListener('tokenChanged', handleTokenChange);
     setLoading(false);
+
+    return () => {
+        window.removeEventListener('tokenChanged', handleTokenChange);
+    };
+
   }, []);
 
   const filteredInvestors = useMemo(() => {
-    let filtered = [...investors];
+    if (!selectedToken) return [];
+
+    let filtered = investors.filter(investor => 
+        investor.status === 'accepted' &&
+        investor.transactions.some(tx => tx.token.id === selectedToken.id)
+    );
 
     if (statusFilter !== 'all') {
       filtered = filtered.filter(inv => {
         if (statusFilter === 'frozen') return inv.isFrozen;
-        if (statusFilter === 'whitelisted') return !inv.isFrozen; // 'whitelisted' means accepted and not frozen
+        if (statusFilter === 'whitelisted') return !inv.isFrozen;
         return true;
       });
     }
@@ -199,11 +219,11 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
     }
 
     return filtered;
-  }, [investors, searchQuery, statusFilter]);
+  }, [investors, searchQuery, statusFilter, selectedToken]);
   
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery, statusFilter]);
+  }, [searchQuery, statusFilter, selectedToken]);
 
   const totalPages = Math.ceil(filteredInvestors.length / ITEMS_PER_PAGE);
   const paginatedInvestors = useMemo(() => {
@@ -216,20 +236,8 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
       setCurrentPage(page);
     }
   };
-
-  const handleDelete = (id: string) => {
-    // This should remove the investor from the main list in localStorage
-    const allInvestors: Investor[] = JSON.parse(localStorage.getItem('investors') || '[]');
-    const updatedAllInvestors = allInvestors.filter(inv => inv.id !== id);
-    localStorage.setItem('investors', JSON.stringify(updatedAllInvestors));
-    
-    // Also update the local state for the UI
-    const updatedUIInvestors = investors.filter(inv => inv.id !== id);
-    setInvestors(updatedUIInvestors);
-  };
   
   const handleToggleFreeze = (id: string) => {
-    // Update the main list in localStorage
     const allInvestors: Investor[] = JSON.parse(localStorage.getItem('investors') || '[]');
     let targetInvestor: Investor | undefined;
     const updatedAllInvestors = allInvestors.map(inv => {
@@ -241,9 +249,7 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
     });
     localStorage.setItem('investors', JSON.stringify(updatedAllInvestors));
 
-    // Update the local UI state
-    const updatedUIInvestors = investors.map(inv => inv.id === id ? { ...inv, isFrozen: !inv.isFrozen } : inv);
-    setInvestors(updatedUIInvestors);
+    setInvestors(updatedAllInvestors);
     
     if(targetInvestor) {
         toast({
@@ -259,6 +265,23 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
       <div className="space-y-4">
         <h1 className="text-3xl font-headline font-semibold">Investors</h1>
         <Card className="h-64 animate-pulse bg-muted/50"></Card>
+      </div>
+    );
+  }
+
+  if (!selectedToken) {
+     return (
+      <div className="space-y-4">
+        <div className="flex justify-between items-center">
+          <h1 className="text-3xl font-headline font-semibold">Investors</h1>
+        </div>
+        <div className="border-dashed border-2 border-muted-foreground/50 rounded-lg h-96 flex flex-col items-center justify-center text-center p-4">
+            <UserPlus className="h-16 w-16 text-muted-foreground mb-4" />
+            <h2 className="text-xl font-semibold mb-2">No Token Selected</h2>
+            <p className="text-muted-foreground mb-4">
+                Please select a token from the sidebar to view its investors.
+            </p>
+        </div>
       </div>
     );
   }
@@ -295,7 +318,7 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-headline font-semibold">Investors</h1>
+        <h1 className="text-3xl font-headline font-semibold">Investors {selectedToken && `for ${selectedToken.tokenTicker}`}</h1>
       </div>
 
       <div className="space-y-4">
@@ -351,7 +374,7 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
             <UserPlus className="h-16 w-16 text-muted-foreground mb-4" />
             <h2 className="text-xl font-semibold mb-2">No investors found</h2>
             <p className="text-muted-foreground mb-4">
-                {searchQuery || statusFilter !== 'all' ? "Try adjusting your search or filter." : "You have no whitelisted investors yet."}
+                {searchQuery || statusFilter !== 'all' ? "Try adjusting your search or filter." : `There are no whitelisted investors for ${selectedToken?.tokenTicker}.`}
             </p>
         </div>
       ) : view === 'card' ? (
@@ -359,7 +382,7 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {paginatedInvestors.map(investor => (
               <AlertDialog key={investor.id}>
-                  <InvestorCard investor={investor} onDelete={handleDelete} onToggleFreeze={handleToggleFreeze} />
+                  <InvestorCard investor={investor} onToggleFreeze={handleToggleFreeze} />
               </AlertDialog>
             ))}
           </div>
@@ -371,6 +394,7 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
             <TableHeader>
               <TableRow>
                 <TableHead>Investor</TableHead>
+                <TableHead className="hidden sm:table-cell">Token</TableHead>
                 <TableHead className="hidden md:table-cell">Total Invested</TableHead>
                 <TableHead className="hidden lg:table-cell">Wallet</TableHead>
                 <TableHead className="hidden sm:table-cell">Status</TableHead>
@@ -380,7 +404,7 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
             <TableBody>
               {paginatedInvestors.map(investor => (
                 <AlertDialog key={investor.id}>
-                  <InvestorTableRow investor={investor} onDelete={handleDelete} onToggleFreeze={handleToggleFreeze} />
+                  <InvestorTableRow investor={investor} selectedToken={selectedToken} onToggleFreeze={handleToggleFreeze} />
                 </AlertDialog>
               ))}
             </TableBody>
