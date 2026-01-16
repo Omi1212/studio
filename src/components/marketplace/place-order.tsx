@@ -15,9 +15,10 @@ interface PlaceOrderProps {
     token: TokenDetails;
     price: number;
     isSubscribed: boolean;
+    onOrderPlaced?: () => void;
 }
 
-export default function PlaceOrder({ token, price, isSubscribed }: PlaceOrderProps) {
+export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced }: PlaceOrderProps) {
     const { toast } = useToast();
     const router = useRouter();
 
@@ -90,6 +91,9 @@ export default function PlaceOrder({ token, price, isSubscribed }: PlaceOrderPro
         const existingOrders = JSON.parse(localStorage.getItem('orders') || JSON.stringify(ordersData));
         localStorage.setItem('orders', JSON.stringify([newOrder, ...existingOrders]));
 
+        if (onOrderPlaced) {
+            onOrderPlaced();
+        }
         router.push('/orders');
     }
 
@@ -119,8 +123,8 @@ export default function PlaceOrder({ token, price, isSubscribed }: PlaceOrderPro
                     </span>
                 </div>
                 <div className="text-xs text-muted-foreground flex justify-between px-1">
-                    <span>Price: ${price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                    <span>Min: {minLimit} / Max: {maxLimit} {token.tokenTicker}</span>
+                    <span>Price: ${price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD</span>
+                    <span>Min: {minLimit} {token.tokenTicker} / Max: {maxLimit} {token.tokenTicker}</span>
                 </div>
             </div>
 
