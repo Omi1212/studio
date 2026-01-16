@@ -13,7 +13,7 @@ import HeaderDynamic from '@/components/dashboard/header-dynamic';
 import { exampleTokens, issuersData } from '@/lib/data';
 import type { TokenDetails, Issuer } from '@/lib/types';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Check, FileText, HardDrive, Hash, Image as ImageIcon, Info, Network, ToggleRight, User, X, Download, Eye, Tag } from 'lucide-react';
+import { ArrowLeft, Check, FileText, HardDrive, Hash, Image as ImageIcon, Info, Network, ToggleRight, User, X, Download, Eye, Tag, MessageSquare } from 'lucide-react';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -53,14 +53,19 @@ function ReviewRow({ icon, label, value }: { icon: React.ElementType, label: str
 function FilePreview({ file, fileName }: { file: any, fileName: string }) {
     if (!file) return <span className="text-muted-foreground">Not provided</span>;
     
+    // Create a blob URL for preview/download if it's a file object
+    const fileUrl = (file instanceof File || (typeof file === 'object' && 'name' in file)) 
+        ? URL.createObjectURL(file as File) 
+        : '#';
+
     return (
         <div className="flex items-center gap-2 text-sm justify-end">
             <span className="truncate max-w-40" title={fileName}>{fileName}</span>
             <Button variant="ghost" size="icon" className="h-7 w-7" asChild>
-                <a href="#" target="_blank" rel="noopener noreferrer"><Eye className="h-4 w-4" /></a>
+                <a href={fileUrl} target="_blank" rel="noopener noreferrer"><Eye className="h-4 w-4" /></a>
             </Button>
             <Button variant="ghost" size="icon" className="h-7 w-7" asChild>
-                <a href="#" download={fileName}><Download className="h-4 w-4" /></a>
+                <a href={fileUrl} download={fileName}><Download className="h-4 w-4" /></a>
             </Button>
         </div>
     )
@@ -98,10 +103,18 @@ function RequestDetailsPage({ params }: { params: { id: string } }) {
       const issuer = issuersData.find(i => i.id === foundToken.issuerId);
       
       // Add fake documents if they don't exist for review purposes
-      const fakeFile = (name: string) => new File([""], name, { type: "application/pdf" });
-      if (!foundToken.whitepaper) foundToken.whitepaper = fakeFile(`${foundToken.tokenTicker}_Whitepaper.pdf`) as any;
-      if (!foundToken.legalTokenizationDoc) foundToken.legalTokenizationDoc = fakeFile('Legal_Tokenization.pdf') as any;
-      if (!foundToken.tokenIssuanceLegalDoc) foundToken.tokenIssuanceLegalDoc = fakeFile('Token_Issuance_Agreement.pdf') as any;
+      if (!foundToken.whitepaper) {
+        const fakeFile = new File(["fake content"], `${foundToken.tokenTicker}_Whitepaper.pdf`, { type: "application/pdf" });
+        foundToken.whitepaper = [fakeFile] as any;
+      }
+      if (!foundToken.legalTokenizationDoc) {
+        const fakeFile = new File(["fake content"], `Legal_Tokenization.pdf`, { type: "application/pdf" });
+        foundToken.legalTokenizationDoc = [fakeFile] as any;
+      }
+      if (!foundToken.tokenIssuanceLegalDoc) {
+        const fakeFile = new File(["fake content"], `Token_Issuance_Agreement.pdf`, { type: "application/pdf" });
+        foundToken.tokenIssuanceLegalDoc = [fakeFile] as any;
+      }
 
       setRequest({ ...foundToken, issuer });
 
@@ -142,6 +155,23 @@ function RequestDetailsPage({ params }: { params: { id: string } }) {
         description: `The token "${request.tokenName}" has been ${status === 'active' ? 'approved' : 'rejected'}.`
     });
     router.push('/requests');
+  };
+
+  const handleSaveObservation = () => {
+    const observationText = (document.getElementById('observation') as HTMLTextAreaElement)?.value;
+    if (!observationText?.trim()) {
+        toast({
+            variant: "destructive",
+            title: "Observation is empty",
+            description: "Please write an observation before saving.",
+        });
+        return;
+    }
+    // In a real app, you would save this observation to your backend.
+    toast({
+        title: "Observation Saved",
+        description: `Your observation for "${request?.tokenName}" has been noted.`,
+    });
   };
 
   const handleNext = () => setCurrentStep(prev => Math.min(prev + 1, steps.length));
@@ -252,6 +282,10 @@ function RequestDetailsPage({ params }: { params: { id: string } }) {
                               <Label htmlFor="observation">Observation</Label>
                               <Textarea id="observation" placeholder="Add an observation for the issuer..." />
                           </div>
+                          <Button variant="secondary" className="w-full" onClick={handleSaveObservation}>
+                            <MessageSquare className="mr-2 h-4 w-4" />
+                            Leave Observation
+                          </Button>
                           <div className="flex flex-col sm:flex-row gap-2">
                               <Button variant="destructive" className="w-full" onClick={() => updateRequestStatus(request.id, 'rejected')}>
                                   <X className="mr-2 h-4 w-4" /> Reject Request
