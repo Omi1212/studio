@@ -269,7 +269,7 @@ export const investorsData = [
         status: 'accepted' as const,
         walletAddress: 'spark1q...a4b3c2d1',
         joinedDate: '2024-05-10',
-        totalInvested: 50000,
+        totalInvested: 75000,
         isFrozen: false,
         holdings: [
             { tokenId: 'example-1', tokenName: 'Digital Dollar', tokenTicker: 'DUSD', amount: 25000, value: 1.00 },
@@ -280,16 +280,18 @@ export const investorsData = [
             { id: 'tx-1-2', type: 'Buy' as const, token: txToken2, amount: 50, price: 70.20, date: '2024-07-05' },
             { id: 'tx-1-3', type: 'Sell' as const, token: txToken1, amount: 2000, price: 1.01, date: '2024-07-15' },
             { id: 'tx-1-4', type: 'Buy' as const, token: txToken4, amount: 500, price: 12.50, date: '2024-07-18' },
+            { id: 'tx-1-5', type: 'Buy' as const, token: txToken3, amount: 20, price: 240.00, date: '2024-07-20' },
+            { id: 'tx-1-6', type: 'Buy' as const, token: txToken1, amount: 15000, price: 1.00, date: '2024-07-22' },
         ]
     },
     {
         id: 'inv-002',
         name: 'Bob Williams',
         email: 'bob.w@example.com',
-        status: 'pending' as const,
+        status: 'accepted' as const,
         walletAddress: 'spark1q...e5f6g7h8',
         joinedDate: '2024-06-15',
-        totalInvested: 25000,
+        totalInvested: 50000,
         isFrozen: false,
         holdings: [
              { tokenId: 'example-1', tokenName: 'Digital Dollar', tokenTicker: 'DUSD', amount: 15000, value: 1.00 },
@@ -299,6 +301,7 @@ export const investorsData = [
             { id: 'tx-2-1', type: 'Buy' as const, token: txToken1, amount: 15000, price: 1.00, date: '2024-07-20' },
             { id: 'tx-2-2', type: 'Sell' as const, token: txToken1, amount: 5000, price: 1.00, date: '2024-07-25' },
             { id: 'tx-2-3', type: 'Buy' as const, token: txToken3, amount: 40, price: 250.00, date: '2024-07-28' },
+            { id: 'tx-2-4', type: 'Buy' as const, token: txToken2, amount: 100, price: 75.00, date: '2024-08-01' },
         ]
     },
     {
@@ -308,7 +311,7 @@ export const investorsData = [
         status: 'accepted' as const,
         walletAddress: 'spark1q...i9j0k1l2',
         joinedDate: '2024-03-22',
-        totalInvested: 125000,
+        totalInvested: 150000,
         isFrozen: false,
         holdings: [
             { tokenId: 'example-1', tokenName: 'Digital Dollar', tokenTicker: 'DUSD', amount: 50000, value: 1.00 },
@@ -319,6 +322,8 @@ export const investorsData = [
             { id: 'tx-3-2', type: 'Sell' as const, token: txToken4, amount: 300, price: 12.00, date: '2024-07-10' },
             { id: 'tx-3-3', type: 'Buy' as const, token: txToken1, amount: 20000, price: 1.00, date: '2024-07-18' },
             { id: 'tx-3-4', type: 'Buy' as const, token: txToken2, amount: 100, price: 72.00, date: '2024-07-21' },
+            { id: 'tx-3-5', type: 'Sell' as const, token: txToken1, amount: 5000, price: 1.02, date: '2024-07-25' },
+            { id: 'tx-3-6', type: 'Buy' as const, token: txToken3, amount: 10, price: 255.00, date: '2024-07-29' },
         ]
     },
     {
@@ -394,11 +399,12 @@ export const investorsData = [
         status: 'accepted' as const,
         walletAddress: 'spark1q...g3h4i5j6',
         joinedDate: '2024-01-15',
-        totalInvested: 75000,
+        totalInvested: 90000,
         isFrozen: false,
         holdings: [],
         transactions: [
             { id: 'tx-9-1', type: 'Buy' as const, token: txToken1, amount: 75000, price: 1.00, date: '2024-01-20' },
+            { id: 'tx-9-2', type: 'Buy' as const, token: txToken2, amount: 200, price: 75.00, date: '2024-08-02' },
         ]
     },
     {
@@ -408,11 +414,13 @@ export const investorsData = [
         status: 'accepted' as const,
         walletAddress: 'spark1q...k7l8m9n0',
         joinedDate: '2024-04-05',
-        totalInvested: 200000,
+        totalInvested: 270000,
         isFrozen: false,
         holdings: [],
         transactions: [
              { id: 'tx-10-1', type: 'Buy' as const, token: txToken2, amount: 1000, price: 70.00, date: '2024-04-10' },
+             { id: 'tx-10-2', type: 'Buy' as const, token: txToken3, amount: 50, price: 240.00, date: '2024-05-15' },
+             { id: 'tx-10-3', type: 'Buy' as const, token: txToken1, amount: 20000, price: 1.01, date: '2024-06-01' },
         ]
     },
     {
@@ -426,7 +434,51 @@ export const investorsData = [
         isFrozen: false,
         holdings: [],
         transactions: []
-    }
+    },
+    {
+        id: 'inv-012',
+        name: 'Laura Palmer',
+        email: 'laura.p@example.com',
+        status: 'accepted' as const,
+        walletAddress: 'spark1q...lp123456',
+        joinedDate: '2024-08-01',
+        totalInvested: 35000,
+        isFrozen: false,
+        holdings: [],
+        transactions: [
+            { id: 'tx-12-1', type: 'Buy' as const, token: txToken1, amount: 20000, price: 1.00, date: '2024-08-01' },
+            { id: 'tx-12-2', type: 'Buy' as const, token: txToken3, amount: 60, price: 250.00, date: '2024-08-02' },
+        ]
+    },
+    {
+        id: 'inv-013',
+        name: 'Michael Jordan',
+        email: 'michael.j@example.com',
+        status: 'accepted' as const,
+        walletAddress: 'spark1q...mj232323',
+        joinedDate: '2024-08-02',
+        totalInvested: 100250,
+        isFrozen: false,
+        holdings: [],
+        transactions: [
+            { id: 'tx-13-1', type: 'Buy' as const, token: txToken2, amount: 1000, price: 75.25, date: '2024-08-02' },
+            { id: 'tx-13-2', type: 'Buy' as const, token: txToken3, amount: 100, price: 250.00, date: '2024-08-03' },
+        ]
+    },
+    {
+        id: 'inv-014',
+        name: 'Nancy Drew',
+        email: 'nancy.d@example.com',
+        status: 'accepted' as const,
+        walletAddress: 'spark1q...nd654321',
+        joinedDate: '2024-08-03',
+        totalInvested: 12750,
+        isFrozen: false,
+        holdings: [],
+        transactions: [
+            { id: 'tx-14-1', type: 'Buy' as const, token: txToken3, amount: 50, price: 255.00, date: '2024-08-03' },
+        ]
+    },
 ];
 
 export const ordersData: Order[] = [
@@ -605,6 +657,7 @@ export const usersData: User[] = [
         status: 'active',
     }
 ]
+
 
 
 
