@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/sidebar';
 import SidebarNav from '@/components/dashboard/sidebar-nav';
 import HeaderDynamic from '@/components/dashboard/header-dynamic';
-import { exampleTokens, tokenPriceHistory } from '@/lib/data';
+import { exampleTokens, tokenPriceHistory, investorsData } from '@/lib/data';
 import type { TokenDetails } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Globe, FileText } from 'lucide-react';
@@ -27,6 +27,9 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import PlaceOrder from '@/components/marketplace/place-order';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
+import { useToast } from '@/hooks/use-toast';
+
+type WhitelistRequest = typeof investorsData[0];
 
 const chartConfig = {
   price: {
@@ -48,9 +51,10 @@ function InfoRow({ label, value, valueClassName }: { label: string; value: React
 function TokenOfferingPage({ params }: { params: { tokenId: string } }) {
   const [token, setToken] = useState<TokenDetails | null>(null);
   const [loading, setLoading] = useState(true);
-  const [isSubscribed, setIsSubscribed] = useState(false);
+  const [subscriptionStatus, setSubscriptionStatus] = useState<'none' | 'pending' | 'approved'>('none');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [investStep, setInvestStep] = useState(1);
+  const { toast } = useToast();
 
    const networkMap: { [key: string]: string } = {
     spark: 'Spark',
@@ -68,13 +72,26 @@ function TokenOfferingPage({ params }: { params: { tokenId: string } }) {
 
   useEffect(() => {
     const { tokenId } = params;
-    
-    // In a real app, this would come from a global state or an API call
+
     const subscriptions = {
       'example-1': 'approved'
     };
+    
     // @ts-ignore
-    setIsSubscribed(subscriptions[tokenId] === 'approved');
+    if (subscriptions[tokenId] === 'approved') {
+        setSubscriptionStatus('approved');
+    } else {
+        const storedInvestors: WhitelistRequest[] = JSON.parse(localStorage.getItem('investors') || '[]');
+        // A real app would check against the current user. For demo, we assume any pending request by a 'Market Subscriber' is for this token.
+        const pendingRequest = storedInvestors.find(inv => 
+            inv.name === 'Market Subscriber' && inv.status === 'pending'
+        );
+        if (pendingRequest) {
+            setSubscriptionStatus('pending');
+        } else {
+            setSubscriptionStatus('none');
+        }
+    }
     
     const storedTokens: TokenDetails[] = JSON.parse(localStorage.getItem('createdTokens') || '[]');
     const allTokens: TokenDetails[] = [...exampleTokens, ...storedTokens].map(t => ({
@@ -93,6 +110,28 @@ function TokenOfferingPage({ params }: { params: { tokenId: string } }) {
     
     setLoading(false);
   }, [params]);
+  
+  const handleSubscribe = () => {
+    const newRequest: WhitelistRequest = {
+        id: `inv-req-${Math.random().toString(36).substring(2, 9)}`,
+        name: 'Market Subscriber', // Generic name for demo
+        email: `subscriber.${Math.floor(Math.random() * 1000)}@example.com`,
+        status: 'pending' as const,
+        walletAddress: `spark1q-market-${Math.random().toString(36).substring(2, 9)}`,
+        joinedDate: new Date().toISOString(),
+        totalInvested: 0,
+        isFrozen: false,
+        holdings: [],
+        transactions: [],
+    };
+
+    const existingInvestors = JSON.parse(localStorage.getItem('investors') || JSON.stringify(investorsData));
+    localStorage.setItem('investors', JSON.stringify([newRequest, ...existingInvestors]));
+    
+    setSubscriptionStatus('pending');
+    toast({ title: 'Whitelisting Request Sent!', description: "Your request to be whitelisted on the platform is now pending approval." });
+};
+
 
   if (loading) {
     return (
@@ -167,35 +206,60 @@ function TokenOfferingPage({ params }: { params: { tokenId: string } }) {
                  <Card>
                   <CardHeader>
                       <CardTitle>Invest in {token.tokenName}</CardTitle>
-                      <CardDescription>Place an order to acquire {token.tokenTicker}.</CardDescription>
+                      <CardDescription>
+                          To invest in this token, you must first be subscribed to the offering.
+                          Once your subscription is approved, you can place an order.
+                      </CardDescription>
                   </CardHeader>
                   <CardContent>
                       <InfoRow label="Current Price" value={`$${offeringData.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD`} />
-                      <InfoRow label="Subscription" value={isSubscribed ? 'Approved' : 'Not Subscribed'} valueClassName={isSubscribed ? 'text-green-500' : 'text-yellow-500'} />
+                      <InfoRow 
+                          label="Subscription" 
+                          value={
+                              subscriptionStatus === 'approved' ? 'Approved' :
+                              subscriptionStatus === 'pending' ? 'Pending Approval' :
+                              'Not Subscribed'
+                          }
+                          valueClassName={
+                              subscriptionStatus === 'approved' ? 'text-green-500' :
+                              subscriptionStatus === 'pending' ? 'text-yellow-500' :
+                              'text-red-500'
+                          }
+                      />
                   </CardContent>
                   <CardFooter>
-                      <Dialog open={isModalOpen} onOpenChange={(open) => { if (!open) setInvestStep(1); setIsModalOpen(open); }}>
-                          <DialogTrigger asChild>
-                              <Button className="w-full" disabled={!isSubscribed}>
-                                  Invest
-                              </Button>
-                          </DialogTrigger>
-                          <DialogContent className={cn(investStep === 2 ? 'sm:max-w-4xl' : 'sm:max-w-lg')}>
-                              <DialogHeader>
-                                  <DialogTitle>Invest in {token.tokenName}</DialogTitle>
-                                  <DialogDescription>
-                                      Place your order for {token.tokenTicker}.
-                                  </DialogDescription>
-                              </DialogHeader>
-                              <PlaceOrder
-                                  token={token}
-                                  price={offeringData.price}
-                                  isSubscribed={isSubscribed}
-                                  onOrderPlaced={() => setIsModalOpen(false)}
-                                  onStepChange={setInvestStep}
-                              />
-                          </DialogContent>
-                      </Dialog>
+                    {subscriptionStatus === 'approved' ? (
+                        <Dialog open={isModalOpen} onOpenChange={(open) => { if (!open) setInvestStep(1); setIsModalOpen(open); }}>
+                            <DialogTrigger asChild>
+                                <Button className="w-full">
+                                    Invest
+                                </Button>
+                            </DialogTrigger>
+                            <DialogContent className={cn(investStep === 2 ? 'sm:max-w-4xl' : 'sm:max-w-lg')}>
+                                <DialogHeader>
+                                    <DialogTitle>Invest in {token.tokenName}</DialogTitle>
+                                    <DialogDescription>
+                                        Place your order for {token.tokenTicker}.
+                                    </DialogDescription>
+                                </DialogHeader>
+                                <PlaceOrder
+                                    token={token}
+                                    price={offeringData.price}
+                                    isSubscribed={true}
+                                    onOrderPlaced={() => setIsModalOpen(false)}
+                                    onStepChange={setInvestStep}
+                                />
+                            </DialogContent>
+                        </Dialog>
+                    ) : subscriptionStatus === 'pending' ? (
+                        <Button className="w-full" disabled>
+                            Pending Approval
+                        </Button>
+                    ) : (
+                        <Button className="w-full" onClick={handleSubscribe}>
+                            Subscribe
+                        </Button>
+                    )}
                   </CardFooter>
                 </Card>
 
