@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -33,7 +32,7 @@ const SparkIcon = () => (
 )
 
 const UsdtIcon = () => (
-    <svg xmlns="http://wwws.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6">
         <circle cx="12" cy="12" r="10" />
         <path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4h-6"/>
         <path d="M12 6v12"/>
@@ -46,9 +45,10 @@ interface PlaceOrderProps {
     price: number;
     isSubscribed: boolean;
     onOrderPlaced?: () => void;
+    onStepChange?: (step: number) => void;
 }
 
-export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced }: PlaceOrderProps) {
+export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced, onStepChange }: PlaceOrderProps) {
     const { toast } = useToast();
     const router = useRouter();
 
@@ -140,6 +140,12 @@ export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced }
             return;
         }
         setStep(2);
+        onStepChange?.(2);
+    }
+    
+    const handleBack = () => {
+        setStep(1);
+        onStepChange?.(1);
     }
 
     const renderStep1 = () => {
@@ -293,7 +299,7 @@ export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced }
                     </Card>
                 </div>
                  <div className="lg:col-span-2 flex justify-between">
-                    <Button variant="outline" onClick={() => setStep(1)}>Back</Button>
+                    <Button variant="outline" onClick={handleBack}>Back</Button>
                     <Button onClick={handlePlaceOrder}>Place Order</Button>
                 </div>
             </div>
@@ -302,5 +308,3 @@ export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced }
 
     return step === 1 ? renderStep1() : renderStep2();
 }
-
-    

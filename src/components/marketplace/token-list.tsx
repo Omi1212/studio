@@ -141,6 +141,7 @@ export default function TokenList() {
   const [view, setView] = useState<ViewMode>('card');
   const [selectedToken, setSelectedToken] = useState<TokenDetails | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [investStep, setInvestStep] = useState(1);
   const router = useRouter();
 
   useEffect(() => {
@@ -238,7 +239,7 @@ export default function TokenList() {
   }
 
   return (
-    <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+    <Dialog open={isModalOpen} onOpenChange={(open) => { if (!open) setInvestStep(1); setIsModalOpen(open); }}>
         <div className="mb-12 space-y-4">
         <div className="flex justify-between items-center mb-4">
             <h2 className="text-2xl font-headline font-semibold">Available Tokens</h2>
@@ -328,7 +329,7 @@ export default function TokenList() {
             )}
         </div>
          {selectedToken && (
-            <DialogContent>
+            <DialogContent className={cn(investStep === 2 && 'sm:max-w-4xl')}>
                 <DialogHeader>
                     <DialogTitle>Invest in {selectedToken.tokenName}</DialogTitle>
                     <DialogDescription>
@@ -340,14 +341,10 @@ export default function TokenList() {
                     price={selectedToken.price || 0} 
                     isSubscribed={true}
                     onOrderPlaced={() => setIsModalOpen(false)}
+                    onStepChange={setInvestStep}
                 />
             </DialogContent>
         )}
     </Dialog>
   );
 }
-
-    
-
-
-

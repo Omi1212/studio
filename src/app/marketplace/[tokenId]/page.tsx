@@ -25,6 +25,8 @@ import {
 } from '@/components/ui/chart';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import PlaceOrder from '@/components/marketplace/place-order';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { cn } from '@/lib/utils';
 
 const chartConfig = {
   price: {
@@ -47,6 +49,8 @@ function TokenOfferingPage({ params }: { params: { tokenId: string } }) {
   const [token, setToken] = useState<TokenDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [isSubscribed, setIsSubscribed] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [investStep, setInvestStep] = useState(1);
 
    const networkMap: { [key: string]: string } = {
     spark: 'Spark',
@@ -160,7 +164,40 @@ function TokenOfferingPage({ params }: { params: { tokenId: string } }) {
                     </CardFooter>
                 </Card>
 
-                <PlaceOrder token={token} price={offeringData.price} isSubscribed={isSubscribed} />
+                 <Card>
+                  <CardHeader>
+                      <CardTitle>Invest in {token.tokenName}</CardTitle>
+                      <CardDescription>Place an order to acquire {token.tokenTicker}.</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                      <InfoRow label="Current Price" value={`$${offeringData.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD`} />
+                      <InfoRow label="Subscription" value={isSubscribed ? 'Approved' : 'Not Subscribed'} valueClassName={isSubscribed ? 'text-green-500' : 'text-yellow-500'} />
+                  </CardContent>
+                  <CardFooter>
+                      <Dialog open={isModalOpen} onOpenChange={(open) => { if (!open) setInvestStep(1); setIsModalOpen(open); }}>
+                          <DialogTrigger asChild>
+                              <Button className="w-full" disabled={!isSubscribed}>
+                                  Invest
+                              </Button>
+                          </DialogTrigger>
+                          <DialogContent className={cn(investStep === 2 ? 'sm:max-w-4xl' : 'sm:max-w-lg')}>
+                              <DialogHeader>
+                                  <DialogTitle>Invest in {token.tokenName}</DialogTitle>
+                                  <DialogDescription>
+                                      Place your order for {token.tokenTicker}.
+                                  </DialogDescription>
+                              </DialogHeader>
+                              <PlaceOrder
+                                  token={token}
+                                  price={offeringData.price}
+                                  isSubscribed={isSubscribed}
+                                  onOrderPlaced={() => setIsModalOpen(false)}
+                                  onStepChange={setInvestStep}
+                              />
+                          </DialogContent>
+                      </Dialog>
+                  </CardFooter>
+                </Card>
 
             </div>
             
