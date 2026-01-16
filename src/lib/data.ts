@@ -479,6 +479,49 @@ export const investorsData = [
             { id: 'tx-14-1', type: 'Buy' as const, token: txToken3, amount: 50, price: 255.00, date: '2024-08-03' },
         ]
     },
+    {
+        id: 'inv-015',
+        name: 'Olivia Chen',
+        email: 'olivia.c@example.com',
+        status: 'accepted' as const,
+        walletAddress: 'spark1q...oc151515',
+        joinedDate: '2024-08-04',
+        totalInvested: 25000,
+        isFrozen: false,
+        holdings: [],
+        transactions: [
+            { id: 'tx-15-1', type: 'Buy' as const, token: txToken1, amount: 25000, price: 1.00, date: '2024-08-04' },
+        ]
+    },
+    {
+        id: 'inv-016',
+        name: 'Paul Atreides',
+        email: 'paul.a@example.com',
+        status: 'accepted' as const,
+        walletAddress: 'spark1q...pa161616',
+        joinedDate: '2024-08-05',
+        totalInvested: 15100,
+        isFrozen: false,
+        holdings: [],
+        transactions: [
+            { id: 'tx-16-1', type: 'Buy' as const, token: txToken2, amount: 200, price: 75.50, date: '2024-08-05' },
+        ]
+    },
+    {
+        id: 'inv-017',
+        name: 'Quinn Fabray',
+        email: 'quinn.f@example.com',
+        status: 'accepted' as const,
+        walletAddress: 'spark1q...qf171717',
+        joinedDate: '2024-08-06',
+        totalInvested: 17550,
+        isFrozen: false,
+        holdings: [],
+        transactions: [
+            { id: 'tx-17-1', type: 'Buy' as const, token: txToken1, amount: 10000, price: 1.00, date: '2024-08-06' },
+            { id: 'tx-17-2', type: 'Buy' as const, token: txToken2, amount: 100, price: 75.50, date: '2024-08-06' },
+        ]
+    }
 ];
 
 export const ordersData: Order[] = [
@@ -657,6 +700,7 @@ export const usersData: User[] = [
         status: 'active',
     }
 ]
+
 
 
 
