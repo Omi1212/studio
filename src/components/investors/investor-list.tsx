@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import { investorsData, exampleTokens } from '@/lib/data';
 import type { ViewMode, TokenDetails } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/card';
@@ -91,8 +92,13 @@ function InvestorCard({ investor, onToggleFreeze }: { investor: Investor, onTogg
 }
 
 function InvestorTableRow({ investor, selectedToken, onToggleFreeze }: { investor: Investor, selectedToken: TokenDetails | null, onToggleFreeze: (id: string) => void }) {
+  const router = useRouter();
+
   return (
-    <TableRow>
+    <TableRow 
+      onClick={() => router.push(`/investors/${investor.id}`)}
+      className="cursor-pointer"
+    >
       <TableCell>
         <div className="flex items-center gap-3">
           <Avatar className="h-8 w-8">
@@ -119,7 +125,7 @@ function InvestorTableRow({ investor, selectedToken, onToggleFreeze }: { investo
         <span className="font-mono">{investor.walletAddress.slice(0, 7)}...{investor.walletAddress.slice(-4)}</span>
       </TableCell>
       <TableCell className="hidden sm:table-cell">{getStatusBadge(investor)}</TableCell>
-      <TableCell className="text-right">
+      <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" className="h-8 w-8">
