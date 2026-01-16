@@ -13,12 +13,14 @@ import HeaderDynamic from '@/components/dashboard/header-dynamic';
 import { exampleTokens, issuersData } from '@/lib/data';
 import type { TokenDetails, Issuer } from '@/lib/types';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Check, FileText, HardDrive, Hash, Image as ImageIcon, Info, Network, ToggleRight, User, X, Download, Eye } from 'lucide-react';
+import { ArrowLeft, Check, FileText, HardDrive, Hash, Image as ImageIcon, Info, Network, ToggleRight, User, X, Download, Eye, Tag } from 'lucide-react';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useToast } from '@/hooks/use-toast';
 import { Stepper, StepperItem } from '@/components/ui/stepper';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
 
 type CombinedRequest = TokenDetails & { issuer?: Issuer };
 
@@ -199,7 +201,7 @@ function RequestDetailsPage({ params }: { params: { id: string } }) {
               {currentStep === 1 && (
                 <ReviewSection title="Token Information">
                     <ReviewRow icon={Info} label="Token Name" value={request.tokenName} />
-                    <ReviewRow icon={Info} label="Token Ticker" value={request.tokenTicker} />
+                    <ReviewRow icon={Tag} label="Token Ticker" value={request.tokenTicker} />
                     <ReviewRow icon={ImageIcon} label="Token Icon" value={
                       iconPreview ? (
                           <Avatar className="h-6 w-6">
@@ -243,15 +245,21 @@ function RequestDetailsPage({ params }: { params: { id: string } }) {
                     <Card>
                       <CardHeader>
                           <CardTitle>Actions</CardTitle>
-                          <CardDescription>Approve or reject this token issuance request.</CardDescription>
+                          <CardDescription>Approve or reject this token issuance request. You can add an optional observation.</CardDescription>
                       </CardHeader>
-                      <CardContent className="flex flex-col sm:flex-row gap-2">
-                          <Button variant="destructive" className="w-full" onClick={() => updateRequestStatus(request.id, 'rejected')}>
-                              <X className="mr-2 h-4 w-4" /> Reject Request
-                          </Button>
-                          <Button className="w-full" onClick={() => updateRequestStatus(request.id, 'active')}>
-                              <Check className="mr-2 h-4 w-4" /> Approve Request
-                          </Button>
+                      <CardContent className="space-y-4">
+                           <div className="space-y-2">
+                              <Label htmlFor="observation">Observation</Label>
+                              <Textarea id="observation" placeholder="Add an observation for the issuer..." />
+                          </div>
+                          <div className="flex flex-col sm:flex-row gap-2">
+                              <Button variant="destructive" className="w-full" onClick={() => updateRequestStatus(request.id, 'rejected')}>
+                                  <X className="mr-2 h-4 w-4" /> Reject Request
+                              </Button>
+                              <Button className="w-full" onClick={() => updateRequestStatus(request.id, 'active')}>
+                                  <Check className="mr-2 h-4 w-4" /> Approve Request
+                              </Button>
+                          </div>
                       </CardContent>
                     </Card>
                   )}
@@ -278,5 +286,3 @@ export default function RequestDetailsUsePage({ params }: { params: Promise<{ id
   const resolvedParams = use(params);
   return <RequestDetailsPage params={resolvedParams} />;
 }
-
-    
