@@ -6,7 +6,7 @@ import {
   Card,
   CardContent,
 } from '@/components/ui/card';
-import { tokenData } from '@/lib/data';
+import { investorsData, exampleTokens } from '@/lib/data';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { ChevronDown, Send, Copy } from 'lucide-react';
@@ -16,9 +16,21 @@ import {
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
 import { useToast } from '@/hooks/use-toast';
-import { Separator } from '../ui/separator';
 
-function TokenRow({ token }: { token: (typeof tokenData)[0] }) {
+interface PortfolioToken {
+    id: string;
+    name: string;
+    ticker: string;
+    price: number;
+    balance: number;
+    tokenId: string;
+    publicKey: string;
+    maxSupply: number;
+    decimals: number;
+    network: string;
+}
+
+function TokenRow({ token }: { token: PortfolioToken }) {
   const [isOpen, setIsOpen] = React.useState(false);
   const { toast } = useToast();
 
@@ -54,7 +66,7 @@ function TokenRow({ token }: { token: (typeof tokenData)[0] }) {
             <div className="w-[25%] text-right">
               <p className="font-medium font-mono">{token.balance.toLocaleString()}</p>
               <p className="text-sm text-muted-foreground font-mono">
-                ${(token.balance * token.price).toFixed(2)}
+                ${(token.balance * token.price).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </p>
             </div>
             <div className="w-[20%] flex items-center justify-end gap-2 px-6">
@@ -102,7 +114,7 @@ function TokenRow({ token }: { token: (typeof tokenData)[0] }) {
                 <div className="text-right">
                     <p className="text-muted-foreground">Balance</p>
                     <p className="font-mono">{token.balance.toLocaleString()}</p>
-                    <p className="font-mono text-muted-foreground">${(token.balance * token.price).toFixed(2)}</p>
+                    <p className="font-mono text-muted-foreground">${(token.balance * token.price).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                 </div>
             </div>
           </div>
@@ -158,6 +170,28 @@ function InfoRow({ label, value, onCopy }: { label: string; value: string, onCop
 
 
 export default function TokensList() {
+    const investor = investorsData.find(inv => inv.id === 'inv-001');
+
+    const portfolioTokens: PortfolioToken[] = React.useMemo(() => {
+        if (!investor) return [];
+
+        return investor.holdings.map(holding => {
+            const tokenDetail = exampleTokens.find(t => t.id === holding.tokenId);
+            return {
+                id: holding.tokenId,
+                name: holding.tokenName,
+                ticker: holding.tokenTicker,
+                price: holding.value,
+                balance: holding.amount,
+                tokenId: holding.tokenId,
+                publicKey: `03a...${holding.tokenId.slice(-10)}`, // fake public key
+                maxSupply: tokenDetail?.maxSupply || 0,
+                decimals: tokenDetail?.decimals || 0,
+                network: tokenDetail?.network || 'spark',
+            };
+        });
+    }, [investor]);
+
   return (
     <Card>
       <CardContent className="p-0">
@@ -168,7 +202,7 @@ export default function TokensList() {
             <div className="w-[20%] px-4 py-3 font-medium text-muted-foreground text-sm text-center">Actions</div>
         </div>
         <div>
-          {tokenData.map((token) => (
+          {portfolioTokens.map((token) => (
             <TokenRow key={token.id} token={token} />
           ))}
         </div>
