@@ -128,6 +128,8 @@ export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced, 
         const existingOrders = JSON.parse(localStorage.getItem('orders') || JSON.stringify(ordersData));
         localStorage.setItem('orders', JSON.stringify([newOrder, ...existingOrders]));
 
+        localStorage.setItem('selectedTokenId', token.id);
+
         if (onOrderPlaced) {
             onOrderPlaced();
         }
@@ -283,7 +285,7 @@ export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced, 
                             </div>
                             <div className="flex justify-between">
                                 <span className="text-muted-foreground">Total amount</span>
-                                <span className="font-medium font-mono">${investmentAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                                <span className="font-mono">${investmentAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                             </div>
                             <div className="flex justify-between">
                                 <span className="text-muted-foreground">Platform fee</span>
