@@ -1,4 +1,3 @@
-
 'use client';
 
 import {
@@ -52,9 +51,7 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-card px-4 sm:px-6">
-      <div className="md:hidden">
-        <SidebarTrigger />
-      </div>
+      <SidebarTrigger />
 
       <div className="flex items-center gap-4 ml-auto">
         <Button variant="ghost" size="icon" className="rounded-full">
