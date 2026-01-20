@@ -168,7 +168,7 @@ const Sidebar = React.forwardRef<
     {
       side = "left",
       variant = "sidebar",
-      collapsible = "icon",
+      collapsible = "offcanvas",
       className,
       children,
       ...props
