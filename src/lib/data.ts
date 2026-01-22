@@ -1,5 +1,3 @@
-
-
 import type { Order, TokenDetails, Transfer, Issuer, User } from './types';
 
 export const volumeData = [
@@ -677,29 +675,35 @@ export const usersData: User[] = [
     {
         id: 'user-001',
         name: 'John Doe',
-        email: 'john.doe@example.com',
+        email: 'agent@gmail.com',
         role: 'agent',
         walletAddress: 'spark1q...user01',
         kycStatus: 'verified',
         status: 'active',
+        phone: '+1 555-0101',
+        kycLevel: 3,
     },
     {
         id: 'user-002',
         name: 'Jane Smith',
-        email: 'jane.smith@example.com',
+        email: 'issuer@gmail.com',
         role: 'issuer',
         walletAddress: 'spark1q...user02',
         kycStatus: 'pending',
         status: 'active',
+        phone: '+1 555-0102',
+        kycLevel: 1,
     },
     {
         id: 'user-003',
         name: 'Peter Jones',
-        email: 'peter.jones@example.com',
+        email: 'investor@gmail.com',
         role: 'investor',
         walletAddress: 'spark1q...user03',
         kycStatus: 'verified',
-        status: 'inactive',
+        status: 'active',
+        phone: '+1 555-0103',
+        kycLevel: 2,
     },
     {
         id: 'user-004',
@@ -709,21 +713,18 @@ export const usersData: User[] = [
         walletAddress: 'spark1q...user04',
         kycStatus: 'rejected',
         status: 'active',
+        phone: '+1 555-0104',
+        kycLevel: 0,
     },
      {
         id: 'user-005',
         name: 'Super Admin',
-        email: 'superadmin@example.com',
+        email: 'superadmin@gmail.com',
         role: 'superadmin',
         walletAddress: 'spark1q...superadmin',
         kycStatus: 'verified',
         status: 'active',
+        phone: '+1 555-0105',
+        kycLevel: 4,
     }
 ]
-
-
-
-
-
-
-

@@ -88,4 +88,7 @@
   .flex-center {
     @apply flex items-center justify-center;
   }
+  .passport-header-gradient {
+    @apply bg-gradient-to-br from-primary/20 to-primary/5;
+  }
 }

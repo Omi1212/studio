@@ -1,7 +1,6 @@
-
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Card,
@@ -15,8 +14,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-import { Loader2, Triangle } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import Image from 'next/image';
+import { usersData } from '@/lib/data';
 
 type Role = 'agent' | 'superadmin' | 'investor' | 'issuer';
 
@@ -42,18 +42,27 @@ export default function LoginForm() {
     e.preventDefault();
     setIsSubmitting(true);
     
-    // Determine role from email
-    const role = Object.keys(roleEmails).find(
-      (key) => roleEmails[key as Role] === email
-    ) as Role | undefined;
+    // Find user by email
+    const user = usersData.find(u => u.email === email);
 
-    if (role) {
-      localStorage.setItem('userRole', role);
+    if (user) {
+      localStorage.setItem('userRole', user.role);
+      localStorage.setItem('currentUser', JSON.stringify(user));
     } else {
-      localStorage.removeItem('userRole'); // Or set a default role
+      // Fallback for emails not in usersData
+      const role = Object.keys(roleEmails).find(
+        (key) => roleEmails[key as Role] === email
+      ) as Role | undefined;
+      
+      if (role) {
+        localStorage.setItem('userRole', role);
+      } else {
+        localStorage.removeItem('userRole');
+      }
+      localStorage.removeItem('currentUser');
     }
 
-    console.log('Logging in with:', { email, password, role });
+    // console.log('Logging in with:', { email, password, user });
     await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate async operation
     router.push('/');
   };

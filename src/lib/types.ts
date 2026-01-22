@@ -1,5 +1,3 @@
-
-
 import type { TokenFormValues } from "@/components/issue-token/issue-token-form";
 
 export interface TokenDetails extends TokenFormValues {
@@ -54,6 +52,6 @@ export type User = {
   walletAddress: string;
   kycStatus: 'verified' | 'pending' | 'rejected';
   status: 'active' | 'inactive';
+  phone?: string;
+  kycLevel?: number;
 };
-
-

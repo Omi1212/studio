@@ -1,0 +1,210 @@
+
+'use client';
+
+import {
+  Sidebar,
+  SidebarInset,
+  SidebarProvider,
+} from '@/components/ui/sidebar';
+import SidebarNav from '@/components/dashboard/sidebar-nav';
+import HeaderDynamic from '@/components/dashboard/header-dynamic';
+import { useEffect, useState } from 'react';
+import type { User } from '@/lib/types';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
+import { CheckCircle2, Circle, Lock, Mail, Phone, Calendar, ShieldCheck, User as UserIcon } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { Skeleton } from '@/components/ui/skeleton';
+import { usersData } from '@/lib/data';
+
+const kycLevels = [
+  {
+    level: 1,
+    title: 'User Level 1',
+    description: 'Email and phone number verified.',
+    requirements: ['Verified Email', 'Verified Phone Number'],
+  },
+  {
+    level: 2,
+    title: 'User Level 2',
+    description: 'Basic personal information provided.',
+    requirements: ['Full Name', 'Date of Birth', 'Residential Address'],
+  },
+  {
+    level: 3,
+    title: 'User Level 3',
+    description: 'Official ID document submitted.',
+    requirements: ['Passport or National ID', 'Liveness Check'],
+  },
+  {
+    level: 4,
+    title: 'User Level 4',
+    description: 'Proof of address verified.',
+    requirements: ['Utility Bill or Bank Statement'],
+  },
+];
+
+function KycLevelIndicator({ currentLevel }: { currentLevel: number }) {
+  return (
+    <div className="space-y-6">
+      {kycLevels.map((level) => {
+        const isCompleted = currentLevel >= level.level;
+        const isCurrent = currentLevel + 1 === level.level;
+
+        return (
+          <div key={level.level} className="flex items-start gap-4">
+            <div className="flex flex-col items-center">
+                <div
+                className={cn(
+                    'flex-center h-8 w-8 rounded-full border-2',
+                    isCompleted ? 'border-green-500 bg-green-500 text-white' : isCurrent ? 'border-primary' : 'border-muted-foreground/30'
+                )}
+                >
+                {isCompleted ? <CheckCircle2 className="h-5 w-5" /> : <p className={cn(isCurrent ? 'text-primary font-bold' : 'text-muted-foreground')}>{level.level}</p>}
+                </div>
+                {level.level < 4 && <div className={cn("w-0.5 flex-1", isCompleted ? 'bg-green-500' : 'bg-muted-foreground/30')} />}
+            </div>
+            <div className="flex-1 -mt-1">
+              <p className={cn("font-semibold", isCompleted || isCurrent ? 'text-foreground' : 'text-muted-foreground')}>{level.title}</p>
+              <p className="text-sm text-muted-foreground">{level.description}</p>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+
+function InfoRow({ icon: Icon, label, value }: { icon: React.ElementType, label: string, value: string | undefined }) {
+  return (
+    <div className="flex items-center gap-4">
+      <Icon className="h-5 w-5 text-muted-foreground" />
+      <div className="flex-1">
+        <p className="text-xs text-muted-foreground">{label}</p>
+        <p className="text-sm font-medium">{value || 'Not provided'}</p>
+      </div>
+    </div>
+  )
+}
+
+export default function ProfilePage() {
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem('currentUser');
+    if (storedUser) {
+      const parsedUser = JSON.parse(storedUser);
+       if (parsedUser.role !== 'investor') {
+        // For this demo, if not an investor, find first investor in data
+        const investorUser = usersData.find((u: User) => u.role === 'investor');
+        if(investorUser) setUser(investorUser);
+        else setUser(parsedUser); // fallback to current user
+      } else {
+        setUser(parsedUser);
+      }
+    }
+    setLoading(false);
+  }, []);
+
+  const getInitials = (name: string) => {
+    const names = name.split(' ');
+    if (names.length > 1) {
+      return `${names[0][0]}${names[names.length - 1][0]}`;
+    }
+    return name.substring(0, 2);
+  };
+  
+  const kycStatusMap = {
+    verified: { text: "Verified", className: "text-green-400 border-green-400" },
+    pending: { text: "Pending", className: "text-yellow-400 border-yellow-400" },
+    rejected: { text: "Rejected", className: "text-red-500 border-red-500" },
+  }
+  const currentKycStatus = user ? kycStatusMap[user.kycStatus] : kycStatusMap.pending;
+
+  if (loading) {
+      return (
+        <div className="flex-1 p-4 sm:p-6 lg:p-8 flex items-center justify-center">
+            <Skeleton className="w-full max-w-4xl h-[600px]" />
+        </div>
+      )
+  }
+
+  if (!user) {
+    return (
+      <div className="flex-1 p-4 sm:p-6 lg:p-8 flex items-center justify-center">
+        <p>No user data found. Please log in.</p>
+      </div>
+    );
+  }
+
+  return (
+    <SidebarProvider>
+      <Sidebar className="border-r">
+        <SidebarNav />
+      </Sidebar>
+      <SidebarInset>
+        <div className="flex flex-col min-h-dvh">
+          <HeaderDynamic />
+          <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-8 bg-background">
+             <div className="flex justify-between items-center">
+                <h1 className="text-3xl font-headline font-semibold">
+                    My Profile
+                </h1>
+            </div>
+            
+            <div className="max-w-4xl mx-auto">
+                <Card className="overflow-hidden">
+                    <div className="passport-header-gradient p-6 md:p-8">
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-6">
+                            <Avatar className="h-24 w-24 border-4 border-background text-4xl">
+                                <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
+                            </Avatar>
+                            <div className="space-y-1">
+                                <CardTitle className="text-3xl">{user.name}</CardTitle>
+                                <CardDescription className="text-foreground/80">Identity Passport</CardDescription>
+                                <Badge variant="outline" className={currentKycStatus.className}>
+                                    <ShieldCheck className="h-4 w-4 mr-2" />
+                                    KYC Status: {currentKycStatus.text}
+                                </Badge>
+                            </div>
+                        </div>
+                    </div>
+                     <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-border">
+                        <div className="bg-card p-6">
+                            <h3 className="font-semibold mb-4 text-lg">User Information</h3>
+                            <div className="space-y-4">
+                                <InfoRow icon={UserIcon} label="Name" value={user.name} />
+                                <InfoRow icon={Mail} label="Email Address" value={user.email} />
+                                <InfoRow icon={Phone} label="Phone Number" value={user.phone} />
+                            </div>
+                        </div>
+                        <div className="md:col-span-2 bg-card p-6">
+                            <h3 className="font-semibold mb-4 text-lg">Identity Verification</h3>
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                                <KycLevelIndicator currentLevel={user.kycLevel || 0} />
+                                <div className="flex flex-col items-center justify-center bg-muted/50 rounded-lg p-6 text-center">
+                                    <h4 className="font-bold text-lg">Continue Your Verification</h4>
+                                    <p className="text-muted-foreground text-sm mt-2 mb-4">
+                                        Unlock higher investment limits and full platform features by completing your KYC verification.
+                                    </p>
+                                    <Button>
+                                        Verify Identity
+                                    </Button>
+                                </div>
+                            </div>
+                        </div>
+                     </div>
+                </Card>
+            </div>
+
+          </main>
+        </div>
+      </SidebarInset>
+    </SidebarProvider>
+  );
+}
