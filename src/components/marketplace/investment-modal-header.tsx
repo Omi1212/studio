@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Button } from '@/components/ui/button';
@@ -13,7 +12,7 @@ interface InvestmentModalHeaderProps {
 
 export default function InvestmentModalHeader({ tokenName, step, onBack }: InvestmentModalHeaderProps) {
   return (
-    <DialogHeader>
+    <DialogHeader className="pb-2">
       {step === 2 && (
         <Button
           variant="ghost"
