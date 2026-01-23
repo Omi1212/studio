@@ -11,11 +11,13 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/
 import { Label } from '../ui/label';
 import { Checkbox } from '../ui/checkbox';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Landmark } from 'lucide-react';
+import { Landmark, Copy } from 'lucide-react';
 import TokenIcon from '../ui/token-icon';
 import { cn } from '@/lib/utils';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Separator } from '../ui/separator';
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 
 // Icons
@@ -58,6 +60,7 @@ export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced, 
     const [prospectusConfirmed, setProspectusConfirmed] = useState(false);
     const [orderInfoConfirmed, setOrderInfoConfirmed] = useState(false);
     const [paymentMethod, setPaymentMethod] = useState('btc');
+    const [orderId, setOrderId] = useState('');
     
     const minLimit = 1;
     const maxLimit = 250;
@@ -141,6 +144,9 @@ export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced, 
          if (!tokenAmount || tokenAmount <= 0 || !prospectusConfirmed || !orderInfoConfirmed) {
             return;
         }
+        if (!orderId) {
+            setOrderId(`INV-${Math.random().toString(36).substring(2, 7).toUpperCase()}`);
+        }
         setStep(2);
         onStepChange?.(2);
     }
@@ -148,6 +154,74 @@ export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced, 
     const handleBack = () => {
         setStep(1);
         onStepChange?.(1);
+    }
+
+    function BankDetails({ orderReference }: { orderReference: string }) {
+        const { toast } = useToast();
+        const [selectedBank, setSelectedBank] = useState('banco-agricola');
+    
+        const bankData = {
+            'banco-agricola': {
+                'Bank': 'Banco Agrícola',
+                'Account Holder': 'Tiankii S.A. de C.V.',
+                'Account Number': '123-456789-0',
+                'Account Type': 'Corriente',
+                'Reference': orderReference,
+            },
+            'citi-bank': {
+                'Bank': 'Citi Bank',
+                'Account Holder': 'Tiankii S.A. de C.V.',
+                'Account Number': '987-654321-1',
+                'Account Type': 'Corriente',
+                'Reference': orderReference,
+            }
+        };
+    
+        const currentBankDetails = bankData[selectedBank as keyof typeof bankData];
+    
+        const copyToClipboard = (text: string) => {
+            navigator.clipboard.writeText(text);
+            toast({
+                title: 'Copiado!',
+                description: `Se ha copiado al portapapeles.`,
+            });
+        };
+    
+        return (
+            <Card className="bg-muted/30">
+                <CardHeader>
+                    <CardTitle className="text-center text-lg font-semibold">Copy bank details</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    <Tabs value={selectedBank} onValueChange={setSelectedBank} className="w-full">
+                        <TabsList className="grid w-full grid-cols-2">
+                            <TabsTrigger value="banco-agricola">Banco Agrícola</TabsTrigger>
+                            <TabsTrigger value="citi-bank">Citi Bank</TabsTrigger>
+                        </TabsList>
+                    </Tabs>
+    
+                    <div className="space-y-4 pt-2 text-sm">
+                        {Object.entries(currentBankDetails).map(([key, value]) => (
+                            <div key={key} className="flex justify-between items-center">
+                                <span className="text-muted-foreground">{key}:</span>
+                                <div className="flex items-center gap-2">
+                                    <span className="font-medium font-mono">{value}</span>
+                                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => copyToClipboard(value)}>
+                                        <Copy className="h-4 w-4" />
+                                    </Button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+    
+                     <Alert>
+                        <AlertDescription>
+                            Please use the invoice number as a reference for your transfer. Once the transfer is complete, it may take some time to be reflected.
+                        </AlertDescription>
+                    </Alert>
+                </CardContent>
+            </Card>
+        );
     }
 
     const renderStep1 = () => {
@@ -252,52 +326,58 @@ export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced, 
                     </RadioGroup>
                 </div>
                 <div className="space-y-4">
-                     <Card className="bg-muted/30">
-                        <CardHeader>
-                            <CardTitle className="text-base">Investment details</CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-3 text-sm">
-                            <div className="flex justify-between items-center">
-                                <span className="text-muted-foreground">Token</span>
-                                <div className="flex items-center gap-2">
-                                    <TokenIcon token={token} className="w-6 h-6" />
-                                    <span className="font-medium">{token.tokenTicker}</span>
-                                </div>
-                            </div>
-                            <div className="flex justify-between">
-                                <span className="text-muted-foreground">Token price</span>
-                                <span className="font-medium font-mono">${price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                            </div>
-                             <div className="flex justify-between">
-                                <span className="text-muted-foreground">Investment</span>
-                                <span className="font-medium font-mono">${investmentAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                            </div>
-                        </CardContent>
-                    </Card>
-                     <Card className="bg-muted/30">
-                        <CardHeader>
-                            <CardTitle className="text-base">Purchase summary</CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-3 text-sm">
-                            <div className="flex justify-between">
-                                <span className="text-muted-foreground">Tokens to be minted</span>
-                                <span className="font-medium font-mono">{parseFloat(quantity).toLocaleString()} {token.tokenTicker}</span>
-                            </div>
-                            <div className="flex justify-between">
-                                <span className="text-muted-foreground">Total amount</span>
-                                <span className="font-mono">${investmentAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                            </div>
-                            <div className="flex justify-between">
-                                <span className="text-muted-foreground">Platform fee</span>
-                                <span className="font-medium font-mono">$0 / 0%</span>
-                            </div>
-                             <Separator />
-                             <div className="flex justify-between font-bold">
-                                <span>Final amount</span>
-                                <span className="font-mono">${investmentAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                            </div>
-                        </CardContent>
-                    </Card>
+                    {paymentMethod === 'bank' ? (
+                        <BankDetails orderReference={orderId} />
+                    ) : (
+                        <>
+                             <Card className="bg-muted/30">
+                                <CardHeader>
+                                    <CardTitle className="text-base">Investment details</CardTitle>
+                                </CardHeader>
+                                <CardContent className="space-y-3 text-sm">
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-muted-foreground">Token</span>
+                                        <div className="flex items-center gap-2">
+                                            <TokenIcon token={token} className="w-6 h-6" />
+                                            <span className="font-medium">{token.tokenTicker}</span>
+                                        </div>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-muted-foreground">Token price</span>
+                                        <span className="font-medium font-mono">${price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-muted-foreground">Investment</span>
+                                        <span className="font-mono">${investmentAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                            <Card className="bg-muted/30">
+                                <CardHeader>
+                                    <CardTitle className="text-base">Purchase summary</CardTitle>
+                                </CardHeader>
+                                <CardContent className="space-y-3 text-sm">
+                                    <div className="flex justify-between">
+                                        <span className="text-muted-foreground">Tokens to be minted</span>
+                                        <span className="font-medium font-mono">{parseFloat(quantity).toLocaleString()} {token.tokenTicker}</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-muted-foreground">Total amount</span>
+                                        <span className="font-mono">${investmentAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-muted-foreground">Platform fee</span>
+                                        <span className="font-medium font-mono">$0 / 0%</span>
+                                    </div>
+                                    <Separator />
+                                    <div className="flex justify-between font-bold">
+                                        <span>Final amount</span>
+                                        <span className="font-mono">${investmentAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        </>
+                    )}
                 </div>
                  <div className="lg:col-span-2 flex justify-between">
                     <Button variant="outline" onClick={handleBack}>Back</Button>
