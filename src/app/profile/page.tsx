@@ -198,7 +198,7 @@ export default function ProfilePage() {
                         </Badge>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                        <InfoRow icon={UserIcon} label="Name" value={user.name} />
+                        <InfoRow icon={UserIcon} label="Username" value={user.name} />
                         <InfoRow icon={Phone} label="Phone Number" value={user.phone} />
                     </CardContent>
                 </Card>
