@@ -332,9 +332,6 @@ export default function TokenList() {
             <DialogContent className={cn(investStep === 2 && 'sm:max-w-4xl')}>
                 <DialogHeader>
                     <DialogTitle>Invest in {selectedToken.tokenName}</DialogTitle>
-                    <DialogDescription>
-                        Place your order for {selectedToken.tokenTicker}.
-                    </DialogDescription>
                 </DialogHeader>
                 <PlaceOrder 
                     token={selectedToken} 

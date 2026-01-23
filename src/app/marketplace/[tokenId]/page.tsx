@@ -238,9 +238,6 @@ function TokenOfferingPage({ params }: { params: { tokenId: string } }) {
                             <DialogContent className={cn(investStep === 2 ? 'sm:max-w-4xl' : 'sm:max-w-lg')}>
                                 <DialogHeader>
                                     <DialogTitle>Invest in {token.tokenName}</DialogTitle>
-                                    <DialogDescription>
-                                        Place your order for {token.tokenTicker}.
-                                    </DialogDescription>
                                 </DialogHeader>
                                 <PlaceOrder
                                     token={token}
