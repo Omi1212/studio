@@ -1,4 +1,3 @@
-
 'use client';
 
 import {
@@ -185,8 +184,8 @@ export default function ProfilePage() {
             </div>
             
             <div className="max-w-6xl mx-auto space-y-6">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <Card>
+              <div className="grid grid-cols-1 lg:grid-cols-10 gap-6">
+                <Card className="lg:col-span-3">
                     <CardHeader className="items-center text-center">
                         <Avatar className="h-24 w-24 text-4xl">
                             <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
@@ -205,7 +204,7 @@ export default function ProfilePage() {
                     </CardContent>
                 </Card>
 
-                <Card>
+                <Card className="lg:col-span-7">
                     <CardHeader className="flex flex-row items-center justify-between">
                         <CardTitle>Personal information</CardTitle>
                         <Button variant="link" className="p-0 h-auto text-primary">Update Identity</Button>
