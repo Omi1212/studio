@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -223,7 +224,6 @@ export default function ProfilePage() {
               <Card>
                 <CardHeader>
                     <CardTitle>Identity Verification</CardTitle>
-                    <CardDescription>Complete your KYC to unlock higher investment limits and full platform features.</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
