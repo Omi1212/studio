@@ -314,7 +314,7 @@ export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced, 
                                 key={option.id}
                                 onClick={() => setPaymentMethod(option.id)}
                                 className={cn(
-                                    "flex items-center gap-3 rounded-md border-2 p-3 cursor-pointer transition-colors",
+                                    "flex items-center gap-3 rounded-md border-2 p-4 cursor-pointer transition-colors",
                                     paymentMethod === option.id ? "border-primary bg-primary/10" : "border-muted hover:bg-muted/50"
                                 )}
                              >
