@@ -54,4 +54,9 @@ export type User = {
   status: 'active' | 'inactive';
   phone?: string;
   kycLevel?: number;
+  country?: string;
+  legalName?: string;
+  dob?: string;
+  idDoc?: string;
+  address?: string;
 };

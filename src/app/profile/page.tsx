@@ -1,4 +1,3 @@
-
 'use client';
 
 import {
@@ -90,6 +89,23 @@ function InfoRow({ icon: Icon, label, value }: { icon: React.ElementType, label:
   )
 }
 
+function PersonalInfoRow({ label, value, actionLabel, onActionClick }: { label: string; value: React.ReactNode; actionLabel?: string; onActionClick?: () => void; }) {
+    return (
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between py-2">
+            <p className="text-sm text-muted-foreground mb-1 sm:mb-0">{label}</p>
+            <div className="flex items-center gap-4">
+                {actionLabel && (
+                    <Button variant="link" className="text-sm p-0 h-auto text-primary hover:underline" onClick={onActionClick}>
+                        {actionLabel}
+                    </Button>
+                )}
+                <p className="text-sm font-medium text-right">{value}</p>
+            </div>
+        </div>
+    );
+}
+
+
 export default function ProfilePage() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -98,13 +114,14 @@ export default function ProfilePage() {
     const storedUser = localStorage.getItem('currentUser');
     if (storedUser) {
       const parsedUser = JSON.parse(storedUser);
+      const fullUserData = usersData.find((u: User) => u.id === parsedUser.id);
+      
        if (parsedUser.role !== 'investor') {
-        // For this demo, if not an investor, find first investor in data
         const investorUser = usersData.find((u: User) => u.role === 'investor');
         if(investorUser) setUser(investorUser);
         else setUser(parsedUser); // fallback to current user
       } else {
-        setUser(parsedUser);
+        setUser(fullUserData || parsedUser);
       }
     }
     setLoading(false);
@@ -141,6 +158,16 @@ export default function ProfilePage() {
     );
   }
 
+    // Basic email masking
+  const maskEmail = (email: string) => {
+      if (!email) return '';
+      const [local, domain] = email.split('@');
+      if (local.length > 3) {
+          return `${local.substring(0, 2)}***@${domain}`;
+      }
+      return email;
+  }
+
   return (
     <SidebarProvider>
       <Sidebar className="border-r">
@@ -156,27 +183,44 @@ export default function ProfilePage() {
                 </h1>
             </div>
             
-            <div className="max-w-4xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <Card className="lg:col-span-1">
-                <CardHeader className="items-center text-center">
-                    <Avatar className="h-24 w-24 text-4xl">
-                        <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
-                    </Avatar>
-                    <CardTitle className="text-2xl pt-2">{user.name}</CardTitle>
-                    <CardDescription>{user.email}</CardDescription>
-                    <Badge variant="outline" className={currentKycStatus.className}>
-                        <ShieldCheck className="h-4 w-4 mr-2" />
-                        KYC Status: {currentKycStatus.text}
-                    </Badge>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                    <InfoRow icon={UserIcon} label="Name" value={user.name} />
-                    <InfoRow icon={Mail} label="Email Address" value={user.email} />
-                    <InfoRow icon={Phone} label="Phone Number" value={user.phone} />
-                </CardContent>
-              </Card>
+            <div className="max-w-6xl mx-auto space-y-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <Card>
+                    <CardHeader className="items-center text-center">
+                        <Avatar className="h-24 w-24 text-4xl">
+                            <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
+                        </Avatar>
+                        <CardTitle className="text-2xl pt-2">{user.name}</CardTitle>
+                        <CardDescription>{user.email}</CardDescription>
+                        <Badge variant="outline" className={currentKycStatus.className}>
+                            <ShieldCheck className="h-4 w-4 mr-2" />
+                            KYC Status: {currentKycStatus.text}
+                        </Badge>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <InfoRow icon={UserIcon} label="Name" value={user.name} />
+                        <InfoRow icon={Mail} label="Email Address" value={user.email} />
+                        <InfoRow icon={Phone} label="Phone Number" value={user.phone} />
+                    </CardContent>
+                </Card>
 
-              <Card className="lg:col-span-2">
+                <Card>
+                    <CardHeader className="flex flex-row items-center justify-between">
+                        <CardTitle>Personal information</CardTitle>
+                        <Button variant="link" className="p-0 h-auto text-primary">Update Identity</Button>
+                    </CardHeader>
+                    <CardContent className="space-y-1">
+                        <PersonalInfoRow label="Country of Residence" value={user.country || 'Not set'} actionLabel="Change" />
+                        <PersonalInfoRow label="Legal Name" value={user.legalName || 'Not set'} />
+                        <PersonalInfoRow label="Date of Birth" value={user.dob || 'Not set'} />
+                        <PersonalInfoRow label="Identification Documents" value={user.idDoc || 'Not set'} />
+                        <PersonalInfoRow label="Address" value={user.address || 'Not set'} />
+                        <PersonalInfoRow label="Email Address" value={maskEmail(user.email)} />
+                    </CardContent>
+                </Card>
+              </div>
+
+              <Card>
                 <CardHeader>
                     <CardTitle>Identity Verification</CardTitle>
                     <CardDescription>Complete your KYC to unlock higher investment limits and full platform features.</CardDescription>

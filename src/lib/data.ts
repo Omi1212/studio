@@ -704,6 +704,11 @@ export const usersData: User[] = [
         status: 'active',
         phone: '+1 555-0103',
         kycLevel: 2,
+        country: 'El Salvador',
+        legalName: 'OMAR OSCAR LEIVA GUADRON',
+        dob: '2001-09-12',
+        idDoc: 'ID Card, 06**********38',
+        address: 'San Salvador Centro, El Salvador',
     },
     {
         id: 'user-004',
