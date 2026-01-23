@@ -191,7 +191,7 @@ export default function ProfilePage() {
                             <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
                         </Avatar>
                         <CardTitle className="text-2xl pt-2">{user.name}</CardTitle>
-                        <CardDescription>{user.email}</CardDescription>
+                        <CardDescription>User Level {user.kycLevel}</CardDescription>
                         <Badge variant="outline" className={currentKycStatus.className}>
                             <ShieldCheck className="h-4 w-4 mr-2" />
                             KYC Status: {currentKycStatus.text}
