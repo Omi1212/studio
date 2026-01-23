@@ -205,9 +205,8 @@ export default function ProfilePage() {
                 </Card>
 
                 <Card className="lg:col-span-7">
-                    <CardHeader className="flex flex-row items-center justify-between">
+                    <CardHeader>
                         <CardTitle>Personal information</CardTitle>
-                        <Button variant="link" className="p-0 h-auto text-primary">Update Identity</Button>
                     </CardHeader>
                     <CardContent className="space-y-1">
                         <PersonalInfoRow label="Country of Residence" value={user.country || 'Not set'} actionLabel="Change" />
@@ -230,7 +229,7 @@ export default function ProfilePage() {
                         <div className="flex flex-col items-center justify-center bg-muted/50 rounded-lg p-6 text-center">
                             <h4 className="font-bold text-lg">Continue Your Verification</h4>
                             <p className="text-muted-foreground text-sm mt-2 mb-4">
-                                Unlock higher investment limits and full platform features by completing your KYC verification.
+                                Unlock higher investment limits and full platform features.
                             </p>
                             <Button>
                                 Verify Identity
