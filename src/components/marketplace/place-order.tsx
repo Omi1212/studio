@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -306,7 +305,6 @@ export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced, 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <div className="space-y-4">
                     <h3 className="text-xl font-bold">Payment option</h3>
-                    <p className="text-muted-foreground">Choose payment method</p>
 
                     <div className="space-y-2">
                         {paymentOptions.map(option => (
@@ -314,7 +312,7 @@ export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced, 
                                 key={option.id}
                                 onClick={() => setPaymentMethod(option.id)}
                                 className={cn(
-                                    "flex items-center gap-3 rounded-md border-2 p-4 cursor-pointer transition-colors",
+                                    "flex items-center gap-3 rounded-md border-2 p-6 cursor-pointer transition-colors",
                                     paymentMethod === option.id ? "border-primary bg-primary/10" : "border-muted hover:bg-muted/50"
                                 )}
                              >
