@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -46,14 +47,14 @@ interface PlaceOrderProps {
     price: number;
     isSubscribed: boolean;
     onOrderPlaced?: () => void;
-    onStepChange?: (step: number) => void;
+    step: number;
+    onStepChange: (step: number) => void;
 }
 
-export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced, onStepChange }: PlaceOrderProps) {
+export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced, step, onStepChange }: PlaceOrderProps) {
     const { toast } = useToast();
     const router = useRouter();
 
-    const [step, setStep] = useState(1);
     const [quantity, setQuantity] = useState('');
     const [investmentAmount, setInvestmentAmount] = useState(0);
     const [prospectusConfirmed, setProspectusConfirmed] = useState(false);
@@ -146,15 +147,9 @@ export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced, 
         if (!orderId) {
             setOrderId(`INV-${Math.random().toString(36).substring(2, 7).toUpperCase()}`);
         }
-        setStep(2);
-        onStepChange?.(2);
+        onStepChange(2);
     }
     
-    const handleBack = () => {
-        setStep(1);
-        onStepChange?.(1);
-    }
-
     function BankDetails({ orderReference }: { orderReference: string }) {
         const { toast } = useToast();
         const [selectedBank, setSelectedBank] = useState('banco-agricola');
@@ -303,24 +298,20 @@ export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced, 
     const renderStep2 = () => {
         return (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div className="space-y-4">
-                    <h3 className="text-xl font-bold">Payment option</h3>
-
-                    <div className="space-y-2">
-                        {paymentOptions.map(option => (
-                             <div
-                                key={option.id}
-                                onClick={() => setPaymentMethod(option.id)}
-                                className={cn(
-                                    "flex items-center gap-3 rounded-md border-2 p-6 cursor-pointer transition-colors",
-                                    paymentMethod === option.id ? "border-primary bg-primary/10" : "border-muted hover:bg-muted/50"
-                                )}
-                             >
-                                {option.icon}
-                                <span className="font-medium">{option.label}</span>
-                            </div>
-                        ))}
-                    </div>
+                <div className="space-y-2">
+                    {paymentOptions.map(option => (
+                         <div
+                            key={option.id}
+                            onClick={() => setPaymentMethod(option.id)}
+                            className={cn(
+                                "flex items-center gap-3 rounded-md border-2 p-6 cursor-pointer transition-colors",
+                                paymentMethod === option.id ? "border-primary bg-primary/10" : "border-muted hover:bg-muted/50"
+                            )}
+                         >
+                            {option.icon}
+                            <span className="font-medium">{option.label}</span>
+                        </div>
+                    ))}
                 </div>
                 <div className="space-y-4">
                     {paymentMethod === 'bank' ? (
@@ -341,7 +332,7 @@ export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced, 
                                     </div>
                                     <div className="flex justify-between">
                                         <span className="text-muted-foreground">Token price</span>
-                                        <span className="font-medium font-mono">${price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                                        <span className="font-mono">${price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                                     </div>
                                     <div className="flex justify-between">
                                         <span className="text-muted-foreground">Investment</span>
@@ -376,8 +367,7 @@ export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced, 
                         </>
                     )}
                 </div>
-                 <div className="lg:col-span-2 flex justify-between">
-                    <Button variant="outline" onClick={handleBack}>Back</Button>
+                 <div className="lg:col-span-2 flex justify-end">
                     <Button onClick={handlePlaceOrder}>Place Order</Button>
                 </div>
             </div>

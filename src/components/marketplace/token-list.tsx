@@ -15,8 +15,9 @@ import { useToast } from '@/hooks/use-toast';
 import { Input } from '../ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { cn } from '@/lib/utils';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogTrigger } from '../ui/dialog';
 import PlaceOrder from './place-order';
+import InvestmentModalHeader from './investment-modal-header';
 
 
 type SubscriptionStatus = 'none' | 'pending' | 'approved';
@@ -330,14 +331,17 @@ export default function TokenList() {
         </div>
          {selectedToken && (
             <DialogContent className={cn(investStep === 2 && 'sm:max-w-4xl')}>
-                <DialogHeader>
-                    <DialogTitle>Invest in {selectedToken.tokenName}</DialogTitle>
-                </DialogHeader>
+                <InvestmentModalHeader
+                    tokenName={selectedToken.tokenName}
+                    step={investStep}
+                    onBack={() => setInvestStep(1)}
+                />
                 <PlaceOrder 
                     token={selectedToken} 
                     price={selectedToken.price || 0} 
                     isSubscribed={true}
                     onOrderPlaced={() => setIsModalOpen(false)}
+                    step={investStep}
                     onStepChange={setInvestStep}
                 />
             </DialogContent>
