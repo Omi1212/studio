@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -10,7 +11,6 @@ import { ordersData } from '@/lib/data';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 import { Label } from '../ui/label';
 import { Checkbox } from '../ui/checkbox';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Landmark, Copy } from 'lucide-react';
 import TokenIcon from '../ui/token-icon';
 import { cn } from '@/lib/utils';
@@ -308,22 +308,21 @@ export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced, 
                     <h3 className="text-xl font-bold">Payment option</h3>
                     <p className="text-muted-foreground">Choose payment method</p>
 
-                    <RadioGroup onValueChange={setPaymentMethod} defaultValue={paymentMethod} className="space-y-2">
+                    <div className="space-y-2">
                         {paymentOptions.map(option => (
-                             <Label 
+                             <div
                                 key={option.id}
-                                htmlFor={option.id}
+                                onClick={() => setPaymentMethod(option.id)}
                                 className={cn(
                                     "flex items-center gap-3 rounded-md border-2 p-3 cursor-pointer transition-colors",
                                     paymentMethod === option.id ? "border-primary bg-primary/10" : "border-muted hover:bg-muted/50"
                                 )}
                              >
-                                <RadioGroupItem value={option.id} id={option.id} />
                                 {option.icon}
                                 <span className="font-medium">{option.label}</span>
-                            </Label>
+                            </div>
                         ))}
-                    </RadioGroup>
+                    </div>
                 </div>
                 <div className="space-y-4">
                     {paymentMethod === 'bank' ? (
