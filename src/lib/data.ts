@@ -705,7 +705,7 @@ export const usersData: User[] = [
         phone: '+1 555-0103',
         kycLevel: 2,
         country: 'El Salvador',
-        legalName: 'OMAR OSCAR LEIVA GUADRON',
+        legalName: 'Peter Bartholomew Jones',
         dob: '2001-09-12',
         idDoc: 'ID Card, 06**********38',
         address: 'San Salvador Centro, El Salvador',

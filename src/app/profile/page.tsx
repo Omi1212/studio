@@ -199,7 +199,6 @@ export default function ProfilePage() {
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <InfoRow icon={UserIcon} label="Name" value={user.name} />
-                        <InfoRow icon={Mail} label="Email Address" value={user.email} />
                         <InfoRow icon={Phone} label="Phone Number" value={user.phone} />
                     </CardContent>
                 </Card>
@@ -229,7 +228,7 @@ export default function ProfilePage() {
                         <div className="flex flex-col items-center justify-center bg-muted/50 rounded-lg p-6 text-center">
                             <h4 className="font-bold text-lg">Continue Your Verification</h4>
                             <p className="text-muted-foreground text-sm mt-2 mb-4">
-                                Unlock higher investment limits and full platform features.
+                                To unlock all features of the platform, please complete your identity verification.
                             </p>
                             <Button>
                                 Verify Identity
