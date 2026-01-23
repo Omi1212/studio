@@ -14,8 +14,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
-import { CheckCircle2, Circle, Lock, Mail, Phone, Calendar, ShieldCheck, User as UserIcon } from 'lucide-react';
+import { CheckCircle2, ShieldCheck, User as UserIcon, Mail, Phone } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 import { usersData } from '@/lib/data';
@@ -157,49 +156,46 @@ export default function ProfilePage() {
                 </h1>
             </div>
             
-            <div className="max-w-4xl mx-auto">
-                <Card className="overflow-hidden">
-                    <div className="passport-header-gradient p-6 md:p-8">
-                        <div className="flex flex-col sm:flex-row sm:items-center gap-6">
-                            <Avatar className="h-24 w-24 border-4 border-background text-4xl">
-                                <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
-                            </Avatar>
-                            <div className="space-y-1">
-                                <CardTitle className="text-3xl">{user.name}</CardTitle>
-                                <CardDescription className="text-foreground/80">Identity Passport</CardDescription>
-                                <Badge variant="outline" className={currentKycStatus.className}>
-                                    <ShieldCheck className="h-4 w-4 mr-2" />
-                                    KYC Status: {currentKycStatus.text}
-                                </Badge>
-                            </div>
+            <div className="max-w-4xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <Card className="lg:col-span-1">
+                <CardHeader className="items-center text-center">
+                    <Avatar className="h-24 w-24 text-4xl">
+                        <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
+                    </Avatar>
+                    <CardTitle className="text-2xl pt-2">{user.name}</CardTitle>
+                    <CardDescription>{user.email}</CardDescription>
+                    <Badge variant="outline" className={currentKycStatus.className}>
+                        <ShieldCheck className="h-4 w-4 mr-2" />
+                        KYC Status: {currentKycStatus.text}
+                    </Badge>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    <InfoRow icon={UserIcon} label="Name" value={user.name} />
+                    <InfoRow icon={Mail} label="Email Address" value={user.email} />
+                    <InfoRow icon={Phone} label="Phone Number" value={user.phone} />
+                </CardContent>
+              </Card>
+
+              <Card className="lg:col-span-2">
+                <CardHeader>
+                    <CardTitle>Identity Verification</CardTitle>
+                    <CardDescription>Complete your KYC to unlock higher investment limits and full platform features.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <KycLevelIndicator currentLevel={user.kycLevel || 0} />
+                        <div className="flex flex-col items-center justify-center bg-muted/50 rounded-lg p-6 text-center">
+                            <h4 className="font-bold text-lg">Continue Your Verification</h4>
+                            <p className="text-muted-foreground text-sm mt-2 mb-4">
+                                Unlock higher investment limits and full platform features by completing your KYC verification.
+                            </p>
+                            <Button>
+                                Verify Identity
+                            </Button>
                         </div>
                     </div>
-                     <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-border">
-                        <div className="bg-card p-6">
-                            <h3 className="font-semibold mb-4 text-lg">User Information</h3>
-                            <div className="space-y-4">
-                                <InfoRow icon={UserIcon} label="Name" value={user.name} />
-                                <InfoRow icon={Mail} label="Email Address" value={user.email} />
-                                <InfoRow icon={Phone} label="Phone Number" value={user.phone} />
-                            </div>
-                        </div>
-                        <div className="md:col-span-2 bg-card p-6">
-                            <h3 className="font-semibold mb-4 text-lg">Identity Verification</h3>
-                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                                <KycLevelIndicator currentLevel={user.kycLevel || 0} />
-                                <div className="flex flex-col items-center justify-center bg-muted/50 rounded-lg p-6 text-center">
-                                    <h4 className="font-bold text-lg">Continue Your Verification</h4>
-                                    <p className="text-muted-foreground text-sm mt-2 mb-4">
-                                        Unlock higher investment limits and full platform features by completing your KYC verification.
-                                    </p>
-                                    <Button>
-                                        Verify Identity
-                                    </Button>
-                                </div>
-                            </div>
-                        </div>
-                     </div>
-                </Card>
+                </CardContent>
+              </Card>
             </div>
 
           </main>
