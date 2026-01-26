@@ -25,10 +25,9 @@ import {
 } from '@/components/ui/chart';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import PlaceOrder from '@/components/marketplace/place-order';
-import { Dialog, DialogContent, DialogDescription, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogTrigger, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
-import InvestmentModalHeader from '@/components/marketplace/investment-modal-header';
 
 type WhitelistRequest = typeof investorsData[0];
 
@@ -74,24 +73,29 @@ function TokenOfferingPage({ params }: { params: { tokenId: string } }) {
   useEffect(() => {
     const { tokenId } = params;
 
-    const subscriptions = {
-      'example-1': 'approved'
-    };
-    
-    // @ts-ignore
-    if (subscriptions[tokenId] === 'approved') {
+    // First check for dynamic subscriptions
+    const storedInvestors: any[] = JSON.parse(localStorage.getItem('investors') || '[]');
+    // For demo, we identify the user's requests by a generic name. In a real app, this would use a user ID.
+    const myRequests = storedInvestors.filter(inv => inv.name === 'Market Subscriber');
+    const requestForThisToken = myRequests.find(req => req.holdings && req.holdings.some((h: any) => h.tokenId === tokenId));
+
+    if (requestForThisToken) {
+      if (requestForThisToken.status === 'pending') {
+        setSubscriptionStatus('pending');
+      } else if (requestForThisToken.status === 'accepted') {
         setSubscriptionStatus('approved');
+      } else {
+        setSubscriptionStatus('none'); // Rejected or other status, allow to subscribe again
+      }
     } else {
-        const storedInvestors: WhitelistRequest[] = JSON.parse(localStorage.getItem('investors') || '[]');
-        // A real app would check against the current user. For demo, we assume any pending request by a 'Market Subscriber' is for this token.
-        const pendingRequest = storedInvestors.find(inv => 
-            inv.name === 'Market Subscriber' && inv.status === 'pending'
-        );
-        if (pendingRequest) {
-            setSubscriptionStatus('pending');
-        } else {
-            setSubscriptionStatus('none');
-        }
+      // Fallback for demo data
+      const subscriptions = { 'example-1': 'approved' };
+      // @ts-ignore
+      if (subscriptions[tokenId] === 'approved') {
+        setSubscriptionStatus('approved');
+      } else {
+        setSubscriptionStatus('none');
+      }
     }
     
     const storedTokens: TokenDetails[] = JSON.parse(localStorage.getItem('createdTokens') || '[]');
@@ -113,7 +117,9 @@ function TokenOfferingPage({ params }: { params: { tokenId: string } }) {
   }, [params]);
   
   const handleSubscribe = () => {
-    const newRequest: WhitelistRequest = {
+    if (!token) return;
+
+    const newRequest = {
         id: `inv-req-${Math.random().toString(36).substring(2, 9)}`,
         name: 'Market Subscriber', // Generic name for demo
         email: `subscriber.${Math.floor(Math.random() * 1000)}@example.com`,
@@ -122,7 +128,13 @@ function TokenOfferingPage({ params }: { params: { tokenId: string } }) {
         joinedDate: new Date().toISOString(),
         totalInvested: 0,
         isFrozen: false,
-        holdings: [],
+        holdings: [{
+            tokenId: token.id,
+            tokenName: token.tokenName,
+            tokenTicker: token.tokenTicker,
+            amount: 0,
+            value: token.price || 0
+        }],
         transactions: [],
     };
 
@@ -130,7 +142,7 @@ function TokenOfferingPage({ params }: { params: { tokenId: string } }) {
     localStorage.setItem('investors', JSON.stringify([newRequest, ...existingInvestors]));
     
     setSubscriptionStatus('pending');
-    toast({ title: 'Whitelisting Request Sent!', description: "Your request to be whitelisted on the platform is now pending approval." });
+    toast({ title: 'Whitelisting Request Sent!', description: "Your request to be whitelisted for this token is now pending approval." });
 };
 
 
@@ -230,18 +242,16 @@ function TokenOfferingPage({ params }: { params: { tokenId: string } }) {
                   </CardContent>
                   <CardFooter>
                     {subscriptionStatus === 'approved' ? (
-                        <Dialog open={isModalOpen} onOpenChange={(open) => { if (!open) setInvestStep(1); setIsModalOpen(open); }}>
+                        <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
                             <DialogTrigger asChild>
                                 <Button className="w-full">
                                     Invest
                                 </Button>
                             </DialogTrigger>
                             <DialogContent className={cn(investStep === 2 ? 'sm:max-w-4xl' : 'sm:max-w-lg')}>
-                                <InvestmentModalHeader
-                                    tokenName={token.tokenName}
-                                    step={investStep}
-                                    onBack={() => setInvestStep(1)}
-                                />
+                                <DialogHeader className="text-center">
+                                    <DialogTitle>Invest in {token.tokenName}</DialogTitle>
+                                </DialogHeader>
                                 <PlaceOrder
                                     token={token}
                                     price={offeringData.price}

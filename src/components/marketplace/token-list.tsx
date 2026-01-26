@@ -15,9 +15,8 @@ import { useToast } from '@/hooks/use-toast';
 import { Input } from '../ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { cn } from '@/lib/utils';
-import { Dialog, DialogContent, DialogDescription, DialogTrigger } from '../ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogTrigger, DialogHeader, DialogTitle } from '../ui/dialog';
 import PlaceOrder from './place-order';
-import InvestmentModalHeader from './investment-modal-header';
 
 
 type SubscriptionStatus = 'none' | 'pending' | 'approved';
@@ -146,8 +145,7 @@ export default function TokenList() {
   const router = useRouter();
 
   useEffect(() => {
-    setSubscriptions({ 'example-1': 'approved' });
-
+    
     const storedTokens: TokenDetails[] = JSON.parse(localStorage.getItem('createdTokens') || '[]');
     const combinedTokens: TokenDetails[] = [...exampleTokens, ...storedTokens].map(t => ({
       ...t,
@@ -162,6 +160,21 @@ export default function TokenList() {
     })).filter(t => t.status === 'active');
     
     setAllTokens(combinedTokens);
+    
+    // Check subscriptions
+    const storedInvestors: any[] = JSON.parse(localStorage.getItem('investors') || '[]');
+    const myRequests = storedInvestors.filter(inv => inv.name === 'Market Subscriber');
+    
+    const initialSubscriptions: Record<string, SubscriptionStatus> = { 'example-1': 'approved' };
+    combinedTokens.forEach(token => {
+        const requestForThisToken = myRequests.find(req => req.holdings && req.holdings.some((h: any) => h.tokenId === token.id));
+        if (requestForThisToken) {
+            initialSubscriptions[token.id] = requestForThisToken.status === 'accepted' ? 'approved' : 'pending';
+        }
+    });
+
+    setSubscriptions(initialSubscriptions);
+
     setLoading(false);
   }, []);
 
@@ -187,7 +200,7 @@ export default function TokenList() {
     const currentStatus = subscriptions[token.id] || 'none';
     
     if (currentStatus === 'none') {
-        const newRequest: WhitelistRequest = {
+        const newRequest = {
             id: `inv-req-${Math.random().toString(36).substring(2, 9)}`,
             name: 'Market Subscriber',
             email: `subscriber.${Math.floor(Math.random() * 1000)}@example.com`,
@@ -196,7 +209,13 @@ export default function TokenList() {
             joinedDate: new Date().toISOString(),
             totalInvested: 0,
             isFrozen: false,
-            holdings: [],
+            holdings: [{
+                tokenId: token.id,
+                tokenName: token.tokenName,
+                tokenTicker: token.tokenTicker,
+                amount: 0,
+                value: token.price || 0
+            }],
             transactions: [],
         };
 
@@ -204,7 +223,7 @@ export default function TokenList() {
         localStorage.setItem('investors', JSON.stringify([newRequest, ...existingInvestors]));
         
         setSubscriptions(prev => ({...prev, [token.id]: 'pending' }));
-        toast({ title: 'Whitelisting Request Sent!', description: "Your request to be whitelisted on the platform is now pending approval." });
+        toast({ title: 'Whitelisting Request Sent!', description: "Your request to be whitelisted for this token is now pending approval." });
     } else if (currentStatus === 'approved') {
         setSelectedToken(token);
         setIsModalOpen(true);
@@ -240,7 +259,7 @@ export default function TokenList() {
   }
 
   return (
-    <Dialog open={isModalOpen} onOpenChange={(open) => { if (!open) setInvestStep(1); setIsModalOpen(open); }}>
+    <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
         <div className="mb-12 space-y-4">
         <div className="flex justify-between items-center mb-4">
             <h2 className="text-2xl font-headline font-semibold">Available Tokens</h2>
@@ -331,11 +350,9 @@ export default function TokenList() {
         </div>
          {selectedToken && (
             <DialogContent className={cn(investStep === 2 && 'sm:max-w-4xl')}>
-                <InvestmentModalHeader
-                    tokenName={selectedToken.tokenName}
-                    step={investStep}
-                    onBack={() => setInvestStep(1)}
-                />
+                <DialogHeader className="text-center">
+                    <DialogTitle>Invest in {selectedToken.tokenName}</DialogTitle>
+                </DialogHeader>
                 <PlaceOrder 
                     token={selectedToken} 
                     price={selectedToken.price || 0} 
