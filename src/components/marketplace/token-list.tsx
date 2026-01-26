@@ -1,5 +1,3 @@
-
-
 'use client';
 
 import { useEffect, useState, useMemo } from 'react';
@@ -15,12 +13,12 @@ import { useToast } from '@/hooks/use-toast';
 import { Input } from '../ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { cn } from '@/lib/utils';
-import { Dialog, DialogContent, DialogDescription, DialogTrigger, DialogHeader, DialogTitle } from '../ui/dialog';
+import { Dialog, DialogContent, DialogTrigger } from '../ui/dialog';
 import PlaceOrder from './place-order';
+import InvestmentModalHeader from './investment-modal-header';
 
 
 type SubscriptionStatus = 'none' | 'pending' | 'approved';
-type WhitelistRequest = typeof investorsData[0];
 
 const networkMap: { [key: string]: string } = {
     spark: 'Spark',
@@ -177,6 +175,12 @@ export default function TokenList() {
 
     setLoading(false);
   }, []);
+
+  useEffect(() => {
+    if (!isModalOpen) {
+        setInvestStep(1);
+    }
+  }, [isModalOpen]);
 
   const filteredTokens = useMemo(() => {
     let filtered = [...allTokens];
@@ -350,9 +354,11 @@ export default function TokenList() {
         </div>
          {selectedToken && (
             <DialogContent className={cn(investStep === 2 && 'sm:max-w-4xl')}>
-                <DialogHeader className="text-center">
-                    <DialogTitle>Invest in {selectedToken.tokenName}</DialogTitle>
-                </DialogHeader>
+                <InvestmentModalHeader
+                  tokenName={selectedToken.tokenName}
+                  step={investStep}
+                  onBack={() => setInvestStep(1)}
+                />
                 <PlaceOrder 
                     token={selectedToken} 
                     price={selectedToken.price || 0} 

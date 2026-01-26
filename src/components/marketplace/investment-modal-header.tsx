@@ -12,7 +12,7 @@ interface InvestmentModalHeaderProps {
 
 export default function InvestmentModalHeader({ tokenName, step, onBack }: InvestmentModalHeaderProps) {
   return (
-    <DialogHeader className="pb-2">
+    <DialogHeader className="text-center pb-4">
       {step === 2 && (
         <Button
           variant="ghost"
@@ -24,7 +24,7 @@ export default function InvestmentModalHeader({ tokenName, step, onBack }: Inves
           <span className="sr-only">Back</span>
         </Button>
       )}
-      <DialogTitle className="text-center">Invest in {tokenName}</DialogTitle>
+      <DialogTitle>Invest in {tokenName}</DialogTitle>
     </DialogHeader>
   );
 }

@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -257,7 +256,7 @@ export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced, 
                             type="text"
                             value={`$${investmentAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                             disabled
-                            className="pr-20 bg-muted/50"
+                            className="bg-muted/50"
                         />
                     </div>
                 </div>

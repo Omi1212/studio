@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useEffect, useState, use } from 'react';
@@ -25,9 +24,10 @@ import {
 } from '@/components/ui/chart';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import PlaceOrder from '@/components/marketplace/place-order';
-import { Dialog, DialogContent, DialogDescription, DialogTrigger, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
+import InvestmentModalHeader from '@/components/marketplace/investment-modal-header';
 
 type WhitelistRequest = typeof investorsData[0];
 
@@ -115,6 +115,12 @@ function TokenOfferingPage({ params }: { params: { tokenId: string } }) {
     
     setLoading(false);
   }, [params]);
+
+  useEffect(() => {
+    if (!isModalOpen) {
+        setInvestStep(1);
+    }
+  }, [isModalOpen]);
   
   const handleSubscribe = () => {
     if (!token) return;
@@ -249,9 +255,11 @@ function TokenOfferingPage({ params }: { params: { tokenId: string } }) {
                                 </Button>
                             </DialogTrigger>
                             <DialogContent className={cn(investStep === 2 ? 'sm:max-w-4xl' : 'sm:max-w-lg')}>
-                                <DialogHeader className="text-center">
-                                    <DialogTitle>Invest in {token.tokenName}</DialogTitle>
-                                </DialogHeader>
+                                <InvestmentModalHeader 
+                                    tokenName={token.tokenName}
+                                    step={investStep}
+                                    onBack={() => setInvestStep(1)}
+                                />
                                 <PlaceOrder
                                     token={token}
                                     price={offeringData.price}
