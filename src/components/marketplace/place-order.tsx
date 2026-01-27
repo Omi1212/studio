@@ -20,6 +20,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import React from 'react';
 import { DialogHeader, DialogTitle } from '../ui/dialog';
+import QRCode from 'qrcode';
 
 
 // Icons
@@ -91,7 +92,7 @@ export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced, 
         }
     }, [step]);
 
-    function handleQuantityChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setQuantity(e.target.value);
     };
     
@@ -230,10 +231,36 @@ export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced, 
         );
     }
 
-    function BitcoinPaymentDetails({ orderReference, amount }: { orderReference: string, amount: number }) {
+    function BitcoinPaymentDetails({ orderReference, amount, onPay }: { orderReference: string; amount: number; onPay: () => void; }) {
         const { toast } = useToast();
         const [paymentType, setPaymentType] = useState('lightning');
         const [isAddressVisible, setIsAddressVisible] = useState(false);
+        const [qrCodeDataUrl, setQrCodeDataUrl] = useState('');
+
+        const lightningAddress = 'lnbc1190n1p5kujxfpp59mejv93rk75hctd5t398fkfsncgzdk3c9d5y9mav5nelde4dul3qdp2v3shyanfde6xjctwdd5kjgzsfafjq5mpd3jhxgpsxycqzpuxqrwzqsp5u88azqdmchu3vz92hfh0zs0a53k9wh2vezrnejwem0fw5892mf0s9qxpqysgqratk74qpdt23smxz9zpl8n8tdx8rxakp5r9nehrktw4eskr9vfa9dj9rcld8krf0ra875ep4tucg2ven0v7zs2v35huwvzhh3lapcfqp7z72zt';
+        const onChainAddress = 'bc1pmn8m4u2pqvkwpxfx7ygc7sl4c3httujfdrnqsyeuvn9qt4uklz6s57tcnz';
+
+        const fullAddress = paymentType === 'lightning' ? lightningAddress : onChainAddress;
+
+        useEffect(() => {
+            const generateQrCode = async () => {
+                try {
+                    const url = await QRCode.toDataURL(fullAddress, {
+                        errorCorrectionLevel: 'L',
+                        margin: 2,
+                        scale: 8,
+                    });
+                    setQrCodeDataUrl(url);
+                } catch (err) {
+                    console.error(err);
+                    setQrCodeDataUrl(''); // clear on error
+                }
+            };
+
+            if (fullAddress) {
+                generateQrCode();
+            }
+        }, [fullAddress]);
     
         const copyToClipboard = (text: string, field: string) => {
             navigator.clipboard.writeText(text);
@@ -243,10 +270,6 @@ export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced, 
             });
         };
     
-        const fullAddress = paymentType === 'lightning'
-            ? 'lnbc1190n1p5z8d4vjdpjh3j5cdaf8a3fde5h6yqsmz2qflhmz5g2ve2kelhj7v472qr2q9p5hsq2wzzj5j5f0m5t7j3j3s4j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5cqp7z72zt'
-            : 'bc1qar0srrr7xfkvy5l643lydnw9re59gtzzwf5mdq';
-        
         const truncatedAddress = isAddressVisible ? fullAddress : `${fullAddress.slice(0,15)}...${fullAddress.slice(-15)}`;
         
         const satsAmount = (amount / 65000) * 100000000;
@@ -265,11 +288,19 @@ export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced, 
                     </Tabs>
                     <div className="flex justify-center p-4">
                          <div className="relative border-2 border-green-500 rounded-lg p-2 bg-white">
-                            <img 
-                                src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${fullAddress}`}
-                                alt="QR Code"
-                                className="rounded-md"
-                            />
+                            {qrCodeDataUrl ? (
+                                <img
+                                    src={qrCodeDataUrl}
+                                    alt="QR Code"
+                                    className="rounded-md"
+                                    width={200}
+                                    height={200}
+                                />
+                            ) : (
+                                <div className="w-[200px] h-[200px] flex items-center justify-center bg-gray-200 rounded-md">
+                                    <p>Generating QR...</p>
+                                </div>
+                            )}
                              <div className="absolute inset-0 flex items-center justify-center">
                                 <div className="bg-orange-400 p-2 rounded-full flex items-center justify-center text-white">
                                     <SparkIcon />
@@ -289,7 +320,7 @@ export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced, 
                         <div className="flex justify-between items-center">
                             <span className="text-muted-foreground">Pay to</span>
                             <div className="flex items-center gap-2">
-                                <span className="font-medium font-mono">{truncatedAddress}</span>
+                                <span className="font-medium font-mono break-all">{truncatedAddress}</span>
                                 <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setIsAddressVisible(!isAddressVisible)}>
                                     <Eye className="h-4 w-4" />
                                 </Button>
@@ -299,7 +330,7 @@ export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced, 
                 </CardContent>
                 <CardFooter className="flex flex-col gap-2">
                      <Button variant="outline" className="w-full" onClick={() => copyToClipboard(fullAddress, 'Address')}>Copy</Button>
-                     <Button className="w-full" onClick={handlePlaceOrder}>Pay in Wallet</Button>
+                     <Button className="w-full" onClick={onPay}>Pay in Wallet</Button>
                 </CardFooter>
             </Card>
         );
@@ -484,7 +515,7 @@ export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced, 
                      ) : paymentMethod === 'bank' ? (
                             <BankDetails orderReference={orderId} />
                      ) : paymentMethod === 'btc' ? (
-                            <BitcoinPaymentDetails orderReference={orderId} amount={investmentAmount} />
+                            <BitcoinPaymentDetails orderReference={orderId} amount={investmentAmount} onPay={handlePlaceOrder} />
                      ) : (
                             <div className="flex flex-col items-center justify-center h-full text-center p-8 border rounded-lg bg-muted/30">
                                 <p className="text-muted-foreground">Payment details for {paymentMethod.toUpperCase()} would be shown here.</p>
