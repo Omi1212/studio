@@ -249,7 +249,7 @@ export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced, 
                 try {
                     const url = await QRCode.toDataURL(fullAddress, {
                         errorCorrectionLevel: 'L',
-                        margin: 2,
+                        margin: 1,
                         scale: 8,
                     });
                     setQrCodeDataUrl(url);
@@ -295,11 +295,11 @@ export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced, 
                                     src={qrCodeDataUrl}
                                     alt="QR Code"
                                     className="rounded-md"
-                                    width={200}
-                                    height={200}
+                                    width={220}
+                                    height={220}
                                 />
                             ) : (
-                                <div className="w-[200px] h-[200px] flex items-center justify-center bg-gray-200 rounded-md">
+                                <div className="w-[220px] h-[220px] flex items-center justify-center bg-gray-200 rounded-md">
                                     <p>Generating QR...</p>
                                 </div>
                             )}
@@ -350,7 +350,7 @@ export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced, 
                 try {
                     const url = await QRCode.toDataURL(sparkAddress, {
                         errorCorrectionLevel: 'L',
-                        margin: 2,
+                        margin: 1,
                         scale: 8,
                     });
                     setQrCodeDataUrl(url);
@@ -388,11 +388,11 @@ export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced, 
                                     src={qrCodeDataUrl}
                                     alt="QR Code"
                                     className="rounded-md"
-                                    width={200}
-                                    height={200}
+                                    width={220}
+                                    height={220}
                                 />
                             ) : (
-                                <div className="w-[200px] h-[200px] flex items-center justify-center bg-gray-200 rounded-md">
+                                <div className="w-[220px] h-[220px] flex items-center justify-center bg-gray-200 rounded-md">
                                     <p>Generating QR...</p>
                                 </div>
                             )}
@@ -458,7 +458,7 @@ export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced, 
                 try {
                     const url = await QRCode.toDataURL(currentAddress, {
                         errorCorrectionLevel: 'L',
-                        margin: 2,
+                        margin: 1,
                         scale: 8,
                     });
                     setQrCodeDataUrl(url);
@@ -501,11 +501,11 @@ export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced, 
                                     src={qrCodeDataUrl}
                                     alt="QR Code"
                                     className="rounded-md"
-                                    width={200}
-                                    height={200}
+                                    width={220}
+                                    height={220}
                                 />
                             ) : (
-                                <div className="w-[200px] h-[200px] flex items-center justify-center bg-gray-200 rounded-md">
+                                <div className="w-[220px] h-[220px] flex items-center justify-center bg-gray-200 rounded-md">
                                     <p>Generating QR...</p>
                                 </div>
                             )}
@@ -740,7 +740,10 @@ export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced, 
     return (
         <>
             <DialogHeader className="text-center pb-4">
-                {step === 2 && (
+                {step === 1 ? (
+                    <DialogTitle>Invest in {tokenName}</DialogTitle>
+                ) : (
+                    <>
                     <Button
                         variant="ghost"
                         size="icon"
@@ -750,10 +753,11 @@ export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced, 
                         <ArrowLeft className="h-4 w-4" />
                         <span className="sr-only">Back</span>
                     </Button>
+                    <DialogTitle className="flex justify-center items-center h-full">
+                        {breadcrumb}
+                    </DialogTitle>
+                    </>
                 )}
-                <DialogTitle>
-                    {step === 1 ? `Invest in ${tokenName}` : breadcrumb}
-                </DialogTitle>
             </DialogHeader>
 
             {step === 1 ? renderStep1() : renderStep2()}
