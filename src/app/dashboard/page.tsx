@@ -12,14 +12,13 @@ import { useEffect, useState } from 'react';
 import type { TokenDetails } from '@/lib/types';
 import { exampleTokens } from '@/lib/data';
 import TokenDetailsView from '@/components/workspace/token-details-view';
-import PaymentSummaryDynamic from '@/components/dashboard/payment-summary-dynamic';
+import InvestorDashboard from './investor-dashboard';
 
 
 function TokenDashboard({ token }: { token: TokenDetails }) {
   return (
     <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-8 bg-background">
         <TokenDetailsView token={token} view="dashboard" />
-        <PaymentSummaryDynamic />
     </main>
   );
 }
@@ -34,41 +33,49 @@ function DashboardRenderer() {
         const userRole = localStorage.getItem('userRole');
         setRole(userRole);
 
-        const handleTokenChange = () => {
-            const storedTokenId = localStorage.getItem('selectedTokenId');
-            if (storedTokenId) {
-                const storedTokens: TokenDetails[] = JSON.parse(localStorage.getItem('createdTokens') || '[]');
-                const allTokens: TokenDetails[] = [...exampleTokens, ...storedTokens];
-                const foundToken = allTokens.find(t => t.id === storedTokenId);
-                setSelectedToken(foundToken || null);
-            } else if (exampleTokens.length > 0) {
-              const firstToken = {
-                ...exampleTokens[0],
-                id: exampleTokens[0].id,
-                tokenName: exampleTokens[0].tokenName,
-                tokenTicker: exampleTokens[0].tokenTicker,
-                network: exampleTokens[0].network,
-                status: exampleTokens[0].status,
-                maxSupply: exampleTokens[0].maxSupply,
-                publicKey: `02f...${exampleTokens[0].id.slice(-10)}`,
-                decimals: 0,
-                isFreezable: false,
-              }
-              setSelectedToken(firstToken);
-            }
-        };
+        if (userRole === 'issuer' || userRole === 'agent') {
+             const handleTokenChange = () => {
+                const storedTokenId = localStorage.getItem('selectedTokenId');
+                if (storedTokenId) {
+                    const storedTokens: TokenDetails[] = JSON.parse(localStorage.getItem('createdTokens') || '[]');
+                    const allTokens: TokenDetails[] = [...exampleTokens, ...storedTokens];
+                    const foundToken = allTokens.find(t => t.id === storedTokenId);
+                    setSelectedToken(foundToken || null);
+                } else if (exampleTokens.length > 0) {
+                  const firstToken = {
+                    ...exampleTokens[0],
+                    id: exampleTokens[0].id,
+                    tokenName: exampleTokens[0].tokenName,
+                    tokenTicker: exampleTokens[0].tokenTicker,
+                    network: exampleTokens[0].network,
+                    status: exampleTokens[0].status,
+                    maxSupply: exampleTokens[0].maxSupply,
+                    publicKey: `02f...${exampleTokens[0].id.slice(-10)}`,
+                    decimals: 0,
+                    isFreezable: false,
+                  }
+                  setSelectedToken(firstToken);
+                }
+            };
 
-        handleTokenChange(); // Initial load
-        window.addEventListener('tokenChanged', handleTokenChange);
-        setLoading(false);
+            handleTokenChange(); // Initial load
+            window.addEventListener('tokenChanged', handleTokenChange);
+            setLoading(false);
 
-        return () => {
-            window.removeEventListener('tokenChanged', handleTokenChange);
-        };
+            return () => {
+                window.removeEventListener('tokenChanged', handleTokenChange);
+            };
+        } else {
+             setLoading(false);
+        }
     }, []);
 
     if (loading) {
         return <div className="flex-1 p-4 sm:p-6 lg:p-8">Loading...</div>; // Or a skeleton loader
+    }
+
+    if (role === 'investor') {
+        return <InvestorDashboard />;
     }
 
     if ((role === 'agent' || role === 'issuer') && selectedToken) {
