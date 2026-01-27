@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -58,7 +59,7 @@ export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced, 
     const [investmentAmount, setInvestmentAmount] = useState(0);
     const [prospectusConfirmed, setProspectusConfirmed] = useState(false);
     const [orderInfoConfirmed, setOrderInfoConfirmed] = useState(false);
-    const [paymentMethod, setPaymentMethod] = useState('btc');
+    const [paymentMethod, setPaymentMethod] = useState('');
     const [orderId, setOrderId] = useState('');
     
     const minLimit = 1;
@@ -304,7 +305,7 @@ export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced, 
                                 key={option.id}
                                 onClick={() => setPaymentMethod(option.id)}
                                 className={cn(
-                                    "flex items-center gap-3 rounded-md border-2 p-4 cursor-pointer transition-colors",
+                                    "flex items-center gap-3 rounded-md border-2 p-3 cursor-pointer transition-colors",
                                     paymentMethod === option.id ? "border-primary bg-primary/10" : "border-muted hover:bg-muted/50"
                                 )}
                              >
@@ -313,7 +314,7 @@ export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced, 
                             </div>
                         ))}
                     </div>
-                    <Button className="w-full">Continue</Button>
+                    <Button className="w-full mt-2 h-11" onClick={handlePlaceOrder} disabled={!paymentMethod}>Continue</Button>
                 </div>
                 <div className="space-y-4">
                     {paymentMethod === 'bank' ? (
@@ -368,9 +369,6 @@ export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced, 
                             </Card>
                         </>
                     )}
-                </div>
-                 <div className="lg:col-span-2 flex justify-end">
-                    <Button onClick={handlePlaceOrder}>Place Order</Button>
                 </div>
             </div>
         )
