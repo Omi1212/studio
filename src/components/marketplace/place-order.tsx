@@ -69,7 +69,7 @@ export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced, 
         { id: 'btc', label: 'BTC', icon: <BtcIcon /> },
         { id: 'bank', label: 'Bank Transfers', icon: <Landmark /> },
         { id: 'spark', label: 'Bitcoin Spark', icon: <SparkIcon /> },
-        { id: 'usdt', label: 'USDT', icon: <UsdtIcon /> },
+        { id: 'usdt', label: 'Stablecoin', icon: <UsdtIcon /> },
     ]
 
     useEffect(() => {
@@ -376,3 +376,5 @@ export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced, 
 
     return step === 1 ? renderStep1() : renderStep2();
 }
+
+    
