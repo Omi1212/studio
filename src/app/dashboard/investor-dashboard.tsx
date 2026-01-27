@@ -29,14 +29,14 @@ export default function InvestorDashboard() {
             </div>
             <PortfolioOverview />
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-                <div className="lg:col-span-3 space-y-8">
+                <div className="lg:col-span-3">
                     <MyHoldings />
-                    <RecentActivity />
                 </div>
                 <div className="lg:col-span-2">
                     <MarketHighlights />
                 </div>
             </div>
+            <RecentActivity />
         </main>
     );
 }
