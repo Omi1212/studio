@@ -52,7 +52,6 @@ function TokenOfferingPage({ params }: { params: { tokenId: string } }) {
   const [loading, setLoading] = useState(true);
   const [subscriptionStatus, setSubscriptionStatus] = useState<'none' | 'pending' | 'approved'>('none');
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [investStep, setInvestStep] = useState(1);
   const { toast } = useToast();
 
    const networkMap: { [key: string]: string } = {
@@ -115,11 +114,6 @@ function TokenOfferingPage({ params }: { params: { tokenId: string } }) {
     setLoading(false);
   }, [params]);
 
-  useEffect(() => {
-    if (!isModalOpen) {
-        setInvestStep(1);
-    }
-  }, [isModalOpen]);
   
   const handleSubscribe = () => {
     if (!token) return;
@@ -253,16 +247,13 @@ function TokenOfferingPage({ params }: { params: { tokenId: string } }) {
                                     Invest
                                 </Button>
                             </DialogTrigger>
-                            <DialogContent className={cn(investStep === 2 ? 'sm:max-w-4xl' : 'sm:max-w-lg')}>
+                            <DialogContent className='sm:max-w-lg'>
                                 <PlaceOrder
                                     token={token}
                                     price={offeringData.price}
                                     isSubscribed={true}
                                     onOrderPlaced={() => setIsModalOpen(false)}
-                                    step={investStep}
-                                    onStepChange={setInvestStep}
                                     tokenName={token.tokenName}
-                                    onBack={() => setInvestStep(1)}
                                 />
                             </DialogContent>
                         </Dialog>

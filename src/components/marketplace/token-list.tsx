@@ -137,7 +137,6 @@ export default function TokenList() {
   const [view, setView] = useState<ViewMode>('card');
   const [selectedToken, setSelectedToken] = useState<TokenDetails | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [investStep, setInvestStep] = useState(1);
   const router = useRouter();
 
   useEffect(() => {
@@ -173,12 +172,6 @@ export default function TokenList() {
 
     setLoading(false);
   }, []);
-
-  useEffect(() => {
-    if (!isModalOpen) {
-        setInvestStep(1);
-    }
-  }, [isModalOpen]);
 
   const filteredTokens = useMemo(() => {
     let filtered = [...allTokens];
@@ -351,16 +344,13 @@ export default function TokenList() {
             )}
         </div>
          {selectedToken && (
-            <DialogContent className={cn(investStep === 2 && 'sm:max-w-4xl')}>
+            <DialogContent className='sm:max-w-lg'>
                 <PlaceOrder 
                     token={selectedToken} 
                     price={selectedToken.price || 0} 
                     isSubscribed={true}
                     onOrderPlaced={() => setIsModalOpen(false)}
-                    step={investStep}
-                    onStepChange={setInvestStep}
                     tokenName={selectedToken.tokenName}
-                    onBack={() => setInvestStep(1)}
                 />
             </DialogContent>
         )}
