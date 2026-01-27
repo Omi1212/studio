@@ -287,7 +287,7 @@ export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced, 
                         </TabsList>
                     </Tabs>
                     <div className="flex justify-center p-4">
-                         <div className="relative border-2 border-green-500 rounded-lg p-2 bg-white">
+                         <div className="relative border-2 border-orange-500 rounded-lg p-2 bg-white">
                             {qrCodeDataUrl ? (
                                 <img
                                     src={qrCodeDataUrl}
@@ -302,8 +302,8 @@ export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced, 
                                 </div>
                             )}
                              <div className="absolute inset-0 flex items-center justify-center">
-                                <div className="bg-orange-400 p-2 rounded-full flex items-center justify-center text-white">
-                                    <SparkIcon />
+                                <div className="bg-orange-500 p-2 rounded-full flex items-center justify-center text-white">
+                                    <BtcIcon />
                                 </div>
                             </div>
                         </div>
@@ -336,6 +336,98 @@ export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced, 
         );
     }
     
+    function SparkPaymentDetails({ orderReference, amount, onPay }: { orderReference: string; amount: number; onPay: () => void; }) {
+        const { toast } = useToast();
+        const [isAddressVisible, setIsAddressVisible] = useState(false);
+        const [qrCodeDataUrl, setQrCodeDataUrl] = useState('');
+    
+        const sparkAddress = 'spark1pgss8grzdccq54hwecptpevgzqnf5uut7qp865zkvlpdfeeuw578x23q6n7dvn';
+    
+        useEffect(() => {
+            const generateQrCode = async () => {
+                try {
+                    const url = await QRCode.toDataURL(sparkAddress, {
+                        errorCorrectionLevel: 'L',
+                        margin: 2,
+                        scale: 8,
+                    });
+                    setQrCodeDataUrl(url);
+                } catch (err) {
+                    console.error(err);
+                    setQrCodeDataUrl('');
+                }
+            };
+    
+            if (sparkAddress) {
+                generateQrCode();
+            }
+        }, [sparkAddress]);
+    
+        const copyToClipboard = (text: string, field: string) => {
+            navigator.clipboard.writeText(text);
+            toast({
+                title: 'Copied!',
+                description: `${field} copied to clipboard.`,
+            });
+        };
+    
+        const truncatedAddress = isAddressVisible ? sparkAddress : `${sparkAddress.slice(0,15)}...${sparkAddress.slice(-15)}`;
+        
+        return (
+            <Card className="bg-muted/30">
+                <CardHeader>
+                    <CardTitle className="text-center text-lg font-semibold">Pay to</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    <div className="flex justify-center p-4">
+                         <div className="relative border-2 border-primary rounded-lg p-2 bg-white">
+                            {qrCodeDataUrl ? (
+                                <img
+                                    src={qrCodeDataUrl}
+                                    alt="QR Code"
+                                    className="rounded-md"
+                                    width={200}
+                                    height={200}
+                                />
+                            ) : (
+                                <div className="w-[200px] h-[200px] flex items-center justify-center bg-gray-200 rounded-md">
+                                    <p>Generating QR...</p>
+                                </div>
+                            )}
+                             <div className="absolute inset-0 flex items-center justify-center">
+                                <div className="bg-primary p-2 rounded-full flex items-center justify-center text-white">
+                                    <SparkIcon />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+    
+                    <div className="space-y-4 pt-2 text-sm">
+                         <div className="flex justify-between items-center">
+                            <span className="text-muted-foreground">Total</span>
+                            <div className="flex flex-col items-end">
+                                <span className="font-medium font-mono text-primary">${amount.toFixed(2)}</span>
+                            </div>
+                        </div>
+                        <div className="flex justify-between items-center">
+                            <span className="text-muted-foreground">Pay to</span>
+                            <div className="flex items-center gap-2">
+                                <span className="font-medium font-mono break-all">{truncatedAddress}</span>
+                                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setIsAddressVisible(!isAddressVisible)}>
+                                    <Eye className="h-4 w-4" />
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
+                </CardContent>
+                <CardFooter className="flex flex-col gap-2">
+                     <Button variant="outline" className="w-full" onClick={() => copyToClipboard(sparkAddress, 'Address')}>Copy</Button>
+                     <Button className="w-full" onClick={onPay}>Pay in Wallet</Button>
+                </CardFooter>
+            </Card>
+        );
+    }
+
     const renderStep1 = () => {
         const isOrderButtonDisabled = !quantity || parseFloat(quantity) <= 0 || !prospectusConfirmed || !orderInfoConfirmed || !isSubscribed;
         const OrderButton = (
@@ -458,7 +550,7 @@ export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced, 
                             </div>
                         ))}
                     </div>
-                     <Button className="w-full mt-2 h-11" onClick={handleContinueClick} disabled={!paymentMethod}>
+                     <Button className="w-full mt-2 h-11" onClick={handleContinueClick}>
                          {showPaymentDetails ? "Confirm Purchase" : "Continue"}
                     </Button>
                 </div>
@@ -516,6 +608,8 @@ export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced, 
                             <BankDetails orderReference={orderId} />
                      ) : paymentMethod === 'btc' ? (
                             <BitcoinPaymentDetails orderReference={orderId} amount={investmentAmount} onPay={handlePlaceOrder} />
+                     ) : paymentMethod === 'spark' ? (
+                            <SparkPaymentDetails orderReference={orderId} amount={investmentAmount} onPay={handlePlaceOrder} />
                      ) : (
                             <div className="flex flex-col items-center justify-center h-full text-center p-8 border rounded-lg bg-muted/30">
                                 <p className="text-muted-foreground">Payment details for {paymentMethod.toUpperCase()} would be shown here.</p>
