@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -66,7 +67,7 @@ export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced, 
 
     const paymentOptions = [
         { id: 'btc', label: 'BTC', icon: <BtcIcon /> },
-        { id: 'bank', label: 'Transferencia Bancaria', icon: <Landmark /> },
+        { id: 'bank', label: 'Bank Transfers', icon: <Landmark /> },
         { id: 'spark', label: 'Bitcoin Spark', icon: <SparkIcon /> },
         { id: 'usdt', label: 'USDT', icon: <UsdtIcon /> },
     ]
