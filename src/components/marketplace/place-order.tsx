@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import type { TokenDetails } from '@/lib/types';
@@ -17,6 +17,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Separator } from '../ui/separator';
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import React from 'react';
 
 
 // Icons
@@ -66,7 +67,7 @@ export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced, 
 
     const paymentOptions = [
         { id: 'btc', label: 'BTC', icon: <BtcIcon /> },
-        { id: 'bank', label: 'Bank Transfers', icon: <Landmark className="h-8 w-8" /> },
+        { id: 'bank', label: 'Bank Transfers', icon: <Landmark /> },
         { id: 'spark', label: 'Bitcoin Spark', icon: <SparkIcon /> },
         { id: 'usdt', label: 'Stablecoin', icon: <UsdtIcon /> },
     ]
@@ -298,17 +299,17 @@ export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced, 
         return (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <div className="space-y-4">
-                    <div className="space-y-4">
+                    <div className="space-y-2">
                         {paymentOptions.map(option => (
                              <div
                                 key={option.id}
                                 onClick={() => setPaymentMethod(option.id)}
                                 className={cn(
-                                    "flex items-center gap-4 rounded-md border-2 p-6 cursor-pointer transition-colors",
+                                    "flex items-center gap-4 rounded-md border-2 p-4 cursor-pointer transition-colors",
                                     paymentMethod === option.id ? "border-primary bg-primary/10" : "border-muted hover:bg-muted/50"
                                 )}
                              >
-                                {option.icon}
+                                {React.cloneElement(option.icon, { className: "h-8 w-8" })}
                                 <span className="font-medium text-lg">{option.label}</span>
                             </div>
                         ))}
@@ -320,7 +321,7 @@ export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced, 
                         <BankDetails orderReference={orderId} />
                     ) : (
                         <>
-                             <Card className="bg-muted/30">
+                            <Card className="bg-muted/30">
                                 <CardHeader>
                                     <CardTitle className="text-base">Investment details</CardTitle>
                                 </CardHeader>
