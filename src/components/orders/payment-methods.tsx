@@ -419,6 +419,7 @@ function StablecoinPaymentDetails({ orderReference, amount, onPay }: { orderRefe
                  <Button variant="outline" className="w-full" onClick={() => copyToClipboard(currentAddress)}>Copy</Button>
                  <Button className="w-full" onClick={onPay}>I've made the payment</Button>
             </CardFooter>
+        </Card>
     );
 }
 
