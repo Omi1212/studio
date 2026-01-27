@@ -27,7 +27,6 @@ import PlaceOrder from '@/components/marketplace/place-order';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
-import InvestmentModalHeader from '@/components/marketplace/investment-modal-header';
 
 type WhitelistRequest = typeof investorsData[0];
 
@@ -255,11 +254,6 @@ function TokenOfferingPage({ params }: { params: { tokenId: string } }) {
                                 </Button>
                             </DialogTrigger>
                             <DialogContent className={cn(investStep === 2 ? 'sm:max-w-4xl' : 'sm:max-w-lg')}>
-                                <InvestmentModalHeader 
-                                    tokenName={token.tokenName}
-                                    step={investStep}
-                                    onBack={() => setInvestStep(1)}
-                                />
                                 <PlaceOrder
                                     token={token}
                                     price={offeringData.price}
@@ -267,6 +261,8 @@ function TokenOfferingPage({ params }: { params: { tokenId: string } }) {
                                     onOrderPlaced={() => setIsModalOpen(false)}
                                     step={investStep}
                                     onStepChange={setInvestStep}
+                                    tokenName={token.tokenName}
+                                    onBack={() => setInvestStep(1)}
                                 />
                             </DialogContent>
                         </Dialog>
