@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
@@ -11,7 +10,7 @@ import { ordersData } from '@/lib/data';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 import { Label } from '../ui/label';
 import { Checkbox } from '../ui/checkbox';
-import { Landmark, Copy, Eye } from 'lucide-react';
+import { Landmark, Copy, Eye, ArrowLeft } from 'lucide-react';
 import TokenIcon from '../ui/token-icon';
 import { cn } from '@/lib/utils';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '../ui/card';
@@ -53,9 +52,11 @@ interface PlaceOrderProps {
     onOrderPlaced?: () => void;
     step: number;
     onStepChange: (step: number) => void;
+    tokenName: string;
+    onBack: () => void;
 }
 
-export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced, step, onStepChange }: PlaceOrderProps) {
+export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced, step, onStepChange, tokenName, onBack }: PlaceOrderProps) {
     const { toast } = useToast();
     const router = useRouter();
 
@@ -92,11 +93,11 @@ export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced, 
             setPaymentMethod('');
         }
     }, [step]);
-
+    
     const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setQuantity(e.target.value);
     };
-    
+
     const handlePlaceOrder = () => {
         toast({
             title: "Order Placed Successfully!",
@@ -558,7 +559,6 @@ export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced, 
         )
 
         return (
-          <>
             <div className="space-y-6">
                 <div className="space-y-2">
                     <Label htmlFor="quantity">Quantity</Label>
@@ -624,53 +624,29 @@ export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced, 
                     </TooltipProvider>
                 )}
             </div>
-          </>
         )
     }
 
     const renderStep2 = () => {
-        const selectedOption = paymentOptions.find(o => o.id === paymentMethod);
-        const breadcrumb = (
-             <div className="text-center">
-                {showPaymentDetails && selectedOption ? (
-                    <div className="flex items-center justify-center gap-2">
-                        <span className="text-lg font-medium text-muted-foreground cursor-pointer" onClick={() => {
-                            setShowPaymentDetails(false);
-                        }}>Checkout</span>
-                        <span className="text-lg font-medium text-muted-foreground">/</span>
-                        <span className="text-lg font-semibold">{selectedOption?.label}</span>
-                    </div>
-                ) : (
-                    <span className="text-lg font-semibold">Checkout</span>
-                )}
-            </div>
-        );
-
         return (
-            <>
-            <DialogHeader className="pb-4">
-              <DialogTitle className="text-center">{breadcrumb}</DialogTitle>
-            </DialogHeader>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div className="space-y-4">
-                    <div className="space-y-2">
-                        {paymentOptions.map(option => (
-                             <div
-                                key={option.id}
-                                onClick={() => {
-                                    if(showPaymentDetails) setShowPaymentDetails(false);
-                                    setPaymentMethod(option.id)
-                                }}
-                                className={cn(
-                                    "flex items-center gap-4 rounded-md border-2 p-4 cursor-pointer transition-colors hover:bg-muted/50",
-                                    paymentMethod === option.id ? "border-primary bg-primary/10" : "border-muted"
-                                )}
-                             >
-                                {React.cloneElement(option.icon, { className: "h-10 w-10" })}
-                                <span className="font-medium text-lg">{option.label}</span>
-                            </div>
-                        ))}
-                    </div>
+                <div className="space-y-2">
+                    {paymentOptions.map(option => (
+                         <div
+                            key={option.id}
+                            onClick={() => {
+                                if(showPaymentDetails) setShowPaymentDetails(false);
+                                setPaymentMethod(option.id)
+                            }}
+                            className={cn(
+                                "flex items-center gap-4 rounded-md border-2 p-4 cursor-pointer transition-colors hover:bg-muted/50",
+                                paymentMethod === option.id ? "border-primary bg-primary/10" : "border-muted"
+                            )}
+                         >
+                            {React.cloneElement(option.icon, { className: "h-10 w-10" })}
+                            <span className="font-medium text-lg">{option.label}</span>
+                        </div>
+                    ))}
                      <Button className="w-full mt-2 h-11" onClick={handleContinueClick}>
                          {showPaymentDetails ? "Confirm Purchase" : "Continue"}
                     </Button>
@@ -741,9 +717,46 @@ export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced, 
                     }
                 </div>
             </div>
-            </>
         )
     }
+    
+    const selectedOption = paymentOptions.find(o => o.id === paymentMethod);
+    const breadcrumb = (
+         <div className="text-center">
+            {showPaymentDetails && selectedOption ? (
+                <div className="flex items-center justify-center gap-2">
+                    <span className="text-lg font-medium text-muted-foreground cursor-pointer" onClick={() => {
+                        setShowPaymentDetails(false);
+                    }}>Checkout</span>
+                    <span className="text-lg font-medium text-muted-foreground">/</span>
+                    <span className="text-lg font-semibold">{selectedOption?.label}</span>
+                </div>
+            ) : (
+                <span className="text-lg font-semibold">Checkout</span>
+            )}
+        </div>
+    );
 
-    return step === 1 ? renderStep1() : renderStep2();
+    return (
+        <>
+            <DialogHeader className="text-center pb-4">
+                {step === 2 && (
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={onBack}
+                        className="absolute left-4 top-4 h-8 w-8"
+                    >
+                        <ArrowLeft className="h-4 w-4" />
+                        <span className="sr-only">Back</span>
+                    </Button>
+                )}
+                <DialogTitle>
+                    {step === 1 ? `Invest in ${tokenName}` : breadcrumb}
+                </DialogTitle>
+            </DialogHeader>
+
+            {step === 1 ? renderStep1() : renderStep2()}
+        </>
+    );
 }

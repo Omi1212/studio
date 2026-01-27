@@ -15,8 +15,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { cn } from '@/lib/utils';
 import { Dialog, DialogContent, DialogTrigger } from '../ui/dialog';
 import PlaceOrder from './place-order';
-import InvestmentModalHeader from './investment-modal-header';
-
 
 type SubscriptionStatus = 'none' | 'pending' | 'approved';
 
@@ -354,11 +352,6 @@ export default function TokenList() {
         </div>
          {selectedToken && (
             <DialogContent className={cn(investStep === 2 && 'sm:max-w-4xl')}>
-                <InvestmentModalHeader
-                  tokenName={selectedToken.tokenName}
-                  step={investStep}
-                  onBack={() => setInvestStep(1)}
-                />
                 <PlaceOrder 
                     token={selectedToken} 
                     price={selectedToken.price || 0} 
@@ -366,6 +359,8 @@ export default function TokenList() {
                     onOrderPlaced={() => setIsModalOpen(false)}
                     step={investStep}
                     onStepChange={setInvestStep}
+                    tokenName={selectedToken.tokenName}
+                    onBack={() => setInvestStep(1)}
                 />
             </DialogContent>
         )}
