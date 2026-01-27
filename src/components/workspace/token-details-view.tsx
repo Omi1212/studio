@@ -1,4 +1,3 @@
-
 'use client';
 
 import {
@@ -93,6 +92,13 @@ export default function TokenDetailsView({
 
   return (
     <div className="space-y-6">
+      {view === 'dashboard' && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <KpiCard title="Volume (24h)" value="$0.00" icon={TrendingUp} />
+          <KpiCard title="Transactions (24h)" value="0" icon={BarChart} />
+          <KpiCard title="Market Cap" value="$0.00" icon={CircleDollarSign} />
+        </div>
+      )}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <Card className="lg:col-span-2">
           <CardContent className="p-6 space-y-6">
@@ -173,13 +179,7 @@ export default function TokenDetailsView({
         </Card>
       </div>
 
-      {view === 'dashboard' ? (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <KpiCard title="Volume (24h)" value="$0.00" icon={TrendingUp} />
-          <KpiCard title="Transactions (24h)" value="0" icon={BarChart} />
-          <KpiCard title="Market Cap" value="$0.00" icon={CircleDollarSign} />
-        </div>
-      ) : (
+      {(view === 'dashboard' || view === 'workspace') && (
         <Card>
           <CardHeader>
             <CardTitle>Token Actions</CardTitle>
