@@ -317,57 +317,56 @@ export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced, 
                     <Button className="w-full mt-2 h-11" onClick={handlePlaceOrder} disabled={!paymentMethod}>Continue</Button>
                 </div>
                 <div className="space-y-4">
-                    {paymentMethod === 'bank' ? (
+                     <>
+                        <Card className="bg-muted/30">
+                            <CardHeader>
+                                <CardTitle className="text-base">Investment details</CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-3 text-sm">
+                                <div className="flex justify-between items-center">
+                                    <span className="text-muted-foreground">Token</span>
+                                    <div className="flex items-center gap-2">
+                                        <TokenIcon token={token} className="w-6 h-6" />
+                                        <span className="font-medium">{token.tokenTicker}</span>
+                                    </div>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-muted-foreground">Token price</span>
+                                    <span className="font-mono">${price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-muted-foreground">Investment</span>
+                                    <span className="font-mono">${investmentAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                                </div>
+                            </CardContent>
+                        </Card>
+                        <Card className="bg-muted/30">
+                            <CardHeader>
+                                <CardTitle className="text-base">Purchase summary</CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-3 text-sm">
+                                <div className="flex justify-between">
+                                    <span className="text-muted-foreground">Tokens to be minted</span>
+                                    <span className="font-medium font-mono">{parseFloat(quantity).toLocaleString()} {token.tokenTicker}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-muted-foreground">Total amount</span>
+                                    <span className="font-mono">${investmentAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-muted-foreground">Platform fee</span>
+                                    <span className="font-medium font-mono">$0 / 0%</span>
+                                </div>
+                                <Separator />
+                                <div className="flex justify-between font-bold">
+                                    <span>Final amount</span>
+                                    <span className="font-mono">${investmentAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </>
+                    {paymentMethod === 'bank' && (
                         <BankDetails orderReference={orderId} />
-                    ) : (
-                        <>
-                            <Card className="bg-muted/30">
-                                <CardHeader>
-                                    <CardTitle className="text-base">Investment details</CardTitle>
-                                </CardHeader>
-                                <CardContent className="space-y-3 text-sm">
-                                    <div className="flex justify-between items-center">
-                                        <span className="text-muted-foreground">Token</span>
-                                        <div className="flex items-center gap-2">
-                                            <TokenIcon token={token} className="w-6 h-6" />
-                                            <span className="font-medium">{token.tokenTicker}</span>
-                                        </div>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <span className="text-muted-foreground">Token price</span>
-                                        <span className="font-mono">${price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <span className="text-muted-foreground">Investment</span>
-                                        <span className="font-mono">${investmentAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                                    </div>
-                                </CardContent>
-                            </Card>
-                            <Card className="bg-muted/30">
-                                <CardHeader>
-                                    <CardTitle className="text-base">Purchase summary</CardTitle>
-                                </CardHeader>
-                                <CardContent className="space-y-3 text-sm">
-                                    <div className="flex justify-between">
-                                        <span className="text-muted-foreground">Tokens to be minted</span>
-                                        <span className="font-medium font-mono">{parseFloat(quantity).toLocaleString()} {token.tokenTicker}</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <span className="text-muted-foreground">Total amount</span>
-                                        <span className="font-mono">${investmentAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <span className="text-muted-foreground">Platform fee</span>
-                                        <span className="font-medium font-mono">$0 / 0%</span>
-                                    </div>
-                                    <Separator />
-                                    <div className="flex justify-between font-bold">
-                                        <span>Final amount</span>
-                                        <span className="font-mono">${investmentAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        </>
                     )}
                 </div>
             </div>
