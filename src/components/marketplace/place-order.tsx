@@ -72,7 +72,7 @@ export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced, 
     const paymentOptions = [
         { id: 'btc', label: 'Bitcoin', icon: <BtcIcon /> },
         { id: 'bank', label: 'Bank Transfers', icon: <Landmark /> },
-        { id: 'credit-card', label: 'Credit Card', icon: <Landmark /> },
+        { id: 'spark', label: 'Bitcoin Spark', icon: <SparkIcon /> },
         { id: 'usdt', label: 'Stablecoin', icon: <UsdtIcon /> },
     ]
 
