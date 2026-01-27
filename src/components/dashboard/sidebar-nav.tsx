@@ -100,6 +100,12 @@ export default function SidebarNav() {
   const [isClient, setIsClient] = useState(false);
   const [allTokens, setAllTokens] = useState<TokenDetails[]>([]);
   const [selectedToken, setSelectedToken] = useState<TokenDetails | null>(null);
+  const [companies] = useState([
+    { id: 'banco-atlantida', name: 'Banco Atlantida' },
+    { id: 'ditobanx', name: 'DitoBanx' },
+    { id: 'tiankii', name: 'Tiankii' },
+  ]);
+  const [selectedCompany, setSelectedCompany] = useState<{ id: string; name: string } | null>(null);
 
 
   useEffect(() => {
@@ -108,6 +114,16 @@ export default function SidebarNav() {
     const role = localStorage.getItem('userRole');
     const currentUser: User | null = JSON.parse(localStorage.getItem('currentUser') || 'null');
     setUserRole(role);
+
+    if (role === 'investor' || role === 'issuer') {
+      const storedCompanyId = localStorage.getItem('selectedCompanyId');
+      if (storedCompanyId) {
+        const foundCompany = companies.find((c) => c.id === storedCompanyId);
+        setSelectedCompany(foundCompany || companies[0]);
+      } else {
+        setSelectedCompany(companies[0]);
+      }
+    }
 
     const storedTokens = JSON.parse(localStorage.getItem('createdTokens') || '[]');
     let combinedTokens: TokenDetails[] = [...exampleTokens, ...storedTokens].map(t => ({
@@ -154,6 +170,12 @@ export default function SidebarNav() {
     window.dispatchEvent(new Event('tokenChanged'));
   }
 
+  const handleCompanySelect = (company: { id: string; name: string }) => {
+    setSelectedCompany(company);
+    localStorage.setItem('selectedCompanyId', company.id);
+    window.dispatchEvent(new Event('companyChanged'));
+  };
+
   let menuItems: any[] = [];
 
   if (!isClient) {
@@ -186,6 +208,38 @@ export default function SidebarNav() {
           <Image src="https://i.wpfc.ml/35/8gtsxa.png" alt="BlockStratus Logo" fill style={{objectFit: 'contain'}} sizes="14rem" />
         </div>
       </SidebarHeader>
+      
+      {isClient && (userRole === 'investor' || userRole === 'issuer') && selectedCompany && (
+        <div className="px-3 pb-3">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="outline"
+                className="w-full justify-between items-center p-2 text-left bg-sidebar-accent border-sidebar-border hover:bg-sidebar-accent/80"
+              >
+                <div className="flex items-center gap-3">
+                    <Building className="h-5 w-5" />
+                    <span className="font-medium text-sm">{selectedCompany.name}</span>
+                </div>
+                <ChevronsUpDown className="h-4 w-4 text-muted-foreground" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-[--radix-dropdown-menu-trigger-width]">
+              {companies.map((company) => (
+                <DropdownMenuItem
+                  key={company.id}
+                  onSelect={() => handleCompanySelect(company)}
+                >
+                  <div className="flex items-center justify-between w-full">
+                    <span>{company.name}</span>
+                    {selectedCompany.id === company.id && <Check className="h-4 w-4" />}
+                  </div>
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      )}
 
       {isClient && userRole !== 'superadmin' && userRole !== 'investor' && selectedToken && (
         <div className="px-3 pb-3">
