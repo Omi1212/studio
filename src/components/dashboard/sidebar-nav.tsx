@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -216,7 +217,7 @@ export default function SidebarNav() {
             <DropdownMenuTrigger asChild>
               <Button
                 variant="outline"
-                className="w-full justify-between items-center p-2 text-left bg-sidebar-accent border-sidebar-border hover:bg-sidebar-accent/80"
+                className="w-full justify-between items-center p-2 text-left border-sidebar-border bg-sidebar hover:bg-sidebar-accent"
               >
                 <div className="flex items-center gap-3">
                     <Building className="h-5 w-5" />
