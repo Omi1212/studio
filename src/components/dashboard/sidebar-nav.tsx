@@ -37,7 +37,7 @@ import { Button } from '../ui/button';
 import { exampleTokens } from '@/lib/data';
 import TokenIcon from '../ui/token-icon';
 import { cn } from '@/lib/utils';
-import type { TokenDetails } from '@/lib/types';
+import type { TokenDetails, User } from '@/lib/types';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../ui/collapsible';
 import Image from 'next/image';
 
@@ -46,6 +46,7 @@ const superAdminMenu = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/issuer-management', label: 'Issuers', icon: Building },
   { href: '/user-management', label: 'Users', icon: Users },
+  { href: '/assignments', label: 'Assignments', icon: ClipboardList },
 ];
 
 const agentMenu = [
@@ -105,25 +106,43 @@ export default function SidebarNav() {
     // This ensures the code runs only on the client, preventing hydration errors.
     setIsClient(true);
     const role = localStorage.getItem('userRole');
+    const currentUser: User | null = JSON.parse(localStorage.getItem('currentUser') || 'null');
     setUserRole(role);
 
     const storedTokens = JSON.parse(localStorage.getItem('createdTokens') || '[]');
-    const combinedTokens: TokenDetails[] = [...exampleTokens, ...storedTokens].map(t => ({
+    let combinedTokens: TokenDetails[] = [...exampleTokens, ...storedTokens].map(t => ({
       ...t,
       // Ensure all tokens have the necessary fields for TokenDetails type
       decimals: t.decimals ?? 0,
       isFreezable: t.isFreezable ?? false,
       publicKey: t.publicKey ?? `02f...${t.id.slice(-10)}`,
     }));
+
+    if (role === 'agent' && currentUser) {
+        const assignments = JSON.parse(localStorage.getItem('agentTokenAssignments') || '{}');
+        const assignedTokenIds = assignments[currentUser.id] || [];
+        combinedTokens = combinedTokens.filter(token => assignedTokenIds.includes(token.id));
+    }
+
     setAllTokens(combinedTokens);
 
     const storedTokenId = localStorage.getItem('selectedTokenId');
     if (storedTokenId) {
         const foundToken = combinedTokens.find(t => t.id === storedTokenId);
-        setSelectedToken(foundToken || (combinedTokens.length > 0 ? combinedTokens[0] : null));
+        if (foundToken) {
+          setSelectedToken(foundToken);
+        } else if (combinedTokens.length > 0) {
+          const firstToken = combinedTokens[0];
+          setSelectedToken(firstToken);
+          localStorage.setItem('selectedTokenId', firstToken.id);
+        } else {
+          setSelectedToken(null);
+          localStorage.removeItem('selectedTokenId');
+        }
     } else if (combinedTokens.length > 0) {
-      setSelectedToken(combinedTokens[0]);
-      localStorage.setItem('selectedTokenId', combinedTokens[0].id);
+      const firstToken = combinedTokens[0];
+      setSelectedToken(firstToken);
+      localStorage.setItem('selectedTokenId', firstToken.id);
     }
 
 
