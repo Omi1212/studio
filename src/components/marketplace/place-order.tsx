@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
@@ -90,14 +91,6 @@ export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced, 
         }
     }, [step]);
 
-    const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const value = e.target.value;
-        const numValue = parseFloat(value);
-        if (value === '' || (!isNaN(numValue) && numValue >= 0)) {
-           setQuantity(value);
-        }
-    };
-
     const handlePlaceOrder = () => {
         toast({
             title: "Order Placed Successfully!",
@@ -147,17 +140,22 @@ export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced, 
         onStepChange(2);
     }
     
-    const handleContinueToPaymentDetails = () => {
-        if (!paymentMethod) {
-            toast({
-                variant: "destructive",
-                title: "Payment method required",
-                description: "Please select a payment method to continue.",
-            });
-            return;
+    const handleContinueClick = () => {
+        if (showPaymentDetails) {
+            handlePlaceOrder();
+        } else {
+            if (!paymentMethod) {
+                toast({
+                    variant: "destructive",
+                    title: "Payment method required",
+                    description: "Please select a payment method to continue.",
+                });
+                return;
+            }
+            setShowPaymentDetails(true);
         }
-        setShowPaymentDetails(true);
     };
+
 
     function BankDetails({ orderReference }: { orderReference: string }) {
         const { toast } = useToast();
@@ -237,9 +235,6 @@ export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced, 
 
         return (
           <>
-            <DialogHeader className="text-center pb-4">
-              <DialogTitle>Checkout</DialogTitle>
-            </DialogHeader>
             <div className="space-y-6">
                 <div className="space-y-2">
                     <Label htmlFor="quantity">Quantity</Label>
@@ -311,9 +306,9 @@ export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced, 
 
     const renderStep2 = () => {
         const selectedOption = paymentOptions.find(o => o.id === paymentMethod);
-        const breadcrumb = paymentMethod ? (
-            <div className="flex items-center gap-2">
-                <span className="text-lg font-medium text-muted-foreground cursor-pointer" onClick={() => {setShowPaymentDetails(false); setPaymentMethod('')}}>Checkout</span>
+        const breadcrumb = showPaymentDetails && selectedOption ? (
+            <div className="flex items-center justify-center gap-2">
+                <span className="text-lg font-medium text-muted-foreground cursor-pointer" onClick={() => setShowPaymentDetails(false)}>Checkout</span>
                 <span className="text-lg font-medium text-muted-foreground">/</span>
                 <span className="text-lg font-semibold">{selectedOption?.label}</span>
             </div>
@@ -331,11 +326,10 @@ export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced, 
                         {paymentOptions.map(option => (
                              <div
                                 key={option.id}
-                                onClick={() => !showPaymentDetails && setPaymentMethod(option.id)}
+                                onClick={() => setPaymentMethod(option.id)}
                                 className={cn(
-                                    "flex items-center gap-4 rounded-md border-2 p-4 cursor-pointer transition-colors",
-                                    paymentMethod === option.id ? "border-primary bg-primary/10" : "border-muted",
-                                    showPaymentDetails ? "cursor-not-allowed opacity-50" : "hover:bg-muted/50"
+                                    "flex items-center gap-4 rounded-md border-2 p-6 cursor-pointer transition-colors hover:bg-muted/50",
+                                    paymentMethod === option.id ? "border-primary bg-primary/10" : "border-muted"
                                 )}
                              >
                                 {React.cloneElement(option.icon, { className: "h-10 w-10" })}
@@ -343,11 +337,7 @@ export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced, 
                             </div>
                         ))}
                     </div>
-                    {!showPaymentDetails ? (
-                        <Button className="w-full mt-2 h-11" onClick={handleContinueToPaymentDetails} disabled={!paymentMethod}>Continue</Button>
-                    ) : (
-                        <Button className="w-full mt-2 h-11" onClick={handlePlaceOrder}>Confirm Purchase</Button>
-                    )}
+                    <Button className="w-full mt-2 h-11" onClick={handleContinueClick} disabled={!paymentMethod}>Continue</Button>
                 </div>
                 <div className="space-y-4">
                      {!showPaymentDetails ? (
