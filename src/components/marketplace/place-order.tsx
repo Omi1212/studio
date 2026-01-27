@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
@@ -90,6 +89,10 @@ export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced, 
             setPaymentMethod('');
         }
     }, [step]);
+    
+    const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setQuantity(e.target.value);
+    };
 
     const handlePlaceOrder = () => {
         toast({
@@ -141,17 +144,18 @@ export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced, 
     }
     
     const handleContinueClick = () => {
+        if (!paymentMethod) {
+            toast({
+                variant: "destructive",
+                title: "Payment method required",
+                description: "Please select a payment method to continue.",
+            });
+            return;
+        }
+
         if (showPaymentDetails) {
             handlePlaceOrder();
         } else {
-            if (!paymentMethod) {
-                toast({
-                    variant: "destructive",
-                    title: "Payment method required",
-                    description: "Please select a payment method to continue.",
-                });
-                return;
-            }
             setShowPaymentDetails(true);
         }
     };
@@ -306,19 +310,27 @@ export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced, 
 
     const renderStep2 = () => {
         const selectedOption = paymentOptions.find(o => o.id === paymentMethod);
-        const breadcrumb = showPaymentDetails && selectedOption ? (
+        const breadcrumb = (
             <div className="flex items-center justify-center gap-2">
-                <span className="text-lg font-medium text-muted-foreground cursor-pointer" onClick={() => setShowPaymentDetails(false)}>Checkout</span>
-                <span className="text-lg font-medium text-muted-foreground">/</span>
-                <span className="text-lg font-semibold">{selectedOption?.label}</span>
+                {showPaymentDetails && selectedOption ? (
+                    <>
+                    <span className="text-lg font-medium text-muted-foreground cursor-pointer" onClick={() => {
+                        setShowPaymentDetails(false);
+                        // Do not reset paymentMethod to allow re-selection
+                    }}>Checkout</span>
+                    <span className="text-lg font-medium text-muted-foreground">/</span>
+                    <span className="text-lg font-semibold">{selectedOption?.label}</span>
+                    </>
+                ) : (
+                    <span className="text-lg font-semibold">Checkout</span>
+                )}
             </div>
-        ) : (
-            <span className="text-lg font-semibold">Checkout</span>
         );
+
         return (
             <>
             <DialogHeader className="pb-4">
-              <DialogTitle>{breadcrumb}</DialogTitle>
+              <DialogTitle className="text-center">{breadcrumb}</DialogTitle>
             </DialogHeader>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <div className="space-y-4">
@@ -337,7 +349,9 @@ export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced, 
                             </div>
                         ))}
                     </div>
-                    <Button className="w-full mt-2 h-11" onClick={handleContinueClick} disabled={!paymentMethod}>Continue</Button>
+                    <Button className="w-full mt-2 h-11" onClick={handleContinueClick} disabled={!paymentMethod}>
+                         Continue
+                    </Button>
                 </div>
                 <div className="space-y-4">
                      {!showPaymentDetails ? (
