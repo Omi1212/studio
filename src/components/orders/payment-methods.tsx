@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -39,7 +40,7 @@ const UsdtIcon = () => (
     </svg>
 )
 
-function BankDetails({ orderReference }: { orderReference: string }) {
+function BankDetails({ orderReference, onPay }: { orderReference: string, onPay: () => void }) {
     const { toast } = useToast();
     const [selectedBank, setSelectedBank] = useState('banco-agricola');
 
@@ -71,11 +72,11 @@ function BankDetails({ orderReference }: { orderReference: string }) {
     };
 
     return (
-        <Card className="bg-muted/30">
+        <Card className="bg-muted/30 flex flex-col h-full">
             <CardHeader>
                 <CardTitle className="text-center text-lg font-semibold">Copy bank details</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-4 flex-1">
                 <Tabs value={selectedBank} onValueChange={setSelectedBank} className="w-full">
                     <TabsList className="grid w-full grid-cols-2">
                         <TabsTrigger value="banco-agricola">Banco Agrícola</TabsTrigger>
@@ -103,6 +104,9 @@ function BankDetails({ orderReference }: { orderReference: string }) {
                     </AlertDescription>
                 </Alert>
             </CardContent>
+            <CardFooter>
+                 <Button className="w-full" onClick={onPay}>I've made the payment</Button>
+            </CardFooter>
         </Card>
     );
 }
@@ -432,8 +436,7 @@ interface PaymentMethodsProps {
 export default function PaymentMethods({ order, token, onPaymentConfirmed }: PaymentMethodsProps) {
     const { toast } = useToast();
     const router = useRouter();
-    const [step, setStep] = useState(1);
-    const [paymentMethod, setPaymentMethod] = useState('');
+    const [paymentMethod, setPaymentMethod] = useState('btc');
 
     const investmentAmount = order.amount * order.price;
 
@@ -442,19 +445,7 @@ export default function PaymentMethods({ order, token, onPaymentConfirmed }: Pay
         { id: 'bank', label: 'Bank Transfers', icon: <Landmark /> },
         { id: 'spark', label: 'Bitcoin Spark', icon: <SparkIcon /> },
         { id: 'usdt', label: 'Stablecoin', icon: <UsdtIcon /> },
-    ]
-
-    const handleContinueClick = () => {
-        if (!paymentMethod) {
-            toast({
-                variant: "destructive",
-                title: "Payment method required",
-                description: "Please select a payment method to continue.",
-            });
-            return;
-        }
-        setStep(2);
-    };
+    ];
 
     const handlePaymentMade = () => {
         toast({
@@ -465,120 +456,55 @@ export default function PaymentMethods({ order, token, onPaymentConfirmed }: Pay
             onPaymentConfirmed();
         }
         router.push('/orders');
-    }
+    };
 
-    const selectedOption = paymentOptions.find(o => o.id === paymentMethod);
+    const renderPaymentDetails = () => {
+        switch (paymentMethod) {
+            case 'bank':
+                return <BankDetails orderReference={order.id} onPay={handlePaymentMade} />;
+            case 'btc':
+                return <BitcoinPaymentDetails orderReference={order.id} amount={investmentAmount} onPay={handlePaymentMade} />;
+            case 'spark':
+                return <SparkPaymentDetails orderReference={order.id} amount={investmentAmount} onPay={handlePaymentMade} />;
+            case 'usdt':
+                return <StablecoinPaymentDetails orderReference={order.id} amount={investmentAmount} onPay={handlePaymentMade} />;
+            default:
+                return (
+                    <Card className="flex items-center justify-center h-full bg-muted/30">
+                        <p className="text-muted-foreground">Select a payment method.</p>
+                    </Card>
+                );
+        }
+    };
     
     return (
         <>
             <DialogHeader className="text-center pb-4">
-                 {step === 2 && (
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => setStep(1)}
-                        className="absolute left-4 top-4 h-8 w-8"
-                    >
-                        <ArrowLeft className="h-4 w-4" />
-                        <span className="sr-only">Back</span>
-                    </Button>
-                )}
                 <DialogTitle className="flex justify-center items-center h-full">
-                   {step === 2 && selectedOption ? (
-                        <div className="flex items-center justify-center gap-2">
-                            <span className="text-lg font-medium text-muted-foreground cursor-pointer" onClick={() => setStep(1)}>Checkout</span>
-                            <span className="text-lg font-medium text-muted-foreground">/</span>
-                            <span className="text-lg font-semibold">{selectedOption?.label}</span>
-                        </div>
-                    ) : (
-                        <span className="text-lg font-semibold">Checkout</span>
-                    )}
+                    <span className="text-lg font-semibold">Checkout</span>
                 </DialogTitle>
             </DialogHeader>
 
-            {step === 1 ? (
-                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    <div className="space-y-2">
-                        {paymentOptions.map(option => (
-                             <div
-                                key={option.id}
-                                onClick={() => setPaymentMethod(option.id)}
-                                className={cn(
-                                    "flex items-center gap-4 rounded-md border-2 p-4 cursor-pointer transition-colors hover:bg-muted/50",
-                                    paymentMethod === option.id ? "border-primary bg-primary/10" : "border-muted"
-                                )}
-                             >
-                                {React.cloneElement(option.icon, { className: "h-10 w-10" })}
-                                <span className="font-medium text-lg">{option.label}</span>
-                            </div>
-                        ))}
-                    </div>
-                    <div className="space-y-4">
-                        <Card className="bg-muted/30">
-                            <CardHeader>
-                                <CardTitle className="text-base">Investment details</CardTitle>
-                            </CardHeader>
-                            <CardContent className="space-y-3 text-sm">
-                                <div className="flex justify-between items-center">
-                                    <span className="text-muted-foreground">Token</span>
-                                    <div className="flex items-center gap-2">
-                                        <TokenIcon token={token} className="w-6 h-6" />
-                                        <span className="font-medium">{token.tokenTicker}</span>
-                                    </div>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span className="text-muted-foreground">Token price</span>
-                                    <span className="font-mono">${token.price?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span className="text-muted-foreground">Investment</span>
-                                    <span className="font-mono">${investmentAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                                </div>
-                            </CardContent>
-                        </Card>
-                        <Card className="bg-muted/30">
-                            <CardHeader>
-                                <CardTitle className="text-base">Purchase summary</CardTitle>
-                            </CardHeader>
-                            <CardContent className="space-y-3 text-sm">
-                                <div className="flex justify-between">
-                                    <span className="text-muted-foreground">Tokens to be minted</span>
-                                    <span className="font-medium font-mono">{order.amount.toLocaleString()} {token.tokenTicker}</span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span className="text-muted-foreground">Total amount</span>
-                                    <span className="font-mono">${investmentAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span className="text-muted-foreground">Platform fee</span>
-                                    <span className="font-medium font-mono">$0 / 0%</span>
-                                </div>
-                                <Separator />
-                                <div className="flex justify-between font-bold">
-                                    <span>Final amount</span>
-                                    <span className="font-mono">${investmentAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div className="space-y-2">
+                    {paymentOptions.map(option => (
+                         <div
+                            key={option.id}
+                            onClick={() => setPaymentMethod(option.id)}
+                            className={cn(
+                                "flex items-center gap-4 rounded-md border-2 p-4 cursor-pointer transition-colors hover:bg-muted/50",
+                                paymentMethod === option.id ? "border-primary bg-primary/10" : "border-muted"
+                            )}
+                         >
+                            {React.cloneElement(option.icon, { className: "h-10 w-10" })}
+                            <span className="font-medium text-lg">{option.label}</span>
+                        </div>
+                    ))}
                 </div>
-            ) : paymentMethod === 'bank' ? (
-                <BankDetails orderReference={order.id} />
-            ) : paymentMethod === 'btc' ? (
-                <BitcoinPaymentDetails orderReference={order.id} amount={investmentAmount} onPay={handlePaymentMade} />
-            ) : paymentMethod === 'spark' ? (
-                <SparkPaymentDetails orderReference={order.id} amount={investmentAmount} onPay={handlePaymentMade} />
-            ) : paymentMethod === 'usdt' ? (
-                <StablecoinPaymentDetails orderReference={order.id} amount={investmentAmount} onPay={handlePaymentMade} />
-            ) : (
-                <div className="flex flex-col items-center justify-center h-full text-center p-8 border rounded-lg bg-muted/30">
-                    <p className="text-muted-foreground">Something went wrong. Please go back and select a payment method.</p>
+                <div>
+                    {renderPaymentDetails()}
                 </div>
-            )}
-             <DialogFooter className="mt-4">
-                {step === 1 && <Button className="w-full" onClick={handleContinueClick}>Continue</Button>}
-                {step === 2 && paymentMethod === 'bank' && <Button className="w-full" onClick={handlePaymentMade}>I've made the payment</Button>}
-            </DialogFooter>
+            </div>
         </>
     );
 }
