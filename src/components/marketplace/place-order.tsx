@@ -21,6 +21,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import React from 'react';
 import { DialogHeader, DialogTitle } from '../ui/dialog';
 import QRCode from 'qrcode';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 
 
 // Icons
@@ -427,6 +428,126 @@ export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced, 
             </Card>
         );
     }
+    
+    function StablecoinPaymentDetails({ orderReference, amount, onPay }: { orderReference: string; amount: number; onPay: () => void; }) {
+        const { toast } = useToast();
+        const [stablecoin, setStablecoin] = useState('usdt');
+        const [network, setNetwork] = useState('tron');
+        const [isAddressVisible, setIsAddressVisible] = useState(false);
+        const [qrCodeDataUrl, setQrCodeDataUrl] = useState('');
+    
+        const addresses = {
+            usdt: {
+                tron: 'TX1qaz2wsxhn7ujm8ik9TX1qaz2wsxhn7ujm8ik9',
+                ethereum: '0x1234567890123456789012345678901234567890',
+                polygon: '0x0987654321098765432109876543210987654321',
+            },
+            usdc: {
+                tron: 'TRC20USDCAddressTRC20USDCAddressTRC20USDC',
+                ethereum: '0xabcdefabcdefabcdefabcdefabcdefabcdefabcd',
+                polygon: '0xfedcbafedcbafedcbafedcbafedcbafedcbafed',
+            }
+        };
+    
+        const currentAddress = addresses[stablecoin as keyof typeof addresses][network as keyof typeof addresses.usdt];
+    
+        useEffect(() => {
+            const generateQrCode = async () => {
+                if (!currentAddress) return;
+                try {
+                    const url = await QRCode.toDataURL(currentAddress, {
+                        errorCorrectionLevel: 'L',
+                        margin: 2,
+                        scale: 8,
+                    });
+                    setQrCodeDataUrl(url);
+                } catch (err) {
+                    console.error(err);
+                    setQrCodeDataUrl('');
+                }
+            };
+    
+            generateQrCode();
+        }, [currentAddress]);
+    
+        const copyToClipboard = (text: string) => {
+            navigator.clipboard.writeText(text);
+            toast({
+                title: 'Copied!',
+                description: `Address copied to clipboard.`,
+            });
+        };
+    
+        const truncatedAddress = isAddressVisible ? currentAddress : `${currentAddress.slice(0,10)}...${currentAddress.slice(-10)}`;
+    
+        return (
+            <Card className="bg-muted/30">
+                <CardHeader>
+                    <CardTitle className="text-center text-lg font-semibold">Scan QR Code</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    <Tabs value={stablecoin} onValueChange={setStablecoin} className="w-full">
+                        <TabsList className="grid w-full grid-cols-2">
+                            <TabsTrigger value="usdt">USDT</TabsTrigger>
+                            <TabsTrigger value="usdc">USDC</TabsTrigger>
+                        </TabsList>
+                    </Tabs>
+    
+                    <div className="flex justify-center p-4">
+                         <div className="relative border-2 border-primary rounded-lg p-2 bg-white">
+                            {qrCodeDataUrl ? (
+                                <img
+                                    src={qrCodeDataUrl}
+                                    alt="QR Code"
+                                    className="rounded-md"
+                                    width={200}
+                                    height={200}
+                                />
+                            ) : (
+                                <div className="w-[200px] h-[200px] flex items-center justify-center bg-gray-200 rounded-md">
+                                    <p>Generating QR...</p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+    
+                    <div className="space-y-4 pt-2 text-sm">
+                         <div className="flex justify-between items-center">
+                            <span className="text-muted-foreground">Total</span>
+                            <span className="font-medium font-mono text-primary">${amount.toFixed(2)}</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                            <span className="text-muted-foreground">Network</span>
+                            <Select value={network} onValueChange={setNetwork}>
+                                <SelectTrigger className="w-[180px]">
+                                    <SelectValue placeholder="Select network" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="tron">Tron (TRC20)</SelectItem>
+                                    <SelectItem value="ethereum">Ethereum (ERC20)</SelectItem>
+                                    <SelectItem value="polygon">Polygon</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="flex justify-between items-center">
+                            <span className="text-muted-foreground">Pay to</span>
+                            <div className="flex items-center gap-2">
+                                <span className="font-medium font-mono break-all">{truncatedAddress}</span>
+                                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setIsAddressVisible(!isAddressVisible)}>
+                                    <Eye className="h-4 w-4" />
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
+                </CardContent>
+                <CardFooter className="flex flex-col gap-2">
+                     <Button variant="outline" className="w-full" onClick={() => copyToClipboard(currentAddress)}>Copy</Button>
+                     <Button className="w-full" onClick={onPay}>Open in Wallet</Button>
+                </CardFooter>
+            </Card>
+        );
+    }
+
 
     const renderStep1 = () => {
         const isOrderButtonDisabled = !quantity || parseFloat(quantity) <= 0 || !prospectusConfirmed || !orderInfoConfirmed || !isSubscribed;
@@ -610,11 +731,13 @@ export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced, 
                             <BitcoinPaymentDetails orderReference={orderId} amount={investmentAmount} onPay={handlePlaceOrder} />
                      ) : paymentMethod === 'spark' ? (
                             <SparkPaymentDetails orderReference={orderId} amount={investmentAmount} onPay={handlePlaceOrder} />
+                     ) : paymentMethod === 'usdt' ? (
+                            <StablecoinPaymentDetails orderReference={orderId} amount={investmentAmount} onPay={handlePlaceOrder} />
                      ) : (
-                            <div className="flex flex-col items-center justify-center h-full text-center p-8 border rounded-lg bg-muted/30">
-                                <p className="text-muted-foreground">Payment details for {paymentMethod.toUpperCase()} would be shown here.</p>
-                            </div>
-                        )
+                        <div className="flex flex-col items-center justify-center h-full text-center p-8 border rounded-lg bg-muted/30">
+                            <p className="text-muted-foreground">Select a payment method to continue.</p>
+                        </div>
+                     )
                     }
                 </div>
             </div>
