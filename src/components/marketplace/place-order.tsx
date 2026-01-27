@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -22,7 +21,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 // Icons
 const BtcIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
         <path d="M12.3 4.3a1 1 0 0 0-1.1.2l-3 3.3a1 1 0 0 0 .8 1.6h2.2c.4 0 .7.5.5.8l-3.3 6.6a1 1 0 0 0 1.6.8l3-3.3a1 1 0 0 0-.8-1.6H10c-.4 0-.7-.5-.5-.8l3.3-6.6a1 1 0 0 0-.5-.8z"/>
         <path d="M7 14h1.4c.8 0 1.5.7 1.5 1.5v1.4c0 .8-.7 1.5-1.5 1.5H7z"/>
         <path d="M14 7h1.4c.8 0 1.5.7 1.5 1.5v1.4c0 .8-.7 1.5-1.5 1.5H14z"/>
@@ -30,11 +29,11 @@ const BtcIcon = () => (
 )
 
 const SparkIcon = () => (
-     <svg width="24" height="24" viewBox="0 0 68 64" fill="none" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" clipRule="evenodd" d="M39.68 24.656L40.836 0H26.398l1.156 24.656-23.092-8.718L0 29.668l23.807 6.52L8.38 55.457l11.68 8.487 13.558-20.628 13.558 20.627 11.68-8.486L43.43 36.188l23.804-6.52-4.461-13.73-23.092 8.718zM33.617 33v.001z" fill="currentColor"></path></svg>
+     <svg width="24" height="24" viewBox="0 0 68 64" fill="none" xmlns="http://www.w3.org/2000/svg" className="h-4 w-4"><path fillRule="evenodd" clipRule="evenodd" d="M39.68 24.656L40.836 0H26.398l1.156 24.656-23.092-8.718L0 29.668l23.807 6.52L8.38 55.457l11.68 8.487 13.558-20.628 13.558 20.627 11.68-8.486L43.43 36.188l23.804-6.52-4.461-13.73-23.092 8.718zM33.617 33v.001z" fill="currentColor"></path></svg>
 )
 
 const UsdtIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
         <circle cx="12" cy="12" r="10" />
         <path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4h-6"/>
         <path d="M12 6v12"/>
@@ -67,7 +66,7 @@ export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced, 
 
     const paymentOptions = [
         { id: 'btc', label: 'BTC', icon: <BtcIcon /> },
-        { id: 'bank', label: 'Bank Transfers', icon: <Landmark /> },
+        { id: 'bank', label: 'Bank Transfers', icon: <Landmark className="h-4 w-4" /> },
         { id: 'spark', label: 'Bitcoin Spark', icon: <SparkIcon /> },
         { id: 'usdt', label: 'Stablecoin', icon: <UsdtIcon /> },
     ]
@@ -298,20 +297,23 @@ export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced, 
     const renderStep2 = () => {
         return (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div className="space-y-2">
-                    {paymentOptions.map(option => (
-                         <div
-                            key={option.id}
-                            onClick={() => setPaymentMethod(option.id)}
-                            className={cn(
-                                "flex items-center gap-3 rounded-md border-2 p-6 cursor-pointer transition-colors",
-                                paymentMethod === option.id ? "border-primary bg-primary/10" : "border-muted hover:bg-muted/50"
-                            )}
-                         >
-                            {option.icon}
-                            <span className="font-medium">{option.label}</span>
-                        </div>
-                    ))}
+                <div className="space-y-4">
+                    <div className="space-y-2">
+                        {paymentOptions.map(option => (
+                             <div
+                                key={option.id}
+                                onClick={() => setPaymentMethod(option.id)}
+                                className={cn(
+                                    "flex items-center gap-3 rounded-md border-2 p-4 cursor-pointer transition-colors",
+                                    paymentMethod === option.id ? "border-primary bg-primary/10" : "border-muted hover:bg-muted/50"
+                                )}
+                             >
+                                {option.icon}
+                                <span className="font-medium">{option.label}</span>
+                            </div>
+                        ))}
+                    </div>
+                    <Button className="w-full">Continue</Button>
                 </div>
                 <div className="space-y-4">
                     {paymentMethod === 'bank' ? (
@@ -376,5 +378,3 @@ export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced, 
 
     return step === 1 ? renderStep1() : renderStep2();
 }
-
-    
