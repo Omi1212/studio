@@ -24,6 +24,7 @@ import {
   ChevronsUpDown,
   Check,
   ChevronDown,
+  MoreVertical,
 } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
@@ -221,7 +222,7 @@ export default function SidebarNav() {
                     <Building className="h-5 w-5" />
                     <span className="font-medium text-sm">{selectedCompany.name}</span>
                 </div>
-                <ChevronsUpDown className="h-4 w-4 text-muted-foreground" />
+                <MoreVertical className="h-4 w-4 text-muted-foreground" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-[--radix-dropdown-menu-trigger-width]">
