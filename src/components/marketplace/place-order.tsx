@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
@@ -10,10 +11,10 @@ import { ordersData } from '@/lib/data';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 import { Label } from '../ui/label';
 import { Checkbox } from '../ui/checkbox';
-import { Landmark, Copy } from 'lucide-react';
+import { Landmark, Copy, Eye } from 'lucide-react';
 import TokenIcon from '../ui/token-icon';
 import { cn } from '@/lib/utils';
-import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '../ui/card';
 import { Separator } from '../ui/separator';
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -89,11 +90,11 @@ export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced, 
             setPaymentMethod('');
         }
     }, [step]);
-    
-    const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+
+    function handleQuantityChange(e: React.ChangeEvent<HTMLInputElement>) {
         setQuantity(e.target.value);
     };
-
+    
     const handlePlaceOrder = () => {
         toast({
             title: "Order Placed Successfully!",
@@ -228,6 +229,81 @@ export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced, 
             </Card>
         );
     }
+
+    function BitcoinPaymentDetails({ orderReference, amount }: { orderReference: string, amount: number }) {
+        const { toast } = useToast();
+        const [paymentType, setPaymentType] = useState('lightning');
+        const [isAddressVisible, setIsAddressVisible] = useState(false);
+    
+        const copyToClipboard = (text: string, field: string) => {
+            navigator.clipboard.writeText(text);
+            toast({
+                title: 'Copied!',
+                description: `${field} copied to clipboard.`,
+            });
+        };
+    
+        const fullAddress = paymentType === 'lightning'
+            ? 'lnbc1190n1p5z8d4vjdpjh3j5cdaf8a3fde5h6yqsmz2qflhmz5g2ve2kelhj7v472qr2q9p5hsq2wzzj5j5f0m5t7j3j3s4j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5j5cqp7z72zt'
+            : 'bc1qar0srrr7xfkvy5l643lydnw9re59gtzzwf5mdq';
+        
+        const truncatedAddress = isAddressVisible ? fullAddress : `${fullAddress.slice(0,15)}...${fullAddress.slice(-15)}`;
+        
+        const satsAmount = (amount / 65000) * 100000000;
+    
+        return (
+            <Card className="bg-muted/30">
+                <CardHeader>
+                    <CardTitle className="text-center text-lg font-semibold">Pay to</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    <Tabs value={paymentType} onValueChange={setPaymentType} className="w-full">
+                        <TabsList className="grid w-full grid-cols-2">
+                            <TabsTrigger value="lightning">Lightning</TabsTrigger>
+                            <TabsTrigger value="on-chain">On-chain</TabsTrigger>
+                        </TabsList>
+                    </Tabs>
+                    <div className="flex justify-center p-4">
+                         <div className="relative border-2 border-green-500 rounded-lg p-2 bg-white">
+                            <img 
+                                src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${fullAddress}`}
+                                alt="QR Code"
+                                className="rounded-md"
+                            />
+                             <div className="absolute inset-0 flex items-center justify-center">
+                                <div className="bg-orange-400 p-2 rounded-full flex items-center justify-center text-white">
+                                    <SparkIcon />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+    
+                    <div className="space-y-4 pt-2 text-sm">
+                         <div className="flex justify-between items-center">
+                            <span className="text-muted-foreground">Total</span>
+                            <div className="flex flex-col items-end">
+                                <span className="font-medium font-mono text-orange-500">${amount.toFixed(2)}</span>
+                                <span className="font-medium font-mono text-muted-foreground">{satsAmount.toLocaleString('en-US', { maximumFractionDigits: 0 })} SATS</span>
+                            </div>
+                        </div>
+                        <div className="flex justify-between items-center">
+                            <span className="text-muted-foreground">Pay to</span>
+                            <div className="flex items-center gap-2">
+                                <span className="font-medium font-mono">{truncatedAddress}</span>
+                                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setIsAddressVisible(!isAddressVisible)}>
+                                    <Eye className="h-4 w-4" />
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
+                </CardContent>
+                <CardFooter className="flex flex-col gap-2">
+                     <Button variant="outline" className="w-full" onClick={() => copyToClipboard(fullAddress, 'Address')}>Copy</Button>
+                     <Button className="w-full" onClick={handlePlaceOrder}>Pay in Wallet</Button>
+                </CardFooter>
+            </Card>
+        );
+    }
     
     const renderStep1 = () => {
         const isOrderButtonDisabled = !quantity || parseFloat(quantity) <= 0 || !prospectusConfirmed || !orderInfoConfirmed || !isSubscribed;
@@ -311,16 +387,15 @@ export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced, 
     const renderStep2 = () => {
         const selectedOption = paymentOptions.find(o => o.id === paymentMethod);
         const breadcrumb = (
-            <div className="flex items-center justify-center gap-2">
+             <div className="text-center">
                 {showPaymentDetails && selectedOption ? (
-                    <>
-                    <span className="text-lg font-medium text-muted-foreground cursor-pointer" onClick={() => {
-                        setShowPaymentDetails(false);
-                        // Do not reset paymentMethod to allow re-selection
-                    }}>Checkout</span>
-                    <span className="text-lg font-medium text-muted-foreground">/</span>
-                    <span className="text-lg font-semibold">{selectedOption?.label}</span>
-                    </>
+                    <div className="flex items-center justify-center gap-2">
+                        <span className="text-lg font-medium text-muted-foreground cursor-pointer" onClick={() => {
+                            setShowPaymentDetails(false);
+                        }}>Checkout</span>
+                        <span className="text-lg font-medium text-muted-foreground">/</span>
+                        <span className="text-lg font-semibold">{selectedOption?.label}</span>
+                    </div>
                 ) : (
                     <span className="text-lg font-semibold">Checkout</span>
                 )}
@@ -338,9 +413,12 @@ export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced, 
                         {paymentOptions.map(option => (
                              <div
                                 key={option.id}
-                                onClick={() => setPaymentMethod(option.id)}
+                                onClick={() => {
+                                    if(showPaymentDetails) setShowPaymentDetails(false);
+                                    setPaymentMethod(option.id)
+                                }}
                                 className={cn(
-                                    "flex items-center gap-4 rounded-md border-2 p-6 cursor-pointer transition-colors hover:bg-muted/50",
+                                    "flex items-center gap-4 rounded-md border-2 p-4 cursor-pointer transition-colors hover:bg-muted/50",
                                     paymentMethod === option.id ? "border-primary bg-primary/10" : "border-muted"
                                 )}
                              >
@@ -349,8 +427,8 @@ export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced, 
                             </div>
                         ))}
                     </div>
-                    <Button className="w-full mt-2 h-11" onClick={handleContinueClick} disabled={!paymentMethod}>
-                         Continue
+                     <Button className="w-full mt-2 h-11" onClick={handleContinueClick} disabled={!paymentMethod}>
+                         {showPaymentDetails ? "Confirm Purchase" : "Continue"}
                     </Button>
                 </div>
                 <div className="space-y-4">
@@ -403,15 +481,16 @@ export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced, 
                                 </CardContent>
                             </Card>
                         </>
-                     ) : (
-                        paymentMethod === 'bank' ? (
+                     ) : paymentMethod === 'bank' ? (
                             <BankDetails orderReference={orderId} />
-                        ) : (
+                     ) : paymentMethod === 'btc' ? (
+                            <BitcoinPaymentDetails orderReference={orderId} amount={investmentAmount} />
+                     ) : (
                             <div className="flex flex-col items-center justify-center h-full text-center p-8 border rounded-lg bg-muted/30">
                                 <p className="text-muted-foreground">Payment details for {paymentMethod.toUpperCase()} would be shown here.</p>
                             </div>
                         )
-                    )}
+                    }
                 </div>
             </div>
             </>
