@@ -18,6 +18,7 @@ import { Separator } from '../ui/separator';
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import React from 'react';
+import { DialogHeader, DialogTitle } from '../ui/dialog';
 
 
 // Icons
@@ -67,9 +68,9 @@ export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced, 
     const maxLimit = 250;
 
     const paymentOptions = [
-        { id: 'btc', label: 'BTC', icon: <BtcIcon /> },
+        { id: 'btc', label: 'Bitcoin', icon: <BtcIcon /> },
         { id: 'bank', label: 'Bank Transfers', icon: <Landmark /> },
-        { id: 'spark', label: 'Bitcoin Spark', icon: <SparkIcon /> },
+        { id: 'credit-card', label: 'Credit Card', icon: <Landmark /> },
         { id: 'usdt', label: 'Stablecoin', icon: <UsdtIcon /> },
     ]
 
@@ -225,7 +226,7 @@ export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced, 
             </Card>
         );
     }
-
+    
     const renderStep1 = () => {
         const isOrderButtonDisabled = !quantity || parseFloat(quantity) <= 0 || !prospectusConfirmed || !orderInfoConfirmed || !isSubscribed;
         const OrderButton = (
@@ -235,6 +236,10 @@ export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced, 
         )
 
         return (
+          <>
+            <DialogHeader className="text-center pb-4">
+              <DialogTitle>Checkout</DialogTitle>
+            </DialogHeader>
             <div className="space-y-6">
                 <div className="space-y-2">
                     <Label htmlFor="quantity">Quantity</Label>
@@ -300,14 +305,28 @@ export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced, 
                     </TooltipProvider>
                 )}
             </div>
+          </>
         )
     }
 
     const renderStep2 = () => {
+        const selectedOption = paymentOptions.find(o => o.id === paymentMethod);
+        const breadcrumb = paymentMethod ? (
+            <div className="flex items-center gap-2">
+                <span className="text-lg font-medium text-muted-foreground cursor-pointer" onClick={() => {setShowPaymentDetails(false); setPaymentMethod('')}}>Checkout</span>
+                <span className="text-lg font-medium text-muted-foreground">/</span>
+                <span className="text-lg font-semibold">{selectedOption?.label}</span>
+            </div>
+        ) : (
+            <span className="text-lg font-semibold">Checkout</span>
+        );
         return (
+            <>
+            <DialogHeader className="pb-4">
+              <DialogTitle>{breadcrumb}</DialogTitle>
+            </DialogHeader>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <div className="space-y-4">
-                    <h3 className="font-semibold text-lg">Choose payment method</h3>
                     <div className="space-y-2">
                         {paymentOptions.map(option => (
                              <div
@@ -319,7 +338,7 @@ export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced, 
                                     showPaymentDetails ? "cursor-not-allowed opacity-50" : "hover:bg-muted/50"
                                 )}
                              >
-                                {React.cloneElement(option.icon, { className: "h-8 w-8" })}
+                                {React.cloneElement(option.icon, { className: "h-10 w-10" })}
                                 <span className="font-medium text-lg">{option.label}</span>
                             </div>
                         ))}
@@ -331,7 +350,6 @@ export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced, 
                     )}
                 </div>
                 <div className="space-y-4">
-                    <h3 className="font-semibold text-lg">Order summary</h3>
                      {!showPaymentDetails ? (
                         <>
                             <Card className="bg-muted/30">
@@ -392,6 +410,7 @@ export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced, 
                     )}
                 </div>
             </div>
+            </>
         )
     }
 
