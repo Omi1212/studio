@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -427,6 +426,63 @@ function StablecoinPaymentDetails({ orderReference, amount, onPay }: { orderRefe
     );
 }
 
+function InvestmentSummary({ order, token }: { order: Order; token: TokenDetails }) {
+    const investmentAmount = order.amount * order.price;
+    const platformFee = 0; // As per image
+    const finalAmount = investmentAmount + platformFee;
+
+    return (
+        <div className="space-y-6 h-full flex flex-col">
+            <Card className="bg-muted/30">
+                <CardHeader>
+                    <CardTitle className="text-lg">Investment details</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4 text-sm">
+                    <div className="flex justify-between items-center">
+                        <span className="text-muted-foreground">Token</span>
+                        <div className="flex items-center gap-2">
+                            <TokenIcon token={token} className="h-5 w-5" />
+                            <span className="font-medium">{token.tokenTicker}</span>
+                        </div>
+                    </div>
+                    <div className="flex justify-between items-center">
+                        <span className="text-muted-foreground">Token price</span>
+                        <span className="font-mono">${order.price.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                        <span className="text-muted-foreground">Investment</span>
+                        <span className="font-mono">${investmentAmount.toFixed(2)}</span>
+                    </div>
+                </CardContent>
+            </Card>
+            <Card className="bg-muted/30 flex-1">
+                <CardHeader>
+                    <CardTitle className="text-lg">Purchase summary</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4 text-sm">
+                    <div className="flex justify-between items-center">
+                        <span className="text-muted-foreground">Tokens to be minted</span>
+                        <span className="font-mono">{order.amount} {token.tokenTicker}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                        <span className="text-muted-foreground">Total amount</span>
+                        <span className="font-mono">${investmentAmount.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                        <span className="text-muted-foreground">Platform fee</span>
+                        <span className="font-mono">$0 / 0%</span>
+                    </div>
+                    <Separator className="my-4" />
+                    <div className="flex justify-between items-center font-bold text-base">
+                        <span>Final amount</span>
+                        <span className="font-mono">${finalAmount.toFixed(2)}</span>
+                    </div>
+                </CardContent>
+            </Card>
+        </div>
+    );
+}
+
 interface PaymentMethodsProps {
     order: Order;
     token: TokenDetails;
@@ -436,7 +492,7 @@ interface PaymentMethodsProps {
 export default function PaymentMethods({ order, token, onPaymentConfirmed }: PaymentMethodsProps) {
     const { toast } = useToast();
     const router = useRouter();
-    const [paymentMethod, setPaymentMethod] = useState('btc');
+    const [paymentMethod, setPaymentMethod] = useState('');
 
     const investmentAmount = order.amount * order.price;
 
@@ -469,11 +525,7 @@ export default function PaymentMethods({ order, token, onPaymentConfirmed }: Pay
             case 'usdt':
                 return <StablecoinPaymentDetails orderReference={order.id} amount={investmentAmount} onPay={handlePaymentMade} />;
             default:
-                return (
-                    <Card className="flex items-center justify-center h-full bg-muted/30">
-                        <p className="text-muted-foreground">Select a payment method.</p>
-                    </Card>
-                );
+                 return <InvestmentSummary order={order} token={token} />;
         }
     };
     
