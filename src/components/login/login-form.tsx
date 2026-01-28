@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import {
   Card,
   CardContent,
@@ -138,9 +139,9 @@ export default function LoginForm() {
         </div>
         <p className="text-center text-sm text-muted-foreground">
             Don't you have an account?{' '}
-            <a href="#" className="text-primary hover:underline">
+            <Link href="/signup" className="text-primary hover:underline">
                 Sign up here
-            </a>
+            </Link>
         </p>
       </CardFooter>
     </Card>
