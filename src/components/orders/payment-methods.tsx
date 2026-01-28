@@ -65,8 +65,8 @@ function BankDetails({ orderReference, onPay }: { orderReference: string, onPay:
     const copyToClipboard = (text: string) => {
         navigator.clipboard.writeText(text);
         toast({
-            title: 'Copiado!',
-            description: `Se ha copiado al portapapeles.`,
+            title: 'Copied!',
+            description: `Copied to clipboard.`,
         });
     };
 
@@ -492,7 +492,9 @@ interface PaymentMethodsProps {
 export default function PaymentMethods({ order, token, onPaymentConfirmed }: PaymentMethodsProps) {
     const { toast } = useToast();
     const router = useRouter();
-    const [paymentMethod, setPaymentMethod] = useState('');
+    const [step, setStep] = useState(1);
+    const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('');
+    const [activePaymentMethod, setActivePaymentMethod] = useState('');
 
     const investmentAmount = order.amount * order.price;
 
@@ -502,6 +504,20 @@ export default function PaymentMethods({ order, token, onPaymentConfirmed }: Pay
         { id: 'spark', label: 'Bitcoin Spark', icon: <SparkIcon /> },
         { id: 'usdt', label: 'Stablecoin', icon: <UsdtIcon /> },
     ];
+
+    const handleContinue = () => {
+        if (selectedPaymentMethod) {
+            setActivePaymentMethod(selectedPaymentMethod);
+            setStep(2);
+            setSelectedPaymentMethod(''); // Deselect after continuing
+        }
+    };
+    
+    const handleBack = () => {
+        setStep(1);
+        setActivePaymentMethod('');
+        setSelectedPaymentMethod('');
+    };
 
     const handlePaymentMade = () => {
         toast({
@@ -514,8 +530,12 @@ export default function PaymentMethods({ order, token, onPaymentConfirmed }: Pay
         router.push('/orders');
     };
 
-    const renderPaymentDetails = () => {
-        switch (paymentMethod) {
+    const renderRightColumn = () => {
+        if (step === 1) {
+            return <InvestmentSummary order={order} token={token} />;
+        }
+
+        switch (activePaymentMethod) {
             case 'bank':
                 return <BankDetails orderReference={order.id} onPay={handlePaymentMade} />;
             case 'btc':
@@ -531,30 +551,43 @@ export default function PaymentMethods({ order, token, onPaymentConfirmed }: Pay
     
     return (
         <>
-            <DialogHeader className="text-center pb-4">
+            <DialogHeader className="text-center pb-4 relative">
                 <DialogTitle className="flex justify-center items-center h-full">
-                    <span className="text-lg font-semibold">Checkout</span>
+                     {step === 2 && (
+                        <Button variant="ghost" size="icon" className="absolute left-0" onClick={handleBack}>
+                            <ArrowLeft className="h-4 w-4" />
+                        </Button>
+                    )}
+                    <span className="text-lg font-semibold">
+                        Checkout
+                        {step === 2 && activePaymentMethod && ` / ${paymentOptions.find(p => p.id === activePaymentMethod)?.label}`}
+                    </span>
                 </DialogTitle>
             </DialogHeader>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div className="space-y-2">
-                    {paymentOptions.map(option => (
-                         <div
-                            key={option.id}
-                            onClick={() => setPaymentMethod(option.id)}
-                            className={cn(
-                                "flex items-center gap-4 rounded-md border-2 p-4 cursor-pointer transition-colors hover:bg-muted/50",
-                                paymentMethod === option.id ? "border-primary bg-primary/10" : "border-muted"
-                            )}
-                         >
-                            {React.cloneElement(option.icon, { className: "h-10 w-10" })}
-                            <span className="font-medium text-lg">{option.label}</span>
-                        </div>
-                    ))}
+                <div className="space-y-2 flex flex-col">
+                    <div className="flex-1 space-y-2">
+                        {paymentOptions.map(option => (
+                            <div
+                                key={option.id}
+                                onClick={() => setSelectedPaymentMethod(option.id)}
+                                className={cn(
+                                    "flex items-center gap-4 rounded-md border-2 p-4 cursor-pointer transition-colors hover:bg-muted/50",
+                                    selectedPaymentMethod === option.id ? "border-primary bg-primary/10" : "border-muted"
+                                )}
+                            >
+                                {React.cloneElement(option.icon, { className: "h-10 w-10" })}
+                                <span className="font-medium text-lg">{option.label}</span>
+                            </div>
+                        ))}
+                    </div>
+                    <Button className="w-full mt-4" onClick={handleContinue} disabled={!selectedPaymentMethod}>
+                        Continue
+                    </Button>
                 </div>
                 <div>
-                    {renderPaymentDetails()}
+                    {renderRightColumn()}
                 </div>
             </div>
         </>
