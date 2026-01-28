@@ -70,7 +70,7 @@ export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced, 
             amount: parseFloat(quantity),
             price: price,
             date: new Date().toISOString(),
-            status: 'pending' as const
+            status: 'waiting payment' as const
         };
         
         const existingOrders = JSON.parse(localStorage.getItem('orders') || JSON.stringify(ordersData));

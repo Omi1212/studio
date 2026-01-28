@@ -21,7 +21,7 @@ export type Order = {
   amount: number;
   price: number;
   date: string;
-  status: 'pending' | 'completed' | 'rejected';
+  status: 'pending' | 'completed' | 'rejected' | 'waiting payment';
 }
 
 export type Transfer = {

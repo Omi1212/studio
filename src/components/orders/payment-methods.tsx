@@ -520,6 +520,13 @@ export default function PaymentMethods({ order, token, onPaymentConfirmed }: Pay
     };
 
     const handlePaymentMade = () => {
+        // Update order status from 'waiting payment' to 'pending'
+        const storedOrders: Order[] = JSON.parse(localStorage.getItem('orders') || '[]');
+        const updatedOrders = storedOrders.map(o => 
+            o.id === order.id ? { ...o, status: 'pending' as const } : o
+        );
+        localStorage.setItem('orders', JSON.stringify(updatedOrders));
+
         toast({
             title: "Payment Submitted",
             description: "Your payment is being processed. The order status will be updated shortly.",
@@ -582,9 +589,11 @@ export default function PaymentMethods({ order, token, onPaymentConfirmed }: Pay
                             </div>
                         ))}
                     </div>
-                    <Button className="w-full mt-4" onClick={handleContinue} disabled={!selectedPaymentMethod}>
-                        Continue
-                    </Button>
+                    <div className='mt-auto pt-4'>
+                        <Button className="w-full" onClick={handleContinue} disabled={!selectedPaymentMethod}>
+                            Continue
+                        </Button>
+                    </div>
                 </div>
                 <div>
                     {renderRightColumn()}

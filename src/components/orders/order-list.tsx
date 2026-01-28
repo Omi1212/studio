@@ -28,6 +28,8 @@ function getStatusBadge(status: Order['status']) {
       return <Badge variant="outline" className="text-green-400 border-green-400">Completed</Badge>;
     case 'pending':
       return <Badge variant="outline" className="text-yellow-400 border-yellow-400">Pending</Badge>;
+    case 'waiting payment':
+        return <Badge variant="outline" className="text-blue-400 border-blue-400">Waiting Payment</Badge>;
     case 'rejected':
       return <Badge variant="destructive">Rejected</Badge>;
     default:
@@ -313,6 +315,7 @@ export default function OrderList() {
                 </SelectTrigger>
                 <SelectContent>
                     <SelectItem value="all">All Orders</SelectItem>
+                    <SelectItem value="waiting payment">Waiting Payment</SelectItem>
                     <SelectItem value="pending">Pending</SelectItem>
                     <SelectItem value="completed">Completed</SelectItem>
                     <SelectItem value="rejected">Rejected</SelectItem>
