@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -131,7 +132,7 @@ export default function PersonalInfoPage() {
                                 <FormItem>
                                 <FormLabel>Phone Number</FormLabel>
                                 <FormControl>
-                                    <Input placeholder="e.g. +1 555-123-4567" {...field} />
+                                    <Input type="tel" placeholder="e.g. +1 555-123-4567" {...field} />
                                 </FormControl>
                                 <FormMessage />
                                 </FormItem>

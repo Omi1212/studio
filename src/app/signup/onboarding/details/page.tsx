@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -12,6 +13,8 @@ import { Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import type { User } from '@/lib/types';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { countries } from '@/lib/countries';
 
 const detailsSchema = z.object({
   country: z.string().min(1, 'Country is required'),
@@ -45,8 +48,11 @@ export default function DetailsPage() {
         return;
       }
       setUser(parsedUser);
+      
+      const countryValue = countries.find(c => c.label === parsedUser.country)?.value || parsedUser.country || '';
+
       form.reset({
-        country: parsedUser.country || '',
+        country: countryValue,
         dob: parsedUser.dob || ''
       });
     }
@@ -114,9 +120,20 @@ export default function DetailsPage() {
                             render={({ field }) => (
                                 <FormItem>
                                 <FormLabel>Country of Residence</FormLabel>
-                                <FormControl>
-                                    <Input placeholder="e.g. El Salvador" {...field} />
-                                </FormControl>
+                                <Select onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
+                                    <FormControl>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select a country" />
+                                        </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                        {countries.map(country => (
+                                            <SelectItem key={country.value} value={country.value}>
+                                                {country.label}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
                                 <FormMessage />
                                 </FormItem>
                             )}

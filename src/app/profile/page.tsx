@@ -18,6 +18,7 @@ import { CheckCircle2, ShieldCheck, User as UserIcon, Mail, Phone } from 'lucide
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 import { usersData } from '@/lib/data';
+import { countries } from '@/lib/countries';
 
 const kycLevels = [
   {
@@ -168,6 +169,9 @@ export default function ProfilePage() {
       }
       return email;
   }
+  
+  const countryObj = countries.find(c => c.value === user.country || c.label === user.country);
+  const countryDisplay = countryObj ? countryObj.label : user.country;
 
   return (
     <SidebarProvider>
@@ -209,7 +213,7 @@ export default function ProfilePage() {
                         <CardTitle>Personal information</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-1">
-                        <PersonalInfoRow label="Country of Residence" value={user.country || 'Not set'} actionLabel="Change" />
+                        <PersonalInfoRow label="Country of Residence" value={countryDisplay || 'Not set'} actionLabel="Change" />
                         <PersonalInfoRow label="Legal Name" value={user.legalName || 'Not set'} />
                         <PersonalInfoRow label="Date of Birth" value={user.dob || 'Not set'} />
                         <PersonalInfoRow label="Identification Documents" value={user.idDoc || 'Not set'} />
