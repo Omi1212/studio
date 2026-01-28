@@ -126,36 +126,50 @@ export default function SignupForm() {
               <Image src="https://i.wpfc.ml/35/8gtsxa.png" alt="BlockStratus Logo" fill style={{objectFit: 'contain'}} sizes="18rem" priority />
             </div>
         </div>
-        <CardTitle className="text-2xl font-headline">Create an Account</CardTitle>
-        <CardDescription>
-          Choose your role and enter your details to get started.
-        </CardDescription>
+        {step === 1 ? (
+          <>
+            <CardTitle className="text-2xl font-headline">Create an Account</CardTitle>
+            <CardDescription>
+              Choose your role and enter your details to get started.
+            </CardDescription>
+          </>
+        ) : (
+           <>
+            <CardTitle className="text-2xl font-headline">
+                Create an Account as an {role === 'investor' ? 'Investor' : 'Issuer'}
+            </CardTitle>
+            <CardDescription>
+                Create a password to secure your new account.
+            </CardDescription>
+          </>
+        )}
       </CardHeader>
       <CardContent className="space-y-4">
-         <Tabs value={role} onValueChange={(value) => setRole(value as 'investor' | 'issuer')} className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="investor">I am an Investor</TabsTrigger>
-                <TabsTrigger value="issuer">I am an Issuer</TabsTrigger>
-            </TabsList>
-        </Tabs>
-
         {step === 1 && (
-            <form onSubmit={handleEmailSubmit} className="space-y-4">
-                <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
-                    <Input
-                    id="email"
-                    type="email"
-                    placeholder="Enter your email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    />
-                </div>
-                <Button type="submit" className="w-full">
-                    Continue
-                </Button>
-            </form>
+            <>
+                <Tabs value={role} onValueChange={(value) => setRole(value as 'investor' | 'issuer')} className="w-full">
+                    <TabsList className="grid w-full grid-cols-2">
+                        <TabsTrigger value="investor">I am an Investor</TabsTrigger>
+                        <TabsTrigger value="issuer">I am an Issuer</TabsTrigger>
+                    </TabsList>
+                </Tabs>
+                <form onSubmit={handleEmailSubmit} className="space-y-4">
+                    <div className="space-y-2">
+                        <Label htmlFor="email">Email</Label>
+                        <Input
+                        id="email"
+                        type="email"
+                        placeholder="Enter your email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required
+                        />
+                    </div>
+                    <Button type="submit" className="w-full">
+                        Continue
+                    </Button>
+                </form>
+            </>
         )}
 
         {step === 2 && (
