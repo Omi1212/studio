@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -100,7 +101,7 @@ export default function PayOrderPage() {
                     <Card>
                         <CardContent className="p-8 text-center">
                             <CheckCircle2 className="mx-auto h-12 w-12 text-green-500 mb-4" />
-                            <h2 className="text-2xl font-semibold">Order created and waiting to be confirmed.</h2>
+                            <h2 className="text-2xl font-semibold">Order created and waiting to be paid.</h2>
                             <p className="text-muted-foreground mt-2">The order number is #{order.id}</p>
                             <p className="mt-6 text-muted-foreground">To confirm your order, please complete your payment using one of the available payment methods offered.</p>
                             <div className="flex justify-center gap-4 my-6">
@@ -111,13 +112,13 @@ export default function PayOrderPage() {
                             </div>
                             <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
                                 <DialogTrigger asChild>
-                                    <Button size="lg">Continue to payment</Button>
+                                    <Button size="lg">Proceed to Payment</Button>
                                 </DialogTrigger>
                                 <DialogContent className="sm:max-w-4xl">
                                    <PaymentMethods order={order} token={token} onPaymentConfirmed={() => setIsModalOpen(false)} />
                                 </DialogContent>
                             </Dialog>
-                            <p className="text-sm text-muted-foreground mt-6">Once the payment is completed, your order will be fully confirmed.</p>
+                            <p className="text-sm text-muted-foreground mt-6">Once the payment is completed, you must wait for the order to be reviewed.</p>
                         </CardContent>
                     </Card>
                      <Card>
