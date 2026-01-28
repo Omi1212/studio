@@ -43,8 +43,10 @@ function OrderTableRow({ order, onApprove, onReject, userRole }: { order: Order,
   const investor = investorsData.find(i => i.id === order.investorId);
   const total = order.amount * order.price;
 
+  const targetUrl = order.status === 'waiting payment' ? `/orders/${order.id}/pay` : `/orders/${order.id}`;
+
   return (
-    <TableRow onClick={() => router.push(`/orders/${order.id}`)} className="cursor-pointer">
+    <TableRow onClick={() => router.push(targetUrl)} className="cursor-pointer">
       <TableCell>
         {investor && (
              <div className="flex items-center gap-3">
@@ -108,7 +110,7 @@ function OrderTableRow({ order, onApprove, onReject, userRole }: { order: Order,
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
                 <DropdownMenuItem asChild>
-                    <Link href={`/orders/${order.id}`}>View Details</Link>
+                    <Link href={targetUrl}>View Details</Link>
                 </DropdownMenuItem>
             </DropdownMenuContent>
             </DropdownMenu>
