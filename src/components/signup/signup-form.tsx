@@ -18,29 +18,62 @@ import { Separator } from '@/components/ui/separator';
 import { Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import { useToast } from '@/hooks/use-toast';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { usersData } from '@/lib/data';
 import type { User } from '@/lib/types';
 
 export default function SignupForm() {
-  const [name, setName] = useState('');
+  const [step, setStep] = useState(1);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState<'investor' | 'issuer' | ''>('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [role, setRole] = useState<'investor' | 'issuer'>('investor');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleEmailSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!role) {
+    if (!email) {
       toast({
         variant: 'destructive',
-        title: 'Role not selected',
-        description: 'Please select a role to continue.',
+        title: 'Email required',
+        description: 'Please enter your email address.',
       });
       return;
     }
+    // Simple email regex for basic validation
+    if (!/\S+@\S+\.\S+/.test(email)) {
+        toast({
+            variant: 'destructive',
+            title: 'Invalid Email',
+            description: 'Please enter a valid email address.',
+        });
+        return;
+    }
+    setStep(2);
+  };
+
+  const handleFinalSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    
+    if (password !== confirmPassword) {
+      toast({
+        variant: 'destructive',
+        title: 'Passwords do not match',
+        description: 'Please check your password and try again.',
+      });
+      return;
+    }
+    if (!password) {
+       toast({
+        variant: 'destructive',
+        title: 'Password is required',
+        description: 'Please enter a password.',
+      });
+      return;
+    }
+
     setIsSubmitting(true);
 
     const existingUsers: User[] = JSON.parse(localStorage.getItem('users') || JSON.stringify(usersData));
@@ -50,15 +83,17 @@ export default function SignupForm() {
         toast({
             variant: 'destructive',
             title: 'Email already in use',
-            description: 'Please use a different email address.',
+            description: 'Please use a different email address or log in.',
         });
         setIsSubmitting(false);
         return;
     }
 
+    const generatedName = email.split('@')[0].replace(/[._-]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+
     const newUser: User = {
       id: `user-${Math.random().toString(36).substring(2, 9)}`,
-      name,
+      name: generatedName,
       email,
       role,
       walletAddress: `spark1q...${Math.random().toString(36).substring(2, 11)}`,
@@ -70,7 +105,6 @@ export default function SignupForm() {
     const updatedUsers = [newUser, ...existingUsers];
     localStorage.setItem('users', JSON.stringify(updatedUsers));
     
-    // Log the user in
     localStorage.setItem('userRole', newUser.role);
     localStorage.setItem('currentUser', JSON.stringify(newUser));
 
@@ -94,67 +128,87 @@ export default function SignupForm() {
         </div>
         <CardTitle className="text-2xl font-headline">Create an Account</CardTitle>
         <CardDescription>
-          Choose your role and fill in your details to get started.
+          Choose your role and enter your details to get started.
         </CardDescription>
       </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="name">Full Name</Label>
-            <Input
-              id="name"
-              type="text"
-              placeholder="Enter your full name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="Enter your email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
-            <Input
-              id="password"
-              type="password"
-              placeholder="Enter your password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </div>
-           <div className="space-y-2">
-              <Label htmlFor="role">I am a...</Label>
-              <Select onValueChange={(value: 'investor' | 'issuer') => setRole(value)} value={role}>
-                  <SelectTrigger id="role">
-                      <SelectValue placeholder="Select a role" />
-                  </SelectTrigger>
-                  <SelectContent>
-                      <SelectItem value="investor">Investor</SelectItem>
-                      <SelectItem value="issuer">Issuer</SelectItem>
-                  </SelectContent>
-              </Select>
-          </div>
-          <Button type="submit" className="w-full" disabled={isSubmitting}>
-            {isSubmitting ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Creating Account...
-              </>
-            ) : (
-              'Sign Up'
-            )}
-          </Button>
-        </form>
+      <CardContent className="space-y-4">
+         <Tabs value={role} onValueChange={(value) => setRole(value as 'investor' | 'issuer')} className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="investor">I am an Investor</TabsTrigger>
+                <TabsTrigger value="issuer">I am an Issuer</TabsTrigger>
+            </TabsList>
+        </Tabs>
+
+        {step === 1 && (
+            <form onSubmit={handleEmailSubmit} className="space-y-4">
+                <div className="space-y-2">
+                    <Label htmlFor="email">Email</Label>
+                    <Input
+                    id="email"
+                    type="email"
+                    placeholder="Enter your email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    />
+                </div>
+                <Button type="submit" className="w-full">
+                    Continue
+                </Button>
+            </form>
+        )}
+
+        {step === 2 && (
+            <form onSubmit={handleFinalSubmit} className="space-y-4">
+                 <div className="space-y-2">
+                    <Label htmlFor="email-display">Email</Label>
+                    <Input
+                        id="email-display"
+                        type="email"
+                        value={email}
+                        disabled
+                        className="bg-muted/50"
+                    />
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="password">Password</Label>
+                    <Input
+                    id="password"
+                    type="password"
+                    placeholder="Enter your password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    />
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="confirm-password">Confirm Password</Label>
+                    <Input
+                    id="confirm-password"
+                    type="password"
+                    placeholder="Confirm your password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    required
+                    />
+                </div>
+                <div className="flex gap-2">
+                    <Button type="button" variant="outline" onClick={() => setStep(1)} className="w-full">
+                        Back
+                    </Button>
+                    <Button type="submit" className="w-full" disabled={isSubmitting}>
+                        {isSubmitting ? (
+                        <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Signing Up...
+                        </>
+                        ) : (
+                        'Sign Up'
+                        )}
+                    </Button>
+                </div>
+            </form>
+        )}
       </CardContent>
       <CardFooter className="flex flex-col gap-4">
         <Separator />
