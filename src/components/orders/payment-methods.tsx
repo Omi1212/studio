@@ -567,7 +567,7 @@ export default function PaymentMethods({ order, token, onPaymentConfirmed }: Pay
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <div className="space-y-2 flex flex-col">
-                    <div className="flex-1 space-y-2">
+                    <div className="space-y-2">
                         {paymentOptions.map(option => (
                             <div
                                 key={option.id}
