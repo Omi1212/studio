@@ -115,7 +115,7 @@ export default function SignupForm() {
       description: 'Welcome to BlockStratus.',
     });
 
-    router.push('/dashboard');
+    router.push('/signup/onboarding');
   };
 
   return (
