@@ -209,7 +209,7 @@ function BitcoinPaymentDetails({ orderReference, amount, onPay }: { orderReferen
             </CardContent>
             <CardFooter className="flex flex-col gap-2">
                  <Button variant="outline" className="w-full" onClick={() => copyToClipboard(fullAddress, 'Address')}>Copy</Button>
-                 <Button className="w-full" onClick={onPay}>I've made the payment</Button>
+                 <Button className="w-full" onClick={onPay}>Open In Wallet</Button>
             </CardFooter>
         </Card>
     );
@@ -301,7 +301,7 @@ function SparkPaymentDetails({ orderReference, amount, onPay }: { orderReference
             </CardContent>
             <CardFooter className="flex flex-col gap-2">
                  <Button variant="outline" className="w-full" onClick={() => copyToClipboard(sparkAddress, 'Address')}>Copy</Button>
-                 <Button className="w-full" onClick={onPay}>I've made the payment</Button>
+                 <Button className="w-full" onClick={onPay}>Open In Wallet</Button>
             </CardFooter>
         </Card>
     );
@@ -420,7 +420,7 @@ function StablecoinPaymentDetails({ orderReference, amount, onPay }: { orderRefe
             </CardContent>
             <CardFooter className="flex flex-col gap-2">
                  <Button variant="outline" className="w-full" onClick={() => copyToClipboard(currentAddress)}>Copy</Button>
-                 <Button className="w-full" onClick={onPay}>I've made the payment</Button>
+                 <Button className="w-full" onClick={onPay}>Open In Wallet</Button>
             </CardFooter>
         </Card>
     );
