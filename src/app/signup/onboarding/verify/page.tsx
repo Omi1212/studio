@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -34,7 +34,7 @@ function VerificationSection({
                     <InputOTPSlot index={5} />
                 </InputOTPGroup>
             </InputOTP>
-            <div className="text-center text-sm">
+            <div className="text-right text-sm">
                 {resendCooldown > 0 ? (
                     <p className="text-muted-foreground">Please wait {resendCooldown} seconds to resend</p>
                 ) : (
@@ -101,7 +101,13 @@ export default function VerifyAccountPage() {
             description: "You are all set. Welcome!",
         });
 
-        router.push('/dashboard');
+        if (user?.role === 'issuer') {
+            router.push('/signup/onboarding/business-info');
+        } else if (user?.role === 'investor') {
+            router.push('/signup/onboarding/details');
+        } else {
+            router.push('/dashboard');
+        }
         setIsSubmitting(false);
     };
 
@@ -131,16 +137,12 @@ export default function VerifyAccountPage() {
                             resendCooldown={phoneCooldown}
                         />
                     </CardContent>
+                    <CardFooter>
+                        <Button onClick={handleConfirm} disabled={isSubmitting} className="w-full">
+                            {isSubmitting ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Verifying...</> : 'Confirm'}
+                        </Button>
+                    </CardFooter>
                 </Card>
-
-                <div className="flex flex-col gap-2">
-                    <Button onClick={handleConfirm} disabled={isSubmitting}>
-                        {isSubmitting ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Verifying...</> : 'Confirm'}
-                    </Button>
-                    <Button variant="outline" asChild>
-                        <Link href="/dashboard">Skip for now</Link>
-                    </Button>
-                </div>
             </div>
         </div>
     );
