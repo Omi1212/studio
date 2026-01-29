@@ -286,6 +286,7 @@ export default function ProfilePage() {
                         {!isBusinessRole && <PersonalInfoRow label="Identification Documents" value={user.idDoc || 'Not set'} />}
                         <PersonalInfoRow label="Address" value={user.address || 'Not set'} />
                         <PersonalInfoRow label="Email Address" value={maskEmail(user.email)} />
+                        <PersonalInfoRow label="Password" value="******" actionLabel="Change" />
                     </CardContent>
                 </Card>
               </div>
