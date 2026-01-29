@@ -101,13 +101,7 @@ export default function VerifyAccountPage() {
             description: "You are all set. Welcome!",
         });
 
-        if (user?.role === 'issuer') {
-            router.push('/signup/onboarding/business-info');
-        } else if (user?.role === 'investor') {
-            router.push('/signup/onboarding/details');
-        } else {
-            router.push('/dashboard');
-        }
+        router.push('/dashboard');
         setIsSubmitting(false);
     };
 
