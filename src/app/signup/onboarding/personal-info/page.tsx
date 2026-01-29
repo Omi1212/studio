@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Loader2 } from 'lucide-react';
@@ -198,18 +198,19 @@ export default function PersonalInfoPage() {
                             </div>
                         </div>
                     </CardContent>
+                    <CardFooter>
+                        <Button type="submit" className="w-full" disabled={isSubmitting}>
+                            {isSubmitting ? (
+                            <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                Saving...
+                            </>
+                            ) : (
+                            'Continue'
+                            )}
+                        </Button>
+                    </CardFooter>
                 </Card>
-              
-                <Button type="submit" className="w-full" disabled={isSubmitting}>
-                    {isSubmitting ? (
-                    <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Saving...
-                    </>
-                    ) : (
-                    'Continue'
-                    )}
-                </Button>
             </form>
         </Form>
       </div>
