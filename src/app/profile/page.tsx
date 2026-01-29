@@ -245,6 +245,7 @@ export default function ProfilePage() {
                     </CardHeader>
                     <CardContent className="space-y-1">
                         <PersonalInfoRow label="Country of Residence" value={countryDisplay || 'Not set'} actionLabel="Change" />
+                        <PersonalInfoRow label="City" value={user.city || 'Not set'} />
                         <PersonalInfoRow label="Legal Name" value={user.legalName || 'Not set'} />
                         <PersonalInfoRow label="Date of Birth" value={user.dob || 'Not set'} />
                         <PersonalInfoRow label="Identification Documents" value={user.idDoc || 'Not set'} />

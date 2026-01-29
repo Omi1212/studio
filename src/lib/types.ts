@@ -59,4 +59,5 @@ export type User = {
   dob?: string;
   idDoc?: string;
   address?: string;
+  city?: string;
 };

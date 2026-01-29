@@ -18,7 +18,7 @@ import { countries } from '@/lib/countries';
 
 const detailsSchema = z.object({
   country: z.string().min(1, 'Country is required'),
-  dob: z.string().min(1, 'Date of birth is required'),
+  city: z.string().min(1, 'City is required'),
 });
 
 type DetailsFormValues = z.infer<typeof detailsSchema>;
@@ -34,7 +34,7 @@ export default function DetailsPage() {
     resolver: zodResolver(detailsSchema),
     defaultValues: {
       country: '',
-      dob: '',
+      city: '',
     },
   });
 
@@ -53,7 +53,7 @@ export default function DetailsPage() {
 
       form.reset({
         country: countryValue,
-        dob: parsedUser.dob || ''
+        city: parsedUser.city || ''
       });
     }
     setLoading(false);
@@ -66,7 +66,7 @@ export default function DetailsPage() {
     const updatedUser: User = {
       ...user,
       country: data.country,
-      dob: data.dob,
+      city: data.city,
     };
     
     // Update currentUser in localStorage
@@ -140,12 +140,12 @@ export default function DetailsPage() {
                         />
                         <FormField
                             control={form.control}
-                            name="dob"
+                            name="city"
                             render={({ field }) => (
                                 <FormItem>
-                                <FormLabel>Date of Birth</FormLabel>
+                                <FormLabel>City</FormLabel>
                                 <FormControl>
-                                    <Input type="date" {...field} />
+                                    <Input placeholder="e.g. San Salvador" {...field} />
                                 </FormControl>
                                 <FormMessage />
                                 </FormItem>

@@ -17,6 +17,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 const personalInfoSchema = z.object({
   legalName: z.string().min(1, 'Full name is required'),
   phone: z.string().min(1, 'Phone number is required'),
+  dob: z.string().min(1, 'Date of birth is required'),
 });
 
 type PersonalInfoFormValues = z.infer<typeof personalInfoSchema>;
@@ -33,6 +34,7 @@ export default function PersonalInfoPage() {
     defaultValues: {
       legalName: '',
       phone: '',
+      dob: '',
     },
   });
 
@@ -43,7 +45,8 @@ export default function PersonalInfoPage() {
       setUser(parsedUser);
       form.reset({
         legalName: parsedUser.legalName || parsedUser.name || '',
-        phone: parsedUser.phone || ''
+        phone: parsedUser.phone || '',
+        dob: parsedUser.dob || ''
       });
     }
     setLoading(false);
@@ -58,6 +61,7 @@ export default function PersonalInfoPage() {
       name: data.legalName, // Also update name field for display purposes
       legalName: data.legalName,
       phone: data.phone,
+      dob: data.dob,
     };
     
     // Update currentUser in localStorage
@@ -133,6 +137,19 @@ export default function PersonalInfoPage() {
                                 <FormLabel>Phone Number</FormLabel>
                                 <FormControl>
                                     <Input type="tel" placeholder="e.g. +1 555-123-4567" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="dob"
+                            render={({ field }) => (
+                                <FormItem>
+                                <FormLabel>Date of Birth</FormLabel>
+                                <FormControl>
+                                    <Input type="date" {...field} />
                                 </FormControl>
                                 <FormMessage />
                                 </FormItem>
