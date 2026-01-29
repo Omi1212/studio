@@ -1,4 +1,3 @@
-
 'use client';
 
 import {
@@ -19,6 +18,7 @@ import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 import { usersData } from '@/lib/data';
 import { countries } from '@/lib/countries';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 const kycLevels = [
   {
@@ -172,6 +172,7 @@ export default function ProfilePage() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedVerification, setSelectedVerification] = useState<'kyc' | 'kyb'>('kyc');
+  const [isVerificationModalOpen, setIsVerificationModalOpen] = useState(false);
 
   useEffect(() => {
     const storedUser = localStorage.getItem('currentUser');
@@ -330,68 +331,74 @@ export default function ProfilePage() {
                   <CardHeader>
                       <CardTitle>Verify my identity</CardTitle>
                   </CardHeader>
-                  <CardContent className="space-y-6">
+                  <CardContent>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <div
-                              onClick={() => setSelectedVerification('kyc')}
-                              className={cn(
-                                  "rounded-lg border p-6 text-center cursor-pointer transition-all space-y-2",
-                                  selectedVerification === 'kyc' ? "bg-muted border-primary shadow-inner" : "hover:bg-muted/50"
-                              )}
+                              onClick={() => {
+                                  setSelectedVerification('kyc');
+                                  setIsVerificationModalOpen(true);
+                              }}
+                              className="rounded-lg border p-6 text-center cursor-pointer transition-all space-y-2 hover:bg-muted/50"
                           >
                               <FileLock2 className="mx-auto h-8 w-8 text-muted-foreground" />
                               <p className="font-semibold">KYC</p>
                               <p className={cn("text-sm", user.kycStatus === 'verified' ? 'text-green-500' : 'text-muted-foreground')}>{getVerificationStatusText(user.kycStatus)}</p>
                           </div>
-
+                          
                           <div
-                              onClick={() => setSelectedVerification('kyb')}
-                              className={cn(
-                                  "rounded-lg border p-6 text-center cursor-pointer transition-all space-y-2",
-                                  selectedVerification === 'kyb' ? "bg-muted border-primary shadow-inner" : "hover:bg-muted/50"
-                              )}
+                              onClick={() => {
+                                  setSelectedVerification('kyb');
+                                  setIsVerificationModalOpen(true);
+                              }}
+                              className="rounded-lg border p-6 text-center cursor-pointer transition-all space-y-2 hover:bg-muted/50"
                           >
                               <FileLock2 className="mx-auto h-8 w-8 text-muted-foreground" />
                               <p className="font-semibold">KYB</p>
                               <p className={cn("text-sm", user.kybStatus === 'verified' ? 'text-green-500' : 'text-muted-foreground')}>{getVerificationStatusText(user.kybStatus)}</p>
                           </div>
                       </div>
-
-                      <div className="pt-4">
-                          {selectedVerification === 'kyc' ? (
-                              <div>
-                                  <h3 className="font-semibold">Status:</h3>
-                                  <p className="text-muted-foreground text-sm mb-6">{getKycStatusDescription(user)}</p>
-                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                      <VerificationLevelIndicator 
-                                        currentLevel={user.kycLevel || 0}
-                                        levels={kycLevels}
-                                      />
-                                    <VerificationPrompt user={user} isBusiness={false} />
-                                </div>
-                              </div>
-                          ) : (
-                            <div>
-                                <h3 className="font-semibold">Status:</h3>
-                                <p className="text-muted-foreground text-sm mb-6">{getKybStatusDescription(user)}</p>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                    <VerificationLevelIndicator 
-                                      currentLevel={user.kybLevel || 0}
-                                      levels={kybLevels}
-                                    />
-                                  <VerificationPrompt user={user} isBusiness={true} />
-                              </div>
-                            </div>
-                          )}
-                      </div>
                   </CardContent>
               </Card>
             </div>
-
           </main>
         </div>
       </SidebarInset>
+       <Dialog open={isVerificationModalOpen} onOpenChange={setIsVerificationModalOpen}>
+            <DialogContent className="sm:max-w-3xl">
+                <DialogHeader>
+                    <DialogTitle>
+                        {selectedVerification === 'kyc' ? 'KYC Verification Status' : 'KYB Verification Status'}
+                    </DialogTitle>
+                </DialogHeader>
+                <div className="pt-4">
+                    {selectedVerification === 'kyc' ? (
+                        <div>
+                            <h3 className="font-semibold">Status:</h3>
+                            <p className="text-muted-foreground text-sm mb-6">{getKycStatusDescription(user)}</p>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                <VerificationLevelIndicator 
+                                currentLevel={user.kycLevel || 0}
+                                levels={kycLevels}
+                                />
+                                <VerificationPrompt user={user} isBusiness={false} />
+                            </div>
+                        </div>
+                    ) : (
+                        <div>
+                            <h3 className="font-semibold">Status:</h3>
+                            <p className="text-muted-foreground text-sm mb-6">{getKybStatusDescription(user)}</p>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                <VerificationLevelIndicator 
+                                currentLevel={user.kybLevel || 0}
+                                levels={kybLevels}
+                                />
+                                <VerificationPrompt user={user} isBusiness={true} />
+                            </div>
+                        </div>
+                    )}
+                </div>
+            </DialogContent>
+        </Dialog>
     </SidebarProvider>
   );
 }
-    
