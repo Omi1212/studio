@@ -14,7 +14,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { CheckCircle2, ShieldCheck, User as UserIcon, Mail, Phone, Building } from 'lucide-react';
+import { CheckCircle2, ShieldCheck, User as UserIcon, Mail, Phone, Building, FileLock2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 import { usersData } from '@/lib/data';
@@ -171,6 +171,7 @@ function PersonalInfoRow({ label, value, actionLabel, onActionClick }: { label: 
 export default function ProfilePage() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [selectedVerification, setSelectedVerification] = useState<'kyc' | 'kyb'>('kyc');
 
   useEffect(() => {
     const storedUser = localStorage.getItem('currentUser');
@@ -205,6 +206,40 @@ export default function ProfilePage() {
     rejected: { text: "Rejected", className: "text-red-500 border-red-500" },
   };
   
+  function getVerificationStatusText(status: 'verified' | 'pending' | 'rejected' | undefined) {
+    if (!status) return 'Not Started';
+    switch(status) {
+        case 'verified': return 'Verified';
+        case 'pending': return 'In Review';
+        case 'rejected': return 'Rejected';
+        default: return 'Not Started';
+    }
+  }
+
+  function getKycStatusDescription(user: User) {
+      const level = user.kycLevel || 0;
+      if (level === 0 && user.kycStatus !== 'pending') return 'Identity verification not started.';
+      if (user.kycStatus === 'pending') return `Your verification for Level ${level} is currently under review.`;
+      if (user.kycStatus === 'verified') {
+          if (level >= kycLevels.length) return 'You have successfully completed all identity verification steps.';
+          return `Level ${level} verified. You can now proceed to the next level of verification.`;
+      }
+      if (user.kycStatus === 'rejected') return `Your verification for Level ${level} was rejected. Please review the requirements and submit your documents again.`;
+      return 'Identity verification not started.';
+  }
+
+  function getKybStatusDescription(user: User) {
+      const level = user.kybLevel || 0;
+      if (level === 0 && user.kybStatus !== 'pending') return 'Business verification not started.';
+      if (user.kybStatus === 'pending') return `Your verification for Business Level ${level} is currently under review.`;
+      if (user.kybStatus === 'verified') {
+          if (level >= kybLevels.length) return 'Your business has been fully verified.';
+          return `Business Level ${level} verified. You can now proceed to the next level of verification.`;
+      }
+      if (user.kybStatus === 'rejected') return `Your verification for Business Level ${level} was rejected. Please review the requirements and submit your documents again.`;
+      return 'Business verification not started.';
+  }
+
   if (loading) {
       return (
         <div className="flex-1 p-4 sm:p-6 lg:p-8 flex items-center justify-center">
@@ -222,8 +257,8 @@ export default function ProfilePage() {
   }
 
   const isBusinessRole = user.role === 'issuer' || user.role === 'agent' || user.role === 'superadmin';
-  const verificationStatus = isBusinessRole ? user.kybStatus : user.kycStatus;
-  const currentVerificationStatus = verificationStatus ? verificationStatusMap[verificationStatus] : verificationStatusMap.pending;
+  const currentVerificationStatus = isBusinessRole ? user.kybStatus : user.kycStatus;
+  const currentStatusBadge = verificationStatusMap[currentVerificationStatus || 'pending'];
 
 
   const maskEmail = (email: string) => {
@@ -262,9 +297,9 @@ export default function ProfilePage() {
                         </Avatar>
                         <CardTitle className="text-2xl pt-2">{isBusinessRole ? user.businessName || user.name : user.name}</CardTitle>
                         <CardDescription>{isBusinessRole ? `Business Level ${user.kybLevel || 0}` : `User Level ${user.kycLevel || 0}`}</CardDescription>
-                        <Badge variant="outline" className={currentVerificationStatus.className}>
+                        <Badge variant="outline" className={currentStatusBadge.className}>
                             <ShieldCheck className="h-4 w-4 mr-2" />
-                            {isBusinessRole ? 'KYB' : 'KYC'} Status: {currentVerificationStatus.text}
+                            {isBusinessRole ? 'KYB' : 'KYC'} Status: {currentStatusBadge.text}
                         </Badge>
                     </CardHeader>
                     <CardContent className="space-y-4">
@@ -292,18 +327,68 @@ export default function ProfilePage() {
               </div>
 
               <Card>
-                <CardHeader>
-                    <CardTitle>{isBusinessRole ? 'Business Verification (KYB)' : 'Identity Verification (KYC)'}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                         <VerificationLevelIndicator 
-                            currentLevel={(isBusinessRole ? user.kybLevel : user.kycLevel) || 0}
-                            levels={isBusinessRole ? kybLevels : kycLevels}
-                         />
-                        <VerificationPrompt user={user} isBusiness={isBusinessRole} />
-                    </div>
-                </CardContent>
+                  <CardHeader>
+                      <CardTitle>Verify my identity</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div
+                              onClick={() => setSelectedVerification('kyc')}
+                              className={cn(
+                                  "rounded-lg border p-6 text-center cursor-pointer transition-all space-y-2",
+                                  selectedVerification === 'kyc' ? "bg-muted border-primary shadow-inner" : "hover:bg-muted/50"
+                              )}
+                          >
+                              <FileLock2 className="mx-auto h-8 w-8 text-muted-foreground" />
+                              <p className="font-semibold">KYC</p>
+                              <p className={cn("text-sm", user.kycStatus === 'verified' ? 'text-green-500' : 'text-muted-foreground')}>{getVerificationStatusText(user.kycStatus)}</p>
+                          </div>
+
+                          {isBusinessRole && (
+                              <div
+                                  onClick={() => setSelectedVerification('kyb')}
+                                  className={cn(
+                                      "rounded-lg border p-6 text-center cursor-pointer transition-all space-y-2",
+                                      selectedVerification === 'kyb' ? "bg-muted border-primary shadow-inner" : "hover:bg-muted/50"
+                                  )}
+                              >
+                                  <FileLock2 className="mx-auto h-8 w-8 text-muted-foreground" />
+                                  <p className="font-semibold">KYB</p>
+                                  <p className={cn("text-sm", user.kybStatus === 'verified' ? 'text-green-500' : 'text-muted-foreground')}>{getVerificationStatusText(user.kybStatus)}</p>
+                              </div>
+                          )}
+                      </div>
+
+                      <div className="pt-4">
+                          {selectedVerification === 'kyc' ? (
+                              <div>
+                                  <h3 className="font-semibold">Status:</h3>
+                                  <p className="text-muted-foreground text-sm mb-6">{getKycStatusDescription(user)}</p>
+                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                      <VerificationLevelIndicator 
+                                        currentLevel={user.kycLevel || 0}
+                                        levels={kycLevels}
+                                      />
+                                    <VerificationPrompt user={user} isBusiness={false} />
+                                </div>
+                              </div>
+                          ) : (
+                              isBusinessRole && (
+                                <div>
+                                    <h3 className="font-semibold">Status:</h3>
+                                    <p className="text-muted-foreground text-sm mb-6">{getKybStatusDescription(user)}</p>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                        <VerificationLevelIndicator 
+                                          currentLevel={user.kybLevel || 0}
+                                          levels={kybLevels}
+                                        />
+                                      <VerificationPrompt user={user} isBusiness={true} />
+                                  </div>
+                                </div>
+                              )
+                          )}
+                      </div>
+                  </CardContent>
               </Card>
             </div>
 
