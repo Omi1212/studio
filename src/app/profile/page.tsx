@@ -78,6 +78,37 @@ function KycLevelIndicator({ currentLevel }: { currentLevel: number }) {
   );
 }
 
+function KycVerificationPrompt({ user }: { user: User }) {
+  const nextKycLevel = kycLevels.find(level => level.level === (user.kycLevel || 0) + 1);
+
+  if (nextKycLevel) {
+    return (
+      <div className="flex flex-col items-center justify-center bg-muted/50 rounded-lg p-6 text-center h-full">
+        <h4 className="font-bold text-lg">Continue to {nextKycLevel.title}</h4>
+        <p className="text-muted-foreground text-sm mt-2 mb-4">
+          To unlock higher limits and more features, please complete the next verification step. You will need to provide:
+        </p>
+        <ul className="text-sm text-muted-foreground list-disc list-inside mb-4 text-left">
+            {nextKycLevel.requirements.map(req => <li key={req}>{req}</li>)}
+        </ul>
+        <Button>
+          Start {nextKycLevel.title}
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col items-center justify-center bg-muted/50 rounded-lg p-6 text-center h-full">
+      <ShieldCheck className="h-16 w-16 text-green-500 mb-4" />
+      <h4 className="font-bold text-lg">You are fully verified!</h4>
+      <p className="text-muted-foreground text-sm mt-2">
+        You have successfully completed all identity verification steps.
+      </p>
+    </div>
+  );
+}
+
 
 function InfoRow({ icon: Icon, label, value }: { icon: React.ElementType, label: string, value: string | undefined }) {
   return (
@@ -230,15 +261,7 @@ export default function ProfilePage() {
                 <CardContent>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <KycLevelIndicator currentLevel={user.kycLevel || 0} />
-                        <div className="flex flex-col items-center justify-center bg-muted/50 rounded-lg p-6 text-center">
-                            <h4 className="font-bold text-lg">Continue Your Verification</h4>
-                            <p className="text-muted-foreground text-sm mt-2 mb-4">
-                                To unlock all features of the platform, please complete your identity verification.
-                            </p>
-                            <Button>
-                                Verify Identity
-                            </Button>
-                        </div>
+                        <KycVerificationPrompt user={user} />
                     </div>
                 </CardContent>
               </Card>
