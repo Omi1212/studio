@@ -344,19 +344,17 @@ export default function ProfilePage() {
                               <p className={cn("text-sm", user.kycStatus === 'verified' ? 'text-green-500' : 'text-muted-foreground')}>{getVerificationStatusText(user.kycStatus)}</p>
                           </div>
 
-                          {isBusinessRole && (
-                              <div
-                                  onClick={() => setSelectedVerification('kyb')}
-                                  className={cn(
-                                      "rounded-lg border p-6 text-center cursor-pointer transition-all space-y-2",
-                                      selectedVerification === 'kyb' ? "bg-muted border-primary shadow-inner" : "hover:bg-muted/50"
-                                  )}
-                              >
-                                  <FileLock2 className="mx-auto h-8 w-8 text-muted-foreground" />
-                                  <p className="font-semibold">KYB</p>
-                                  <p className={cn("text-sm", user.kybStatus === 'verified' ? 'text-green-500' : 'text-muted-foreground')}>{getVerificationStatusText(user.kybStatus)}</p>
-                              </div>
-                          )}
+                          <div
+                              onClick={() => setSelectedVerification('kyb')}
+                              className={cn(
+                                  "rounded-lg border p-6 text-center cursor-pointer transition-all space-y-2",
+                                  selectedVerification === 'kyb' ? "bg-muted border-primary shadow-inner" : "hover:bg-muted/50"
+                              )}
+                          >
+                              <FileLock2 className="mx-auto h-8 w-8 text-muted-foreground" />
+                              <p className="font-semibold">KYB</p>
+                              <p className={cn("text-sm", user.kybStatus === 'verified' ? 'text-green-500' : 'text-muted-foreground')}>{getVerificationStatusText(user.kybStatus)}</p>
+                          </div>
                       </div>
 
                       <div className="pt-4">
@@ -373,19 +371,17 @@ export default function ProfilePage() {
                                 </div>
                               </div>
                           ) : (
-                              isBusinessRole && (
-                                <div>
-                                    <h3 className="font-semibold">Status:</h3>
-                                    <p className="text-muted-foreground text-sm mb-6">{getKybStatusDescription(user)}</p>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                        <VerificationLevelIndicator 
-                                          currentLevel={user.kybLevel || 0}
-                                          levels={kybLevels}
-                                        />
-                                      <VerificationPrompt user={user} isBusiness={true} />
-                                  </div>
-                                </div>
-                              )
+                            <div>
+                                <h3 className="font-semibold">Status:</h3>
+                                <p className="text-muted-foreground text-sm mb-6">{getKybStatusDescription(user)}</p>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                    <VerificationLevelIndicator 
+                                      currentLevel={user.kybLevel || 0}
+                                      levels={kybLevels}
+                                    />
+                                  <VerificationPrompt user={user} isBusiness={true} />
+                              </div>
+                            </div>
                           )}
                       </div>
                   </CardContent>
