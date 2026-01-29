@@ -4,12 +4,13 @@
 import { useState, useEffect, useMemo } from 'react';
 import { usersData, exampleTokens } from '@/lib/data';
 import type { User, TokenDetails } from '@/lib/types';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
-import TokenIcon from '@/components/ui/token-icon';
 import { AssignTokenDialog } from './assign-token-dialog';
-import { Badge } from '../ui/badge';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Input } from '@/components/ui/input';
+import { Search } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 
 type Agent = User;
 type Assignments = Record<string, string[]>; // agentId: tokenId[]
@@ -18,8 +19,8 @@ export default function AssignmentView() {
     const [agents, setAgents] = useState<Agent[]>([]);
     const [activeTokens, setActiveTokens] = useState<TokenDetails[]>([]);
     const [assignments, setAssignments] = useState<Assignments>({});
-    const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
     const [loading, setLoading] = useState(true);
+    const [searchQuery, setSearchQuery] = useState('');
 
     useEffect(() => {
         // Fetch agents
@@ -43,90 +44,84 @@ export default function AssignmentView() {
         setAssignments(newAssignments);
         localStorage.setItem('agentTokenAssignments', JSON.stringify(newAssignments));
     };
-    
-    const assignedTokensForSelectedAgent = useMemo(() => {
-        if (!selectedAgent) return [];
-        const tokenIds = assignments[selectedAgent.id] || [];
-        return activeTokens.filter(token => tokenIds.includes(token.id));
-    }, [selectedAgent, assignments, activeTokens]);
+
+    const filteredAgents = useMemo(() => {
+        if (!searchQuery) return agents;
+        const lowercasedQuery = searchQuery.toLowerCase();
+        return agents.filter(agent => 
+            agent.name.toLowerCase().includes(lowercasedQuery) ||
+            agent.email.toLowerCase().includes(lowercasedQuery)
+        );
+    }, [agents, searchQuery]);
 
     if (loading) {
-        return <Card className="h-64 animate-pulse bg-muted/50"></Card>;
+        return <Card className="h-96 animate-pulse bg-muted/50"></Card>;
     }
 
     return (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Card className="md:col-span-1">
-                <CardHeader>
-                    <CardTitle>Agents</CardTitle>
-                    <CardDescription>Select an agent to manage their token assignments.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <ul className="space-y-2">
-                        {agents.map(agent => (
-                            <li key={agent.id}>
-                                <Button
-                                    variant={selectedAgent?.id === agent.id ? 'secondary' : 'ghost'}
-                                    className="w-full justify-start h-auto py-2"
-                                    onClick={() => setSelectedAgent(agent)}
-                                >
-                                    <div className="flex items-center gap-3">
-                                        <Avatar className="h-8 w-8">
-                                            <AvatarFallback>{agent.name.charAt(0)}</AvatarFallback>
-                                        </Avatar>
-                                        <div>
-                                            <p className="font-medium text-sm">{agent.name}</p>
-                                            <p className="text-xs text-muted-foreground">{agent.email}</p>
-                                        </div>
-                                    </div>
-                                </Button>
-                            </li>
-                        ))}
-                    </ul>
-                </CardContent>
-            </Card>
-
-            <div className="md:col-span-2">
-                {selectedAgent ? (
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between">
-                            <div>
-                                <CardTitle>Assigned Tokens for {selectedAgent.name}</CardTitle>
-                                <CardDescription>This agent can manage workspace for these tokens.</CardDescription>
-                            </div>
-                            <AssignTokenDialog 
-                                agent={selectedAgent}
-                                allTokens={activeTokens}
-                                assignedTokenIds={assignments[selectedAgent.id] || []}
-                                onUpdate={handleUpdateAssignments}
-                            />
-                        </CardHeader>
-                        <CardContent>
-                            {assignedTokensForSelectedAgent.length > 0 ? (
-                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                                    {assignedTokensForSelectedAgent.map(token => (
-                                        <div key={token.id} className="border rounded-lg p-3 flex items-center gap-3">
-                                             <TokenIcon token={token} className="h-8 w-8" />
+        <Card>
+            <CardHeader>
+                <div className="flex justify-between items-center">
+                    <CardTitle>Manage Agent Permissions</CardTitle>
+                    <div className="relative w-full max-w-sm">
+                        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                        <Input
+                            placeholder="Search agents..."
+                            className="pl-8"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                        />
+                    </div>
+                </div>
+            </CardHeader>
+            <CardContent>
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>Agent</TableHead>
+                            <TableHead className="text-center">Assigned Tokens</TableHead>
+                            <TableHead className="text-right">Actions</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {filteredAgents.length > 0 ? filteredAgents.map(agent => {
+                            const assignedTokenIds = assignments[agent.id] || [];
+                            return (
+                                <TableRow key={agent.id}>
+                                    <TableCell>
+                                        <div className="flex items-center gap-3">
+                                            <Avatar className="h-9 w-9">
+                                                <AvatarFallback>{agent.name.charAt(0)}</AvatarFallback>
+                                            </Avatar>
                                             <div>
-                                                <p className="font-medium text-sm">{token.tokenName}</p>
-                                                <p className="text-primary text-xs font-semibold">{token.tokenTicker}</p>
+                                                <p className="font-medium">{agent.name}</p>
+                                                <p className="text-sm text-muted-foreground">{agent.email}</p>
                                             </div>
                                         </div>
-                                    ))}
-                                </div>
-                            ) : (
-                                <div className="text-center text-muted-foreground py-12">
-                                    <p>No tokens assigned to this agent.</p>
-                                </div>
-                            )}
-                        </CardContent>
-                    </Card>
-                ) : (
-                    <div className="flex items-center justify-center h-full border-2 border-dashed rounded-lg">
-                        <p className="text-muted-foreground">Select an agent to see their assignments.</p>
-                    </div>
-                )}
-            </div>
-        </div>
+                                    </TableCell>
+                                    <TableCell className="text-center">
+                                        <Badge variant="secondary">{assignedTokenIds.length}</Badge>
+                                    </TableCell>
+                                    <TableCell className="text-right">
+                                        <AssignTokenDialog 
+                                            agent={agent}
+                                            allTokens={activeTokens}
+                                            assignedTokenIds={assignedTokenIds}
+                                            onUpdate={handleUpdateAssignments}
+                                        />
+                                    </TableCell>
+                                </TableRow>
+                            )
+                        }) : (
+                            <TableRow>
+                                <TableCell colSpan={3} className="h-24 text-center">
+                                    No agents found.
+                                </TableCell>
+                            </TableRow>
+                        )}
+                    </TableBody>
+                </Table>
+            </CardContent>
+        </Card>
     );
 }

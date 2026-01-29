@@ -16,7 +16,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import type { User, TokenDetails } from '@/lib/types';
-import { ClipboardList } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface AssignTokenDialogProps {
@@ -65,9 +64,8 @@ export function AssignTokenDialog({ agent, allTokens, assignedTokenIds, onUpdate
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
-                <Button>
-                    <ClipboardList className="mr-2 h-4 w-4" />
-                    Assign Tokens
+                <Button variant="outline">
+                    Manage
                 </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px]">

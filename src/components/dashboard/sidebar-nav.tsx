@@ -48,7 +48,7 @@ const superAdminMenu = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/issuer-management', label: 'Issuers', icon: Building },
   { href: '/user-management', label: 'Users', icon: Users },
-  { href: '/assignments', label: 'Assignments', icon: ClipboardList },
+  { href: '/assignments', label: 'Agents', icon: ClipboardList },
 ];
 
 const agentMenu = [
