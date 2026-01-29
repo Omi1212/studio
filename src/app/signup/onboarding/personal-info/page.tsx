@@ -12,11 +12,14 @@ import { Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import type { User } from '@/lib/types';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { countryCallingCodes } from '@/lib/country-calling-codes';
 
 const personalInfoSchema = z.object({
   legalName: z.string().min(1, 'Full name is required'),
   dob: z.string().min(1, 'Date of birth is required'),
   phone: z.string().min(1, 'Phone number is required'),
+  phoneCountryCode: z.string().min(1, "Country code is required"),
 });
 
 type PersonalInfoFormValues = z.infer<typeof personalInfoSchema>;
@@ -34,6 +37,7 @@ export default function PersonalInfoPage() {
       legalName: '',
       dob: '',
       phone: '',
+      phoneCountryCode: 'US', // Default to US
     },
   });
 
@@ -42,9 +46,22 @@ export default function PersonalInfoPage() {
     if (storedUser) {
       const parsedUser = JSON.parse(storedUser);
       setUser(parsedUser);
+
+      let countryCode = 'US';
+      let phoneNumber = parsedUser.phone || '';
+
+      if (parsedUser.phone) {
+          const foundCode = countryCallingCodes.find(c => parsedUser.phone.startsWith(c.dial_code));
+          if (foundCode) {
+              countryCode = foundCode.code;
+              phoneNumber = parsedUser.phone.replace(foundCode.dial_code, '');
+          }
+      }
+
       form.reset({
         legalName: parsedUser.legalName || parsedUser.name || '',
-        phone: parsedUser.phone || '',
+        phone: phoneNumber,
+        phoneCountryCode: countryCode,
         dob: parsedUser.dob || ''
       });
     }
@@ -55,11 +72,14 @@ export default function PersonalInfoPage() {
     if (!user) return;
     setIsSubmitting(true);
 
+    const countryCodeData = countryCallingCodes.find(c => c.code === data.phoneCountryCode);
+    const fullPhoneNumber = `${countryCodeData?.dial_code || ''}${data.phone}`;
+
     const updatedUser: User = {
       ...user,
       name: data.legalName, // Also update name field for display purposes
       legalName: data.legalName,
-      phone: data.phone,
+      phone: fullPhoneNumber,
       dob: data.dob,
     };
     
@@ -83,13 +103,7 @@ export default function PersonalInfoPage() {
       title: 'Personal Info Saved!',
     });
 
-    if (user.role === 'investor') {
-        router.push('/signup/onboarding/details');
-    } else if (user.role === 'issuer') {
-        router.push('/signup/onboarding/business-info');
-    } else {
-        router.push('/dashboard');
-    }
+    router.push('/signup/onboarding/verify');
   };
   
   if (loading) {
@@ -130,7 +144,7 @@ export default function PersonalInfoPage() {
                                 </FormItem>
                             )}
                         />
-                        <FormField
+                         <FormField
                             control={form.control}
                             name="dob"
                             render={({ field }) => (
@@ -143,19 +157,46 @@ export default function PersonalInfoPage() {
                                 </FormItem>
                             )}
                         />
-                        <FormField
-                            control={form.control}
-                            name="phone"
-                            render={({ field }) => (
-                                <FormItem>
-                                <FormLabel>Phone Number</FormLabel>
-                                <FormControl>
-                                    <Input type="tel" placeholder="e.g. +1 555-123-4567" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                                </FormItem>
-                            )}
-                        />
+                        <div className="space-y-2">
+                            <FormLabel>Phone Number</FormLabel>
+                            <div className="flex gap-2">
+                                <FormField
+                                    control={form.control}
+                                    name="phoneCountryCode"
+                                    render={({ field }) => (
+                                        <FormItem className="w-1/3">
+                                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                <FormControl>
+                                                    <SelectTrigger>
+                                                        <SelectValue placeholder="Code" />
+                                                    </SelectTrigger>
+                                                </FormControl>
+                                                <SelectContent>
+                                                    {countryCallingCodes.map(country => (
+                                                        <SelectItem key={country.code} value={country.code}>
+                                                            {country.dial_code}
+                                                        </SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name="phone"
+                                    render={({ field }) => (
+                                        <FormItem className="flex-1">
+                                        <FormControl>
+                                            <Input type="tel" placeholder="e.g. 555-123-4567" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                            </div>
+                        </div>
                     </CardContent>
                 </Card>
               
