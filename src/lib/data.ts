@@ -679,9 +679,11 @@ export const usersData: User[] = [
         role: 'agent',
         walletAddress: 'spark1q...user01',
         kycStatus: 'verified',
+        kybStatus: 'verified',
         status: 'active',
         phone: '+1 555-0101',
         kycLevel: 3,
+        kybLevel: 1,
     },
     {
         id: 'user-002',
@@ -690,9 +692,11 @@ export const usersData: User[] = [
         role: 'issuer',
         walletAddress: 'spark1q...user02',
         kycStatus: 'pending',
+        kybStatus: 'pending',
         status: 'active',
         phone: '+1 555-0102',
         kycLevel: 1,
+        kybLevel: 0,
     },
     {
         id: 'user-003',
@@ -717,9 +721,11 @@ export const usersData: User[] = [
         role: 'agent',
         walletAddress: 'spark1q...user04',
         kycStatus: 'rejected',
+        kybStatus: 'pending',
         status: 'active',
         phone: '+1 555-0104',
         kycLevel: 0,
+        kybLevel: 0,
     },
      {
         id: 'user-005',
@@ -728,8 +734,10 @@ export const usersData: User[] = [
         role: 'superadmin',
         walletAddress: 'spark1q...superadmin',
         kycStatus: 'verified',
+        kybStatus: 'verified',
         status: 'active',
         phone: '+1 555-0105',
         kycLevel: 4,
+        kybLevel: 4,
     }
 ]

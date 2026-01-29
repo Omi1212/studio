@@ -14,7 +14,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { CheckCircle2, ShieldCheck, User as UserIcon, Mail, Phone } from 'lucide-react';
+import { CheckCircle2, ShieldCheck, User as UserIcon, Mail, Phone, Building } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 import { usersData } from '@/lib/data';
@@ -47,10 +47,38 @@ const kycLevels = [
   },
 ];
 
-function KycLevelIndicator({ currentLevel }: { currentLevel: number }) {
+const kybLevels = [
+  {
+    level: 1,
+    title: 'Business Level 1',
+    description: 'Basic business information provided.',
+    requirements: ['Business Name', 'Registration Number', 'Country of Operation'],
+  },
+  {
+    level: 2,
+    title: 'Business Level 2',
+    description: 'Legal business documents submitted.',
+    requirements: ['Certificate of Incorporation', 'Memorandum of Association'],
+  },
+  {
+    level: 3,
+    title: 'Business Level 3',
+    description: 'Beneficial ownership information verified.',
+    requirements: ['Details of major shareholders (over 25%)'],
+  },
+  {
+    level: 4,
+    title: 'Business Level 4',
+    description: 'Financial information verified.',
+    requirements: ['Business Bank Statements', 'Financial Reports'],
+  },
+];
+
+
+function VerificationLevelIndicator({ currentLevel, levels }: { currentLevel: number, levels: typeof kycLevels }) {
   return (
     <div className="space-y-6">
-      {kycLevels.map((level) => {
+      {levels.map((level) => {
         const isCompleted = currentLevel >= level.level;
         const isCurrent = currentLevel + 1 === level.level;
 
@@ -65,7 +93,7 @@ function KycLevelIndicator({ currentLevel }: { currentLevel: number }) {
                 >
                 {isCompleted ? <CheckCircle2 className="h-5 w-5" /> : <p className={cn(isCurrent ? 'text-primary font-bold' : 'text-muted-foreground')}>{level.level}</p>}
                 </div>
-                {level.level < 4 && <div className={cn("w-0.5 flex-1", isCompleted ? 'bg-green-500' : 'bg-muted-foreground/30')} />}
+                {level.level < levels.length && <div className={cn("w-0.5 flex-1", isCompleted ? 'bg-green-500' : 'bg-muted-foreground/30')} />}
             </div>
             <div className="flex-1 -mt-1">
               <p className={cn("font-semibold", isCompleted || isCurrent ? 'text-foreground' : 'text-muted-foreground')}>{level.title}</p>
@@ -78,37 +106,38 @@ function KycLevelIndicator({ currentLevel }: { currentLevel: number }) {
   );
 }
 
-function KycVerificationPrompt({ user }: { user: User }) {
-  const nextKycLevel = kycLevels.find(level => level.level === (user.kycLevel || 0) + 1);
+function VerificationPrompt({ user, isBusiness }: { user: User, isBusiness: boolean }) {
+    const levels = isBusiness ? kybLevels : kycLevels;
+    const currentLevel = (isBusiness ? user.kybLevel : user.kycLevel) || 0;
+    const nextLevel = levels.find(level => level.level === currentLevel + 1);
 
-  if (nextKycLevel) {
+    if (nextLevel) {
+        return (
+        <div className="flex flex-col items-center justify-center bg-muted/50 rounded-lg p-6 text-center h-full">
+            <h4 className="font-bold text-lg">Continue to {nextLevel.title}</h4>
+            <p className="text-muted-foreground text-sm mt-2 mb-4">
+            To unlock higher limits and more features, please complete the next verification step. You will need to provide:
+            </p>
+            <ul className="text-sm text-muted-foreground list-disc list-inside mb-4 text-left">
+                {nextLevel.requirements.map(req => <li key={req}>{req}</li>)}
+            </ul>
+            <Button>
+            Start {nextLevel.title}
+            </Button>
+        </div>
+        );
+    }
+
     return (
-      <div className="flex flex-col items-center justify-center bg-muted/50 rounded-lg p-6 text-center h-full">
-        <h4 className="font-bold text-lg">Continue to {nextKycLevel.title}</h4>
-        <p className="text-muted-foreground text-sm mt-2 mb-4">
-          To unlock higher limits and more features, please complete the next verification step. You will need to provide:
+        <div className="flex flex-col items-center justify-center bg-muted/50 rounded-lg p-6 text-center h-full">
+        <ShieldCheck className="h-16 w-16 text-green-500 mb-4" />
+        <h4 className="font-bold text-lg">You are fully verified!</h4>
+        <p className="text-muted-foreground text-sm mt-2">
+            You have successfully completed all identity verification steps.
         </p>
-        <ul className="text-sm text-muted-foreground list-disc list-inside mb-4 text-left">
-            {nextKycLevel.requirements.map(req => <li key={req}>{req}</li>)}
-        </ul>
-        <Button>
-          Start {nextKycLevel.title}
-        </Button>
-      </div>
+        </div>
     );
-  }
-
-  return (
-    <div className="flex flex-col items-center justify-center bg-muted/50 rounded-lg p-6 text-center h-full">
-      <ShieldCheck className="h-16 w-16 text-green-500 mb-4" />
-      <h4 className="font-bold text-lg">You are fully verified!</h4>
-      <p className="text-muted-foreground text-sm mt-2">
-        You have successfully completed all identity verification steps.
-      </p>
-    </div>
-  );
 }
-
 
 function InfoRow({ icon: Icon, label, value }: { icon: React.ElementType, label: string, value: string | undefined }) {
   return (
@@ -147,14 +176,16 @@ export default function ProfilePage() {
     const storedUser = localStorage.getItem('currentUser');
     if (storedUser) {
       const parsedUser = JSON.parse(storedUser);
-      const fullUserData = usersData.find((u: User) => u.id === parsedUser.id);
-      
-       if (parsedUser.role !== 'investor') {
-        const investorUser = usersData.find((u: User) => u.role === 'investor');
-        if(investorUser) setUser(investorUser);
-        else setUser(parsedUser); // fallback to current user
-      } else {
-        setUser(fullUserData || parsedUser);
+      // Fallback for different roles to show a relevant profile
+      if (parsedUser.role === 'agent') {
+        setUser(usersData.find((u: User) => u.role === 'agent') || parsedUser);
+      } else if (parsedUser.role === 'issuer') {
+        setUser(usersData.find((u: User) => u.role === 'issuer') || parsedUser);
+      } else if (parsedUser.role === 'investor') {
+        setUser(usersData.find((u: User) => u.role === 'investor') || parsedUser);
+      }
+      else {
+        setUser(parsedUser);
       }
     }
     setLoading(false);
@@ -168,13 +199,12 @@ export default function ProfilePage() {
     return name.substring(0, 2);
   };
   
-  const kycStatusMap = {
+  const verificationStatusMap = {
     verified: { text: "Verified", className: "text-green-400 border-green-400" },
     pending: { text: "Pending", className: "text-yellow-400 border-yellow-400" },
     rejected: { text: "Rejected", className: "text-red-500 border-red-500" },
-  }
-  const currentKycStatus = user ? kycStatusMap[user.kycStatus] : kycStatusMap.pending;
-
+  };
+  
   if (loading) {
       return (
         <div className="flex-1 p-4 sm:p-6 lg:p-8 flex items-center justify-center">
@@ -191,7 +221,11 @@ export default function ProfilePage() {
     );
   }
 
-    // Basic email masking
+  const isBusinessRole = user.role === 'issuer' || user.role === 'agent' || user.role === 'superadmin';
+  const verificationStatus = isBusinessRole ? user.kybStatus : user.kycStatus;
+  const currentVerificationStatus = verificationStatus ? verificationStatusMap[verificationStatus] : verificationStatusMap.pending;
+
+
   const maskEmail = (email: string) => {
       if (!email) return '';
       const [local, domain] = email.split('@');
@@ -226,29 +260,30 @@ export default function ProfilePage() {
                         <Avatar className="h-24 w-24 text-4xl">
                             <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
                         </Avatar>
-                        <CardTitle className="text-2xl pt-2">{user.name}</CardTitle>
-                        <CardDescription>User Level {user.kycLevel}</CardDescription>
-                        <Badge variant="outline" className={currentKycStatus.className}>
+                        <CardTitle className="text-2xl pt-2">{isBusinessRole ? user.businessName || user.name : user.name}</CardTitle>
+                        <CardDescription>{isBusinessRole ? `Business Level ${user.kybLevel || 0}` : `User Level ${user.kycLevel || 0}`}</CardDescription>
+                        <Badge variant="outline" className={currentVerificationStatus.className}>
                             <ShieldCheck className="h-4 w-4 mr-2" />
-                            KYC Status: {currentKycStatus.text}
+                            {isBusinessRole ? 'KYB' : 'KYC'} Status: {currentVerificationStatus.text}
                         </Badge>
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <InfoRow icon={UserIcon} label="Username" value={user.name.toLowerCase().replace(/\s+/g, '')} />
                         <InfoRow icon={Phone} label="Phone Number" value={user.phone} />
+                         {isBusinessRole && user.businessName && <InfoRow icon={Building} label="Business Name" value={user.businessName} />}
                     </CardContent>
                 </Card>
 
                 <Card className="lg:col-span-7">
                     <CardHeader>
-                        <CardTitle>Personal information</CardTitle>
+                        <CardTitle>{isBusinessRole ? 'Business Information' : 'Personal Information'}</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-1">
                         <PersonalInfoRow label="Country of Residence" value={countryDisplay || 'Not set'} actionLabel="Change" />
                         <PersonalInfoRow label="City" value={user.city || 'Not set'} />
-                        <PersonalInfoRow label="Legal Name" value={user.legalName || 'Not set'} />
+                        <PersonalInfoRow label={isBusinessRole ? "Business Registration #" : "Legal Name"} value={(isBusinessRole ? user.businessRegNo : user.legalName) || 'Not set'} />
                         <PersonalInfoRow label="Date of Birth" value={user.dob || 'Not set'} />
-                        <PersonalInfoRow label="Identification Documents" value={user.idDoc || 'Not set'} />
+                        {!isBusinessRole && <PersonalInfoRow label="Identification Documents" value={user.idDoc || 'Not set'} />}
                         <PersonalInfoRow label="Address" value={user.address || 'Not set'} />
                         <PersonalInfoRow label="Email Address" value={maskEmail(user.email)} />
                     </CardContent>
@@ -257,12 +292,15 @@ export default function ProfilePage() {
 
               <Card>
                 <CardHeader>
-                    <CardTitle>Identity Verification</CardTitle>
+                    <CardTitle>{isBusinessRole ? 'Business Verification (KYB)' : 'Identity Verification (KYC)'}</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <KycLevelIndicator currentLevel={user.kycLevel || 0} />
-                        <KycVerificationPrompt user={user} />
+                         <VerificationLevelIndicator 
+                            currentLevel={(isBusinessRole ? user.kybLevel : user.kycLevel) || 0}
+                            levels={isBusinessRole ? kybLevels : kycLevels}
+                         />
+                        <VerificationPrompt user={user} isBusiness={isBusinessRole} />
                     </div>
                 </CardContent>
               </Card>

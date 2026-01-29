@@ -51,13 +51,17 @@ export type User = {
   role: 'investor' | 'issuer' | 'agent' | 'superadmin';
   walletAddress: string;
   kycStatus: 'verified' | 'pending' | 'rejected';
+  kybStatus?: 'verified' | 'pending' | 'rejected';
   status: 'active' | 'inactive';
   phone?: string;
   kycLevel?: number;
+  kybLevel?: number;
   country?: string;
   legalName?: string;
   dob?: string;
   idDoc?: string;
   address?: string;
   city?: string;
+  businessName?: string;
+  businessRegNo?: string;
 };

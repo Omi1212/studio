@@ -86,6 +86,8 @@ export default function PersonalInfoPage() {
 
     if (user.role === 'investor') {
         router.push('/signup/onboarding/details');
+    } else if (user.role === 'issuer') {
+        router.push('/signup/onboarding/business-info');
     } else {
         router.push('/dashboard');
     }
