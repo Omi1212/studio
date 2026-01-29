@@ -137,9 +137,12 @@ export default function VerifyAccountPage() {
                             resendCooldown={phoneCooldown}
                         />
                     </CardContent>
-                    <CardFooter>
+                    <CardFooter className="flex flex-col gap-2">
                         <Button onClick={handleConfirm} disabled={isSubmitting} className="w-full">
                             {isSubmitting ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Verifying...</> : 'Confirm'}
+                        </Button>
+                        <Button variant="outline" onClick={() => router.back()} className="w-full">
+                            Back
                         </Button>
                     </CardFooter>
                 </Card>
