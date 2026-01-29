@@ -18,7 +18,6 @@ import { countries } from '@/lib/countries';
 
 const businessInfoSchema = z.object({
   businessName: z.string().min(1, 'Business name is required'),
-  regNumber: z.string().min(1, 'Registration number is required'),
   country: z.string().min(1, 'Country is required'),
 });
 
@@ -35,7 +34,6 @@ export default function BusinessInfoPage() {
     resolver: zodResolver(businessInfoSchema),
     defaultValues: {
       businessName: '',
-      regNumber: '',
       country: '',
     },
   });
@@ -55,7 +53,6 @@ export default function BusinessInfoPage() {
 
       form.reset({
         businessName: parsedUser.businessName || '',
-        regNumber: parsedUser.businessRegNo || '',
         country: countryValue,
       });
     }
@@ -69,7 +66,6 @@ export default function BusinessInfoPage() {
     const updatedUser: User = {
       ...user,
       businessName: data.businessName,
-      businessRegNo: data.regNumber,
       country: data.country,
       kybLevel: 1,
       kybStatus: 'pending',
@@ -128,19 +124,6 @@ export default function BusinessInfoPage() {
                                 <FormLabel>Business Name</FormLabel>
                                 <FormControl>
                                     <Input placeholder="e.g. Awesome Inc." {...field} />
-                                </FormControl>
-                                <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                         <FormField
-                            control={form.control}
-                            name="regNumber"
-                            render={({ field }) => (
-                                <FormItem>
-                                <FormLabel>Registration Number</FormLabel>
-                                <FormControl>
-                                    <Input placeholder="e.g. 123456-7" {...field} />
                                 </FormControl>
                                 <FormMessage />
                                 </FormItem>

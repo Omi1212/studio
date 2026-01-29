@@ -52,7 +52,7 @@ const kybLevels = [
     level: 1,
     title: 'Business Level 1',
     description: 'Basic business information provided.',
-    requirements: ['Business Name', 'Registration Number', 'Country of Operation'],
+    requirements: ['Business Name', 'Country of Operation'],
   },
   {
     level: 2,
@@ -281,7 +281,7 @@ export default function ProfilePage() {
                     <CardContent className="space-y-1">
                         <PersonalInfoRow label="Country of Residence" value={countryDisplay || 'Not set'} actionLabel="Change" />
                         <PersonalInfoRow label="City" value={user.city || 'Not set'} />
-                        <PersonalInfoRow label={isBusinessRole ? "Business Registration #" : "Legal Name"} value={(isBusinessRole ? user.businessRegNo : user.legalName) || 'Not set'} />
+                        <PersonalInfoRow label="Legal Name" value={user.legalName || 'Not set'} />
                         <PersonalInfoRow label="Date of Birth" value={user.dob || 'Not set'} />
                         {!isBusinessRole && <PersonalInfoRow label="Identification Documents" value={user.idDoc || 'Not set'} />}
                         <PersonalInfoRow label="Address" value={user.address || 'Not set'} />

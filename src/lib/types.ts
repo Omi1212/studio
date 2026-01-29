@@ -63,5 +63,4 @@ export type User = {
   address?: string;
   city?: string;
   businessName?: string;
-  businessRegNo?: string;
 };

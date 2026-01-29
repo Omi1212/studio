@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -16,8 +15,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 
 const personalInfoSchema = z.object({
   legalName: z.string().min(1, 'Full name is required'),
-  phone: z.string().min(1, 'Phone number is required'),
   dob: z.string().min(1, 'Date of birth is required'),
+  phone: z.string().min(1, 'Phone number is required'),
 });
 
 type PersonalInfoFormValues = z.infer<typeof personalInfoSchema>;
@@ -33,8 +32,8 @@ export default function PersonalInfoPage() {
     resolver: zodResolver(personalInfoSchema),
     defaultValues: {
       legalName: '',
-      phone: '',
       dob: '',
+      phone: '',
     },
   });
 
@@ -133,12 +132,12 @@ export default function PersonalInfoPage() {
                         />
                         <FormField
                             control={form.control}
-                            name="phone"
+                            name="dob"
                             render={({ field }) => (
                                 <FormItem>
-                                <FormLabel>Phone Number</FormLabel>
+                                <FormLabel>Date of Birth</FormLabel>
                                 <FormControl>
-                                    <Input type="tel" placeholder="e.g. +1 555-123-4567" {...field} />
+                                    <Input type="date" {...field} />
                                 </FormControl>
                                 <FormMessage />
                                 </FormItem>
@@ -146,12 +145,12 @@ export default function PersonalInfoPage() {
                         />
                         <FormField
                             control={form.control}
-                            name="dob"
+                            name="phone"
                             render={({ field }) => (
                                 <FormItem>
-                                <FormLabel>Date of Birth</FormLabel>
+                                <FormLabel>Phone Number</FormLabel>
                                 <FormControl>
-                                    <Input type="date" {...field} />
+                                    <Input type="tel" placeholder="e.g. +1 555-123-4567" {...field} />
                                 </FormControl>
                                 <FormMessage />
                                 </FormItem>
