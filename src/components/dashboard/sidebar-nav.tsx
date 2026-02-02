@@ -48,7 +48,7 @@ const superAdminMenu = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/issuer-management', label: 'Issuers', icon: Building },
   { href: '/user-management', label: 'Users', icon: Users },
-  { href: '/assignments', label: 'Agents', icon: ClipboardList },
+  { href: '/agents', label: 'Agents', icon: ClipboardList },
 ];
 
 const agentMenu = [
@@ -103,9 +103,9 @@ export default function SidebarNav() {
   const [allTokens, setAllTokens] = useState<TokenDetails[]>([]);
   const [selectedToken, setSelectedToken] = useState<TokenDetails | null>(null);
   const [companies] = useState([
-    { id: 'banco-atlantida', name: 'Banco Atlantida' },
-    { id: 'ditobanx', name: 'DitoBanx' },
-    { id: 'tiankii', name: 'Tiankii' },
+    { id: 'bstratus-securities', name: 'Bstratus Securities' },
+    { id: 'neobank-sa-de-cv', name: 'NeoBank SA de CV' },
+    { id: 'tradfi-bank-sa', name: 'TradFi Bank SA' },
   ]);
   const [selectedCompany, setSelectedCompany] = useState<{ id: string; name: string } | null>(null);
 
