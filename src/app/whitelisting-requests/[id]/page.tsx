@@ -18,6 +18,17 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 
 type WhitelistRequest = typeof investorsData[0];
 
@@ -141,9 +152,25 @@ export default function RequestDetailsPage() {
                     <CardTitle>Actions</CardTitle>
                 </CardHeader>
                 <CardContent className="flex flex-col sm:flex-row gap-2">
-                    <Button variant="destructive" className="w-full" onClick={() => handleUpdateStatus('rejected')}>
-                        <X className="mr-2 h-4 w-4" /> Reject Request
-                    </Button>
+                    <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                            <Button variant="destructive" className="w-full">
+                                <X className="mr-2 h-4 w-4" /> Reject Request
+                            </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>Are you sure you want to reject this request?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                This action cannot be undone.
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction onClick={() => handleUpdateStatus('rejected')}>Reject</AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
                     <Button className="w-full" onClick={() => handleUpdateStatus('accepted')}>
                         <Check className="mr-2 h-4 w-4" /> Approve Request
                     </Button>

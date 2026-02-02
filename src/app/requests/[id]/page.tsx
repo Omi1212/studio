@@ -21,6 +21,17 @@ import { useToast } from '@/hooks/use-toast';
 import { Stepper, StepperItem } from '@/components/ui/stepper';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 
 type CombinedRequest = TokenDetails & { issuer?: Issuer };
 
@@ -287,9 +298,25 @@ function RequestDetailsPage({ params }: { params: { id: string } }) {
                             Leave Observation
                           </Button>
                           <div className="flex flex-col sm:flex-row gap-2">
-                              <Button variant="destructive" className="w-full" onClick={() => updateRequestStatus(request.id, 'rejected')}>
-                                  <X className="mr-2 h-4 w-4" /> Reject Request
-                              </Button>
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <Button variant="destructive" className="w-full">
+                                    <X className="mr-2 h-4 w-4" /> Reject Request
+                                  </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                      This will reject the token request for "{request.tokenName}". This action cannot be undone.
+                                    </AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction onClick={() => updateRequestStatus(request.id, 'rejected')}>Confirm Reject</AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
                               <Button className="w-full" onClick={() => updateRequestStatus(request.id, 'active')}>
                                   <Check className="mr-2 h-4 w-4" /> Approve Request
                               </Button>

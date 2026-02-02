@@ -23,6 +23,17 @@ import type { Order } from '@/lib/types';
 import { Separator } from '@/components/ui/separator';
 import TokenIcon from '@/components/ui/token-icon';
 import { cn } from '@/lib/utils';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 
 function getStatusBadge(status: Order['status']) {
   switch (status) {
@@ -178,9 +189,25 @@ export default function OrderDetailsPage() {
                     <CardTitle>Actions</CardTitle>
                 </CardHeader>
                 <CardContent className="flex flex-col sm:flex-row gap-2">
-                    <Button variant="destructive" className="w-full" onClick={() => handleUpdateStatus('rejected')}>
-                        <X className="mr-2 h-4 w-4" /> Reject Order
-                    </Button>
+                    <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                            <Button variant="destructive" className="w-full">
+                                <X className="mr-2 h-4 w-4" /> Reject Order
+                            </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>Are you sure you want to reject this order?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                This action cannot be undone.
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction onClick={() => handleUpdateStatus('rejected')}>Reject</AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
                     <Button className="w-full" onClick={() => handleUpdateStatus('completed')}>
                         <Check className="mr-2 h-4 w-4" /> Accept Order
                     </Button>

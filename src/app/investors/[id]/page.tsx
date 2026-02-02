@@ -13,7 +13,7 @@ import SidebarNav from '@/components/dashboard/sidebar-nav';
 import HeaderDynamic from '@/components/dashboard/header-dynamic';
 import { investorsData, exampleTokens } from '@/lib/data';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Edit, Trash2, Snowflake, ArrowUpRight, ArrowDownLeft } from 'lucide-react';
+import { ArrowLeft, Trash2, Snowflake, ArrowUpRight, ArrowDownLeft } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -185,6 +185,25 @@ export default function InvestorDetailsPage() {
                     <Button variant={investor.isFrozen ? "secondary" : "outline"} onClick={handleToggleFreeze}>
                         <Snowflake className="mr-2 h-4 w-4" /> {investor.isFrozen ? 'Unfreeze' : 'Freeze'} Address
                     </Button>
+                    <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                             <Button variant="destructive">
+                                <Trash2 className="mr-2 h-4 w-4" /> Delete Investor
+                             </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                This action cannot be undone. This will permanently delete the investor "{investor.name}" and all associated data.
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction onClick={handleDelete}>Delete</AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
                 </div>
             </div>
             

@@ -17,6 +17,17 @@ import Link from 'next/link';
 import { useToast } from '@/hooks/use-toast';
 import { Input } from '../ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 type WhitelistRequest = typeof investorsData[0];
 const ITEMS_PER_PAGE = 10;
@@ -81,9 +92,23 @@ function RequestCard({ request, onApprove, onReject }: { request: WhitelistReque
       </CardContent>
       {request.status === 'pending' && (
         <CardFooter className="flex gap-2">
-            <Button variant="outline" className="w-full" onClick={() => onReject(request.id)}>
-                <X className="mr-2 h-4 w-4" /> Reject
-            </Button>
+            <AlertDialog>
+                <AlertDialogTrigger asChild>
+                    <Button variant="outline" className="w-full">
+                        <X className="mr-2 h-4 w-4" /> Reject
+                    </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                        <AlertDialogDescription>This will reject the request from {request.name}. This cannot be undone.</AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={() => onReject(request.id)}>Confirm Reject</AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
             <Button className="w-full" onClick={() => onApprove(request.id)}>
                 <Check className="mr-2 h-4 w-4" /> Approve
             </Button>
@@ -119,7 +144,21 @@ function RequestTableRow({ request, onApprove, onReject }: { request: WhitelistR
         <div className="flex items-center justify-end gap-2" onClick={(e) => e.stopPropagation()}>
             {request.status === 'pending' && (
                 <>
-                    <Button size="sm" variant="outline" onClick={() => onReject(request.id)}>Reject</Button>
+                    <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                            <Button size="sm" variant="outline">Reject</Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                <AlertDialogDescription>This will reject the request from {request.name}. This cannot be undone.</AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction onClick={() => onReject(request.id)}>Confirm Reject</AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
                     <Button size="sm" onClick={() => onApprove(request.id)}>Approve</Button>
                 </>
             )}
