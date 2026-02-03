@@ -46,6 +46,7 @@ import Image from 'next/image';
 
 const superAdminMenu = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/assets', label: 'Assets', icon: CircleDollarSign },
   { href: '/issuer-management', label: 'Issuers', icon: Building },
   { href: '/user-management', label: 'Users', icon: Users },
   { href: '/agents', label: 'Agents', icon: ClipboardList },
