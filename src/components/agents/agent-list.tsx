@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import { usersData, exampleTokens } from '@/lib/data';
 import type { User, TokenDetails } from '@/lib/types';
 import { Card } from '@/components/ui/card';
@@ -8,14 +9,40 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { AssignTokenDialog } from './assign-token-dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
-import { Search, ClipboardList } from 'lucide-react';
+import { Search, ClipboardList, MoreVertical } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '../ui/button';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
+import Link from 'next/link';
 
 type Agent = User;
 type Assignments = Record<string, string[]>; // agentId: tokenId[]
 
 const ITEMS_PER_PAGE = 10;
+
+function getStatusBadge(status: User['status']) {
+  switch (status) {
+    case 'active':
+      return <Badge variant="outline" className="text-green-400 border-green-400">Active</Badge>;
+    case 'inactive':
+      return <Badge variant="destructive">Inactive</Badge>;
+    default:
+      return <Badge variant="secondary">Unknown</Badge>;
+  }
+}
+
+function getKycBadge(status: User['kycStatus']) {
+  switch (status) {
+    case 'verified':
+      return <Badge variant="outline" className="text-green-400 border-green-400">Verified</Badge>;
+    case 'pending':
+      return <Badge variant="outline" className="text-yellow-400 border-yellow-400">Pending</Badge>;
+    case 'rejected':
+       return <Badge variant="destructive">Rejected</Badge>;
+    default:
+      return <Badge variant="secondary">Unknown</Badge>;
+  }
+}
 
 export default function AgentList() {
     const [agents, setAgents] = useState<Agent[]>([]);
@@ -24,6 +51,7 @@ export default function AgentList() {
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
+    const router = useRouter();
 
     useEffect(() => {
         // Fetch agents
@@ -146,6 +174,8 @@ export default function AgentList() {
                             <TableRow>
                                 <TableHead>Agent</TableHead>
                                 <TableHead className="text-center">Assigned Tokens</TableHead>
+                                <TableHead className="hidden sm:table-cell">KYC</TableHead>
+                                <TableHead className="hidden sm:table-cell">Status</TableHead>
                                 <TableHead className="text-right">Actions</TableHead>
                             </TableRow>
                         </TableHeader>
@@ -153,7 +183,7 @@ export default function AgentList() {
                             {paginatedAgents.map(agent => {
                                 const assignedTokenIds = assignments[agent.id] || [];
                                 return (
-                                    <TableRow key={agent.id}>
+                                    <TableRow key={agent.id} onClick={() => router.push(`/agents/${agent.id}`)} className="cursor-pointer">
                                         <TableCell>
                                             <div className="flex items-center gap-3">
                                                 <Avatar className="h-9 w-9">
@@ -168,13 +198,29 @@ export default function AgentList() {
                                         <TableCell className="text-center">
                                             <Badge variant="secondary">{assignedTokenIds.length}</Badge>
                                         </TableCell>
-                                        <TableCell className="text-right">
-                                            <AssignTokenDialog 
-                                                agent={agent}
-                                                allTokens={activeTokens}
-                                                assignedTokenIds={assignedTokenIds}
-                                                onUpdate={handleUpdateAssignments}
-                                            />
+                                        <TableCell className="hidden sm:table-cell">{getKycBadge(agent.kycStatus)}</TableCell>
+                                        <TableCell className="hidden sm:table-cell">{getStatusBadge(agent.status)}</TableCell>
+                                        <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
+                                            <div className="flex items-center justify-end gap-2">
+                                                <AssignTokenDialog 
+                                                    agent={agent}
+                                                    allTokens={activeTokens}
+                                                    assignedTokenIds={assignedTokenIds}
+                                                    onUpdate={handleUpdateAssignments}
+                                                />
+                                                <DropdownMenu>
+                                                    <DropdownMenuTrigger asChild>
+                                                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                                                            <MoreVertical className="h-4 w-4" />
+                                                        </Button>
+                                                    </DropdownMenuTrigger>
+                                                    <DropdownMenuContent align="end">
+                                                        <DropdownMenuItem asChild>
+                                                            <Link href={`/agents/${agent.id}`}>View Details</Link>
+                                                        </DropdownMenuItem>
+                                                    </DropdownMenuContent>
+                                                </DropdownMenu>
+                                            </div>
                                         </TableCell>
                                     </TableRow>
                                 )
