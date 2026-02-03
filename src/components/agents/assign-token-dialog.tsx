@@ -39,10 +39,12 @@ const networkMap: { [key: string]: string } = {
 export function AssignTokenDialog({ agent, allTokens, assignedTokenIds, onUpdate }: AssignTokenDialogProps) {
     const [isOpen, setIsOpen] = useState(false);
     const [selectedTokenIds, setSelectedTokenIds] = useState<string[]>([]);
+    const [isAddingToken, setIsAddingToken] = useState(false);
     
     useEffect(() => {
         if (isOpen) {
             setSelectedTokenIds(assignedTokenIds);
+            setIsAddingToken(false);
         }
     }, [isOpen, assignedTokenIds]);
 
@@ -52,6 +54,7 @@ export function AssignTokenDialog({ agent, allTokens, assignedTokenIds, onUpdate
         if (tokenId && !selectedTokenIds.includes(tokenId)) {
             setSelectedTokenIds(prev => [...prev, tokenId]);
         }
+        setIsAddingToken(false);
     };
 
     const handleTokenRemove = (tokenId: string) => {
@@ -126,26 +129,38 @@ export function AssignTokenDialog({ agent, allTokens, assignedTokenIds, onUpdate
                 </ScrollArea>
                 
                 <div className="space-y-2 pt-2">
-                    <Label htmlFor="add-token-select">Add a token</Label>
-                    <Select onValueChange={handleTokenAdd} value="">
-                        <SelectTrigger id="add-token-select" className="w-full">
-                            <SelectValue placeholder="Select a token to add..." />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {unassigned.length > 0 ? (
-                                unassigned.map(token => (
-                                    <SelectItem key={token.id} value={token.id}>
-                                        <div className="flex items-center gap-2">
-                                            <TokenIcon token={token} className="h-6 w-6" />
-                                            <span>{token.tokenName} ({token.tokenTicker})</span>
-                                        </div>
-                                    </SelectItem>
-                                ))
-                            ) : (
-                                <div className="p-2 text-center text-sm text-muted-foreground">No other tokens to add.</div>
-                            )}
-                        </SelectContent>
-                    </Select>
+                    {!isAddingToken ? (
+                        <Button
+                            variant="link"
+                            className="p-0 h-auto text-primary"
+                            onClick={() => setIsAddingToken(true)}
+                        >
+                            + Add Another Token
+                        </Button>
+                    ) : (
+                        <>
+                            <Label htmlFor="add-token-select">Add a token</Label>
+                            <Select onValueChange={handleTokenAdd} value="">
+                                <SelectTrigger id="add-token-select" className="w-full">
+                                    <SelectValue placeholder="Select a token to add..." />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {unassigned.length > 0 ? (
+                                        unassigned.map(token => (
+                                            <SelectItem key={token.id} value={token.id}>
+                                                <div className="flex items-center gap-2">
+                                                    <TokenIcon token={token} className="h-6 w-6" />
+                                                    <span>{token.tokenName} ({token.tokenTicker})</span>
+                                                </div>
+                                            </SelectItem>
+                                        ))
+                                    ) : (
+                                        <div className="p-2 text-center text-sm text-muted-foreground">No other tokens to add.</div>
+                                    )}
+                                </SelectContent>
+                            </Select>
+                        </>
+                    )}
                 </div>
                 
                 <DialogFooter>
