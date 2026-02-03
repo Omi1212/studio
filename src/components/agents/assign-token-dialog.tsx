@@ -16,6 +16,7 @@ import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import type { User, TokenDetails } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
+import { DropdownMenuItem } from '../ui/dropdown-menu';
 
 interface AssignTokenDialogProps {
     agent: User;
@@ -63,9 +64,9 @@ export function AssignTokenDialog({ agent, allTokens, assignedTokenIds, onUpdate
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
-                <Button variant="outline">
-                    Manage
-                </Button>
+                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                    Manage Tokens
+                </DropdownMenuItem>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>

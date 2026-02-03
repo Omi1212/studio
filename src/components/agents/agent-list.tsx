@@ -187,12 +187,6 @@ export default function AgentList() {
                                         <TableCell className="hidden sm:table-cell">{getStatusBadge(agent.status)}</TableCell>
                                         <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
                                             <div className="flex items-center justify-end gap-2">
-                                                <AssignTokenDialog 
-                                                    agent={agent}
-                                                    allTokens={activeTokens}
-                                                    assignedTokenIds={assignedTokenIds}
-                                                    onUpdate={handleUpdateAssignments}
-                                                />
                                                 <DropdownMenu>
                                                     <DropdownMenuTrigger asChild>
                                                         <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -203,6 +197,12 @@ export default function AgentList() {
                                                         <DropdownMenuItem asChild>
                                                             <Link href={`/agents/${agent.id}`}>View Details</Link>
                                                         </DropdownMenuItem>
+                                                         <AssignTokenDialog 
+                                                            agent={agent}
+                                                            allTokens={activeTokens}
+                                                            assignedTokenIds={assignedTokenIds}
+                                                            onUpdate={handleUpdateAssignments}
+                                                        />
                                                     </DropdownMenuContent>
                                                 </DropdownMenu>
                                             </div>
