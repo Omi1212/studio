@@ -17,6 +17,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import type { User, TokenDetails } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { DropdownMenuItem } from '../ui/dropdown-menu';
+import TokenIcon from '../ui/token-icon';
+import { Check } from 'lucide-react';
 
 interface AssignTokenDialogProps {
     agent: User;
@@ -24,6 +26,13 @@ interface AssignTokenDialogProps {
     assignedTokenIds: string[];
     onUpdate: (agentId: string, tokenIds: string[]) => void;
 }
+
+const networkMap: { [key: string]: string } = {
+    spark: 'Spark',
+    liquid: 'Liquid',
+    rgb: 'RGB',
+    taproot: 'Taproot Assets',
+};
 
 export function AssignTokenDialog({ agent, allTokens, assignedTokenIds, onUpdate }: AssignTokenDialogProps) {
     const [isOpen, setIsOpen] = useState(false);
@@ -68,28 +77,38 @@ export function AssignTokenDialog({ agent, allTokens, assignedTokenIds, onUpdate
                     Manage Tokens
                 </DropdownMenuItem>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
+            <DialogContent className="sm:max-w-md">
                 <DialogHeader>
                     <DialogTitle>Assign Tokens to {agent.name}</DialogTitle>
                     <DialogDescription>
                         Select the tokens this agent can manage.
                     </DialogDescription>
                 </DialogHeader>
-                <ScrollArea className="max-h-72">
-                    <div className="grid gap-4 py-4 pr-4">
+                <ScrollArea className="max-h-96 -mr-4">
+                    <div className="grid gap-3 py-4 pr-4">
                         {sortedTokens.length > 0 ? (
                              sortedTokens.map(token => (
-                                <div key={token.id} className="flex items-center space-x-3">
+                                <div key={token.id}>
                                     <Checkbox
-                                        id={`token-${agent.id}-${token.id}`}
+                                        id={`token-dialog-${agent.id}-${token.id}`}
                                         checked={selectedTokenIds.includes(token.id)}
                                         onCheckedChange={(checked) => handleCheckboxChange(token.id, !!checked)}
+                                        className="sr-only peer"
                                     />
                                     <Label
-                                        htmlFor={`token-${agent.id}-${token.id}`}
-                                        className="font-medium"
+                                        htmlFor={`token-dialog-${agent.id}-${token.id}`}
+                                        className="flex items-center gap-4 rounded-md border-2 border-muted bg-popover p-4 cursor-pointer transition-colors hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/10"
                                     >
-                                        {token.tokenName} ({token.tokenTicker})
+                                        <TokenIcon token={token} className="h-8 w-8" />
+                                        <div className="flex-1">
+                                            <p className="font-semibold">{token.tokenName}</p>
+                                            <p className="text-sm text-muted-foreground">
+                                                {token.tokenTicker} on {networkMap[token.network] || token.network}
+                                            </p>
+                                        </div>
+                                        <div className="h-5 w-5 rounded-full border-2 border-muted-foreground peer-data-[state=checked]:border-primary flex-shrink-0 flex items-center justify-center">
+                                            <Check className="h-3 w-3 text-primary opacity-0 transition-opacity peer-data-[state=checked]:opacity-100" />
+                                        </div>
                                     </Label>
                                 </div>
                             ))
