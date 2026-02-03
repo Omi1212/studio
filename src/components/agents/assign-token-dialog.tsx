@@ -17,9 +17,10 @@ import type { User, TokenDetails } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { DropdownMenuItem, DropdownMenu, DropdownMenuTrigger, DropdownMenuContent } from '../ui/dropdown-menu';
 import TokenIcon from '../ui/token-icon';
-import { MoreVertical, Plus, Trash2, Search } from 'lucide-react';
-import { Input } from '../ui/input';
+import { MoreVertical, Trash2 } from 'lucide-react';
 import { Card } from '../ui/card';
+import { Label } from '../ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 
 interface AssignTokenDialogProps {
     agent: User;
@@ -38,19 +39,17 @@ const networkMap: { [key: string]: string } = {
 export function AssignTokenDialog({ agent, allTokens, assignedTokenIds, onUpdate }: AssignTokenDialogProps) {
     const [isOpen, setIsOpen] = useState(false);
     const [selectedTokenIds, setSelectedTokenIds] = useState<string[]>([]);
-    const [searchQuery, setSearchQuery] = useState('');
-
+    
     useEffect(() => {
         if (isOpen) {
             setSelectedTokenIds(assignedTokenIds);
-            setSearchQuery('');
         }
     }, [isOpen, assignedTokenIds]);
 
     const { toast } = useToast();
 
     const handleTokenAdd = (tokenId: string) => {
-        if (!selectedTokenIds.includes(tokenId)) {
+        if (tokenId && !selectedTokenIds.includes(tokenId)) {
             setSelectedTokenIds(prev => [...prev, tokenId]);
         }
     };
@@ -73,16 +72,8 @@ export function AssignTokenDialog({ agent, allTokens, assignedTokenIds, onUpdate
     }, [allTokens, selectedTokenIds]);
 
     const unassigned = useMemo(() => {
-        const filtered = allTokens.filter(token => !selectedTokenIds.includes(token.id));
-        if (!searchQuery) {
-            return filtered;
-        }
-        const lowercasedQuery = searchQuery.toLowerCase();
-        return filtered.filter(token =>
-            token.tokenName.toLowerCase().includes(lowercasedQuery) ||
-            token.tokenTicker.toLowerCase().includes(lowercasedQuery)
-        );
-    }, [allTokens, selectedTokenIds, searchQuery]);
+        return allTokens.filter(token => !selectedTokenIds.includes(token.id));
+    }, [allTokens, selectedTokenIds]);
 
 
     return (
@@ -134,46 +125,28 @@ export function AssignTokenDialog({ agent, allTokens, assignedTokenIds, onUpdate
                     </div>
                 </ScrollArea>
                 
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button
-                            variant="link"
-                            className="p-0 h-auto justify-start text-primary"
-                            onClick={() => setSearchQuery('')}
-                        >
-                            <Plus className="mr-2 h-4 w-4" />
-                            Add Another Token
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent className="p-0 w-96" align="start">
-                        <div className="p-2 border-b">
-                            <Input
-                                autoFocus
-                                placeholder="Search tokens..."
-                                className="w-full border-0 focus-visible:ring-0 focus-visible:ring-offset-0 h-8"
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                            />
-                        </div>
-                        <ScrollArea className="max-h-64">
+                <div className="space-y-2 pt-2">
+                    <Label htmlFor="add-token-select">Add a token</Label>
+                    <Select onValueChange={handleTokenAdd} value="">
+                        <SelectTrigger id="add-token-select" className="w-full">
+                            <SelectValue placeholder="Select a token to add..." />
+                        </SelectTrigger>
+                        <SelectContent>
                             {unassigned.length > 0 ? (
                                 unassigned.map(token => (
-                                    <DropdownMenuItem key={token.id} onSelect={() => handleTokenAdd(token.id)} className="p-2 cursor-pointer">
-                                        <div className="flex items-center gap-3">
-                                            <TokenIcon token={token} className="h-8 w-8" />
-                                            <div>
-                                                <p className="font-semibold text-sm">{token.tokenName}</p>
-                                                <p className="text-xs text-muted-foreground">{token.tokenTicker}</p>
-                                            </div>
+                                    <SelectItem key={token.id} value={token.id}>
+                                        <div className="flex items-center gap-2">
+                                            <TokenIcon token={token} className="h-6 w-6" />
+                                            <span>{token.tokenName} ({token.tokenTicker})</span>
                                         </div>
-                                    </DropdownMenuItem>
+                                    </SelectItem>
                                 ))
                             ) : (
-                                <p className="text-sm text-muted-foreground text-center p-4">No other tokens to add.</p>
+                                <div className="p-2 text-center text-sm text-muted-foreground">No other tokens to add.</div>
                             )}
-                        </ScrollArea>
-                    </DropdownMenuContent>
-                </DropdownMenu>
+                        </SelectContent>
+                    </Select>
+                </div>
                 
                 <DialogFooter>
                     <DialogClose asChild>
