@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -11,7 +12,7 @@ import SidebarNav from '@/components/dashboard/sidebar-nav';
 import HeaderDynamic from '@/components/dashboard/header-dynamic';
 import { usersData } from '@/lib/data';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Edit, Power, PowerOff } from 'lucide-react';
+import { ArrowLeft, Power, PowerOff } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -124,9 +125,6 @@ export default function AgentDetailsPage() {
                     </h1>
                 </div>
                 <div className="flex gap-2">
-                    <Button variant="outline" asChild>
-                       <Link href={`/agents/${agent.id}/edit`}><Edit className="mr-2 h-4 w-4"/>Edit</Link>
-                    </Button>
                     <AlertDialog>
                         <AlertDialogTrigger asChild>
                              <Button variant={agent.status === 'active' ? 'destructive' : 'outline'}>
