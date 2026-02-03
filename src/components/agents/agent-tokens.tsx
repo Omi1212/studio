@@ -9,11 +9,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Button } from '@/components/ui/button';
 import TokenIcon from '../ui/token-icon';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ClipboardList, Check, Search } from 'lucide-react';
+import { ClipboardList, Check, Search, MoreVertical, Plus, Trash2 } from 'lucide-react';
 import { Input } from '../ui/input';
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '../ui/dropdown-menu';
 
 interface AgentTokensProps {
     agent: User;
@@ -75,9 +74,9 @@ export default function AgentTokens({ agent }: AgentTokensProps) {
         setIsDialogOpen(false);
     };
 
-    const handleCheckboxChange = (tokenId: string, checked: boolean) => {
+    const handleAssignmentChange = (tokenId: string, shouldAssign: boolean) => {
         setSelectedTokenIds(prev => 
-            checked ? [...prev, tokenId] : prev.filter(id => id !== tokenId)
+            shouldAssign ? [...prev, tokenId] : prev.filter(id => id !== tokenId)
         );
     };
 
@@ -132,18 +131,10 @@ export default function AgentTokens({ agent }: AgentTokensProps) {
                         <ScrollArea className="max-h-96 -mr-4">
                             <div className="grid gap-3 py-4 pr-4">
                                 {filteredTokens.length > 0 ? (
-                                    filteredTokens.map(token => (
-                                        <div key={token.id}>
-                                            <Checkbox
-                                                id={`token-${agent.id}-${token.id}`}
-                                                checked={selectedTokenIds.includes(token.id)}
-                                                onCheckedChange={(checked) => handleCheckboxChange(token.id, !!checked)}
-                                                className="sr-only peer"
-                                            />
-                                            <Label
-                                                htmlFor={`token-${agent.id}-${token.id}`}
-                                                className="flex items-center gap-4 rounded-md border-2 border-muted bg-popover p-4 cursor-pointer transition-colors hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/10"
-                                            >
+                                    filteredTokens.map(token => {
+                                        const isAssigned = selectedTokenIds.includes(token.id);
+                                        return (
+                                            <div key={token.id} className="flex items-center gap-4 rounded-md border-2 border-muted bg-popover p-4 transition-colors hover:bg-accent hover:text-accent-foreground">
                                                 <TokenIcon token={token} className="h-8 w-8" />
                                                 <div className="flex-1">
                                                     <p className="font-semibold">{token.tokenName}</p>
@@ -151,12 +142,26 @@ export default function AgentTokens({ agent }: AgentTokensProps) {
                                                         {token.tokenTicker} on {networkMap[token.network] || token.network}
                                                     </p>
                                                 </div>
-                                                <div className="h-5 w-5 rounded-full border-2 border-muted-foreground peer-data-[state=checked]:border-primary flex-shrink-0 flex items-center justify-center">
-                                                    <Check className="h-3 w-3 text-primary opacity-0 transition-opacity peer-data-[state=checked]:opacity-100" />
-                                                </div>
-                                            </Label>
-                                        </div>
-                                    ))
+                                                {isAssigned && <Check className="h-5 w-5 text-green-500" />}
+                                                <DropdownMenu>
+                                                    <DropdownMenuTrigger asChild>
+                                                        <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0">
+                                                            <MoreVertical className="h-4 w-4" />
+                                                        </Button>
+                                                    </DropdownMenuTrigger>
+                                                    <DropdownMenuContent align="end">
+                                                        <DropdownMenuItem onSelect={() => handleAssignmentChange(token.id, !isAssigned)}>
+                                                            {isAssigned ? (
+                                                                <><Trash2 className="mr-2 h-4 w-4" /> Remove</>
+                                                            ) : (
+                                                                <><Plus className="mr-2 h-4 w-4" /> Add</>
+                                                            )}
+                                                        </DropdownMenuItem>
+                                                    </DropdownMenuContent>
+                                                </DropdownMenu>
+                                            </div>
+                                        )
+                                    })
                                 ) : (
                                     <p className="text-sm text-muted-foreground text-center py-8">No tokens found.</p>
                                 )}
