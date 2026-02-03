@@ -10,9 +10,10 @@ import { Button } from '@/components/ui/button';
 import TokenIcon from '../ui/token-icon';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ClipboardList, MoreVertical, Plus, Trash2 } from 'lucide-react';
+import { ClipboardList, MoreVertical, Plus, Trash2, Search } from 'lucide-react';
 import { Input } from '../ui/input';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from '../ui/dropdown-menu';
+import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 
 interface AgentTokensProps {
     agent: User;
@@ -34,6 +35,7 @@ export default function AgentTokens({ agent }: AgentTokensProps) {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [selectedTokenIds, setSelectedTokenIds] = useState<string[]>([]);
     const [searchQuery, setSearchQuery] = useState('');
+    const [isAdding, setIsAdding] = useState(false);
 
     useEffect(() => {
         const storedTokens: TokenDetails[] = JSON.parse(localStorage.getItem('createdTokens') || '[]');
@@ -55,6 +57,7 @@ export default function AgentTokens({ agent }: AgentTokensProps) {
         if (isDialogOpen) {
             setSelectedTokenIds(assignments[agent.id] || []);
             setSearchQuery('');
+            setIsAdding(false);
         }
     }, [isDialogOpen, assignments, agent.id]);
 
@@ -150,39 +153,70 @@ export default function AgentTokens({ agent }: AgentTokensProps) {
                             </div>
                         </ScrollArea>
                         
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button variant="outline" className="w-full">
-                                    <Plus className="mr-2 h-4 w-4" />
-                                    Add Another Token
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent className="w-[var(--radix-dropdown-menu-trigger-width)]">
-                                <div className="p-2">
-                                    <Input
-                                        autoFocus
-                                        placeholder="Search tokens..."
-                                        className="w-full"
-                                        value={searchQuery}
-                                        onChange={(e) => setSearchQuery(e.target.value)}
-                                    />
-                                </div>
-                                <DropdownMenuSeparator />
-                                <ScrollArea className="max-h-64">
-                                    {unassigned.length > 0 ? (
-                                        unassigned.map(token => (
-                                            <DropdownMenuItem key={token.id} onSelect={() => handleTokenAdd(token.id)}>
-                                                {token.tokenName} ({token.tokenTicker})
-                                            </DropdownMenuItem>
-                                        ))
-                                    ) : (
-                                        <p className="text-sm text-muted-foreground text-center p-2">No other tokens to add.</p>
-                                    )}
-                                </ScrollArea>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
+                        {!isAdding ? (
+                            <Button
+                                variant="link"
+                                className="p-0 h-auto justify-start text-primary"
+                                onClick={() => {
+                                    setIsAdding(true);
+                                    setSearchQuery('');
+                                }}
+                            >
+                                <Plus className="mr-2 h-4 w-4" />
+                                Add Another Token
+                            </Button>
+                        ) : (
+                            <div className="space-y-2">
+                                <p className="text-sm text-left font-medium">Select token</p>
+                                <Popover open={isAdding} onOpenChange={setIsAdding}>
+                                    <PopoverTrigger asChild>
+                                        <Button variant="outline" className="w-full justify-start text-muted-foreground">
+                                            <Search className="mr-2 h-4 w-4" />
+                                            Search for a token to add...
+                                        </Button>
+                                    </PopoverTrigger>
+                                    <PopoverContent
+                                        className="w-[var(--radix-popover-trigger-width)] p-0"
+                                        align="start"
+                                    >
+                                        <div className="p-2 border-b">
+                                            <Input
+                                                autoFocus
+                                                placeholder="Search tokens..."
+                                                className="w-full border-0 focus-visible:ring-0 focus-visible:ring-offset-0 h-8"
+                                                value={searchQuery}
+                                                onChange={(e) => setSearchQuery(e.target.value)}
+                                            />
+                                        </div>
+                                        <ScrollArea className="max-h-64">
+                                            {unassigned.length > 0 ? (
+                                                <div className="p-1">
+                                                    {unassigned.map(token => (
+                                                        <button
+                                                            key={token.id}
+                                                            className="w-full text-left p-2 rounded-md hover:bg-accent flex items-center gap-3"
+                                                            onClick={() => {
+                                                                handleTokenAdd(token.id);
+                                                                setIsAdding(false);
+                                                            }}>
+                                                            <TokenIcon token={token} className="h-8 w-8" />
+                                                            <div>
+                                                                <p className="font-semibold text-sm">{token.tokenName}</p>
+                                                                <p className="text-xs text-muted-foreground">{token.tokenTicker}</p>
+                                                            </div>
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            ) : (
+                                                <p className="text-sm text-muted-foreground text-center p-4">No other tokens to add.</p>
+                                            )}
+                                        </ScrollArea>
+                                    </PopoverContent>
+                                </Popover>
+                            </div>
+                        )}
                         
-                        <DialogFooter>
+                        <DialogFooter className="pt-4">
                             <DialogClose asChild>
                                 <Button type="button" variant="ghost">Cancel</Button>
                             </DialogClose>
