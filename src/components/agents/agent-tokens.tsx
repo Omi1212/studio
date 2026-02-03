@@ -85,15 +85,14 @@ export default function AgentTokens({ agent }: AgentTokensProps) {
     const unassigned = useMemo(() => {
         return allTokens.filter(token => !selectedTokenIds.includes(token.id));
     }, [allTokens, selectedTokenIds]);
-
+    
+    const assigned = useMemo(() => {
+        return allTokens.filter(token => selectedTokenIds.includes(token.id));
+    }, [allTokens, selectedTokenIds]);
 
     if (loading) {
         return <Card className="h-64 animate-pulse bg-muted/50"></Card>;
     }
-
-    const assigned = useMemo(() => {
-        return allTokens.filter(token => selectedTokenIds.includes(token.id));
-    }, [allTokens, selectedTokenIds]);
 
     return (
         <Card>
