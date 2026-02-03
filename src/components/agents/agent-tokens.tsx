@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import type { User, TokenDetails } from '@/lib/types';
 import { exampleTokens } from '@/lib/data';
 import { useToast } from '@/hooks/use-toast';
@@ -12,7 +12,8 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ClipboardList, Check } from 'lucide-react';
+import { ClipboardList, Check, Search } from 'lucide-react';
+import { Input } from '../ui/input';
 
 interface AgentTokensProps {
     agent: User;
@@ -33,6 +34,7 @@ export default function AgentTokens({ agent }: AgentTokensProps) {
     const [loading, setLoading] = useState(true);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [selectedTokenIds, setSelectedTokenIds] = useState<string[]>([]);
+    const [searchQuery, setSearchQuery] = useState('');
 
     useEffect(() => {
         // Fetch tokens and assignments
@@ -54,6 +56,7 @@ export default function AgentTokens({ agent }: AgentTokensProps) {
     useEffect(() => {
         if (isDialogOpen) {
             setSelectedTokenIds(assignments[agent.id] || []);
+            setSearchQuery('');
         }
     }, [isDialogOpen, assignments, agent.id]);
 
@@ -78,12 +81,25 @@ export default function AgentTokens({ agent }: AgentTokensProps) {
         );
     };
 
-    const sortedTokens = [...allTokens].sort((a, b) => {
-        const aIsAssigned = (assignments[agent.id] || []).includes(a.id);
-        const bIsAssigned = (assignments[agent.id] || []).includes(b.id);
-        if (aIsAssigned === bIsAssigned) return a.tokenName.localeCompare(b.tokenName);
-        return aIsAssigned ? -1 : 1;
-    });
+    const filteredTokens = useMemo(() => {
+        const sortedTokens = [...allTokens].sort((a, b) => {
+            const aIsAssigned = (assignments[agent.id] || []).includes(a.id);
+            const bIsAssigned = (assignments[agent.id] || []).includes(b.id);
+            if (aIsAssigned === bIsAssigned) return a.tokenName.localeCompare(b.tokenName);
+            return aIsAssigned ? -1 : 1;
+        });
+
+        if (!searchQuery) {
+            return sortedTokens;
+        }
+
+        const lowercasedQuery = searchQuery.toLowerCase();
+        return sortedTokens.filter(token => 
+            token.tokenName.toLowerCase().includes(lowercasedQuery) ||
+            token.tokenTicker.toLowerCase().includes(lowercasedQuery)
+        );
+    }, [allTokens, assignments, agent.id, searchQuery]);
+
 
     if (loading) {
         return <Card className="h-64 animate-pulse bg-muted/50"></Card>;
@@ -97,17 +113,26 @@ export default function AgentTokens({ agent }: AgentTokensProps) {
                     <DialogTrigger asChild>
                         <Button variant="outline">Manage Tokens</Button>
                     </DialogTrigger>
-                    <DialogContent className="sm:max-w-md">
+                    <DialogContent className="sm:max-w-lg">
                         <DialogHeader>
                             <DialogTitle>Assign Tokens to {agent.name}</DialogTitle>
                             <DialogDescription>
                                 Select the tokens this agent can manage.
                             </DialogDescription>
                         </DialogHeader>
+                         <div className="relative">
+                            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                            <Input
+                                placeholder="Search tokens..."
+                                className="pl-8"
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                            />
+                        </div>
                         <ScrollArea className="max-h-96 -mr-4">
                             <div className="grid gap-3 py-4 pr-4">
-                                {sortedTokens.length > 0 ? (
-                                    sortedTokens.map(token => (
+                                {filteredTokens.length > 0 ? (
+                                    filteredTokens.map(token => (
                                         <div key={token.id}>
                                             <Checkbox
                                                 id={`token-${agent.id}-${token.id}`}
@@ -133,7 +158,7 @@ export default function AgentTokens({ agent }: AgentTokensProps) {
                                         </div>
                                     ))
                                 ) : (
-                                    <p className="text-sm text-muted-foreground text-center">No active tokens available to assign.</p>
+                                    <p className="text-sm text-muted-foreground text-center py-8">No tokens found.</p>
                                 )}
                             </div>
                         </ScrollArea>

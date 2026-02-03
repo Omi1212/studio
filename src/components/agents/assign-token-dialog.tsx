@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -18,7 +18,8 @@ import type { User, TokenDetails } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { DropdownMenuItem } from '../ui/dropdown-menu';
 import TokenIcon from '../ui/token-icon';
-import { Check } from 'lucide-react';
+import { Check, Search } from 'lucide-react';
+import { Input } from '../ui/input';
 
 interface AssignTokenDialogProps {
     agent: User;
@@ -36,12 +37,13 @@ const networkMap: { [key: string]: string } = {
 
 export function AssignTokenDialog({ agent, allTokens, assignedTokenIds, onUpdate }: AssignTokenDialogProps) {
     const [isOpen, setIsOpen] = useState(false);
-    // Initialize local state when dialog opens
     const [selectedTokenIds, setSelectedTokenIds] = useState<string[]>([]);
+    const [searchQuery, setSearchQuery] = useState('');
 
     useEffect(() => {
         if (isOpen) {
             setSelectedTokenIds(assignedTokenIds);
+            setSearchQuery('');
         }
     }, [isOpen, assignedTokenIds]);
 
@@ -62,13 +64,25 @@ export function AssignTokenDialog({ agent, allTokens, assignedTokenIds, onUpdate
         });
     };
     
-    // Sort tokens to show assigned ones first
-    const sortedTokens = [...allTokens].sort((a, b) => {
-        const aIsAssigned = assignedTokenIds.includes(a.id);
-        const bIsAssigned = assignedTokenIds.includes(b.id);
-        if (aIsAssigned === bIsAssigned) return a.tokenName.localeCompare(b.tokenName);
-        return aIsAssigned ? -1 : 1;
-    });
+    const filteredTokens = useMemo(() => {
+        let sortedTokens = [...allTokens].sort((a, b) => {
+            const aIsAssigned = assignedTokenIds.includes(a.id);
+            const bIsAssigned = assignedTokenIds.includes(b.id);
+            if (aIsAssigned === bIsAssigned) return a.tokenName.localeCompare(b.tokenName);
+            return aIsAssigned ? -1 : 1;
+        });
+
+        if (!searchQuery) {
+            return sortedTokens;
+        }
+
+        const lowercasedQuery = searchQuery.toLowerCase();
+        return sortedTokens.filter(token => 
+            token.tokenName.toLowerCase().includes(lowercasedQuery) ||
+            token.tokenTicker.toLowerCase().includes(lowercasedQuery)
+        );
+    }, [allTokens, assignedTokenIds, searchQuery]);
+
 
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -77,17 +91,26 @@ export function AssignTokenDialog({ agent, allTokens, assignedTokenIds, onUpdate
                     Manage Tokens
                 </DropdownMenuItem>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-md">
+            <DialogContent className="sm:max-w-lg">
                 <DialogHeader>
                     <DialogTitle>Assign Tokens to {agent.name}</DialogTitle>
                     <DialogDescription>
                         Select the tokens this agent can manage.
                     </DialogDescription>
                 </DialogHeader>
+                <div className="relative">
+                    <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <Input
+                        placeholder="Search tokens..."
+                        className="pl-8"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                </div>
                 <ScrollArea className="max-h-96 -mr-4">
                     <div className="grid gap-3 py-4 pr-4">
-                        {sortedTokens.length > 0 ? (
-                             sortedTokens.map(token => (
+                        {filteredTokens.length > 0 ? (
+                             filteredTokens.map(token => (
                                 <div key={token.id}>
                                     <Checkbox
                                         id={`token-dialog-${agent.id}-${token.id}`}
@@ -113,7 +136,7 @@ export function AssignTokenDialog({ agent, allTokens, assignedTokenIds, onUpdate
                                 </div>
                             ))
                         ) : (
-                            <p className="text-sm text-muted-foreground text-center">No active tokens available to assign.</p>
+                            <p className="text-sm text-muted-foreground text-center py-8">No tokens found.</p>
                         )}
                     </div>
                 </ScrollArea>
