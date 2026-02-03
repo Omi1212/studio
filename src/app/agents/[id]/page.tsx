@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -41,20 +40,6 @@ function getStatusBadge(status: User['status']) {
       return <Badge variant="secondary">Unknown</Badge>;
   }
 }
-
-function getKycBadge(status: User['kycStatus']) {
-  switch (status) {
-    case 'verified':
-      return <Badge variant="outline" className="text-green-400 border-green-400">Verified</Badge>;
-    case 'pending':
-      return <Badge variant="outline" className="text-yellow-400 border-yellow-400">Pending</Badge>;
-    case 'rejected':
-       return <Badge variant="destructive">Rejected</Badge>;
-    default:
-      return <Badge variant="secondary">Unknown</Badge>;
-  }
-}
-
 
 function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
   return (
@@ -185,7 +170,6 @@ export default function AgentDetailsPage() {
                     <InfoRow label="Email" value={agent.email} />
                     <InfoRow label="Role" value={<span className="capitalize">{agent.role}</span>} />
                     <InfoRow label="Wallet Address" value={<span className="font-mono">{agent.walletAddress}</span>} />
-                    <InfoRow label="KYC Status" value={getKycBadge(agent.kycStatus)} />
                 </CardContent>
             </Card>
             </div>

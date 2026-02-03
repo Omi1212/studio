@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -59,7 +58,6 @@ export default function EditAgentPage() {
       // Update from form data
       role: formData.get('role') as 'investor' | 'issuer' | 'agent' | 'superadmin',
       status: formData.get('status') as 'active' | 'inactive',
-      kycStatus: formData.get('kycStatus') as 'verified' | 'pending' | 'rejected',
     };
     
     const storedUsers: User[] = JSON.parse(localStorage.getItem('users') || '[]');
@@ -141,19 +139,6 @@ export default function EditAgentPage() {
                                 </Select>
                             </div>
                          </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="kycStatus">KYC Status</Label>
-                             <Select name="kycStatus" defaultValue={agent.kycStatus}>
-                                <SelectTrigger id="kycStatus">
-                                    <SelectValue placeholder="Select KYC status" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="verified">Verified</SelectItem>
-                                    <SelectItem value="pending">Pending</SelectItem>
-                                     <SelectItem value="rejected">Rejected</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
                     </CardContent>
                     <CardContent className="flex justify-end gap-2">
                         <Button variant="outline" asChild>

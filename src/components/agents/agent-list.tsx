@@ -31,19 +31,6 @@ function getStatusBadge(status: User['status']) {
   }
 }
 
-function getKycBadge(status: User['kycStatus']) {
-  switch (status) {
-    case 'verified':
-      return <Badge variant="outline" className="text-green-400 border-green-400">Verified</Badge>;
-    case 'pending':
-      return <Badge variant="outline" className="text-yellow-400 border-yellow-400">Pending</Badge>;
-    case 'rejected':
-       return <Badge variant="destructive">Rejected</Badge>;
-    default:
-      return <Badge variant="secondary">Unknown</Badge>;
-  }
-}
-
 export default function AgentList() {
     const [agents, setAgents] = useState<Agent[]>([]);
     const [activeTokens, setActiveTokens] = useState<TokenDetails[]>([]);
@@ -174,7 +161,6 @@ export default function AgentList() {
                             <TableRow>
                                 <TableHead>Agent</TableHead>
                                 <TableHead className="text-center">Assigned Tokens</TableHead>
-                                <TableHead className="hidden sm:table-cell">KYC</TableHead>
                                 <TableHead className="hidden sm:table-cell">Status</TableHead>
                                 <TableHead className="text-right">Actions</TableHead>
                             </TableRow>
@@ -198,7 +184,6 @@ export default function AgentList() {
                                         <TableCell className="text-center">
                                             <Badge variant="secondary">{assignedTokenIds.length}</Badge>
                                         </TableCell>
-                                        <TableCell className="hidden sm:table-cell">{getKycBadge(agent.kycStatus)}</TableCell>
                                         <TableCell className="hidden sm:table-cell">{getStatusBadge(agent.status)}</TableCell>
                                         <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
                                             <div className="flex items-center justify-end gap-2">
