@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useEffect, useState, useMemo } from 'react';
@@ -183,7 +182,7 @@ export default function AssetList() {
     return (
         <div className="space-y-4">
             <div className="flex justify-between items-center">
-                <h1 className="text-3xl font-headline font-semibold">Assets</h1>
+                <h1 className="text-3xl font-headline font-semibold">Tokens</h1>
             </div>
              {view === 'card' ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -214,7 +213,7 @@ export default function AssetList() {
   return (
     <div className="space-y-4">
         <div className="flex justify-between items-center">
-            <h1 className="text-3xl font-headline font-semibold">Assets</h1>
+            <h1 className="text-3xl font-headline font-semibold">Tokens</h1>
         </div>
          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
             <div className="relative w-full sm:w-auto flex-grow sm:flex-grow-0">
