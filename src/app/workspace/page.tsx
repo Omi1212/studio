@@ -7,7 +7,7 @@ import {
 import SidebarNav from '@/components/dashboard/sidebar-nav';
 import HeaderDynamic from '@/components/dashboard/header-dynamic';
 import { useEffect, useState } from 'react';
-import type { TokenDetails } from '@/lib/types';
+import type { TokenDetails, User } from '@/lib/types';
 import { exampleTokens } from '@/lib/data';
 import { Rocket } from 'lucide-react';
 import TokenDetailsView from '@/components/workspace/token-details-view';
@@ -17,8 +17,12 @@ import Link from 'next/link';
 export default function WorkspacePage() {
   const [selectedToken, setSelectedToken] = useState<TokenDetails | null>(null);
   const [loading, setLoading] = useState(true);
+  const [userRole, setUserRole] = useState<User['role'] | null>(null);
 
   useEffect(() => {
+    const role = localStorage.getItem('userRole') as User['role'] | null;
+    setUserRole(role);
+
     const handleTokenChange = () => {
         const storedTokenId = localStorage.getItem('selectedTokenId');
         if (storedTokenId) {
@@ -61,7 +65,7 @@ export default function WorkspacePage() {
                    <p className="text-muted-foreground">Loading token details...</p>
                 </div>
             ) : selectedToken ? (
-               <TokenDetailsView token={selectedToken} view="workspace" />
+               <TokenDetailsView token={selectedToken} view="workspace" userRole={userRole} />
             ) : (
               <div className="border-dashed border-2 border-muted-foreground/50 rounded-lg h-96 flex flex-col items-center justify-center text-center p-4">
                   <Rocket className="h-16 w-16 text-muted-foreground mb-4" />

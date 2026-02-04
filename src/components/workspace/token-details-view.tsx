@@ -11,16 +11,18 @@ import {
 import { Button } from '@/components/ui/button';
 import { Copy, Globe, Coins, Flame, Snowflake, TrendingUp, BarChart, CircleDollarSign } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import type { TokenDetails } from '@/lib/types';
+import type { TokenDetails, User } from '@/lib/types';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Badge } from '../ui/badge';
 import { Separator } from '../ui/separator';
 import { Progress } from '../ui/progress';
 import { useState, useEffect } from 'react';
+import AssignedAgents from './assigned-agents';
 
 interface TokenDetailsViewProps {
   token: TokenDetails;
   view?: 'dashboard' | 'workspace';
+  userRole?: User['role'] | null;
 }
 
 function KpiCard({ title, value, icon: Icon }: { title: string; value: string; icon: React.ElementType }) {
@@ -40,7 +42,8 @@ function KpiCard({ title, value, icon: Icon }: { title: string; value: string; i
 
 export default function TokenDetailsView({
   token,
-  view = 'workspace'
+  view = 'workspace',
+  userRole,
 }: TokenDetailsViewProps) {
   const { toast } = useToast();
   const [iconPreview, setIconPreview] = useState<string | null>(null);
@@ -87,6 +90,39 @@ export default function TokenDetailsView({
       default:
         return <Badge variant="secondary">Unknown</Badge>;
     }
+  }
+  
+  const renderConditionalContent = () => {
+    if (userRole === 'superadmin') {
+      return <AssignedAgents tokenId={token.id} />;
+    }
+
+    if (view === 'dashboard' || view === 'workspace') {
+      return (
+        <Card>
+          <CardHeader>
+            <CardTitle>Token Actions</CardTitle>
+            <CardDescription>Perform actions on this token. (Available after approval)</CardDescription>
+          </CardHeader>
+          <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Button variant="outline" disabled={token.status !== 'active'}>
+              <Coins className="mr-2 h-4 w-4" />
+              Mint Tokens
+            </Button>
+            <Button variant="outline" disabled={token.status !== 'active'}>
+              <Flame className="mr-2 h-4 w-4" />
+              Burn Tokens
+            </Button>
+            <Button variant="outline" disabled={token.status !== 'active'}>
+              <Snowflake className="mr-2 h-4 w-4" />
+              Freeze Address
+            </Button>
+          </CardContent>
+        </Card>
+      );
+    }
+
+    return null;
   }
 
 
@@ -179,28 +215,7 @@ export default function TokenDetailsView({
         </Card>
       </div>
 
-      {(view === 'dashboard' || view === 'workspace') && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Token Actions</CardTitle>
-            <CardDescription>Perform actions on this token. (Available after approval)</CardDescription>
-          </CardHeader>
-          <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Button variant="outline" disabled={token.status !== 'active'}>
-              <Coins className="mr-2 h-4 w-4" />
-              Mint Tokens
-            </Button>
-            <Button variant="outline" disabled={token.status !== 'active'}>
-              <Flame className="mr-2 h-4 w-4" />
-              Burn Tokens
-            </Button>
-            <Button variant="outline" disabled={token.status !== 'active'}>
-              <Snowflake className="mr-2 h-4 w-4" />
-              Freeze Address
-            </Button>
-          </CardContent>
-        </Card>
-      )}
+      {renderConditionalContent()}
     </div>
   );
 }

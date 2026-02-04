@@ -12,15 +12,19 @@ import SidebarNav from '@/components/dashboard/sidebar-nav';
 import HeaderDynamic from '@/components/dashboard/header-dynamic';
 import TokenDetailsView from '@/components/workspace/token-details-view';
 import { exampleTokens } from '@/lib/data';
-import type { TokenDetails } from '@/lib/types';
+import type { TokenDetails, User } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 
 function TokenDetailsComponent({ params }: { params: { tokenId: string } }) {
   const [token, setToken] = useState<TokenDetails | null>(null);
   const [loading, setLoading] = useState(true);
+  const [userRole, setUserRole] = useState<User['role'] | null>(null);
 
   useEffect(() => {
+    const role = localStorage.getItem('userRole') as User['role'] | null;
+    setUserRole(role);
+
     const { tokenId } = params;
     
     const storedTokens: TokenDetails[] = JSON.parse(localStorage.getItem('createdTokens') || '[]');
@@ -80,7 +84,7 @@ function TokenDetailsComponent({ params }: { params: { tokenId: string } }) {
                 </h1>
             </div>
             <div className="max-w-4xl mx-auto">
-             <TokenDetailsView token={token} view="workspace" />
+             <TokenDetailsView token={token} view="workspace" userRole={userRole} />
             </div>
           </main>
         </div>
