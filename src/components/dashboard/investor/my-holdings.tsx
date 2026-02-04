@@ -26,9 +26,9 @@ export default function MyHoldings() {
                     <TableHeader>
                         <TableRow>
                             <TableHead>Asset</TableHead>
-                            <TableHead className="text-right">Price</TableHead>
+                            <TableHead className="hidden sm:table-cell text-right">Price</TableHead>
                             <TableHead className="text-right">Balance</TableHead>
-                            <TableHead className="text-right">Value</TableHead>
+                            <TableHead className="hidden sm:table-cell text-right">Value</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -43,9 +43,12 @@ export default function MyHoldings() {
                                         </div>
                                     </div>
                                 </TableCell>
-                                <TableCell className="text-right font-mono">${holding.value.toFixed(2)}</TableCell>
-                                <TableCell className="text-right font-mono">{holding.amount.toLocaleString()}</TableCell>
-                                <TableCell className="text-right font-mono">${(holding.amount * holding.value).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
+                                <TableCell className="hidden sm:table-cell text-right font-mono">${holding.value.toFixed(2)}</TableCell>
+                                <TableCell className="text-right font-mono">
+                                    <p className="font-medium">{holding.amount.toLocaleString()}</p>
+                                    <p className="text-sm text-muted-foreground sm:hidden">${(holding.amount * holding.value).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                                </TableCell>
+                                <TableCell className="hidden sm:table-cell text-right font-mono">${(holding.amount * holding.value).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
                             </TableRow>
                         ))}
                     </TableBody>
