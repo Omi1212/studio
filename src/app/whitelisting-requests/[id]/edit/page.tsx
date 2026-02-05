@@ -51,7 +51,7 @@ export default function EditRequestPage() {
       ...request,
       name: formData.get('name') as string,
       email: formData.get('email') as string,
-      kycStatus: formData.get('status') as 'verified' | 'pending' | 'rejected',
+      kycStatus: formData.get('kycStatus') as 'verified' | 'pending' | 'rejected',
       walletAddress: formData.get('walletAddress') as string,
     };
     
@@ -103,9 +103,9 @@ export default function EditRequestPage() {
                             <Input id="walletAddress" name="walletAddress" defaultValue={request.walletAddress} required />
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="status">Status</Label>
-                             <Select name="status" defaultValue={request.kycStatus}>
-                                <SelectTrigger id="status">
+                            <Label htmlFor="kycStatus">Status</Label>
+                             <Select name="kycStatus" defaultValue={request.kycStatus}>
+                                <SelectTrigger id="kycStatus">
                                     <SelectValue placeholder="Select status" />
                                 </SelectTrigger>
                                 <SelectContent>

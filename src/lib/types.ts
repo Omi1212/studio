@@ -63,4 +63,9 @@ export type User = {
   address?: string;
   city?: string;
   businessName?: string;
+  joinedDate?: string;
+  totalInvested?: number;
+  isFrozen?: boolean;
+  holdings?: any[];
+  transactions?: any[];
 };

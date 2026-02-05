@@ -32,24 +32,12 @@ import Link from 'next/link';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import TokenIcon from '@/components/ui/token-icon';
 import { cn } from '@/lib/utils';
-import type { TokenDetails } from '@/lib/types';
+import type { TokenDetails, User } from '@/lib/types';
 
-type Investor = {
-    id: string;
-    name: string;
-    email: string;
-    status: 'accepted' | 'pending' | 'rejected';
-    walletAddress: string;
-    joinedDate: string;
-    totalInvested: number;
-    isFrozen: boolean;
-    holdings: any[];
-    transactions: any[];
-};
 
-function getStatusBadge(status: Investor['status']) {
+function getStatusBadge(status: User['kycStatus']) {
   switch (status) {
-    case 'accepted':
+    case 'verified':
       return <Badge variant="outline" className="text-green-400 border-green-400">Whitelisted</Badge>;
     case 'pending':
       return <Badge variant="outline" className="text-yellow-400 border-yellow-400">Pending</Badge>;
@@ -73,11 +61,11 @@ export default function InvestorDetailsPage() {
   const params = useParams();
   const router = useRouter();
   const { toast } = useToast();
-  const [investor, setInvestor] = useState<Investor | null>(null);
+  const [investor, setInvestor] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [allTokens, setAllTokens] = useState<TokenDetails[]>([]);
   const [selectedToken, setSelectedToken] = useState<TokenDetails | null>(null);
-  const [filteredTransactions, setFilteredTransactions] = useState<Investor['transactions']>([]);
+  const [filteredTransactions, setFilteredTransactions] = useState<User['transactions']>([]);
 
   useEffect(() => {
     const { id } = params;
@@ -212,7 +200,7 @@ export default function InvestorDetailsPage() {
                         <div>
                             <CardTitle className="text-2xl">{investor.name}</CardTitle>
                             <div className="flex items-center gap-2 mt-1">
-                                {getStatusBadge(investor.status)}
+                                {getStatusBadge(investor.kycStatus)}
                                 {investor.isFrozen && <Badge variant="secondary" className="bg-sky-600/20 text-sky-400 border-sky-400/50">Frozen</Badge>}
                             </div>
                         </div>
@@ -221,8 +209,8 @@ export default function InvestorDetailsPage() {
                 <CardContent className="space-y-4">
                     <InfoRow label="Email" value={investor.email} />
                     <InfoRow label="Wallet Address" value={<span className="font-mono">{investor.walletAddress.slice(0, 7)}...{investor.walletAddress.slice(-4)}</span>} />
-                    <InfoRow label="Joined Date" value={new Date(investor.joinedDate).toLocaleDateString()} />
-                    <InfoRow label="Total Invested" value={<span className="font-mono">${investor.totalInvested.toLocaleString()}</span>} />
+                    {investor.joinedDate && <InfoRow label="Joined Date" value={new Date(investor.joinedDate).toLocaleDateString()} />}
+                    {investor.totalInvested !== undefined && <InfoRow label="Total Invested" value={<span className="font-mono">${investor.totalInvested.toLocaleString()}</span>} />}
                 </CardContent>
             </Card>
 

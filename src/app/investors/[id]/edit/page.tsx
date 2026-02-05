@@ -17,20 +17,13 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
-
-type Investor = {
-    id: string;
-    name: string;
-    email: string;
-    status: 'whitelisted' | 'pending' | 'accepted' | 'rejected';
-    walletAddress: string;
-};
+import type { User } from '@/lib/types';
 
 export default function EditInvestorPage() {
   const params = useParams();
   const router = useRouter();
   const { toast } = useToast();
-  const [investor, setInvestor] = useState<Investor | null>(null);
+  const [investor, setInvestor] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -59,7 +52,7 @@ export default function EditInvestorPage() {
       ...investor,
       name: formData.get('name') as string,
       email: formData.get('email') as string,
-      status: formData.get('status') as 'whitelisted' | 'pending' | 'accepted' | 'rejected',
+      kycStatus: formData.get('kycStatus') as 'verified' | 'pending' | 'rejected',
       walletAddress: formData.get('walletAddress') as string,
     };
     
@@ -112,15 +105,14 @@ export default function EditInvestorPage() {
                             <Input id="walletAddress" name="walletAddress" defaultValue={investor.walletAddress} required />
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="status">Status</Label>
-                             <Select name="status" defaultValue={investor.status}>
-                                <SelectTrigger id="status">
+                            <Label htmlFor="kycStatus">Status</Label>
+                             <Select name="kycStatus" defaultValue={investor.kycStatus}>
+                                <SelectTrigger id="kycStatus">
                                     <SelectValue placeholder="Select status" />
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="pending">Pending</SelectItem>
-                                    <SelectItem value="whitelisted">Whitelisted</SelectItem>
-                                    <SelectItem value="accepted">Accepted</SelectItem>
+                                    <SelectItem value="verified">Whitelisted</SelectItem>
                                     <SelectItem value="rejected">Rejected</SelectItem>
                                 </SelectContent>
                             </Select>

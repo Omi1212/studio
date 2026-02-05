@@ -28,21 +28,22 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import TokenIcon from '../ui/token-icon';
 
 
-type Investor = User & {
-    joinedDate: string;
-    totalInvested: number;
-    isFrozen: boolean;
-    holdings: any[];
-    transactions: any[];
-};
+type Investor = User;
 const ITEMS_PER_PAGE = 10;
 
 function getStatusBadge(investor: Investor) {
   if (investor.isFrozen) {
     return <Badge variant="secondary" className="bg-sky-600/20 text-sky-400 border-sky-400/50">Frozen</Badge>;
   }
-  // In this view, status will always be 'accepted', so we show 'Whitelisted'
-  return <Badge variant="outline" className="text-green-400 border-green-400">Whitelisted</Badge>;
+  
+  switch (investor.kycStatus) {
+    case 'verified':
+      return <Badge variant="outline" className="text-green-400 border-green-400">Whitelisted</Badge>;
+    default:
+        // In this list, we only show verified investors, so other statuses are less likely.
+        // But as a fallback:
+      return <Badge variant="secondary">{investor.kycStatus}</Badge>;
+  }
 }
 
 function InvestorCard({ investor, onToggleFreeze }: { investor: Investor, onToggleFreeze: (id: string) => void }) {
@@ -80,7 +81,7 @@ function InvestorCard({ investor, onToggleFreeze }: { investor: Investor, onTogg
         </div>
         <div className="flex justify-between text-sm mt-2">
           <span className="text-muted-foreground">Invested</span>
-          <span className="font-medium font-mono">${investor.totalInvested.toLocaleString()}</span>
+          <span className="font-medium font-mono">${(investor.totalInvested || 0).toLocaleString()}</span>
         </div>
         <div className="flex justify-between text-sm mt-2">
             <span className="text-muted-foreground">Wallet</span>
@@ -124,7 +125,7 @@ function InvestorTableRow({ investor, selectedToken, onToggleFreeze }: { investo
         )}
       </TableCell>
       <TableCell className="hidden md:table-cell">
-        <span className="font-mono">${investor.totalInvested.toLocaleString()}</span>
+        <span className="font-mono">${(investor.totalInvested || 0).toLocaleString()}</span>
       </TableCell>
        <TableCell className="hidden lg:table-cell">
         <span className="font-mono">{investor.walletAddress.slice(0, 7)}...{investor.walletAddress.slice(-4)}</span>
@@ -195,8 +196,8 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
     if (!selectedToken) return [];
 
     let filtered = investors.filter(investor => 
-        investor.status === 'accepted' &&
-        investor.transactions.some(tx => tx.token.id === selectedToken.id)
+        investor.kycStatus === 'verified' &&
+        investor.transactions?.some(tx => tx.token.id === selectedToken.id)
     );
 
     if (statusFilter !== 'all') {

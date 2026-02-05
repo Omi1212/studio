@@ -26,24 +26,19 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
-type WhitelistRequest = User & {
-    joinedDate: string;
-};
+type WhitelistRequest = User;
 
 const ITEMS_PER_PAGE = 10;
 
-function getStatusBadge(investor: WhitelistRequest) {
-  switch (investor.status) {
-    case 'active': // 'accepted' is mapped to 'active' user status
+function getStatusBadge(request: WhitelistRequest) {
+  switch (request.kycStatus) {
+    case 'verified':
       return <Badge variant="outline" className="text-green-400 border-green-400">Accepted</Badge>;
-    case 'inactive': // 'pending' can be considered 'inactive' for user status
+    case 'pending':
       return <Badge variant="outline" className="text-yellow-400 border-yellow-400">Pending</Badge>;
-    // 'rejected' is not a user status, so we handle it based on kycStatus or another field.
-    // For this component, we'll assume a 'rejected' status from the source data.
+    case 'rejected':
+      return <Badge variant="destructive">Rejected</Badge>;
     default:
-      if ((investor as any).status === 'rejected') {
-        return <Badge variant="destructive">Rejected</Badge>;
-      }
       return <Badge variant="secondary">Unknown</Badge>;
   }
 }
@@ -84,16 +79,18 @@ function RequestCard({ request, onApprove, onReject }: { request: WhitelistReque
             <span className="text-muted-foreground">Wallet</span>
             <span className="font-medium font-mono truncate">{request.walletAddress.slice(0, 7)}...{request.walletAddress.slice(-4)}</span>
         </div>
-        <div className="flex justify-between text-sm mt-2">
-          <span className="text-muted-foreground">Joined Date</span>
-          <span className="font-medium">{new Date(request.joinedDate).toLocaleDateString()}</span>
-        </div>
+        {request.joinedDate && (
+          <div className="flex justify-between text-sm mt-2">
+            <span className="text-muted-foreground">Joined Date</span>
+            <span className="font-medium">{new Date(request.joinedDate).toLocaleDateString()}</span>
+          </div>
+        )}
          <div className="flex justify-between text-sm mt-2">
             <span className="text-muted-foreground">Status</span>
             {getStatusBadge(request)}
         </div>
       </CardContent>
-      {request.status === 'inactive' && (request as any).kycStatus === 'pending' && (
+      {request.kycStatus === 'pending' && (
         <CardFooter className="flex gap-2">
             <AlertDialog>
                 <AlertDialogTrigger asChild>
@@ -140,12 +137,12 @@ function RequestTableRow({ request, onApprove, onReject }: { request: WhitelistR
         <span className="font-mono">{request.walletAddress.slice(0, 15)}...{request.walletAddress.slice(-4)}</span>
        </TableCell>
        <TableCell className="hidden md:table-cell">
-        {new Date(request.joinedDate).toLocaleDateString()}
+        {request.joinedDate ? new Date(request.joinedDate).toLocaleDateString() : 'N/A'}
        </TableCell>
        <TableCell className="hidden sm:table-cell">{getStatusBadge(request)}</TableCell>
       <TableCell className="text-right">
         <div className="flex items-center justify-end gap-2" onClick={(e) => e.stopPropagation()}>
-            {request.status === 'inactive' && (request as any).kycStatus === 'pending' && (
+            {request.kycStatus === 'pending' && (
                 <>
                     <AlertDialog>
                         <AlertDialogTrigger asChild>
@@ -200,9 +197,7 @@ export default function RequestList({ view, setView }: { view: ViewMode, setView
     fetch('/api/investors')
       .then(res => res.json())
       .then(data => {
-        // Assuming joinedDate needs to be added if not present in User type
-        const requestsWithDate = data.map((d: User) => ({...d, joinedDate: (d as any).joinedDate || new Date().toISOString() }))
-        setRequests(requestsWithDate);
+        setRequests(data);
       })
       .catch(console.error)
       .finally(() => setLoading(false));
