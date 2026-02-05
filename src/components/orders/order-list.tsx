@@ -144,11 +144,12 @@ export default function OrderList() {
       setTokens(tokensData);
       setInvestors(investorsData);
     }).catch(console.error).finally(() => setLoading(false));
-    
+  }, []);
 
+  useEffect(() => {
     const handleTokenChange = () => {
         const storedTokenId = localStorage.getItem('selectedTokenId');
-        if (storedTokenId) {
+        if (storedTokenId && tokens.length > 0) {
             const foundToken = tokens.find(t => t.id === storedTokenId);
             setSelectedToken(foundToken || null);
         } else {
