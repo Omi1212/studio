@@ -1,17 +1,13 @@
-
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { transfersData, exampleTokens } from '@/lib/data';
 import type { Transfer, TokenDetails } from '@/lib/types';
-import { Card, CardContent, CardHeader } from '../ui/card';
+import { Card, CardContent } from '../ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
-import { ArrowRight, Search, ArrowRightLeft } from 'lucide-react';
+import { ArrowRight, ArrowRightLeft } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Badge } from '../ui/badge';
-import { Input } from '../ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Button } from '../ui/button';
 
 const ITEMS_PER_PAGE = 10;
@@ -52,15 +48,35 @@ export default function TransferList({ searchQuery, typeFilter }: { searchQuery:
   useEffect(() => {
     const role = localStorage.getItem('userRole');
     setUserRole(role);
-    setTransfers(transfersData);
     
-    const handleTokenChange = () => {
+    const fetchTransfers = async () => {
+        setLoading(true);
+        try {
+            const response = await fetch('/api/transfers');
+            const data = await response.json();
+            setTransfers(data);
+        } catch (error) {
+            console.error("Failed to fetch transfers:", error);
+        }
+    };
+
+    fetchTransfers();
+    
+    const handleTokenChange = async () => {
         const storedTokenId = localStorage.getItem('selectedTokenId');
         if (storedTokenId) {
-            const storedTokens: TokenDetails[] = JSON.parse(localStorage.getItem('createdTokens') || '[]');
-            const allTokens: TokenDetails[] = [...exampleTokens, ...storedTokens];
-            const foundToken = allTokens.find(t => t.id === storedTokenId);
-            setSelectedToken(foundToken || null);
+            try {
+                const response = await fetch(`/api/tokens/${storedTokenId}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    setSelectedToken(data);
+                } else {
+                    setSelectedToken(null);
+                }
+            } catch (error) {
+                console.error("Failed to fetch token:", error);
+                setSelectedToken(null);
+            }
         } else {
             setSelectedToken(null);
         }

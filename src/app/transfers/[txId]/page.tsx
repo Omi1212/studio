@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -10,9 +9,8 @@ import {
 } from '@/components/ui/sidebar';
 import SidebarNav from '@/components/dashboard/sidebar-nav';
 import HeaderDynamic from '@/components/dashboard/header-dynamic';
-import { transfersData } from '@/lib/data';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Copy, Clock, Tag, ArrowRight, ArrowDown, ArrowUp } from 'lucide-react';
+import { ArrowLeft, Copy, Clock, Tag } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
@@ -59,13 +57,28 @@ export default function TransferDetailsPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const { txId } = params;
-    const foundTransfer = transfersData.find(t => t.txId === txId);
+    const fetchTransfer = async () => {
+      const { txId } = params;
+      if (!txId) return;
+
+      setLoading(true);
+      try {
+        const response = await fetch(`/api/transfers/${txId}`);
+        if(response.ok) {
+            const data = await response.json();
+            setTransfer(data);
+        } else {
+            setTransfer(null);
+        }
+      } catch (error) {
+        console.error("Failed to fetch transfer details:", error);
+        setTransfer(null);
+      } finally {
+        setLoading(false);
+      }
+    };
     
-    if (foundTransfer) {
-      setTransfer(foundTransfer);
-    }
-    setLoading(false);
+    fetchTransfer();
   }, [params]);
 
   const copyToClipboard = (text: string, fieldName: string) => {

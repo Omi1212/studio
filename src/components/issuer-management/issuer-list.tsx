@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { issuersData } from '@/lib/data';
 import type { Issuer } from '@/lib/types';
 import { Card } from '../ui/card';
 import { Avatar, AvatarFallback } from '../ui/avatar';
@@ -112,9 +111,19 @@ export default function IssuerList() {
   const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
-    const storedIssuers = localStorage.getItem('issuers');
-    setIssuers(storedIssuers ? JSON.parse(storedIssuers) : issuersData);
-    setLoading(false);
+    const fetchIssuers = async () => {
+      setLoading(true);
+      try {
+        const response = await fetch('/api/issuers');
+        const data = await response.json();
+        setIssuers(data);
+      } catch (error) {
+        console.error("Failed to fetch issuers:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchIssuers();
   }, []);
 
   const filteredIssuers = useMemo(() => {
@@ -162,11 +171,10 @@ export default function IssuerList() {
       return issuer;
     });
     setIssuers(updatedIssuers);
-    localStorage.setItem('issuers', JSON.stringify(updatedIssuers));
     if (updatedIssuer) {
         toast({
             title: "Status Updated",
-            description: `Issuer "${updatedIssuer.name}" is now ${updatedIssuer.status}.`
+            description: `Issuer "${updatedIssuer.name}" is now ${updatedIssuer.status}. (Change not persisted)`
         });
     }
   };
