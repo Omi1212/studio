@@ -1,16 +1,41 @@
 'use client';
+import { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { exampleTokens, investorsData } from '@/lib/data';
 import TokenIcon from '@/components/ui/token-icon';
 import Link from 'next/link';
+import type { TokenDetails, User } from '@/lib/types';
 
 export default function MarketHighlights() {
-    const investor = investorsData.find(inv => inv.id === 'inv-001');
-    const holdingsIds = investor?.holdings.map(h => h.tokenId) || [];
-    
-    // Highlight tokens not already held by the investor
-    const highlights = exampleTokens.filter(token => !holdingsIds.includes(token.id) && token.status === 'active').slice(0, 2);
+    const [highlights, setHighlights] = useState<TokenDetails[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+      setLoading(true);
+      Promise.all([
+        fetch('/api/investors/inv-001').then(res => res.json()),
+        fetch('/api/tokens').then(res => res.json())
+      ]).then(([investorData, tokensData]) => {
+        const holdingsIds = investorData?.holdings.map((h: any) => h.tokenId) || [];
+        const filteredHighlights = tokensData
+          .filter((token: TokenDetails) => !holdingsIds.includes(token.id) && token.status === 'active')
+          .slice(0, 2);
+        setHighlights(filteredHighlights);
+      }).catch(console.error)
+      .finally(() => setLoading(false));
+    }, []);
+
+    if(loading) {
+        return (
+            <div>
+                 <h2 className="text-2xl font-headline font-semibold mb-4">Discover Opportunities</h2>
+                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-6">
+                    <Card className="h-64 animate-pulse bg-muted/50"></Card>
+                    <Card className="h-64 animate-pulse bg-muted/50"></Card>
+                 </div>
+            </div>
+        );
+    }
 
     return (
         <div>

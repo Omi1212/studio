@@ -2,8 +2,7 @@
 
 import { useEffect, useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { exampleTokens, investorsData } from '@/lib/data';
-import type { TokenDetails, ViewMode } from '@/lib/types';
+import type { TokenDetails, ViewMode, User } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/card';
 import TokenIcon from '../ui/token-icon';
 import { Button } from '../ui/button';
@@ -12,7 +11,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '.
 import { useToast } from '@/hooks/use-toast';
 import { Input } from '../ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
-import { cn } from '@/lib/utils';
 import { Dialog, DialogContent, DialogTrigger } from '../ui/dialog';
 import PlaceOrder from './place-order';
 
@@ -137,40 +135,42 @@ export default function TokenList() {
   const [view, setView] = useState<ViewMode>('card');
   const [selectedToken, setSelectedToken] = useState<TokenDetails | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const router = useRouter();
 
   useEffect(() => {
-    
-    const storedTokens: TokenDetails[] = JSON.parse(localStorage.getItem('createdTokens') || '[]');
-    const combinedTokens: TokenDetails[] = [...exampleTokens, ...storedTokens].map(t => ({
-      ...t,
-      decimals: t.decimals ?? 0,
-      isFreezable: t.isFreezable ?? false,
-      publicKey: t.publicKey ?? `02f...${t.id.slice(-10)}`,
-      tokenName: t.tokenName || 'Untitled Token',
-      tokenTicker: t.tokenTicker || '---',
-      network: t.network || 'unknown',
-      maxSupply: t.maxSupply || 0,
-      price: t.price || 0,
-    })).filter(t => t.status === 'active');
-    
-    setAllTokens(combinedTokens);
-    
-    // Check subscriptions
-    const storedInvestors: any[] = JSON.parse(localStorage.getItem('investors') || '[]');
-    const myRequests = storedInvestors.filter(inv => inv.name === 'Market Subscriber');
-    
-    const initialSubscriptions: Record<string, SubscriptionStatus> = { 'example-1': 'approved' };
-    combinedTokens.forEach(token => {
-        const requestForThisToken = myRequests.find(req => req.holdings && req.holdings.some((h: any) => h.tokenId === token.id));
-        if (requestForThisToken) {
-            initialSubscriptions[token.id] = requestForThisToken.status === 'accepted' ? 'approved' : 'pending';
-        }
-    });
+    setLoading(true);
+    Promise.all([
+      fetch('/api/tokens').then(res => res.json()),
+      fetch('/api/investors').then(res => res.json())
+    ]).then(([tokensData, investorsData]: [TokenDetails[], User[]]) => {
+      const activeTokens = tokensData
+        .filter(t => t.status === 'active')
+        .map(t => ({
+          ...t,
+          decimals: t.decimals ?? 0,
+          isFreezable: t.isFreezable ?? false,
+          publicKey: t.publicKey ?? `02f...${t.id.slice(-10)}`,
+          tokenName: t.tokenName || 'Untitled Token',
+          tokenTicker: t.tokenTicker || '---',
+          network: t.network || 'unknown',
+          maxSupply: t.maxSupply || 0,
+          price: t.price || 0,
+        }));
+      setAllTokens(activeTokens);
+      
+      const myRequests = investorsData.filter(inv => inv.name === 'Market Subscriber');
+      
+      const initialSubscriptions: Record<string, SubscriptionStatus> = { 'example-1': 'approved' };
+      activeTokens.forEach(token => {
+          const requestForThisToken = myRequests.find(req => req.holdings && req.holdings.some((h: any) => h.tokenId === token.id));
+          if (requestForThisToken) {
+              initialSubscriptions[token.id] = requestForThisToken.status === 'accepted' ? 'approved' : 'pending';
+          }
+      });
+      setSubscriptions(initialSubscriptions);
 
-    setSubscriptions(initialSubscriptions);
+    }).catch(console.error)
+    .finally(() => setLoading(false));
 
-    setLoading(false);
   }, []);
 
   const filteredTokens = useMemo(() => {
@@ -195,30 +195,8 @@ export default function TokenList() {
     const currentStatus = subscriptions[token.id] || 'none';
     
     if (currentStatus === 'none') {
-        const newRequest = {
-            id: `inv-req-${Math.random().toString(36).substring(2, 9)}`,
-            name: 'Market Subscriber',
-            email: `subscriber.${Math.floor(Math.random() * 1000)}@example.com`,
-            status: 'pending' as const,
-            walletAddress: `spark1q-market-${Math.random().toString(36).substring(2, 9)}`,
-            joinedDate: new Date().toISOString(),
-            totalInvested: 0,
-            isFrozen: false,
-            holdings: [{
-                tokenId: token.id,
-                tokenName: token.tokenName,
-                tokenTicker: token.tokenTicker,
-                amount: 0,
-                value: token.price || 0
-            }],
-            transactions: [],
-        };
-
-        const existingInvestors = JSON.parse(localStorage.getItem('investors') || JSON.stringify(investorsData));
-        localStorage.setItem('investors', JSON.stringify([newRequest, ...existingInvestors]));
-        
         setSubscriptions(prev => ({...prev, [token.id]: 'pending' }));
-        toast({ title: 'Whitelisting Request Sent!', description: "Your request to be whitelisted for this token is now pending approval." });
+        toast({ title: 'Whitelisting Request Sent (Not Persisted)!', description: "Your request to be whitelisted for this token is now pending approval for this session." });
     } else if (currentStatus === 'approved') {
         setSelectedToken(token);
         setIsModalOpen(true);
@@ -305,7 +283,7 @@ export default function TokenList() {
             <div className="border-dashed border-2 border-muted-foreground/50 rounded-lg h-96 flex flex-col items-center justify-center text-center p-4">
                 <ShoppingBag className="h-16 w-16 text-muted-foreground mb-4" />
                 <h2 className="text-xl font-semibold mb-2">No tokens match your search</h2>
-                <p className="text-muted-foreground mb-4">Try adjusting your search or filters to find what you're looking for.</p>
+                <p className="text-muted-foreground mb-4">Try adjusting your search or filters to find what you&apos;re looking for.</p>
             </div>
         ) : view === 'card' ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

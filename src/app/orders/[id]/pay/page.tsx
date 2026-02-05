@@ -10,16 +10,14 @@ import {
 } from '@/components/ui/sidebar';
 import SidebarNav from '@/components/dashboard/sidebar-nav';
 import HeaderDynamic from '@/components/dashboard/header-dynamic';
-import { ordersData, investorsData, exampleTokens } from '@/lib/data';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, CheckCircle2, Landmark, Copy, Eye, ArrowUpFromLine, ArrowDownToLine } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
-import { useToast } from '@/hooks/use-toast';
+import { ArrowLeft, CheckCircle2, Landmark } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import Link from 'next/link';
 import type { Order, TokenDetails } from '@/lib/types';
 import { Separator } from '@/components/ui/separator';
 import TokenIcon from '@/components/ui/token-icon';
-import { Dialog, DialogContent, DialogTrigger, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import PaymentMethods from '@/components/orders/payment-methods';
 
 const BtcIcon = () => (
@@ -51,16 +49,42 @@ export default function PayOrderPage() {
 
   useEffect(() => {
     const { id } = params;
-    const storedOrders: Order[] = JSON.parse(localStorage.getItem('orders') || JSON.stringify(ordersData));
+    if (!id) return;
+
+    setLoading(true);
+    // Because a newly created order is only in localStorage, we check there first.
+    const storedOrders: Order[] = JSON.parse(localStorage.getItem('orders') || '[]');
     const foundOrder = storedOrders.find(o => o.id === id);
     
+    let orderPromise: Promise<Order | null>;
+
     if (foundOrder) {
-      setOrder(foundOrder);
-      const allTokens = [...exampleTokens, ...JSON.parse(localStorage.getItem('createdTokens') || '[]')];
-      const foundToken = allTokens.find(t => t.id === foundOrder.tokenId);
-      if(foundToken) setToken(foundToken);
+        orderPromise = Promise.resolve(foundOrder);
+    } else {
+        orderPromise = fetch(`/api/orders/${id}`).then(res => res.ok ? res.json() : null);
     }
-    setLoading(false);
+    
+    orderPromise.then(orderData => {
+      if (orderData) {
+        setOrder(orderData);
+        return fetch(`/api/tokens/${orderData.tokenId}`);
+      }
+      throw new Error('Order not found');
+    })
+    .then(res => {
+      if (res.ok) return res.json();
+      throw new Error('Token not found');
+    })
+    .then((tokenData: TokenDetails) => {
+      setToken(tokenData);
+    })
+    .catch(err => {
+      console.error(err);
+      setOrder(null);
+      setToken(null);
+    })
+    .finally(() => setLoading(false));
+
   }, [params]);
 
   if (loading) {

@@ -8,7 +8,6 @@ import SidebarNav from '@/components/dashboard/sidebar-nav';
 import HeaderDynamic from '@/components/dashboard/header-dynamic';
 import { useEffect, useState } from 'react';
 import type { TokenDetails, User } from '@/lib/types';
-import { exampleTokens } from '@/lib/data';
 import { Rocket } from 'lucide-react';
 import TokenDetailsView from '@/components/workspace/token-details-view';
 import { Button } from '@/components/ui/button';
@@ -23,18 +22,26 @@ export default function WorkspacePage() {
     const role = localStorage.getItem('userRole') as User['role'] | null;
     setUserRole(role);
 
-    const handleTokenChange = () => {
+    const handleTokenChange = async () => {
         const storedTokenId = localStorage.getItem('selectedTokenId');
         if (storedTokenId) {
-            const storedTokens: TokenDetails[] = JSON.parse(localStorage.getItem('createdTokens') || '[]');
-            const allTokens: TokenDetails[] = [...exampleTokens, ...storedTokens].map(t => ({
-                ...t,
-                decimals: t.decimals ?? 0,
-                isFreezable: t.isFreezable ?? false,
-                publicKey: t.publicKey ?? `02f...${t.id.slice(-10)}`,
-            }));
-            const foundToken = allTokens.find(t => t.id === storedTokenId);
-            setSelectedToken(foundToken || null);
+            try {
+              const response = await fetch(`/api/tokens/${storedTokenId}`);
+              if (response.ok) {
+                const tokenData = await response.json();
+                 setSelectedToken({
+                    ...tokenData,
+                    decimals: tokenData.decimals ?? 0,
+                    isFreezable: tokenData.isFreezable ?? false,
+                    publicKey: tokenData.publicKey ?? `02f...${tokenData.id.slice(-10)}`,
+                });
+              } else {
+                 setSelectedToken(null);
+              }
+            } catch (error) {
+               console.error("Failed to fetch selected token:", error);
+               setSelectedToken(null);
+            }
         } else {
             setSelectedToken(null);
         }

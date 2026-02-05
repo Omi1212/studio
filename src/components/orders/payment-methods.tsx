@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import QRCode from 'qrcode';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
@@ -104,7 +104,7 @@ function BankDetails({ orderReference, onPay }: { orderReference: string, onPay:
                 </Alert>
             </CardContent>
             <CardFooter>
-                 <Button className="w-full" onClick={onPay}>I've made the payment</Button>
+                 <Button className="w-full" onClick={onPay}>I&apos;ve made the payment</Button>
             </CardFooter>
         </Card>
     );
@@ -520,7 +520,8 @@ export default function PaymentMethods({ order, token, onPaymentConfirmed }: Pay
     };
 
     const handlePaymentMade = () => {
-        // Update order status from 'waiting payment' to 'pending'
+        // NOTE: In a real app, this would be handled by a webhook or a confirmation check.
+        // For this demo, we simulate updating the order status in localStorage.
         const storedOrders: Order[] = JSON.parse(localStorage.getItem('orders') || '[]');
         const updatedOrders = storedOrders.map(o => 
             o.id === order.id ? { ...o, status: 'pending' as const } : o
@@ -528,8 +529,8 @@ export default function PaymentMethods({ order, token, onPaymentConfirmed }: Pay
         localStorage.setItem('orders', JSON.stringify(updatedOrders));
 
         toast({
-            title: "Payment Submitted",
-            description: "Your payment is being processed. The order status will be updated shortly.",
+            title: "Payment Submitted (Not Persisted)",
+            description: "Your payment is being processed. The order status will be updated for this session.",
         });
         if (onPaymentConfirmed) {
             onPaymentConfirmed();

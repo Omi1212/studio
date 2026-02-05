@@ -10,7 +10,6 @@ import {
 } from '@/components/ui/sidebar';
 import SidebarNav from '@/components/dashboard/sidebar-nav';
 import HeaderDynamic from '@/components/dashboard/header-dynamic';
-import { exampleTokens, issuersData } from '@/lib/data';
 import type { TokenDetails, Issuer } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Check, FileText, HardDrive, Hash, Image as ImageIcon, Info, Network, ToggleRight, User, X, Download, Eye, Tag, MessageSquare } from 'lucide-react';
@@ -106,64 +105,68 @@ function RequestDetailsPage({ params }: { params: { id: string } }) {
 
   useEffect(() => {
     const { id } = params;
-    const storedTokens: TokenDetails[] = JSON.parse(localStorage.getItem('createdTokens') || '[]');
-    const allTokens: TokenDetails[] = [...exampleTokens, ...storedTokens];
-    let foundToken = allTokens.find(t => t.id === id);
-    
-    if (foundToken) {
-      const issuer = issuersData.find(i => i.id === foundToken.issuerId);
-      
-      // Add fake documents if they don't exist for review purposes
-      if (!foundToken.whitepaper) {
-        const fakeFile = new File(["fake content"], `${foundToken.tokenTicker}_Whitepaper.pdf`, { type: "application/pdf" });
-        foundToken.whitepaper = [fakeFile] as any;
-      }
-      if (!foundToken.legalTokenizationDoc) {
-        const fakeFile = new File(["fake content"], `Legal_Tokenization.pdf`, { type: "application/pdf" });
-        foundToken.legalTokenizationDoc = [fakeFile] as any;
-      }
-      if (!foundToken.tokenIssuanceLegalDoc) {
-        const fakeFile = new File(["fake content"], `Token_Issuance_Agreement.pdf`, { type: "application/pdf" });
-        foundToken.tokenIssuanceLegalDoc = [fakeFile] as any;
-      }
+    if (!id) return;
 
-      setRequest({ ...foundToken, issuer });
-
-      const tokenIcon = foundToken.tokenIcon;
-
-      if (tokenIcon) {
-        if (typeof tokenIcon === 'string') {
-          setIconPreview(tokenIcon);
-        } else if (tokenIcon instanceof File || (typeof tokenIcon === 'object' && 'name' in tokenIcon)) {
-           const reader = new FileReader();
-           reader.onloadend = () => {
-             setIconPreview(reader.result as string);
-           }
-           reader.readAsDataURL(tokenIcon as File);
+    setLoading(true);
+    fetch(`/api/tokens/${id}`)
+      .then(res => {
+        if(res.ok) return res.json();
+        throw new Error('Token not found');
+      })
+      .then((foundToken: TokenDetails) => {
+        if (foundToken.issuerId) {
+            return fetch(`/api/issuers/${foundToken.issuerId}`)
+                .then(res => res.json())
+                .then(issuer => ({ ...foundToken, issuer }));
         }
-      } else {
-         // Fake icon
-        setIconPreview(`https://i.wpfc.ml/35/8gtsxa.png`);
-      }
-    }
-    
-    setLoading(false);
+        return foundToken;
+      })
+      .then((combinedData: CombinedRequest) => {
+          // Add fake documents if they don't exist for review purposes
+          if (!combinedData.whitepaper) {
+            const fakeFile = new File(["fake content"], `${combinedData.tokenTicker}_Whitepaper.pdf`, { type: "application/pdf" });
+            combinedData.whitepaper = [fakeFile] as any;
+          }
+          if (!combinedData.legalTokenizationDoc) {
+            const fakeFile = new File(["fake content"], `Legal_Tokenization.pdf`, { type: "application/pdf" });
+            combinedData.legalTokenizationDoc = [fakeFile] as any;
+          }
+          if (!combinedData.tokenIssuanceLegalDoc) {
+            const fakeFile = new File(["fake content"], `Token_Issuance_Agreement.pdf`, { type: "application/pdf" });
+            combinedData.tokenIssuanceLegalDoc = [fakeFile] as any;
+          }
+
+          setRequest(combinedData);
+
+          const tokenIcon = combinedData.tokenIcon;
+
+          if (tokenIcon) {
+            if (typeof tokenIcon === 'string') {
+              setIconPreview(tokenIcon);
+            } else if (tokenIcon instanceof File || (typeof tokenIcon === 'object' && 'name' in tokenIcon)) {
+              const reader = new FileReader();
+              reader.onloadend = () => {
+                setIconPreview(reader.result as string);
+              }
+              reader.readAsDataURL(tokenIcon as File);
+            }
+          } else {
+            // Fake icon
+            setIconPreview(`https://i.wpfc.ml/35/8gtsxa.png`);
+          }
+      })
+      .catch(console.error)
+      .finally(() => setLoading(false));
   }, [params]);
 
   const updateRequestStatus = (id: string, status: 'active' | 'rejected') => {
     if (!request) return;
 
-    const allTokens: TokenDetails[] = JSON.parse(localStorage.getItem('createdTokens') || '[]');
-    const updatedTokens = allTokens.map((token: TokenDetails) => 
-        token.id === id ? { ...token, status } : token
-    );
-    localStorage.setItem('createdTokens', JSON.stringify(updatedTokens));
-
     setRequest(prev => prev ? { ...prev, status } : null);
 
     toast({
-        title: `Request ${status === 'active' ? 'Approved' : 'Rejected'}`,
-        description: `The token "${request.tokenName}" has been ${status === 'active' ? 'approved' : 'rejected'}.`
+        title: `Request ${status === 'active' ? 'Approved' : 'Rejected'} (Not Persisted)`,
+        description: `The token "${request.tokenName}" has been updated for this session.`
     });
     router.push('/requests');
   };
@@ -180,8 +183,8 @@ function RequestDetailsPage({ params }: { params: { id: string } }) {
     }
     // In a real app, you would save this observation to your backend.
     toast({
-        title: "Observation Saved",
-        description: `Your observation for "${request?.tokenName}" has been noted.`,
+        title: "Observation Saved (Not Persisted)",
+        description: `Your observation for "${request?.tokenName}" has been noted for this session.`,
     });
   };
 
@@ -237,7 +240,7 @@ function RequestDetailsPage({ params }: { params: { id: string } }) {
                 </div>
                  <div className="sm:hidden mb-8">
                     <p className="text-center text-sm text-muted-foreground">Step {currentStep} of {steps.length}: {steps[currentStep-1].label}</p>
-                </div>
+                    </div>
 
               {currentStep === 1 && (
                 <ReviewSection title="Token Information">
@@ -308,7 +311,7 @@ function RequestDetailsPage({ params }: { params: { id: string } }) {
                                   <AlertDialogHeader>
                                     <AlertDialogTitle>Are you sure?</AlertDialogTitle>
                                     <AlertDialogDescription>
-                                      This will reject the token request for "{request.tokenName}". This action cannot be undone.
+                                      This will reject the token request for &quot;{request.tokenName}&quot;. This action cannot be undone.
                                     </AlertDialogDescription>
                                   </AlertDialogHeader>
                                   <AlertDialogFooter>

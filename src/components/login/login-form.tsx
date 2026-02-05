@@ -17,7 +17,7 @@ import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Loader2 } from 'lucide-react';
 import Image from 'next/image';
-import { usersData } from '@/lib/data';
+import type { User } from '@/lib/types';
 
 type Role = 'agent' | 'superadmin' | 'investor' | 'issuer';
 
@@ -44,6 +44,8 @@ export default function LoginForm() {
     setIsSubmitting(true);
     
     // Find user by email
+    const res = await fetch('/api/users');
+    const usersData: User[] = await res.json();
     const user = usersData.find(u => u.email === email);
 
     if (user) {
@@ -63,7 +65,6 @@ export default function LoginForm() {
       localStorage.removeItem('currentUser');
     }
 
-    // console.log('Logging in with:', { email, password, user });
     await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate async operation
     router.push('/');
   };
@@ -138,7 +139,7 @@ export default function LoginForm() {
           </Button>
         </div>
         <p className="text-center text-sm text-muted-foreground">
-            Don't you have an account?{' '}
+            Don&apos;t you have an account?{' '}
             <Link href="/signup" className="text-primary hover:underline">
                 Sign up here
             </Link>

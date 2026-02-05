@@ -22,8 +22,6 @@ import Step5Review from '@/components/issue-token/step-5-review';
 import { Button } from '@/components/ui/button';
 import type { TokenDetails, Issuer } from '@/lib/types';
 import Link from 'next/link';
-import { useForm } from 'react-hook-form';
-
 
 export default function NewTokenPage() {
   const [createdToken, setCreatedToken] = useState<TokenDetails | null>(null);
@@ -51,6 +49,7 @@ export default function NewTokenPage() {
 
     const draftTokenId = searchParams.get('draft_id');
     if (draftTokenId) {
+      // Drafts are a special case of local storage for session persistence of an unfinished form.
       const existingTokens: TokenDetails[] = JSON.parse(localStorage.getItem('createdTokens') || '[]');
       const draftToken = existingTokens.find(token => token.id === draftTokenId && token.status === 'draft');
       if (draftToken) {
@@ -97,6 +96,7 @@ export default function NewTokenPage() {
       issuerId: issuers[1].id, // For demo purposes, assign to TokenForge
     } as TokenDetails;
 
+    // Drafts are a special case of local storage for session persistence of an unfinished form.
     let existingTokens: TokenDetails[] = JSON.parse(localStorage.getItem('createdTokens') || '[]');
     
     if(draftId) {
@@ -116,7 +116,6 @@ export default function NewTokenPage() {
 
   const handleFinalSubmit = (data: Partial<TokenFormValues>) => {
     const finalData = { ...formData, ...data } as TokenFormValues;
-    console.log('Creating token with:', finalData);
     
     if (issuers.length < 2) {
         toast({ title: 'Error', description: 'Not enough issuer data to submit.'});
@@ -136,6 +135,9 @@ export default function NewTokenPage() {
     
     setCreatedToken(newToken);
     
+    // NOTE: This change is not persisted on the server.
+    // In a real app, you would make a POST request to your API.
+    // We add it to localStorage to simulate the creation for this session.
     let existingTokens: TokenDetails[] = JSON.parse(localStorage.getItem('createdTokens') || '[]');
     if (draftId) {
       existingTokens = existingTokens.map(token => token.id === draftId ? newToken : token);
@@ -145,8 +147,8 @@ export default function NewTokenPage() {
     localStorage.setItem('createdTokens', JSON.stringify(existingTokens));
 
     toast({
-      title: 'Request Submitted',
-      description: `Your new token "${finalData.tokenName}" has been submitted for review.`,
+      title: 'Request Submitted (Not Persisted)',
+      description: `Your new token "${finalData.tokenName}" has been submitted for this session.`,
       action: (
          <Button variant="outline" size="sm" onClick={() => router.push('/workspace')}>
             View in Workspace

@@ -11,7 +11,6 @@ import {
 } from '@/components/ui/sidebar';
 import SidebarNav from '@/components/dashboard/sidebar-nav';
 import HeaderDynamic from '@/components/dashboard/header-dynamic';
-import { ordersData, investorsData, exampleTokens } from '@/lib/data';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Check, X, ArrowUpRight, ArrowDownLeft } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -19,7 +18,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
-import type { Order } from '@/lib/types';
+import type { Order, User, TokenDetails } from '@/lib/types';
 import { Separator } from '@/components/ui/separator';
 import TokenIcon from '@/components/ui/token-icon';
 import { cn } from '@/lib/utils';
@@ -64,32 +63,66 @@ export default function OrderDetailsPage() {
   const router = useRouter();
   const { toast } = useToast();
   const [order, setOrder] = useState<Order | null>(null);
+  const [investor, setInvestor] = useState<User | null>(null);
+  const [token, setToken] = useState<TokenDetails | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const { id } = params;
-    const storedOrders: Order[] = JSON.parse(localStorage.getItem('orders') || JSON.stringify(ordersData));
-    const foundOrder = storedOrders.find(o => o.id === id);
+    if (!id) return;
     
+    setLoading(true);
+    // Because a newly created order is only in localStorage, we check there first.
+    const storedOrders: Order[] = JSON.parse(localStorage.getItem('orders') || '[]');
+    const foundOrder = storedOrders.find(o => o.id === id);
+
     if (foundOrder) {
-      setOrder(foundOrder);
+      Promise.all([
+          Promise.resolve(foundOrder),
+          fetch(`/api/investors/${foundOrder.investorId}`).then(res => res.json()),
+          fetch(`/api/tokens/${foundOrder.tokenId}`).then(res => res.json())
+      ]).then(([orderData, investorData, tokenData]) => {
+          setOrder(orderData);
+          setInvestor(investorData);
+          setToken(tokenData);
+      }).catch(err => {
+          console.error(err);
+          setOrder(null);
+      }).finally(() => setLoading(false));
+    } else {
+      fetch(`/api/orders/${id}`)
+        .then(res => {
+          if (res.ok) return res.json();
+          throw new Error('Order not found');
+        })
+        .then((orderData: Order) => {
+          setOrder(orderData);
+          return Promise.all([
+            fetch(`/api/investors/${orderData.investorId}`).then(res => res.json()),
+            fetch(`/api/tokens/${orderData.tokenId}`).then(res => res.json())
+          ]);
+        })
+        .then(([investorData, tokenData]) => {
+          setInvestor(investorData);
+          setToken(tokenData);
+        })
+        .catch(err => {
+          console.error(err);
+          setOrder(null);
+        })
+        .finally(() => setLoading(false));
     }
-    setLoading(false);
+
   }, [params]);
   
   const handleUpdateStatus = (status: 'completed' | 'rejected') => {
     if (!order) return;
     
-    const storedOrders: Order[] = JSON.parse(localStorage.getItem('orders') || '[]');
-    const updatedOrders = storedOrders.map(o => o.id === order.id ? { ...o, status } : o);
-    localStorage.setItem('orders', JSON.stringify(updatedOrders));
-
-    // Also update the local state to re-render the component
     setOrder({ ...order, status });
 
     toast({
-        title: `Order ${status === 'completed' ? 'Accepted' : 'Rejected'}`,
-        description: `The order #${order.id} has been updated.`
+        title: `Order ${status === 'completed' ? 'Accepted' : 'Rejected'} (Not Persisted)`,
+        description: `The order #${order.id} has been updated for this session.`
     });
     router.push('/orders');
   };
@@ -102,12 +135,10 @@ export default function OrderDetailsPage() {
     );
   }
 
-  if (!order) {
+  if (!order || !investor || !token) {
     notFound();
   }
 
-  const investor = investorsData.find(i => i.id === order.investorId);
-  const token = exampleTokens.find(t => t.id === order.tokenId);
   const total = order.amount * order.price;
 
   return (

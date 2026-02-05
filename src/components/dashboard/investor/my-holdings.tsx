@@ -1,14 +1,28 @@
 'use client';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { investorsData } from '@/lib/data';
 import TokenIcon from '@/components/ui/token-icon';
 import Link from 'next/link';
 
 export default function MyHoldings() {
-    const investor = investorsData.find(inv => inv.id === 'inv-001');
-    const holdings = investor?.holdings || [];
+    const [holdings, setHoldings] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        setLoading(true);
+        fetch('/api/investors/inv-001')
+            .then(res => res.json())
+            .then(investor => {
+                setHoldings(investor?.holdings || []);
+            }).catch(console.error)
+            .finally(() => setLoading(false));
+    }, []);
+
+    if (loading) {
+        return <Card className="h-80 animate-pulse bg-muted/50"></Card>
+    }
 
     return (
         <Card>

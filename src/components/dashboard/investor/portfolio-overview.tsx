@@ -3,8 +3,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartConfig } from '@/components/ui/chart';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { investorsData } from '@/lib/data';
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 
 const chartConfig = {
   value: {
@@ -13,22 +12,27 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-const chartData = [
-  { date: '2024-07-01', value: 25000 },
-  { date: '2024-07-05', value: 28510 },
-  { date: '2024-07-10', value: 27900 },
-  { date: '2024-07-15', value: 25880 },
-  { date: '2024-07-20', value: 31180 },
-  { date: '2024-07-25', value: 32750 },
-  { date: '2024-07-30', value: 32750 },
-];
-
 export default function PortfolioOverview() {
-  const investor = investorsData.find(inv => inv.id === 'inv-001');
-  const totalValue = useMemo(() => {
-    if (!investor) return 0;
-    return investor.holdings.reduce((acc, holding) => acc + (holding.amount * holding.value), 0);
-  }, [investor]);
+  const [totalValue, setTotalValue] = useState(0);
+  const [chartData, setChartData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    setLoading(true);
+    Promise.all([
+      fetch('/api/investors/inv-001').then(res => res.json()),
+      fetch('/api/portfolio-history').then(res => res.json())
+    ]).then(([investorData, historyData]) => {
+      const value = investorData?.holdings.reduce((acc: number, holding: any) => acc + (holding.amount * holding.value), 0) || 0;
+      setTotalValue(value);
+      setChartData(historyData);
+    }).catch(console.error)
+    .finally(() => setLoading(false));
+  }, []);
+
+  if(loading) {
+      return <Card className="h-[350px] animate-pulse bg-muted/50"></Card>;
+  }
 
   return (
     <Card>

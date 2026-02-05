@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import type { Order, TokenDetails } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
-import { ordersData } from '@/lib/data';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 import { Label } from '../ui/label';
 import { Checkbox } from '../ui/checkbox';
@@ -73,7 +72,9 @@ export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced, 
             status: 'waiting payment' as const
         };
         
-        const existingOrders = JSON.parse(localStorage.getItem('orders') || JSON.stringify(ordersData));
+        // NOTE: In a real app, this would be a POST request to an API endpoint.
+        // For this demo, we use localStorage to pass the new order to the payment page.
+        const existingOrders: Order[] = JSON.parse(localStorage.getItem('orders') || '[]');
         localStorage.setItem('orders', JSON.stringify([newOrder, ...existingOrders]));
 
         localStorage.setItem('selectedTokenId', token.id);
@@ -136,7 +137,7 @@ export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced, 
                     <div className="flex items-start space-x-3">
                         <Checkbox id="prospectus" checked={prospectusConfirmed} onCheckedChange={(checked) => setProspectusConfirmed(!!checked)} className="mt-1" />
                         <Label htmlFor="prospectus" className="text-sm font-normal text-muted-foreground leading-snug">
-                            I confirm I have read the offering's <a href="#" className="underline text-primary">Prospectus</a>.
+                            I confirm I have read the offering&apos;s <a href="#" className="underline text-primary">Prospectus</a>.
                         </Label>
                     </div>
                     <div className="flex items-start space-x-3">

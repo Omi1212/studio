@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import type { User } from '@/lib/types';
-import { usersData } from '@/lib/data';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -19,24 +18,28 @@ export default function AssignedAgents({ tokenId }: AssignedAgentsProps) {
     const router = useRouter();
 
     useEffect(() => {
-        // Fetch all users and filter for agents
-        const allUsers: User[] = JSON.parse(localStorage.getItem('users') || JSON.stringify(usersData));
-        const allAgents = allUsers.filter(user => user.role === 'agent');
+        setLoading(true);
+        fetch('/api/users')
+            .then(res => res.json())
+            .then((allUsers: User[]) => {
+                const allAgents = allUsers.filter(user => user.role === 'agent');
+                
+                // NOTE: Assignments are not persisted. This is for demonstration purposes only.
+                // In a real app, this data would come from the backend.
+                const storedAssignments: Record<string, string[]> = JSON.parse(localStorage.getItem('agentTokenAssignments') || '{}');
 
-        // Fetch agent-token assignments
-        const storedAssignments: Record<string, string[]> = JSON.parse(localStorage.getItem('agentTokenAssignments') || '{}');
-
-        // Find agents assigned to the current token
-        const agentIdsForToken: string[] = [];
-        for (const agentId in storedAssignments) {
-            if (storedAssignments[agentId].includes(tokenId)) {
-                agentIdsForToken.push(agentId);
-            }
-        }
-        
-        const agents = allAgents.filter(agent => agentIdsForToken.includes(agent.id));
-        setAssignedAgents(agents);
-        setLoading(false);
+                const agentIdsForToken: string[] = [];
+                for (const agentId in storedAssignments) {
+                    if (storedAssignments[agentId].includes(tokenId)) {
+                        agentIdsForToken.push(agentId);
+                    }
+                }
+                
+                const agents = allAgents.filter(agent => agentIdsForToken.includes(agent.id));
+                setAssignedAgents(agents);
+            })
+            .catch(console.error)
+            .finally(() => setLoading(false));
 
     }, [tokenId]);
 

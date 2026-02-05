@@ -142,9 +142,9 @@ export default function ExistingTokens({ view, setView }: { view: ViewMode, setV
   useEffect(() => {
     fetch('/api/tokens')
         .then(res => res.json())
-        .then(exampleTokens => {
+        .then((tokensFromApi: TokenDetails[]) => {
             const storedTokens: TokenDetails[] = JSON.parse(localStorage.getItem('createdTokens') || '[]');
-            const combinedTokens: TokenDetails[] = [...exampleTokens, ...storedTokens].map(t => ({
+            const combinedTokens: TokenDetails[] = [...tokensFromApi, ...storedTokens.filter(st => !tokensFromApi.some(t => t.id === st.id))].map(t => ({
             ...t,
             decimals: t.decimals ?? 0,
             isFreezable: t.isFreezable ?? false,
