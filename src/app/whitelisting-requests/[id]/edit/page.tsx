@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -10,7 +9,6 @@ import {
 } from '@/components/ui/sidebar';
 import SidebarNav from '@/components/dashboard/sidebar-nav';
 import HeaderDynamic from '@/components/dashboard/header-dynamic';
-import { investorsData } from '@/lib/data';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -18,8 +16,10 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
+import type { User } from '@/lib/types';
 
-type WhitelistRequest = typeof investorsData[0];
+
+type WhitelistRequest = User;
 
 export default function EditRequestPage() {
   const params = useParams();
@@ -30,13 +30,16 @@ export default function EditRequestPage() {
 
   useEffect(() => {
     const { id } = params;
-    const storedInvestors: WhitelistRequest[] = JSON.parse(localStorage.getItem('investors') || '[]');
-    const foundRequest = storedInvestors.find(inv => inv.id === id);
-    
-    if (foundRequest) {
-      setRequest(foundRequest);
-    }
-    setLoading(false);
+    if (!id) return;
+    setLoading(true);
+     fetch(`/api/investors/${id}`)
+        .then(res => {
+            if (res.ok) return res.json();
+            throw new Error("Request not found");
+        })
+        .then(data => setRequest(data))
+        .catch(console.error)
+        .finally(() => setLoading(false));
   }, [params]);
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -48,17 +51,13 @@ export default function EditRequestPage() {
       ...request,
       name: formData.get('name') as string,
       email: formData.get('email') as string,
-      status: formData.get('status') as 'accepted' | 'pending' | 'rejected',
+      kycStatus: formData.get('status') as 'verified' | 'pending' | 'rejected',
       walletAddress: formData.get('walletAddress') as string,
     };
     
-    const storedInvestors: WhitelistRequest[] = JSON.parse(localStorage.getItem('investors') || '[]');
-    const updatedInvestors = storedInvestors.map(inv => inv.id === request.id ? updatedRequest : inv);
-    localStorage.setItem('investors', JSON.stringify(updatedInvestors));
-
     toast({
-      title: 'Request Updated',
-      description: `The request for ${updatedRequest.name} has been updated.`,
+      title: 'Request Updated (Not Persisted)',
+      description: `The request for ${updatedRequest.name} has been updated for this session.`,
     });
     router.push(`/whitelisting-requests/${request.id}`);
   };
@@ -105,13 +104,13 @@ export default function EditRequestPage() {
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="status">Status</Label>
-                             <Select name="status" defaultValue={request.status}>
+                             <Select name="status" defaultValue={request.kycStatus}>
                                 <SelectTrigger id="status">
                                     <SelectValue placeholder="Select status" />
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="pending">Pending</SelectItem>
-                                    <SelectItem value="accepted">Accepted</SelectItem>
+                                    <SelectItem value="verified">Accepted</SelectItem>
                                     <SelectItem value="rejected">Rejected</SelectItem>
                                 </SelectContent>
                             </Select>

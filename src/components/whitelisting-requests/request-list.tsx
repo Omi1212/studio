@@ -1,10 +1,8 @@
-
-
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import type { ViewMode } from '@/lib/types';
+import type { ViewMode, User } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/card';
 import { Avatar, AvatarFallback } from '../ui/avatar';
 import { Badge } from '../ui/badge';
@@ -28,12 +26,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
-type WhitelistRequest = {
-    id: string;
-    name: string;
-    email: string;
-    status: 'accepted' | 'pending' | 'rejected';
-    walletAddress: string;
+type WhitelistRequest = User & {
     joinedDate: string;
 };
 
@@ -41,13 +34,16 @@ const ITEMS_PER_PAGE = 10;
 
 function getStatusBadge(investor: WhitelistRequest) {
   switch (investor.status) {
-    case 'accepted':
+    case 'active': // 'accepted' is mapped to 'active' user status
       return <Badge variant="outline" className="text-green-400 border-green-400">Accepted</Badge>;
-    case 'pending':
+    case 'inactive': // 'pending' can be considered 'inactive' for user status
       return <Badge variant="outline" className="text-yellow-400 border-yellow-400">Pending</Badge>;
-    case 'rejected':
-      return <Badge variant="destructive">Rejected</Badge>;
+    // 'rejected' is not a user status, so we handle it based on kycStatus or another field.
+    // For this component, we'll assume a 'rejected' status from the source data.
     default:
+      if ((investor as any).status === 'rejected') {
+        return <Badge variant="destructive">Rejected</Badge>;
+      }
       return <Badge variant="secondary">Unknown</Badge>;
   }
 }
@@ -97,7 +93,7 @@ function RequestCard({ request, onApprove, onReject }: { request: WhitelistReque
             {getStatusBadge(request)}
         </div>
       </CardContent>
-      {request.status === 'pending' && (
+      {request.status === 'inactive' && (request as any).kycStatus === 'pending' && (
         <CardFooter className="flex gap-2">
             <AlertDialog>
                 <AlertDialogTrigger asChild>
@@ -149,7 +145,7 @@ function RequestTableRow({ request, onApprove, onReject }: { request: WhitelistR
        <TableCell className="hidden sm:table-cell">{getStatusBadge(request)}</TableCell>
       <TableCell className="text-right">
         <div className="flex items-center justify-end gap-2" onClick={(e) => e.stopPropagation()}>
-            {request.status === 'pending' && (
+            {request.status === 'inactive' && (request as any).kycStatus === 'pending' && (
                 <>
                     <AlertDialog>
                         <AlertDialogTrigger asChild>
@@ -203,7 +199,11 @@ export default function RequestList({ view, setView }: { view: ViewMode, setView
     setLoading(true);
     fetch('/api/investors')
       .then(res => res.json())
-      .then(data => setRequests(data))
+      .then(data => {
+        // Assuming joinedDate needs to be added if not present in User type
+        const requestsWithDate = data.map((d: User) => ({...d, joinedDate: (d as any).joinedDate || new Date().toISOString() }))
+        setRequests(requestsWithDate);
+      })
       .catch(console.error)
       .finally(() => setLoading(false));
   }, []);
@@ -212,7 +212,13 @@ export default function RequestList({ view, setView }: { view: ViewMode, setView
     let filtered = [...requests];
 
     if (statusFilter !== 'all') {
-        filtered = filtered.filter(req => req.status === statusFilter);
+        if (statusFilter === 'pending') {
+            filtered = filtered.filter(req => req.kycStatus === 'pending');
+        } else if (statusFilter === 'accepted') {
+            filtered = filtered.filter(req => req.kycStatus === 'verified');
+        } else if (statusFilter === 'rejected') {
+            filtered = filtered.filter(req => req.kycStatus === 'rejected');
+        }
     }
     
     if (searchQuery) {
@@ -245,16 +251,16 @@ export default function RequestList({ view, setView }: { view: ViewMode, setView
   };
 
 
-  const updateRequestStatus = (id: string, status: 'accepted' | 'rejected') => {
-    setRequests(prev => prev.map(req => req.id === id ? { ...req, status } : req));
+  const updateRequestStatus = (id: string, status: 'verified' | 'rejected') => {
+    setRequests(prev => prev.map(req => req.id === id ? { ...req, kycStatus: status } : req));
     toast({
-        title: `Request ${status.charAt(0).toUpperCase() + status.slice(1)} (Not Persisted)`,
+        title: `Request ${status === 'verified' ? 'Approved' : 'Rejected'} (Not Persisted)`,
         description: `The request has been updated for this session.`
     });
   }
 
   const handleApprove = (id: string) => {
-    updateRequestStatus(id, 'accepted');
+    updateRequestStatus(id, 'verified');
   };
   
   const handleReject = (id: string) => {

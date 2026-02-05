@@ -2,8 +2,7 @@
 
 import { useEffect, useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { exampleTokens, issuersData } from '@/lib/data';
-import type { TokenDetails, ViewMode } from '@/lib/types';
+import type { TokenDetails, ViewMode, Issuer } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/card';
 import TokenIcon from '../ui/token-icon';
 import { Badge } from '../ui/badge';
@@ -36,7 +35,7 @@ const networkMap: { [key: string]: string } = {
     taproot: 'Taproot Assets',
 };
 
-function TokenCard({ token }: { token: TokenDetails }) {
+function TokenCard({ token, issuer }: { token: TokenDetails, issuer?: Issuer }) {
   const router = useRouter();
   
   const handleView = () => {
@@ -48,8 +47,6 @@ function TokenCard({ token }: { token: TokenDetails }) {
         router.push(`/workspace/${token.id}`);
     }
   };
-
-  const issuer = issuersData.find(i => i.id === token.issuerId);
 
   return (
     <Card>
@@ -85,7 +82,7 @@ function TokenCard({ token }: { token: TokenDetails }) {
   );
 }
 
-function TokenTable({ tokens }: { tokens: TokenDetails[] }) {
+function TokenTable({ tokens, issuers }: { tokens: TokenDetails[], issuers: Issuer[] }) {
     const router = useRouter();
 
     const handleView = (token: TokenDetails) => {
@@ -112,7 +109,7 @@ function TokenTable({ tokens }: { tokens: TokenDetails[] }) {
                 </TableHeader>
                 <TableBody>
                     {tokens.map(token => {
-                        const issuer = issuersData.find(i => i.id === token.issuerId);
+                        const issuer = issuers.find(i => i.id === token.issuerId);
                         return (
                         <TableRow key={token.id} onClick={() => handleView(token)} className="cursor-pointer">
                             <TableCell>
@@ -142,25 +139,31 @@ function TokenTable({ tokens }: { tokens: TokenDetails[] }) {
 
 export default function AssetList() {
   const [allTokens, setAllTokens] = useState<TokenDetails[]>([]);
+  const [issuers, setIssuers] = useState<Issuer[]>([]);
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState<ViewMode>('card');
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
 
   useEffect(() => {
-    const storedTokens: TokenDetails[] = JSON.parse(localStorage.getItem('createdTokens') || '[]');
-    const combinedTokens: TokenDetails[] = [...exampleTokens, ...storedTokens].map(t => ({
-      ...t,
-      decimals: t.decimals ?? 0,
-      isFreezable: t.isFreezable ?? false,
-      publicKey: t.publicKey ?? `02f...${t.id.slice(-10)}`,
-      tokenName: t.tokenName || 'Untitled Token',
-      tokenTicker: t.tokenTicker || '---',
-      network: t.network || 'unknown',
-      maxSupply: t.maxSupply || 0,
-    }));
-    setAllTokens(combinedTokens);
-    setLoading(false);
+    setLoading(true);
+    Promise.all([
+      fetch('/api/tokens').then(res => res.json()),
+      fetch('/api/issuers').then(res => res.json())
+    ]).then(([tokensData, issuersData]) => {
+      const combinedTokens: TokenDetails[] = tokensData.map((t: TokenDetails) => ({
+        ...t,
+        decimals: t.decimals ?? 0,
+        isFreezable: t.isFreezable ?? false,
+        publicKey: t.publicKey ?? `02f...${t.id.slice(-10)}`,
+        tokenName: t.tokenName || 'Untitled Token',
+        tokenTicker: t.tokenTicker || '---',
+        network: t.network || 'unknown',
+        maxSupply: t.maxSupply || 0,
+      }));
+      setAllTokens(combinedTokens);
+      setIssuers(issuersData);
+    }).catch(console.error).finally(() => setLoading(false));
   }, []);
 
   const filteredTokens = useMemo(() => {
@@ -267,12 +270,13 @@ export default function AssetList() {
             </div>
         ) : view === 'card' ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredTokens.map(token => (
-                    <TokenCard key={token.id} token={token} />
-                ))}
+                {filteredTokens.map(token => {
+                  const issuer = issuers.find(i => i.id === token.issuerId);
+                  return <TokenCard key={token.id} token={token} issuer={issuer} />
+                })}
             </div>
         ) : (
-            <TokenTable tokens={filteredTokens} />
+            <TokenTable tokens={filteredTokens} issuers={issuers} />
         )}
     </div>
   );

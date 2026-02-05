@@ -1,15 +1,12 @@
-
-
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { exampleTokens, issuersData } from '@/lib/data';
 import type { TokenDetails, Issuer, ViewMode } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/card';
 import { Avatar, AvatarFallback } from '../ui/avatar';
 import { Button } from '../ui/button';
-import { Search, Check, X, FilePenLine, MoreVertical, LayoutGrid, List, Copy } from 'lucide-react';
+import { Search, FilePenLine, MoreVertical, LayoutGrid, List, Copy } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
 import { useToast } from '@/hooks/use-toast';
 import { Input } from '../ui/input';
@@ -22,13 +19,6 @@ import Link from 'next/link';
 type CombinedRequest = TokenDetails & { issuer?: Issuer };
 
 const ITEMS_PER_PAGE = 10;
-
-const networkMap: { [key: string]: string } = {
-    spark: 'Spark',
-    liquid: 'Liquid',
-    rgb: 'RGB',
-    taproot: 'Taproot Assets',
-};
 
 function getStatusBadge(status: TokenDetails['status']) {
   switch (status) {
@@ -46,8 +36,6 @@ function getStatusBadge(status: TokenDetails['status']) {
 };
 
 function RequestCard({ request }: { request: CombinedRequest }) {
-  const { toast } = useToast();
-  
   return (
     <Card>
       <CardHeader>
@@ -157,29 +145,32 @@ function RequestTableRow({ request }: { request: CombinedRequest }) {
 export default function RequestList({ view, setView }: { view: ViewMode, setView: (mode: ViewMode) => void }) {
   const [requests, setRequests] = useState<CombinedRequest[]>([]);
   const [loading, setLoading] = useState(true);
-  const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
-    const storedTokens: TokenDetails[] = JSON.parse(localStorage.getItem('createdTokens') || '[]');
-    const allTokens: TokenDetails[] = [...exampleTokens, ...storedTokens].filter(token => token.status !== 'draft');
-    
-    let combinedRequests: CombinedRequest[] = allTokens.map(token => ({
-      ...token,
-      issuer: issuersData.find(issuer => issuer.id === token.issuerId)
-    }));
+    setLoading(true);
+    Promise.all([
+      fetch('/api/tokens').then(res => res.json()),
+      fetch('/api/issuers').then(res => res.json())
+    ]).then(([tokensData, issuersData]) => {
+      const combinedRequests = tokensData
+        .filter((token: TokenDetails) => token.status !== 'draft')
+        .map((token: TokenDetails) => ({
+          ...token,
+          issuer: issuersData.find((issuer: Issuer) => issuer.id === token.issuerId)
+        }));
 
-    const statusOrder = { 'pending': 1, 'active': 2, 'rejected': 3 };
-    combinedRequests.sort((a, b) => {
-        const orderA = statusOrder[a.status as keyof typeof statusOrder] || 4;
-        const orderB = statusOrder[b.status as keyof typeof statusOrder] || 4;
-        return orderA - orderB;
-    });
+        const statusOrder = { 'pending': 1, 'active': 2, 'rejected': 3 };
+        combinedRequests.sort((a, b) => {
+            const orderA = statusOrder[a.status as keyof typeof statusOrder] || 4;
+            const orderB = statusOrder[b.status as keyof typeof statusOrder] || 4;
+            return orderA - orderB;
+        });
 
-    setRequests(combinedRequests);
-    setLoading(false);
+      setRequests(combinedRequests);
+    }).catch(console.error).finally(() => setLoading(false));
   }, []);
 
   const filteredRequests = useMemo(() => {
@@ -217,36 +208,6 @@ export default function RequestList({ view, setView }: { view: ViewMode, setView
     if (page >= 1 && page <= totalPages) {
       setCurrentPage(page);
     }
-  };
-
-
-  const updateRequestStatus = (id: string, status: 'active' | 'rejected') => {
-    const allTokens: TokenDetails[] = JSON.parse(localStorage.getItem('createdTokens') || '[]');
-    let tokenName = '';
-    const updatedTokens = allTokens.map((token: TokenDetails) => {
-        if (token.id === id) {
-          tokenName = token.tokenName;
-          return { ...token, status };
-        }
-        return token;
-    });
-    localStorage.setItem('createdTokens', JSON.stringify(updatedTokens));
-
-    // Update local state
-    setRequests(prev => prev.map(req => req.id === id ? { ...req, status } : req));
-
-    toast({
-        title: `Request ${status === 'active' ? 'Approved' : 'Rejected'}`,
-        description: `The token "${tokenName}" has been ${status === 'active' ? 'approved' : 'rejected'}.`
-    });
-  }
-
-  const handleApprove = (id: string) => {
-    updateRequestStatus(id, 'active');
-  };
-  
-  const handleReject = (id: string) => {
-    updateRequestStatus(id, 'rejected');
   };
 
   if (loading) {

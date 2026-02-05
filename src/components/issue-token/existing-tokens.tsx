@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -143,8 +142,7 @@ export default function ExistingTokens({ view, setView }: { view: ViewMode, setV
     fetch('/api/tokens')
         .then(res => res.json())
         .then((tokensFromApi: TokenDetails[]) => {
-            const storedTokens: TokenDetails[] = JSON.parse(localStorage.getItem('createdTokens') || '[]');
-            const combinedTokens: TokenDetails[] = [...tokensFromApi, ...storedTokens.filter(st => !tokensFromApi.some(t => t.id === st.id))].map(t => ({
+            const mappedTokens = tokensFromApi.map(t => ({
             ...t,
             decimals: t.decimals ?? 0,
             isFreezable: t.isFreezable ?? false,
@@ -154,7 +152,7 @@ export default function ExistingTokens({ view, setView }: { view: ViewMode, setV
             network: t.network || 'unknown',
             maxSupply: t.maxSupply || 0,
             }));
-            setAllTokens(combinedTokens);
+            setAllTokens(mappedTokens);
         })
         .finally(() => setLoading(false));
   }, []);

@@ -1,15 +1,40 @@
-
+'use client';
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { cryptoData } from '@/lib/data';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Star } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Skeleton } from '../ui/skeleton';
+import { cn } from '@/lib/utils';
+
+type Crypto = {
+    ticker: string;
+    name: string;
+    balance: number;
+    value: number;
+    icon: string | null;
+    isToken: boolean;
+};
 
 export default function CryptocurrenciesList({ className }: { className?: string }) {
+  const [cryptos, setCryptos] = useState<Crypto[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+      fetch('/api/crypto')
+        .then(res => res.json())
+        .then(data => setCryptos(data))
+        .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) {
+    return <Skeleton className={cn("h-[400px]", className)} />;
+  }
+
   return (
     <Card className={className}>
       <CardHeader>
@@ -21,7 +46,7 @@ export default function CryptocurrenciesList({ className }: { className?: string
           <span>Balance</span>
         </div>
         <div className="space-y-6">
-          {cryptoData.map((crypto) => (
+          {cryptos.map((crypto) => (
             <div key={crypto.ticker} className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <Avatar className="h-10 w-10">

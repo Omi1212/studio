@@ -1,18 +1,45 @@
+'use client';
+
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
-  CardFooter
 } from '@/components/ui/card';
-import { transactionData } from '@/lib/data';
 import { ArrowDownLeft, ArrowUpRight, ExternalLink } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '../ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
+import { useEffect, useState } from 'react';
+import { Skeleton } from '../ui/skeleton';
+
+type Transaction = {
+    id: number;
+    type: string;
+    address: string;
+    date: string;
+    amount: number;
+    currency: string;
+    direction: 'in' | 'out';
+};
 
 export default function TransactionsList({ className, limit }: { className?: string; limit?: number }) {
-  const transactions = limit ? transactionData.slice(0, limit) : transactionData;
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch('/api/transactions')
+      .then(res => res.json())
+      .then((data: Transaction[]) => {
+        const limitedData = limit ? data.slice(0, limit) : data;
+        setTransactions(limitedData);
+      })
+      .finally(() => setLoading(false));
+  }, [limit]);
+
+  if (loading) {
+    return <Skeleton className={cn("h-[400px]", className)} />;
+  }
 
   return (
     <Card className={className}>

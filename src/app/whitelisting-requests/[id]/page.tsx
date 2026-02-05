@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -10,7 +9,6 @@ import {
 } from '@/components/ui/sidebar';
 import SidebarNav from '@/components/dashboard/sidebar-nav';
 import HeaderDynamic from '@/components/dashboard/header-dynamic';
-import { investorsData } from '@/lib/data';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Check, X, Edit } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -29,12 +27,16 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import type { User } from '@/lib/types';
 
-type WhitelistRequest = typeof investorsData[0];
 
-function getStatusBadge(status: WhitelistRequest['status']) {
+type WhitelistRequest = User & {
+    joinedDate: string;
+};
+
+function getStatusBadge(status: WhitelistRequest['kycStatus']) {
   switch (status) {
-    case 'accepted':
+    case 'verified':
       return <Badge variant="outline" className="text-green-400 border-green-400">Accepted</Badge>;
     case 'pending':
       return <Badge variant="outline" className="text-yellow-400 border-yellow-400">Pending</Badge>;
@@ -63,26 +65,28 @@ export default function RequestDetailsPage() {
 
   useEffect(() => {
     const { id } = params;
-    const storedInvestors: WhitelistRequest[] = JSON.parse(localStorage.getItem('investors') || JSON.stringify(investorsData));
-    const foundRequest = storedInvestors.find(inv => inv.id === id);
-    
-    if (foundRequest) {
-      setRequest(foundRequest);
-    }
-    setLoading(false);
+    if (!id) return;
+    setLoading(true);
+    fetch(`/api/investors/${id}`)
+        .then(res => {
+            if (res.ok) return res.json();
+            throw new Error("Request not found");
+        })
+        .then(data => {
+            setRequest({ ...data, joinedDate: data.joinedDate || new Date().toISOString() });
+        })
+        .catch(console.error)
+        .finally(() => setLoading(false));
   }, [params]);
   
-  const handleUpdateStatus = (status: 'accepted' | 'rejected') => {
+  const handleUpdateStatus = (status: 'verified' | 'rejected') => {
     if (!request) return;
-    const updatedRequest = { ...request, status: status };
-    
-    const storedInvestors: WhitelistRequest[] = JSON.parse(localStorage.getItem('investors') || '[]');
-    const updatedInvestors = storedInvestors.map(inv => inv.id === request.id ? updatedRequest : inv);
-    localStorage.setItem('investors', JSON.stringify(updatedInvestors));
+
+    setRequest(prev => prev ? { ...prev, kycStatus: status } : null);
 
     toast({
-        title: `Request ${status === 'accepted' ? 'Approved' : 'Rejected'}`,
-        description: `The request for "${request.name}" has been updated.`
+        title: `Request ${status === 'verified' ? 'Approved' : 'Rejected'} (Not Persisted)`,
+        description: `The request for "${request.name}" has been updated for this session.`
     });
     router.push('/whitelisting-requests');
   };
@@ -134,7 +138,7 @@ export default function RequestDetailsPage() {
                         <div>
                             <CardTitle className="text-2xl">{request.name}</CardTitle>
                             <div className="flex items-center gap-2 mt-1">
-                                {getStatusBadge(request.status)}
+                                {getStatusBadge(request.kycStatus)}
                             </div>
                         </div>
                     </div>
@@ -146,7 +150,7 @@ export default function RequestDetailsPage() {
                 </CardContent>
             </Card>
 
-            {request.status === 'pending' && (
+            {request.kycStatus === 'pending' && (
              <Card>
                 <CardHeader>
                     <CardTitle>Actions</CardTitle>
@@ -171,7 +175,7 @@ export default function RequestDetailsPage() {
                             </AlertDialogFooter>
                         </AlertDialogContent>
                     </AlertDialog>
-                    <Button className="w-full" onClick={() => handleUpdateStatus('accepted')}>
+                    <Button className="w-full" onClick={() => handleUpdateStatus('verified')}>
                         <Check className="mr-2 h-4 w-4" /> Approve Request
                     </Button>
                 </CardContent>

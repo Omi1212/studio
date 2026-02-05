@@ -11,10 +11,17 @@ import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
-  ChartConfig,
 } from '@/components/ui/chart';
-import { paymentData } from '@/lib/data';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
+import { useEffect, useState } from 'react';
+import { Skeleton } from '../ui/skeleton';
+import { cn } from '@/lib/utils';
+
+type Payment = {
+    month: string;
+    income: number;
+    expense: number;
+};
 
 const chartConfig = {
   income: {
@@ -25,9 +32,23 @@ const chartConfig = {
     label: 'Expense',
     color: 'hsl(var(--chart-2))',
   },
-} satisfies ChartConfig;
+};
 
 export default function PaymentSummary({ className }: { className?: string }) {
+    const [paymentData, setPaymentData] = useState<Payment[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        fetch('/api/payments')
+            .then(res => res.json())
+            .then(data => setPaymentData(data))
+            .finally(() => setLoading(false));
+    }, []);
+
+    if (loading) {
+        return <Skeleton className={cn("h-[400px]", className)} />;
+    }
+
   return (
     <Card className={className}>
       <CardHeader>

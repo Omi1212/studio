@@ -2,8 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { investorsData, exampleTokens } from '@/lib/data';
-import type { ViewMode, TokenDetails } from '@/lib/types';
+import type { ViewMode, TokenDetails, User } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/card';
 import { Avatar, AvatarFallback } from '../ui/avatar';
 import { Badge } from '../ui/badge';
@@ -29,7 +28,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import TokenIcon from '../ui/token-icon';
 
 
-type Investor = typeof investorsData[0];
+type Investor = User & {
+    joinedDate: string;
+    totalInvested: number;
+    isFrozen: boolean;
+    holdings: any[];
+    transactions: any[];
+};
 const ITEMS_PER_PAGE = 10;
 
 function getStatusBadge(investor: Investor) {
@@ -154,35 +159,23 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
+  const [allTokens, setAllTokens] = useState<TokenDetails[]>([]);
   const [selectedToken, setSelectedToken] = useState<TokenDetails | null>(null);
 
   useEffect(() => {
-    let allData: Investor[] = [...investorsData];
-    const storedInvestorsRaw = localStorage.getItem('investors');
-    
-    if (storedInvestorsRaw) {
-      const storedInvestors: Investor[] = JSON.parse(storedInvestorsRaw);
-      const storedMap = new Map(storedInvestors.map(item => [item.id, item]));
-      
-      allData = allData.map(defaultInvestor => {
-        const stored = storedMap.get(defaultInvestor.id);
-        return stored ? { ...defaultInvestor, ...stored } : defaultInvestor;
-      });
-
-      storedInvestors.forEach(stored => {
-        if (!allData.find(d => d.id === stored.id)) {
-          allData.push(stored);
-        }
-      });
-    }
-    setInvestors(allData);
+    setLoading(true);
+    Promise.all([
+      fetch('/api/investors').then(res => res.json()),
+      fetch('/api/tokens').then(res => res.json())
+    ]).then(([investorsData, tokensData]) => {
+      setInvestors(investorsData);
+      setAllTokens(tokensData);
+    }).catch(console.error).finally(() => setLoading(false));
 
     const handleTokenChange = () => {
         const storedTokenId = localStorage.getItem('selectedTokenId');
-        if (storedTokenId) {
-            const storedTokens: TokenDetails[] = JSON.parse(localStorage.getItem('createdTokens') || '[]');
-            const allAvailableTokens: TokenDetails[] = [...exampleTokens, ...storedTokens];
-            const foundToken = allAvailableTokens.find(t => t.id === storedTokenId);
+        if (storedTokenId && allTokens.length > 0) {
+            const foundToken = allTokens.find(t => t.id === storedTokenId);
             setSelectedToken(foundToken || null);
         } else {
             setSelectedToken(null);
@@ -191,13 +184,12 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
 
     handleTokenChange();
     window.addEventListener('tokenChanged', handleTokenChange);
-    setLoading(false);
-
+    
     return () => {
         window.removeEventListener('tokenChanged', handleTokenChange);
     };
 
-  }, []);
+  }, [allTokens]);
 
   const filteredInvestors = useMemo(() => {
     if (!selectedToken) return [];
@@ -244,23 +236,20 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
   };
   
   const handleToggleFreeze = (id: string) => {
-    const allInvestors: Investor[] = JSON.parse(localStorage.getItem('investors') || '[]');
     let targetInvestor: Investor | undefined;
-    const updatedAllInvestors = allInvestors.map(inv => {
+    const updatedInvestors = investors.map(inv => {
       if (inv.id === id) {
         targetInvestor = { ...inv, isFrozen: !inv.isFrozen };
         return targetInvestor;
       }
       return inv;
     });
-    localStorage.setItem('investors', JSON.stringify(updatedAllInvestors));
-
-    setInvestors(updatedAllInvestors);
+    setInvestors(updatedInvestors);
     
     if(targetInvestor) {
         toast({
-            title: `Address ${targetInvestor.isFrozen ? 'Frozen' : 'Unfrozen'}`,
-            description: `The wallet address for "${targetInvestor.name}" has been ${targetInvestor.isFrozen ? 'frozen' : 'unfrozen'}.`,
+            title: `Address ${targetInvestor.isFrozen ? 'Frozen' : 'Unfrozen'} (Not Persisted)`,
+            description: `The wallet address for "${targetInvestor.name}" has been updated for this session.`,
         });
     }
   };

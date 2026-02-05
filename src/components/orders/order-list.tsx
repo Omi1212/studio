@@ -1,16 +1,13 @@
-
-
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { ordersData, exampleTokens, investorsData } from '@/lib/data';
-import type { Order, TokenDetails } from '@/lib/types';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/card';
+import type { Order, TokenDetails, User } from '@/lib/types';
+import { Card } from '../ui/card';
 import { Avatar, AvatarFallback } from '../ui/avatar';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
-import { MoreVertical, Search, Check, X, ShoppingBag, ArrowUpRight, ArrowDownLeft } from 'lucide-react';
+import { MoreVertical, Search, ShoppingBag, ArrowUpRight, ArrowDownLeft } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
 import Link from 'next/link';
@@ -37,10 +34,10 @@ function getStatusBadge(status: Order['status']) {
   }
 }
 
-function OrderTableRow({ order, onApprove, onReject, userRole }: { order: Order, onApprove: (id: string) => void, onReject: (id: string) => void, userRole: string | null }) {
+function OrderTableRow({ order, tokens, investors, onApprove, onReject, userRole }: { order: Order, tokens: TokenDetails[], investors: User[], onApprove: (id: string) => void, onReject: (id: string) => void, userRole: string | null }) {
   const router = useRouter();
-  const token = exampleTokens.find(t => t.id === order.tokenId);
-  const investor = investorsData.find(i => i.id === order.investorId);
+  const token = tokens.find(t => t.id === order.tokenId);
+  const investor = investors.find(i => i.id === order.investorId);
   const total = order.amount * order.price;
 
   const targetUrl = order.status === 'waiting payment' ? `/orders/${order.id}/pay` : `/orders/${order.id}`;
@@ -123,6 +120,8 @@ function OrderTableRow({ order, onApprove, onReject, userRole }: { order: Order,
 
 export default function OrderList() {
   const [orders, setOrders] = useState<Order[]>([]);
+  const [tokens, setTokens] = useState<TokenDetails[]>([]);
+  const [investors, setInvestors] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
@@ -134,17 +133,23 @@ export default function OrderList() {
   useEffect(() => {
     const role = localStorage.getItem('userRole');
     setUserRole(role);
+    setLoading(true);
 
-    const storedOrdersRaw = localStorage.getItem('orders');
-    const allOrders = storedOrdersRaw ? JSON.parse(storedOrdersRaw) : ordersData;
-    setOrders(allOrders);
+    Promise.all([
+      fetch('/api/orders').then(res => res.json()),
+      fetch('/api/tokens').then(res => res.json()),
+      fetch('/api/investors').then(res => res.json())
+    ]).then(([ordersData, tokensData, investorsData]) => {
+      setOrders(ordersData);
+      setTokens(tokensData);
+      setInvestors(investorsData);
+    }).catch(console.error).finally(() => setLoading(false));
+    
 
     const handleTokenChange = () => {
         const storedTokenId = localStorage.getItem('selectedTokenId');
         if (storedTokenId) {
-            const storedTokens: TokenDetails[] = JSON.parse(localStorage.getItem('createdTokens') || '[]');
-            const allTokens: TokenDetails[] = [...exampleTokens, ...storedTokens];
-            const foundToken = allTokens.find(t => t.id === storedTokenId);
+            const foundToken = tokens.find(t => t.id === storedTokenId);
             setSelectedToken(foundToken || null);
         } else {
             setSelectedToken(null);
@@ -153,12 +158,11 @@ export default function OrderList() {
 
     handleTokenChange();
     window.addEventListener('tokenChanged', handleTokenChange);
-    setLoading(false);
 
      return () => {
         window.removeEventListener('tokenChanged', handleTokenChange);
     };
-  }, []);
+  }, [tokens]);
 
   const filteredOrders = useMemo(() => {
     let filtered = [...orders];
@@ -207,14 +211,11 @@ export default function OrderList() {
   };
 
   const updateOrderStatus = (id: string, status: 'completed' | 'rejected') => {
-    const allOrders: Order[] = JSON.parse(localStorage.getItem('orders') || JSON.stringify(ordersData));
-    const updatedOrders = allOrders.map((order: Order) => order.id === id ? { ...order, status } : order);
-    localStorage.setItem('orders', JSON.stringify(updatedOrders));
-    setOrders(updatedOrders);
+    setOrders(prev => prev.map(order => order.id === id ? { ...order, status } : order));
 
     toast({
-        title: `Order ${status === 'completed' ? 'Accepted' : 'Rejected'}`,
-        description: `The order #${id} has been ${status}.`
+        title: `Order ${status === 'completed' ? 'Accepted' : 'Rejected'} (Not Persisted)`,
+        description: `The order #${id} has been updated for this session.`
     });
   }
 
@@ -350,7 +351,7 @@ export default function OrderList() {
             </TableHeader>
             <TableBody>
               {paginatedOrders.map(order => (
-                  <OrderTableRow key={order.id} order={order} onApprove={handleApprove} onReject={handleReject} userRole={userRole} />
+                  <OrderTableRow key={order.id} order={order} tokens={tokens} investors={investors} onApprove={handleApprove} onReject={handleReject} userRole={userRole} />
               ))}
             </TableBody>
           </Table>

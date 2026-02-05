@@ -1,8 +1,7 @@
-
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import {
   Sidebar,
   SidebarInset,
@@ -36,30 +35,14 @@ export default function NewTokenPage() {
     isFreezable: true,
     network: 'spark',
   });
-  const [isDraft, setIsDraft] = useState(false);
-  const [draftId, setDraftId] = useState<string | null>(null);
   const { toast } = useToast();
   const router = useRouter();
-  const searchParams = useSearchParams();
 
   const stepFormRef = useRef<HTMLFormElement>(null);
   
   useEffect(() => {
     fetch('/api/issuers').then(res => res.json()).then(setIssuers);
-
-    const draftTokenId = searchParams.get('draft_id');
-    if (draftTokenId) {
-      // Drafts are a special case of local storage for session persistence of an unfinished form.
-      const existingTokens: TokenDetails[] = JSON.parse(localStorage.getItem('createdTokens') || '[]');
-      const draftToken = existingTokens.find(token => token.id === draftTokenId && token.status === 'draft');
-      if (draftToken) {
-        setFormData(draftToken);
-        setCurrentStep(draftToken.savedStep || 1);
-        setIsDraft(true);
-        setDraftId(draftTokenId);
-      }
-    }
-  }, [searchParams]);
+  }, []);
 
   const steps = [
     { id: 1, label: 'Token Information' },
@@ -78,40 +61,11 @@ export default function NewTokenPage() {
     setCurrentStep((prev) => prev - 1);
   };
   
-  const handleSaveDraft = (currentFormData: Partial<TokenFormValues>) => {
-    const finalData = { ...formData, ...currentFormData };
-    const id = draftId || `btkn176av2...${Math.random().toString(36).substring(2, 10)}`;
-    
-    if (issuers.length < 2) {
-        toast({ title: 'Error', description: 'Not enough issuer data to save draft.'});
-        return;
-    }
-
-    const draftToken: TokenDetails = {
-      ...finalData,
-      id: id,
-      publicKey: finalData.publicKey || '',
-      status: 'draft',
-      savedStep: currentStep,
-      issuerId: issuers[1].id, // For demo purposes, assign to TokenForge
-    } as TokenDetails;
-
-    // Drafts are a special case of local storage for session persistence of an unfinished form.
-    let existingTokens: TokenDetails[] = JSON.parse(localStorage.getItem('createdTokens') || '[]');
-    
-    if(draftId) {
-      existingTokens = existingTokens.map(token => token.id === draftId ? draftToken : token);
-    } else {
-      existingTokens.push(draftToken);
-    }
-    
-    localStorage.setItem('createdTokens', JSON.stringify(existingTokens));
-
+  const handleSaveDraft = () => {
     toast({
-      title: 'Draft Saved!',
-      description: `Your token "${draftToken.tokenName}" has been saved as a draft.`,
+      title: 'Drafts Not Persisted',
+      description: `Drafts are not saved in this demonstration. Please complete the form in one session.`,
     });
-    router.push('/issue-token');
   };
 
   const handleFinalSubmit = (data: Partial<TokenFormValues>) => {
@@ -122,7 +76,7 @@ export default function NewTokenPage() {
         return;
     }
 
-    const newId = draftId || `btkn176av2...${Math.random().toString(36).substring(2, 10)}`;
+    const newId = `btkn176av2...${Math.random().toString(36).substring(2, 10)}`;
     const newPublicKey = `03a0626e30...${Math.random().toString(36).substring(2, 10)}`;
     
     const newToken: TokenDetails = { 
@@ -135,54 +89,15 @@ export default function NewTokenPage() {
     
     setCreatedToken(newToken);
     
-    // NOTE: This change is not persisted on the server.
-    // In a real app, you would make a POST request to your API.
-    // We add it to localStorage to simulate the creation for this session.
-    let existingTokens: TokenDetails[] = JSON.parse(localStorage.getItem('createdTokens') || '[]');
-    if (draftId) {
-      existingTokens = existingTokens.map(token => token.id === draftId ? newToken : token);
-    } else {
-      existingTokens.push(newToken);
-    }
-    localStorage.setItem('createdTokens', JSON.stringify(existingTokens));
-
     toast({
       title: 'Request Submitted (Not Persisted)',
-      description: `Your new token "${finalData.tokenName}" has been submitted for this session.`,
+      description: `Your new token "${finalData.tokenName}" has been submitted for this session. It will not be saved permanently.`,
       action: (
          <Button variant="outline" size="sm" onClick={() => router.push('/workspace')}>
             View in Workspace
         </Button>
       ),
     });
-  };
-
-  const onSaveDraftClick = () => {
-    if (stepFormRef.current) {
-        const currentForm = stepFormRef.current;
-        const formElements = Array.from(currentForm.elements);
-        const data: Partial<TokenFormValues> = {};
-        formElements.forEach((el) => {
-            const input = el as HTMLInputElement;
-            if (input.name) {
-                if (input.type === 'checkbox') {
-                    // @ts-ignore
-                    data[input.name] = input.checked;
-                } else if(input.type === 'file') {
-                    // @ts-ignore
-                    if (input.files && input.files.length > 0) {
-                        // @ts-ignore
-                        data[input.name] = input.files[0];
-                    }
-                }
-                else {
-                    // @ts-ignore
-                    data[input.name] = input.value;
-                }
-            }
-        });
-        handleSaveDraft(data);
-    }
   };
 
   return (
@@ -200,10 +115,10 @@ export default function NewTokenPage() {
                   <>
                     <div className="flex justify-between items-center mb-8">
                         <h1 className="text-3xl font-headline font-semibold">
-                          {isDraft ? 'Edit Draft' : 'Create a New Token'}
+                          Create a New Token
                         </h1>
                         <div className="flex items-center gap-2">
-                            <Button variant="outline" onClick={onSaveDraftClick}>Save as Draft</Button>
+                            <Button variant="outline" onClick={handleSaveDraft}>Save as Draft</Button>
                             <Button variant="outline" asChild>
                                 <Link href="/issue-token">Cancel</Link>
                             </Button>
@@ -211,7 +126,7 @@ export default function NewTokenPage() {
                     </div>
 
                     <p className="text-muted-foreground mb-8">
-                      {isDraft ? 'Continue editing your token draft.' : 'Create and issue a new token on the network.'}
+                      Create and issue a new token on the network.
                     </p>
                     <div className="mb-8 hidden sm:block">
                       <Stepper totalSteps={steps.length}>
@@ -270,7 +185,7 @@ export default function NewTokenPage() {
                             onBack={handleBack}
                             onSubmit={handleFinalSubmit}
                             formData={formData as TokenFormValues}
-                            onSaveDraft={() => handleSaveDraft(formData)}
+                            onSaveDraft={handleSaveDraft}
                           />
                         )}
                       </div>

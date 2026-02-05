@@ -1,13 +1,41 @@
+'use client';
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { volumeData } from '@/lib/data';
 import { ArrowDownLeft, ArrowUpRight } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Skeleton } from '../ui/skeleton';
+
+type VolumeItem = {
+    title: string;
+    value: string;
+    change: number;
+};
 
 export default function VolumeCards() {
+    const [volumeData, setVolumeData] = useState<VolumeItem[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        fetch('/api/volume')
+            .then(res => res.json())
+            .then(data => setVolumeData(data))
+            .finally(() => setLoading(false));
+    }, []);
+
+    if (loading) {
+        return (
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                {[...Array(4)].map((_, i) => (
+                    <Skeleton key={i} className="h-28" />
+                ))}
+            </div>
+        );
+    }
+
   return (
     <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
       {volumeData.map((item) => (
