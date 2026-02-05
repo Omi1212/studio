@@ -7,26 +7,48 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { transactionData } from '@/lib/data';
 import { ArrowDownLeft, ArrowUpRight, ExternalLink, Search } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '../ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
 import { Input } from '../ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { Skeleton } from '../ui/skeleton';
 
 const ITEMS_PER_PAGE = 10;
 
+type Transaction = {
+    id: number;
+    type: string;
+    address: string;
+    date: string;
+    amount: number;
+    currency: string;
+    direction: 'in' | 'out';
+};
+
 export default function AllTransactions({ className }: { className?: string }) {
+  const [transactions, setTransactions] = React.useState<Transaction[]>([]);
+  const [loading, setLoading] = React.useState(true);
   const [filter, setFilter] = React.useState('all');
   const [search, setSearch] = React.useState('');
   const [currentPage, setCurrentPage] = React.useState(1);
 
+  React.useEffect(() => {
+    setLoading(true);
+    fetch('/api/transactions')
+      .then(res => res.json())
+      .then(data => {
+        setTransactions(data);
+      })
+      .finally(() => setLoading(false));
+  }, []);
+
   const filteredTransactions = React.useMemo(() => {
-    return transactionData
+    return transactions
       .filter(tx => filter === 'all' || tx.direction === filter)
       .filter(tx => search === '' || tx.address.toLowerCase().includes(search.toLowerCase()));
-  }, [filter, search]);
+  }, [transactions, filter, search]);
 
   const totalPages = Math.ceil(filteredTransactions.length / ITEMS_PER_PAGE);
 
@@ -40,6 +62,10 @@ export default function AllTransactions({ className }: { className?: string }) {
       setCurrentPage(page);
     }
   };
+  
+  if (loading) {
+    return <Skeleton className={cn("h-[400px]", className)} />;
+  }
 
   return (
     <Card className={className}>

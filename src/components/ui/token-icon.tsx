@@ -1,10 +1,9 @@
 
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback } from './avatar';
-import { exampleTokens } from '@/lib/data';
 import type { TokenDetails } from '@/lib/types';
 
-type WorkspaceToken = TokenDetails | (typeof exampleTokens)[0] | { tokenName: string, tokenTicker: string };
+type WorkspaceToken = Partial<TokenDetails> & { tokenName: string; tokenTicker: string };
 
 interface TokenIconProps extends React.HTMLAttributes<HTMLElement> {
     token: WorkspaceToken;
