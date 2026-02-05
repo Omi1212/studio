@@ -751,3 +751,9 @@ export const usersData: User[] = [
         kybLevel: 4,
     }
 ]
+
+export const companiesData = [
+  { id: 'bstratus-securities', name: 'Bstratus Securities' },
+  { id: 'neobank-sa-de-cv', name: 'NeoBank SA de CV' },
+  { id: 'tradfi-bank-sa', name: 'TradFi Bank SA' },
+];

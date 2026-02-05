@@ -101,11 +101,7 @@ export default function SidebarNav() {
   const [isClient, setIsClient] = useState(false);
   const [allTokens, setAllTokens] = useState<TokenDetails[]>([]);
   const [selectedToken, setSelectedToken] = useState<TokenDetails | null>(null);
-  const [companies] = useState([
-    { id: 'bstratus-securities', name: 'Bstratus Securities' },
-    { id: 'neobank-sa-de-cv', name: 'NeoBank SA de CV' },
-    { id: 'tradfi-bank-sa', name: 'TradFi Bank SA' },
-  ]);
+  const [companies, setCompanies] = useState<{ id: string; name: string }[]>([]);
   const [selectedCompany, setSelectedCompany] = useState<{ id: string; name: string } | null>(null);
 
 
@@ -116,20 +112,24 @@ export default function SidebarNav() {
     const currentUser: User | null = JSON.parse(localStorage.getItem('currentUser') || 'null');
     setUserRole(role);
 
-    if (role === 'investor' || role === 'issuer') {
-      const storedCompanyId = localStorage.getItem('selectedCompanyId');
-      if (storedCompanyId) {
-        const foundCompany = companies.find((c) => c.id === storedCompanyId);
-        setSelectedCompany(foundCompany || companies[0]);
-      } else {
-        setSelectedCompany(companies[0]);
-      }
-    }
-
-    fetch('/api/tokens')
-      .then(res => res.json())
-      .then((tokensData: TokenDetails[]) => {
-        let combinedTokens: TokenDetails[] = tokensData.map(t => ({
+    Promise.all([
+      fetch('/api/tokens').then(res => res.json()),
+      fetch('/api/companies').then(res => res.json())
+    ]).then(([tokensData, companiesData]) => {
+        setCompanies(companiesData);
+        
+        if (role === 'investor' || role === 'issuer') {
+            if (companiesData.length > 0) {
+              const storedCompanyId = localStorage.getItem('selectedCompanyId');
+              const foundCompany = storedCompanyId ? companiesData.find((c: any) => c.id === storedCompanyId) : undefined;
+              setSelectedCompany(foundCompany || companiesData[0]);
+              if (!foundCompany) {
+                localStorage.setItem('selectedCompanyId', companiesData[0].id);
+              }
+            }
+        }
+        
+        let combinedTokens: TokenDetails[] = tokensData.map((t: any) => ({
           ...t,
           decimals: t.decimals ?? 0,
           isFreezable: t.isFreezable ?? false,
@@ -138,10 +138,7 @@ export default function SidebarNav() {
 
         if (role === 'agent' && currentUser) {
             // NOTE: assignments are not persisted in this demo
-            // const assignments = JSON.parse(localStorage.getItem('agentTokenAssignments') || '{}');
-            // const assignedTokenIds = assignments[currentUser.id] || [];
             // For demo, we'll just show all tokens. In a real app, you'd filter by assignment.
-            // combinedTokens = combinedTokens.filter(token => assignedTokenIds.includes(token.id));
         }
 
         setAllTokens(combinedTokens);
