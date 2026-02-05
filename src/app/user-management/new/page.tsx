@@ -34,12 +34,10 @@ export default function NewUserPage() {
       status: 'active' as const,
     };
     
-    const existingUsers = JSON.parse(localStorage.getItem('users') || '[]');
-    localStorage.setItem('users', JSON.stringify([newUser, ...existingUsers]));
-
+    // NOTE: This change is not persisted.
     toast({
-      title: 'User Added',
-      description: `${newUser.name} has been added to the user list.`,
+      title: 'User Added (Not Persisted)',
+      description: `${newUser.name} has been added for this session.`,
     });
     router.push('/user-management');
   };

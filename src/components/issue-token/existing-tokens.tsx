@@ -3,7 +3,6 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { exampleTokens } from '@/lib/data';
 import type { TokenDetails } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/card';
 import TokenIcon from '../ui/token-icon';
@@ -141,19 +140,23 @@ export default function ExistingTokens({ view, setView }: { view: ViewMode, setV
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const storedTokens: TokenDetails[] = JSON.parse(localStorage.getItem('createdTokens') || '[]');
-    const combinedTokens: TokenDetails[] = [...exampleTokens, ...storedTokens].map(t => ({
-      ...t,
-      decimals: t.decimals ?? 0,
-      isFreezable: t.isFreezable ?? false,
-      publicKey: t.publicKey ?? `02f...${t.id.slice(-10)}`,
-      tokenName: t.tokenName || 'Untitled Token',
-      tokenTicker: t.tokenTicker || '---',
-      network: t.network || 'unknown',
-      maxSupply: t.maxSupply || 0,
-    }));
-    setAllTokens(combinedTokens);
-    setLoading(false);
+    fetch('/api/tokens')
+        .then(res => res.json())
+        .then(exampleTokens => {
+            const storedTokens: TokenDetails[] = JSON.parse(localStorage.getItem('createdTokens') || '[]');
+            const combinedTokens: TokenDetails[] = [...exampleTokens, ...storedTokens].map(t => ({
+            ...t,
+            decimals: t.decimals ?? 0,
+            isFreezable: t.isFreezable ?? false,
+            publicKey: t.publicKey ?? `02f...${t.id.slice(-10)}`,
+            tokenName: t.tokenName || 'Untitled Token',
+            tokenTicker: t.tokenTicker || '---',
+            network: t.network || 'unknown',
+            maxSupply: t.maxSupply || 0,
+            }));
+            setAllTokens(combinedTokens);
+        })
+        .finally(() => setLoading(false));
   }, []);
 
   if (loading) {

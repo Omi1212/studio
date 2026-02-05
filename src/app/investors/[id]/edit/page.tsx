@@ -10,7 +10,6 @@ import {
 } from '@/components/ui/sidebar';
 import SidebarNav from '@/components/dashboard/sidebar-nav';
 import HeaderDynamic from '@/components/dashboard/header-dynamic';
-import { investorsData } from '@/lib/data';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -19,7 +18,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
 
-type Investor = typeof investorsData[0];
+type Investor = {
+    id: string;
+    name: string;
+    email: string;
+    status: 'whitelisted' | 'pending' | 'accepted' | 'rejected';
+    walletAddress: string;
+};
 
 export default function EditInvestorPage() {
   const params = useParams();
@@ -30,13 +35,19 @@ export default function EditInvestorPage() {
 
   useEffect(() => {
     const { id } = params;
-    const storedInvestors: Investor[] = JSON.parse(localStorage.getItem('investors') || '[]');
-    const foundInvestor = storedInvestors.find(inv => inv.id === id);
-    
-    if (foundInvestor) {
-      setInvestor(foundInvestor);
-    }
-    setLoading(false);
+    if (!id) return;
+
+    fetch(`/api/investors/${id}`)
+      .then(res => {
+        if (!res.ok) throw new Error('Investor not found');
+        return res.json();
+      })
+      .then(data => setInvestor(data))
+      .catch(err => {
+        console.error(err);
+        setInvestor(null);
+      })
+      .finally(() => setLoading(false));
   }, [params]);
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -48,17 +59,14 @@ export default function EditInvestorPage() {
       ...investor,
       name: formData.get('name') as string,
       email: formData.get('email') as string,
-      status: formData.get('status') as 'whitelisted' | 'pending',
+      status: formData.get('status') as 'whitelisted' | 'pending' | 'accepted' | 'rejected',
       walletAddress: formData.get('walletAddress') as string,
     };
     
-    const storedInvestors: Investor[] = JSON.parse(localStorage.getItem('investors') || '[]');
-    const updatedInvestors = storedInvestors.map(inv => inv.id === investor.id ? updatedInvestor : inv);
-    localStorage.setItem('investors', JSON.stringify(updatedInvestors));
-
+    // NOTE: This change is not persisted. This is for demonstration purposes only.
     toast({
-      title: 'Investor Updated',
-      description: `${updatedInvestor.name}'s details have been updated.`,
+      title: 'Investor Updated (Not Persisted)',
+      description: `${updatedInvestor.name}'s details have been updated for this session.`,
     });
     router.push(`/investors/${investor.id}`);
   };
@@ -112,6 +120,8 @@ export default function EditInvestorPage() {
                                 <SelectContent>
                                     <SelectItem value="pending">Pending</SelectItem>
                                     <SelectItem value="whitelisted">Whitelisted</SelectItem>
+                                    <SelectItem value="accepted">Accepted</SelectItem>
+                                    <SelectItem value="rejected">Rejected</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>

@@ -11,7 +11,6 @@ import {
 } from '@/components/ui/sidebar';
 import SidebarNav from '@/components/dashboard/sidebar-nav';
 import HeaderDynamic from '@/components/dashboard/header-dynamic';
-import { investorsData, exampleTokens } from '@/lib/data';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Trash2, Snowflake, ArrowUpRight, ArrowDownLeft } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -35,7 +34,18 @@ import TokenIcon from '@/components/ui/token-icon';
 import { cn } from '@/lib/utils';
 import type { TokenDetails } from '@/lib/types';
 
-type Investor = typeof investorsData[0];
+type Investor = {
+    id: string;
+    name: string;
+    email: string;
+    status: 'accepted' | 'pending' | 'rejected';
+    walletAddress: string;
+    joinedDate: string;
+    totalInvested: number;
+    isFrozen: boolean;
+    holdings: any[];
+    transactions: any[];
+};
 
 function getStatusBadge(status: Investor['status']) {
   switch (status) {
@@ -65,37 +75,29 @@ export default function InvestorDetailsPage() {
   const { toast } = useToast();
   const [investor, setInvestor] = useState<Investor | null>(null);
   const [loading, setLoading] = useState(true);
+  const [allTokens, setAllTokens] = useState<TokenDetails[]>([]);
   const [selectedToken, setSelectedToken] = useState<TokenDetails | null>(null);
   const [filteredTransactions, setFilteredTransactions] = useState<Investor['transactions']>([]);
 
   useEffect(() => {
     const { id } = params;
-    const storedInvestors: Investor[] = JSON.parse(localStorage.getItem('investors') || '[]');
-    const defaultInvestorData = investorsData.find(inv => inv.id === id);
-    const storedInvestorData = storedInvestors.find(inv => inv.id === id);
+    if (!id) return;
 
-    let finalInvestor: Investor | null = null;
-
-    if (defaultInvestorData) {
-      finalInvestor = { ...defaultInvestorData };
-      if (storedInvestorData) {
-        finalInvestor = { ...finalInvestor, ...storedInvestorData };
-      }
-    } else if (storedInvestorData) {
-        finalInvestor = storedInvestorData;
-    }
-    
-    if (finalInvestor) {
-      setInvestor(finalInvestor);
-    }
-    
-    setLoading(false);
+    Promise.all([
+        fetch(`/api/investors/${id}`).then(res => res.ok ? res.json() : null),
+        fetch(`/api/tokens`).then(res => res.ok ? res.json() : [])
+    ]).then(([investorData, tokensData]) => {
+        setInvestor(investorData);
+        setAllTokens(tokensData);
+        setLoading(false);
+    }).catch(err => {
+        console.error(err);
+        setLoading(false);
+    });
 
     const handleTokenChange = () => {
         const storedTokenId = localStorage.getItem('selectedTokenId');
-        if (storedTokenId) {
-            const storedTokens: TokenDetails[] = JSON.parse(localStorage.getItem('createdTokens') || '[]');
-            const allTokens: TokenDetails[] = [...exampleTokens, ...storedTokens];
+        if (storedTokenId && allTokens.length > 0) {
             const foundToken = allTokens.find(t => t.id === storedTokenId);
             setSelectedToken(foundToken || null);
         } else {
@@ -110,7 +112,7 @@ export default function InvestorDetailsPage() {
         window.removeEventListener('tokenChanged', handleTokenChange);
     };
 
-  }, [params]);
+  }, [params, allTokens]);
 
   useEffect(() => {
     if (selectedToken && investor?.transactions) {
@@ -129,24 +131,17 @@ export default function InvestorDetailsPage() {
     const updatedInvestor = { ...investor, isFrozen: !investor.isFrozen };
     setInvestor(updatedInvestor);
 
-    const storedInvestors: Investor[] = JSON.parse(localStorage.getItem('investors') || '[]');
-    const updatedInvestors = storedInvestors.map(inv => inv.id === investor.id ? updatedInvestor : inv);
-    localStorage.setItem('investors', JSON.stringify(updatedInvestors));
-
     toast({
-        title: `Address ${updatedInvestor.isFrozen ? 'Frozen' : 'Unfrozen'}`,
-        description: `The wallet address for "${investor.name}" has been ${updatedInvestor.isFrozen ? 'frozen' : 'unfrozen'}.`,
+        title: `Address ${updatedInvestor.isFrozen ? 'Frozen' : 'Unfrozen'} (Not Persisted)`,
+        description: `The wallet address for "${investor.name}" has been updated for this session.`,
     });
   }
 
   const handleDelete = () => {
     if (!investor) return;
-    const storedInvestors: Investor[] = JSON.parse(localStorage.getItem('investors') || '[]');
-    const updatedInvestors = storedInvestors.filter(inv => inv.id !== investor.id);
-    localStorage.setItem('investors', JSON.stringify(updatedInvestors));
     toast({
-        title: "Investor Deleted",
-        description: `"${investor.name}" has been deleted.`,
+        title: "Investor Deleted (Not Persisted)",
+        description: `"${investor.name}" has been removed for this session.`,
     });
     router.push('/investors');
   };
@@ -195,7 +190,7 @@ export default function InvestorDetailsPage() {
                             <AlertDialogHeader>
                                 <AlertDialogTitle>Are you sure?</AlertDialogTitle>
                                 <AlertDialogDescription>
-                                This action cannot be undone. This will permanently delete the investor "{investor.name}" and all associated data.
+                                This will permanently delete the investor "{investor.name}" and all associated data. (This change will not be persisted).
                                 </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
@@ -298,5 +293,3 @@ export default function InvestorDetailsPage() {
     </SidebarProvider>
   );
 }
-
-    

@@ -11,7 +11,6 @@ import {
 } from '@/components/ui/sidebar';
 import SidebarNav from '@/components/dashboard/sidebar-nav';
 import HeaderDynamic from '@/components/dashboard/header-dynamic';
-import { issuersData } from '@/lib/data';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Edit, Power, PowerOff } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -62,35 +61,30 @@ export default function IssuerDetailsPage() {
 
   useEffect(() => {
     const { id } = params;
-    const storedIssuers: Issuer[] = JSON.parse(localStorage.getItem('issuers') || '[]');
-    let finalIssuer = issuersData.find(i => i.id === id);
-    const storedIssuer = storedIssuers.find(i => i.id === id);
-    
-    if (storedIssuer) {
-      finalIssuer = { ...finalIssuer, ...storedIssuer };
-    } else if (!finalIssuer && storedIssuers.length > 0) {
-      finalIssuer = storedIssuers.find(i => i.id === id);
-    }
-    
-    if (finalIssuer) {
-      setIssuer(finalIssuer);
-    }
-    
-    setLoading(false);
+    if (!id) return;
+    setLoading(true);
+    fetch(`/api/issuers/${id}`)
+        .then(res => {
+            if (!res.ok) throw new Error('Issuer not found');
+            return res.json();
+        })
+        .then(data => setIssuer(data))
+        .catch(err => {
+            console.error(err);
+            setIssuer(null);
+        })
+        .finally(() => setLoading(false));
   }, [params]);
 
   const handleToggleStatus = () => {
     if (!issuer) return;
     const newStatus = issuer.status === 'active' ? 'inactive' : 'active';
     const updatedIssuer = { ...issuer, status: newStatus };
-    
-    const storedIssuers: Issuer[] = JSON.parse(localStorage.getItem('issuers') || '[]');
-    const updatedIssuers = storedIssuers.map(i => i.id === issuer.id ? updatedIssuer : i);
-    localStorage.setItem('issuers', JSON.stringify(updatedIssuers));
     setIssuer(updatedIssuer);
     
+    // NOTE: This change is not persisted.
     toast({
-        title: "Status Updated",
+        title: "Status Updated (Not Persisted)",
         description: `Issuer "${issuer.name}" is now ${newStatus}.`,
     });
   };

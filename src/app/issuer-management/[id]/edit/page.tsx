@@ -11,7 +11,6 @@ import {
 } from '@/components/ui/sidebar';
 import SidebarNav from '@/components/dashboard/sidebar-nav';
 import HeaderDynamic from '@/components/dashboard/header-dynamic';
-import { issuersData } from '@/lib/data';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -30,20 +29,19 @@ export default function EditIssuerPage() {
 
   useEffect(() => {
     const { id } = params;
-    const storedIssuers: Issuer[] = JSON.parse(localStorage.getItem('issuers') || '[]');
-    let foundIssuer = issuersData.find(i => i.id === id);
-    const storedIssuer = storedIssuers.find(i => i.id === id);
-    
-    if (storedIssuer) {
-      foundIssuer = { ...foundIssuer, ...storedIssuer };
-    } else if (!foundIssuer && storedIssuers.length > 0) {
-      foundIssuer = storedIssuers.find(i => i.id === id);
-    }
-    
-    if (foundIssuer) {
-      setIssuer(foundIssuer);
-    }
-    setLoading(false);
+    if (!id) return;
+    setLoading(true);
+    fetch(`/api/issuers/${id}`)
+        .then(res => {
+            if (!res.ok) throw new Error('Issuer not found');
+            return res.json();
+        })
+        .then(data => setIssuer(data))
+        .catch(err => {
+            console.error(err);
+            setIssuer(null);
+        })
+        .finally(() => setLoading(false));
   }, [params]);
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -59,13 +57,10 @@ export default function EditIssuerPage() {
       walletAddress: formData.get('walletAddress') as string,
     };
     
-    const storedIssuers: Issuer[] = JSON.parse(localStorage.getItem('issuers') || '[]');
-    const updatedIssuers = storedIssuers.map(i => i.id === issuer.id ? updatedIssuer : i);
-    localStorage.setItem('issuers', JSON.stringify(updatedIssuers));
-
+    // NOTE: This change is not persisted.
     toast({
-      title: 'Issuer Updated',
-      description: `${updatedIssuer.name}'s details have been updated.`,
+      title: 'Issuer Updated (Not Persisted)',
+      description: `${updatedIssuer.name}'s details have been updated for this session.`,
     });
     router.push(`/issuer-management/${issuer.id}`);
   };
@@ -137,4 +132,3 @@ export default function EditIssuerPage() {
     </SidebarProvider>
   );
 }
-

@@ -4,7 +4,6 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { investorsData } from '@/lib/data';
 import type { ViewMode } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/card';
 import { Avatar, AvatarFallback } from '../ui/avatar';
@@ -29,7 +28,15 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
-type WhitelistRequest = typeof investorsData[0];
+type WhitelistRequest = {
+    id: string;
+    name: string;
+    email: string;
+    status: 'accepted' | 'pending' | 'rejected';
+    walletAddress: string;
+    joinedDate: string;
+};
+
 const ITEMS_PER_PAGE = 10;
 
 function getStatusBadge(investor: WhitelistRequest) {
@@ -193,10 +200,12 @@ export default function RequestList({ view, setView }: { view: ViewMode, setView
   const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
-    const storedInvestorsRaw = localStorage.getItem('investors');
-    const allInvestors = storedInvestorsRaw ? JSON.parse(storedInvestorsRaw) : investorsData;
-    setRequests(allInvestors);
-    setLoading(false);
+    setLoading(true);
+    fetch('/api/investors')
+      .then(res => res.json())
+      .then(data => setRequests(data))
+      .catch(console.error)
+      .finally(() => setLoading(false));
   }, []);
 
   const filteredRequests = useMemo(() => {
@@ -237,14 +246,10 @@ export default function RequestList({ view, setView }: { view: ViewMode, setView
 
 
   const updateRequestStatus = (id: string, status: 'accepted' | 'rejected') => {
-    const allInvestors: WhitelistRequest[] = JSON.parse(localStorage.getItem('investors') || '[]');
-    const updatedInvestors = allInvestors.map((inv: WhitelistRequest) => inv.id === id ? { ...inv, status } : inv);
-    localStorage.setItem('investors', JSON.stringify(updatedInvestors));
-    setRequests(updatedInvestors);
-
+    setRequests(prev => prev.map(req => req.id === id ? { ...req, status } : req));
     toast({
-        title: `Request ${status.charAt(0).toUpperCase() + status.slice(1)}`,
-        description: `The request for ${requests.find(r=>r.id===id)?.name} has been ${status}.`
+        title: `Request ${status.charAt(0).toUpperCase() + status.slice(1)} (Not Persisted)`,
+        description: `The request has been updated for this session.`
     });
   }
 

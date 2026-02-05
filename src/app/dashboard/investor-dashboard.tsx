@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import type { User } from '@/lib/types';
-import { usersData } from '@/lib/data';
 import PortfolioOverview from '@/components/dashboard/investor/portfolio-overview';
 import MyHoldings from '@/components/dashboard/investor/my-holdings';
 import RecentActivity from '@/components/dashboard/investor/recent-activity';
@@ -14,10 +13,14 @@ export default function InvestorDashboard() {
     useEffect(() => {
         // For demo purposes, we'll just find the default investor user.
         // In a real app, you'd get the currently logged-in user.
-        const investorUser = usersData.find((u: User) => u.role === 'investor');
-        if (investorUser) {
-            setUser(investorUser);
-        }
+        fetch('/api/users')
+          .then(res => res.json())
+          .then((usersData: User[]) => {
+            const investorUser = usersData.find((u: User) => u.role === 'investor');
+            if (investorUser) {
+                setUser(investorUser);
+            }
+          }).catch(console.error);
     }, []);
 
     return (
@@ -28,11 +31,11 @@ export default function InvestorDashboard() {
                 </h1>
             </div>
             <PortfolioOverview />
-            <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-                <div className="lg:col-span-3">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div className="lg:col-span-1">
                     <MyHoldings />
                 </div>
-                <div className="lg:col-span-2">
+                <div className="lg:col-span-1">
                     <MarketHighlights />
                 </div>
             </div>

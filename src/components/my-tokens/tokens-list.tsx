@@ -6,7 +6,6 @@ import {
   Card,
   CardContent,
 } from '@/components/ui/card';
-import { investorsData, exampleTokens } from '@/lib/data';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { ChevronDown, Send, Copy } from 'lucide-react';
@@ -16,6 +15,7 @@ import {
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
 import { useToast } from '@/hooks/use-toast';
+import type { TokenDetails } from '@/lib/types';
 
 interface PortfolioToken {
     id: string;
@@ -170,27 +170,34 @@ function InfoRow({ label, value, onCopy }: { label: string; value: string, onCop
 
 
 export default function TokensList() {
-    const investor = investorsData.find(inv => inv.id === 'inv-001');
+    const [portfolioTokens, setPortfolioTokens] = React.useState<PortfolioToken[]>([]);
 
-    const portfolioTokens: PortfolioToken[] = React.useMemo(() => {
-        if (!investor) return [];
+    React.useEffect(() => {
+        Promise.all([
+            fetch('/api/investors/inv-001').then(res => res.json()),
+            fetch('/api/tokens').then(res => res.json())
+        ]).then(([investor, allTokens]: [any, TokenDetails[]]) => {
+            if (!investor) return;
 
-        return investor.holdings.map(holding => {
-            const tokenDetail = exampleTokens.find(t => t.id === holding.tokenId);
-            return {
-                id: holding.tokenId,
-                name: holding.tokenName,
-                ticker: holding.tokenTicker,
-                price: holding.value,
-                balance: holding.amount,
-                tokenId: holding.tokenId,
-                publicKey: `03a...${holding.tokenId.slice(-10)}`, // fake public key
-                maxSupply: tokenDetail?.maxSupply || 0,
-                decimals: tokenDetail?.decimals || 0,
-                network: tokenDetail?.network || 'spark',
-            };
-        });
-    }, [investor]);
+            const pTokens = investor.holdings.map((holding: any) => {
+                const tokenDetail = allTokens.find(t => t.id === holding.tokenId);
+                return {
+                    id: holding.tokenId,
+                    name: holding.tokenName,
+                    ticker: holding.tokenTicker,
+                    price: holding.value,
+                    balance: holding.amount,
+                    tokenId: holding.tokenId,
+                    publicKey: `03a...${holding.tokenId.slice(-10)}`, // fake public key
+                    maxSupply: tokenDetail?.maxSupply || 0,
+                    decimals: tokenDetail?.decimals || 0,
+                    network: tokenDetail?.network || 'spark',
+                };
+            });
+            setPortfolioTokens(pTokens);
+        }).catch(console.error);
+
+    }, []);
 
   return (
     <Card>

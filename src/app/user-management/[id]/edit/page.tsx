@@ -10,7 +10,6 @@ import {
 } from '@/components/ui/sidebar';
 import SidebarNav from '@/components/dashboard/sidebar-nav';
 import HeaderDynamic from '@/components/dashboard/header-dynamic';
-import { usersData } from '@/lib/data';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -29,20 +28,19 @@ export default function EditUserPage() {
 
   useEffect(() => {
     const { id } = params;
-    const storedUsers: User[] = JSON.parse(localStorage.getItem('users') || '[]');
-    let foundUser = usersData.find(i => i.id === id);
-    const storedUser = storedUsers.find(i => i.id === id);
-    
-    if (storedUser) {
-      foundUser = { ...foundUser, ...storedUser };
-    } else if (!foundUser && storedUsers.length > 0) {
-      foundUser = storedUsers.find(i => i.id === id);
-    }
-    
-    if (foundUser) {
-      setUser(foundUser);
-    }
-    setLoading(false);
+    if (!id) return;
+    setLoading(true);
+    fetch(`/api/users/${id}`)
+        .then(res => {
+            if (!res.ok) throw new Error('User not found');
+            return res.json();
+        })
+        .then(data => setUser(data))
+        .catch(err => {
+            console.error(err);
+            setUser(null);
+        })
+        .finally(() => setLoading(false));
   }, [params]);
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -52,23 +50,18 @@ export default function EditUserPage() {
     const formData = new FormData(event.currentTarget);
     const updatedUser = {
       ...user,
-      // Keep original values for disabled fields
       name: user.name,
       email: user.email,
       walletAddress: user.walletAddress,
-      // Update from form data
       role: formData.get('role') as 'investor' | 'issuer' | 'agent' | 'superadmin',
       status: formData.get('status') as 'active' | 'inactive',
       kycStatus: formData.get('kycStatus') as 'verified' | 'pending' | 'rejected',
     };
     
-    const storedUsers: User[] = JSON.parse(localStorage.getItem('users') || '[]');
-    const updatedUsers = storedUsers.map(i => i.id === user.id ? updatedUser : i);
-    localStorage.setItem('users', JSON.stringify(updatedUsers));
-
+    // NOTE: This change is not persisted.
     toast({
-      title: 'User Updated',
-      description: `${updatedUser.name}'s details have been updated.`,
+      title: 'User Updated (Not Persisted)',
+      description: `${updatedUser.name}'s details have been updated for this session.`,
     });
     router.push(`/user-management/${user.id}`);
   };

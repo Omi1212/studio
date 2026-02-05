@@ -4,7 +4,6 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { usersData } from '@/lib/data';
 import type { ViewMode, User } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/card';
 import { Avatar, AvatarFallback } from '../ui/avatar';
@@ -195,9 +194,12 @@ export default function UserList({ view, setView }: { view: ViewMode, setView: (
   const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
-    const storedUsers = localStorage.getItem('users');
-    setUsers(storedUsers ? JSON.parse(storedUsers) : usersData);
-    setLoading(false);
+    setLoading(true);
+    fetch('/api/users')
+      .then(res => res.json())
+      .then(data => setUsers(data))
+      .catch(console.error)
+      .finally(() => setLoading(false));
   }, []);
 
   const filteredUsers = useMemo(() => {
@@ -247,10 +249,9 @@ export default function UserList({ view, setView }: { view: ViewMode, setView: (
       return user;
     });
     setUsers(updatedUsers);
-    localStorage.setItem('users', JSON.stringify(updatedUsers));
     if (updatedUser) {
         toast({
-            title: "Status Updated",
+            title: "Status Updated (Not Persisted)",
             description: `User "${updatedUser.name}" is now ${updatedUser.status}.`
         });
     }
@@ -415,5 +416,3 @@ export default function UserList({ view, setView }: { view: ViewMode, setView: (
     </div>
   )
 }
-
-    

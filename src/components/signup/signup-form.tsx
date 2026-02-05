@@ -19,7 +19,6 @@ import { Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import { useToast } from '@/hooks/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { usersData } from '@/lib/data';
 import type { User } from '@/lib/types';
 
 export default function SignupForm() {
@@ -75,8 +74,9 @@ export default function SignupForm() {
     }
 
     setIsSubmitting(true);
-
-    const existingUsers: User[] = JSON.parse(localStorage.getItem('users') || JSON.stringify(usersData));
+    
+    const res = await fetch('/api/users');
+    const existingUsers: User[] = await res.json();
     const emailExists = existingUsers.some(user => user.email === email);
 
     if (emailExists) {
@@ -102,9 +102,8 @@ export default function SignupForm() {
       kycLevel: 1,
     };
 
-    const updatedUsers = [newUser, ...existingUsers];
-    localStorage.setItem('users', JSON.stringify(updatedUsers));
-    
+    // NOTE: New user is not persisted on the server in this demo.
+    // We only store it in localStorage for the session.
     localStorage.setItem('userRole', newUser.role);
     localStorage.setItem('currentUser', JSON.stringify(newUser));
 

@@ -16,7 +16,6 @@ import { Button } from '@/components/ui/button';
 import { CheckCircle2, ShieldCheck, User as UserIcon, Mail, Phone, Building, FileLock2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
-import { usersData } from '@/lib/data';
 import { countries } from '@/lib/countries';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
@@ -177,20 +176,20 @@ export default function ProfilePage() {
   useEffect(() => {
     const storedUser = localStorage.getItem('currentUser');
     if (storedUser) {
-      const parsedUser = JSON.parse(storedUser);
-      // Fallback for different roles to show a relevant profile
-      if (parsedUser.role === 'agent') {
-        setUser(usersData.find((u: User) => u.role === 'agent') || parsedUser);
-      } else if (parsedUser.role === 'issuer') {
-        setUser(usersData.find((u: User) => u.role === 'issuer') || parsedUser);
-      } else if (parsedUser.role === 'investor') {
-        setUser(usersData.find((u: User) => u.role === 'investor') || parsedUser);
-      }
-      else {
-        setUser(parsedUser);
-      }
+        const parsedUser: User = JSON.parse(storedUser);
+        // Fetch the most up-to-date user data from the API
+        fetch(`/api/users`)
+            .then(res => res.json())
+            .then((allUsers: User[]) => {
+                const apiUser = allUsers.find(u => u.id === parsedUser.id);
+                // Merge localStorage data with API data, localStorage is source of truth for session-edits
+                setUser(apiUser ? { ...apiUser, ...parsedUser } : parsedUser);
+            })
+            .catch(() => setUser(parsedUser)) // Fallback to localStorage user on API error
+            .finally(() => setLoading(false));
+    } else {
+        setLoading(false);
     }
-    setLoading(false);
   }, []);
 
   const getInitials = (name: string) => {
@@ -220,7 +219,7 @@ export default function ProfilePage() {
   function getKycStatusDescription(user: User) {
       const level = user.kycLevel || 0;
       if (level === 0 && user.kycStatus !== 'pending') return 'Identity verification not started.';
-      if (user.kycStatus === 'pending') return `Your verification for Level ${level} is currently under review.`;
+      if (user.kycStatus === 'pending') return `Your verification for Level ${level + 1} is currently under review.`;
       if (user.kycStatus === 'verified') {
           if (level >= kycLevels.length) return 'You have successfully completed all identity verification steps.';
           return `Level ${level} verified. You can now proceed to the next level of verification.`;
@@ -232,7 +231,7 @@ export default function ProfilePage() {
   function getKybStatusDescription(user: User) {
       const level = user.kybLevel || 0;
       if (level === 0 && user.kybStatus !== 'pending') return 'Business verification not started.';
-      if (user.kybStatus === 'pending') return `Your verification for Business Level ${level} is currently under review.`;
+      if (user.kybStatus === 'pending') return `Your verification for Business Level ${level + 1} is currently under review.`;
       if (user.kybStatus === 'verified') {
           if (level >= kybLevels.length) return 'Your business has been fully verified.';
           return `Business Level ${level} verified. You can now proceed to the next level of verification.`;
@@ -259,6 +258,7 @@ export default function ProfilePage() {
 
   const isBusinessRole = user.role === 'issuer' || user.role === 'agent' || user.role === 'superadmin';
   const currentVerificationStatus = isBusinessRole ? user.kybStatus : user.kycStatus;
+  // @ts-ignore
   const currentStatusBadge = verificationStatusMap[currentVerificationStatus || 'pending'];
 
 

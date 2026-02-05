@@ -10,7 +10,6 @@ import {
 } from '@/components/ui/sidebar';
 import SidebarNav from '@/components/dashboard/sidebar-nav';
 import HeaderDynamic from '@/components/dashboard/header-dynamic';
-import { usersData } from '@/lib/data';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Edit, Power, PowerOff } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -74,35 +73,30 @@ export default function UserDetailsPage() {
 
   useEffect(() => {
     const { id } = params;
-    const storedUsers: User[] = JSON.parse(localStorage.getItem('users') || '[]');
-    let finalUser = usersData.find(i => i.id === id);
-    const storedUser = storedUsers.find(i => i.id === id);
-    
-    if (storedUser) {
-      finalUser = { ...finalUser, ...storedUser };
-    } else if (!finalUser && storedUsers.length > 0) {
-      finalUser = storedUsers.find(i => i.id === id);
-    }
-    
-    if (finalUser) {
-      setUser(finalUser);
-    }
-    
-    setLoading(false);
+    if (!id) return;
+    setLoading(true);
+    fetch(`/api/users/${id}`)
+        .then(res => {
+            if (!res.ok) throw new Error('User not found');
+            return res.json();
+        })
+        .then(data => setUser(data))
+        .catch(err => {
+            console.error(err);
+            setUser(null);
+        })
+        .finally(() => setLoading(false));
   }, [params]);
 
   const handleToggleStatus = () => {
     if (!user) return;
     const newStatus = user.status === 'active' ? 'inactive' : 'active';
     const updatedUser = { ...user, status: newStatus };
-    
-    const storedUsers: User[] = JSON.parse(localStorage.getItem('users') || '[]');
-    const updatedUsers = storedUsers.map(i => i.id === user.id ? updatedUser : i);
-    localStorage.setItem('users', JSON.stringify(updatedUsers));
     setUser(updatedUser);
     
+    // NOTE: This change is not persisted.
     toast({
-        title: "Status Updated",
+        title: "Status Updated (Not Persisted)",
         description: `User "${user.name}" is now ${newStatus}.`,
     });
   };

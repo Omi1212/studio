@@ -20,15 +20,15 @@ import Step3Documents from '@/components/issue-token/step-3-documents';
 import Step4Network from '@/components/issue-token/step-4-network';
 import Step5Review from '@/components/issue-token/step-5-review';
 import { Button } from '@/components/ui/button';
-import type { TokenDetails } from '@/lib/types';
+import type { TokenDetails, Issuer } from '@/lib/types';
 import Link from 'next/link';
 import { useForm } from 'react-hook-form';
-import { issuersData } from '@/lib/data';
 
 
 export default function NewTokenPage() {
   const [createdToken, setCreatedToken] = useState<TokenDetails | null>(null);
   const [currentStep, setCurrentStep] = useState(1);
+  const [issuers, setIssuers] = useState<Issuer[]>([]);
   const [formData, setFormData] = useState<Partial<TokenFormValues>>({
     tokenName: 'Ingeniería Coin',
     tokenTicker: 'ING',
@@ -47,6 +47,8 @@ export default function NewTokenPage() {
   const stepFormRef = useRef<HTMLFormElement>(null);
   
   useEffect(() => {
+    fetch('/api/issuers').then(res => res.json()).then(setIssuers);
+
     const draftTokenId = searchParams.get('draft_id');
     if (draftTokenId) {
       const existingTokens: TokenDetails[] = JSON.parse(localStorage.getItem('createdTokens') || '[]');
@@ -81,13 +83,18 @@ export default function NewTokenPage() {
     const finalData = { ...formData, ...currentFormData };
     const id = draftId || `btkn176av2...${Math.random().toString(36).substring(2, 10)}`;
     
+    if (issuers.length < 2) {
+        toast({ title: 'Error', description: 'Not enough issuer data to save draft.'});
+        return;
+    }
+
     const draftToken: TokenDetails = {
       ...finalData,
       id: id,
       publicKey: finalData.publicKey || '',
       status: 'draft',
       savedStep: currentStep,
-      issuerId: issuersData[1].id, // For demo purposes, assign to TokenForge
+      issuerId: issuers[1].id, // For demo purposes, assign to TokenForge
     } as TokenDetails;
 
     let existingTokens: TokenDetails[] = JSON.parse(localStorage.getItem('createdTokens') || '[]');
@@ -111,6 +118,11 @@ export default function NewTokenPage() {
     const finalData = { ...formData, ...data } as TokenFormValues;
     console.log('Creating token with:', finalData);
     
+    if (issuers.length < 2) {
+        toast({ title: 'Error', description: 'Not enough issuer data to submit.'});
+        return;
+    }
+
     const newId = draftId || `btkn176av2...${Math.random().toString(36).substring(2, 10)}`;
     const newPublicKey = `03a0626e30...${Math.random().toString(36).substring(2, 10)}`;
     
@@ -119,7 +131,7 @@ export default function NewTokenPage() {
       id: newId, 
       publicKey: newPublicKey,
       status: 'pending',
-      issuerId: issuersData[1].id, // For demo purposes, assign to TokenForge
+      issuerId: issuers[1].id, // For demo purposes, assign to TokenForge
     };
     
     setCreatedToken(newToken);

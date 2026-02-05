@@ -1,18 +1,28 @@
 'use client';
 
 import { Card, CardContent } from '@/components/ui/card';
-import { investorsData } from '@/lib/data';
+import { useEffect, useState } from 'react';
 
 export default function PortfolioValue() {
-  const investor = investorsData.find(inv => inv.id === 'inv-001');
-  const totalValue = investor?.holdings.reduce((acc, token) => acc + token.amount * token.value, 0) || 0;
+  const [totalValue, setTotalValue] = useState(0);
+  const [tokenCount, setTokenCount] = useState(0);
+
+  useEffect(() => {
+    fetch('/api/investors/inv-001')
+      .then(res => res.json())
+      .then(investor => {
+        const value = investor?.holdings.reduce((acc: number, token: any) => acc + token.amount * token.value, 0) || 0;
+        setTotalValue(value);
+        setTokenCount(investor?.holdings.length || 0);
+      });
+  }, []);
 
   return (
     <Card>
       <CardContent className="p-6">
         <p className="text-sm text-muted-foreground">Total Portfolio Value</p>
         <p className="text-3xl font-bold font-headline">${totalValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
-        <p className="text-sm text-muted-foreground">{investor?.holdings.length || 0} tokens</p>
+        <p className="text-sm text-muted-foreground">{tokenCount} tokens</p>
       </CardContent>
     </Card>
   );

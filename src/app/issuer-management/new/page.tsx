@@ -34,12 +34,10 @@ export default function NewIssuerPage() {
       status: 'active' as const,
     };
     
-    const existingIssuers = JSON.parse(localStorage.getItem('issuers') || '[]');
-    localStorage.setItem('issuers', JSON.stringify([newIssuer, ...existingIssuers]));
-
+    // NOTE: This change is not persisted.
     toast({
-      title: 'Issuer Added',
-      description: `${newIssuer.name} has been added to the issuer list.`,
+      title: 'Issuer Added (Not Persisted)',
+      description: `${newIssuer.name} has been added for this session.`,
     });
     router.push('/issuer-management');
   };
@@ -87,4 +85,3 @@ export default function NewIssuerPage() {
     </SidebarProvider>
   );
 }
-

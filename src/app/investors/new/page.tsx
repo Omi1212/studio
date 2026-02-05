@@ -37,12 +37,10 @@ export default function NewInvestorPage() {
       isFrozen: false,
     };
     
-    const existingInvestors = JSON.parse(localStorage.getItem('investors') || '[]');
-    localStorage.setItem('investors', JSON.stringify([newInvestor, ...existingInvestors]));
-
+    // NOTE: This change is not persisted. This is for demonstration purposes only.
     toast({
-      title: 'Investor Added',
-      description: `${newInvestor.name} has been added to your investor list.`,
+      title: 'Investor Added (Not Persisted)',
+      description: `${newInvestor.name} has been added for this session.`,
     });
     router.push('/investors');
   };
@@ -102,4 +100,3 @@ export default function NewInvestorPage() {
     </SidebarProvider>
   );
 }
-
