@@ -35,7 +35,6 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '../ui/button';
-import { exampleTokens } from '@/lib/data';
 import TokenIcon from '../ui/token-icon';
 import { cn } from '@/lib/utils';
 import type { TokenDetails, User } from '@/lib/types';
@@ -127,43 +126,46 @@ export default function SidebarNav() {
       }
     }
 
-    const storedTokens = JSON.parse(localStorage.getItem('createdTokens') || '[]');
-    let combinedTokens: TokenDetails[] = [...exampleTokens, ...storedTokens].map(t => ({
-      ...t,
-      // Ensure all tokens have the necessary fields for TokenDetails type
-      decimals: t.decimals ?? 0,
-      isFreezable: t.isFreezable ?? false,
-      publicKey: t.publicKey ?? `02f...${t.id.slice(-10)}`,
-    }));
+    fetch('/api/tokens')
+      .then(res => res.json())
+      .then((tokensData: TokenDetails[]) => {
+        let combinedTokens: TokenDetails[] = tokensData.map(t => ({
+          ...t,
+          decimals: t.decimals ?? 0,
+          isFreezable: t.isFreezable ?? false,
+          publicKey: t.publicKey ?? `02f...${t.id.slice(-10)}`,
+        }));
 
-    if (role === 'agent' && currentUser) {
-        const assignments = JSON.parse(localStorage.getItem('agentTokenAssignments') || '{}');
-        const assignedTokenIds = assignments[currentUser.id] || [];
-        combinedTokens = combinedTokens.filter(token => assignedTokenIds.includes(token.id));
-    }
+        if (role === 'agent' && currentUser) {
+            // NOTE: assignments are not persisted in this demo
+            // const assignments = JSON.parse(localStorage.getItem('agentTokenAssignments') || '{}');
+            // const assignedTokenIds = assignments[currentUser.id] || [];
+            // For demo, we'll just show all tokens. In a real app, you'd filter by assignment.
+            // combinedTokens = combinedTokens.filter(token => assignedTokenIds.includes(token.id));
+        }
 
-    setAllTokens(combinedTokens);
+        setAllTokens(combinedTokens);
 
-    const storedTokenId = localStorage.getItem('selectedTokenId');
-    if (storedTokenId) {
-        const foundToken = combinedTokens.find(t => t.id === storedTokenId);
-        if (foundToken) {
-          setSelectedToken(foundToken);
+        const storedTokenId = localStorage.getItem('selectedTokenId');
+        if (storedTokenId) {
+            const foundToken = combinedTokens.find(t => t.id === storedTokenId);
+            if (foundToken) {
+              setSelectedToken(foundToken);
+            } else if (combinedTokens.length > 0) {
+              const firstToken = combinedTokens[0];
+              setSelectedToken(firstToken);
+              localStorage.setItem('selectedTokenId', firstToken.id);
+            } else {
+              setSelectedToken(null);
+              localStorage.removeItem('selectedTokenId');
+            }
         } else if (combinedTokens.length > 0) {
           const firstToken = combinedTokens[0];
           setSelectedToken(firstToken);
           localStorage.setItem('selectedTokenId', firstToken.id);
-        } else {
-          setSelectedToken(null);
-          localStorage.removeItem('selectedTokenId');
         }
-    } else if (combinedTokens.length > 0) {
-      const firstToken = combinedTokens[0];
-      setSelectedToken(firstToken);
-      localStorage.setItem('selectedTokenId', firstToken.id);
-    }
-
-
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleTokenSelect = (token: TokenDetails) => {

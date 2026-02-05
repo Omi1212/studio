@@ -3,7 +3,6 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { exampleTokens } from '@/lib/data';
 import type { TokenDetails } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/card';
 import TokenIcon from '../ui/token-icon';
@@ -85,30 +84,15 @@ export default function IssuerTokens({ issuerId }: { issuerId: string }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const storedTokens: TokenDetails[] = JSON.parse(localStorage.getItem('createdTokens') || '[]');
-    // In a real app, you would filter tokens by issuerId.
-    // For this demo, we'll show a mix of example and created tokens.
-    const combinedTokens: TokenDetails[] = [...exampleTokens, ...storedTokens].map(t => ({
-      ...t,
-      decimals: t.decimals ?? 0,
-      isFreezable: t.isFreezable ?? false,
-      publicKey: t.publicKey ?? `02f...${t.id.slice(-10)}`,
-      tokenName: t.tokenName || 'Untitled Token',
-      tokenTicker: t.tokenTicker || '---',
-      network: t.network || 'unknown',
-      maxSupply: t.maxSupply || 0,
-    }));
-    
-    // Demo logic: assign some tokens to the issuer for display
-    if(issuerId === 'iss-001') {
-        setIssuerTokens(combinedTokens.slice(0, 3));
-    } else if (issuerId === 'iss-002') {
-        setIssuerTokens(combinedTokens.slice(2, 5));
-    } else {
-        setIssuerTokens([]);
-    }
-
-    setLoading(false);
+    setLoading(true);
+    fetch('/api/tokens')
+      .then(res => res.json())
+      .then((allTokens: TokenDetails[]) => {
+        const filteredTokens = allTokens.filter(token => token.issuerId === issuerId);
+        setIssuerTokens(filteredTokens);
+      })
+      .catch(console.error)
+      .finally(() => setLoading(false));
   }, [issuerId]);
 
   if (loading) {

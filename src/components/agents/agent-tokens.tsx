@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import type { User, TokenDetails } from '@/lib/types';
-import { exampleTokens } from '@/lib/data';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -21,9 +20,11 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ClipboardList, MoreVertical, Trash2, Search } from 'lucide-react';
+import { ClipboardList, MoreVertical, Trash2, Search, Plus } from 'lucide-react';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } from '../ui/dropdown-menu';
 import { Input } from '../ui/input';
+import { Label } from '../ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 
 interface AgentTokensProps {
     agent: User;
@@ -44,42 +45,46 @@ export default function AgentTokens({ agent }: AgentTokensProps) {
     const [loading, setLoading] = useState(true);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [selectedTokenIds, setSelectedTokenIds] = useState<string[]>([]);
-    const [searchQuery, setSearchQuery] = useState('');
-    
+    const [isAddingToken, setIsAddingToken] = useState(false);
+
     useEffect(() => {
-        const storedTokens: TokenDetails[] = JSON.parse(localStorage.getItem('createdTokens') || '[]');
-        const activeTokens = [...exampleTokens, ...storedTokens].filter(token => token.status === 'active');
-        setAllTokens(activeTokens);
+      setLoading(true);
+      fetch('/api/tokens')
+        .then(res => res.json())
+        .then((data: TokenDetails[]) => {
+          const activeTokens = data.filter(token => token.status === 'active');
+          setAllTokens(activeTokens);
 
-        const storedAssignments: Record<string, string[]> = JSON.parse(localStorage.getItem('agentTokenAssignments') || '{}');
-        setAssignments(storedAssignments);
-        
-        const agentTokenIds = storedAssignments[agent.id] || [];
-        const agentTokens = activeTokens.filter(token => agentTokenIds.includes(token.id));
-        setAssignedTokens(agentTokens);
-        setSelectedTokenIds(agentTokenIds);
-
-        setLoading(false);
+          // NOTE: Assignments are not persisted on the server in this demo.
+          // They are only stored in local component state. We're initializing it empty.
+          const agentTokenIds = assignments[agent.id] || [];
+          const agentTokens = activeTokens.filter(token => agentTokenIds.includes(token.id));
+          setAssignedTokens(agentTokens);
+          setSelectedTokenIds(agentTokenIds);
+        })
+        .catch(console.error)
+        .finally(() => setLoading(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [agent.id]);
     
     useEffect(() => {
         if (isDialogOpen) {
             setSelectedTokenIds(assignments[agent.id] || []);
-            setSearchQuery('');
+        } else {
+            setIsAddingToken(false);
         }
     }, [isDialogOpen, assignments, agent.id]);
 
     const handleUpdateAssignments = () => {
         const newAssignments = { ...assignments, [agent.id]: selectedTokenIds };
         setAssignments(newAssignments);
-        localStorage.setItem('agentTokenAssignments', JSON.stringify(newAssignments));
-
+        // NOTE: This change is not persisted.
         const updatedAssignedTokens = allTokens.filter(token => selectedTokenIds.includes(token.id));
         setAssignedTokens(updatedAssignedTokens);
 
         toast({
-            title: "Assignments Updated",
-            description: `Token assignments for ${agent.name} have been saved.`,
+            title: "Assignments Updated (Not Persisted)",
+            description: `Token assignments for ${agent.name} have been saved for this session.`,
         });
         setIsDialogOpen(false);
     };
@@ -88,6 +93,7 @@ export default function AgentTokens({ agent }: AgentTokensProps) {
         if (tokenId && !selectedTokenIds.includes(tokenId)) {
             setSelectedTokenIds(prev => [...prev, tokenId]);
         }
+        setIsAddingToken(false);
     };
 
     const handleTokenRemove = (tokenId: string) => {
@@ -99,15 +105,8 @@ export default function AgentTokens({ agent }: AgentTokensProps) {
     }, [allTokens, selectedTokenIds]);
     
     const unassigned = useMemo(() => {
-        let filtered = allTokens.filter(token => !selectedTokenIds.includes(token.id));
-        if (searchQuery) {
-            filtered = filtered.filter(token => 
-                token.tokenName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                token.tokenTicker.toLowerCase().includes(searchQuery.toLowerCase())
-            );
-        }
-        return filtered;
-    }, [allTokens, selectedTokenIds, searchQuery]);
+        return allTokens.filter(token => !selectedTokenIds.includes(token.id));
+    }, [allTokens, selectedTokenIds]);
 
 
     if (loading) {
@@ -160,7 +159,7 @@ export default function AgentTokens({ agent }: AgentTokensProps) {
                                                 <AlertDialogHeader>
                                                     <AlertDialogTitle>Are you sure?</AlertDialogTitle>
                                                     <AlertDialogDescription>
-                                                        This will unassign the token "{token.tokenName}" from {agent.name}. They will no longer be able to manage it.
+                                                        This will unassign the token &quot;{token.tokenName}&quot; from {agent.name}. They will no longer be able to manage it.
                                                     </AlertDialogDescription>
                                                 </AlertDialogHeader>
                                                 <AlertDialogFooter>
@@ -179,46 +178,37 @@ export default function AgentTokens({ agent }: AgentTokensProps) {
                             </div>
                         </ScrollArea>
                         
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button variant="link" className="p-0 h-auto text-primary">
-                                    + Add Another Token
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent className="w-[--radix-dropdown-menu-trigger-width]">
-                                <div className="p-2">
-                                    <div className="relative">
-                                        <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                        <Input 
-                                            placeholder="Search tokens..." 
-                                            className="pl-8"
-                                            value={searchQuery}
-                                            onChange={(e) => setSearchQuery(e.target.value)}
-                                        />
-                                    </div>
-                                </div>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuLabel>Available Tokens</DropdownMenuLabel>
-                                <ScrollArea className="max-h-48">
-                                    {unassigned.length > 0 ? (
-                                        unassigned.map(token => (
-                                        <DropdownMenuItem key={token.id} onSelect={() => handleTokenAdd(token.id)}>
-                                            <div className="flex items-center justify-between w-full">
-                                                <div className="flex items-center gap-2">
-                                                    <TokenIcon token={token} className="h-6 w-6" />
-                                                    <span>{token.tokenName} ({token.tokenTicker})</span>
-                                                </div>
+                        {!isAddingToken && (
+                             <Button variant="link" className="p-0 h-auto text-primary" onClick={() => setIsAddingToken(true)}>
+                                <Plus className="mr-2 h-4 w-4" /> Add Another Token
+                            </Button>
+                        )}
+                        {isAddingToken && (
+                             <div className="space-y-2 pt-2">
+                                <Label>Add a token</Label>
+                                <Select onValueChange={handleTokenAdd}>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select a token to add..." />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {unassigned.length > 0 ? (
+                                            unassigned.map(token => (
+                                                <SelectItem key={token.id} value={token.id}>
+                                                     <div className="flex items-center gap-2">
+                                                        <TokenIcon token={token} className="h-6 w-6" />
+                                                        <span>{token.tokenName} ({token.tokenTicker})</span>
+                                                    </div>
+                                                </SelectItem>
+                                            ))
+                                        ) : (
+                                            <div className="px-2 py-1.5 text-sm text-muted-foreground">
+                                                No other tokens to add.
                                             </div>
-                                        </DropdownMenuItem>
-                                        ))
-                                    ) : (
-                                        <div className="px-2 py-1.5 text-sm text-muted-foreground">
-                                            {searchQuery ? "No tokens match your search." : "No other tokens to add."}
-                                        </div>
-                                    )}
-                                </ScrollArea>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
+                                        )}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        )}
                         
                         <DialogFooter className="pt-4">
                             <DialogClose asChild>

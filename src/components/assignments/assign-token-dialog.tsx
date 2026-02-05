@@ -17,6 +17,17 @@ import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import type { User, TokenDetails } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 
 interface AssignTokenDialogProps {
     agent: User;
@@ -48,8 +59,8 @@ export function AssignTokenDialog({ agent, allTokens, assignedTokenIds, onUpdate
         onUpdate(agent.id, selectedTokenIds);
         setIsOpen(false);
         toast({
-            title: "Assignments Updated",
-            description: `Token assignments for ${agent.name} have been saved.`,
+            title: "Assignments Updated (Not Persisted)",
+            description: `Token assignments for ${agent.name} have been saved for this session.`,
         });
     };
     

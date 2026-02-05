@@ -9,7 +9,6 @@ import {
 } from '@/components/ui/sidebar';
 import SidebarNav from '@/components/dashboard/sidebar-nav';
 import HeaderDynamic from '@/components/dashboard/header-dynamic';
-import { usersData } from '@/lib/data';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -28,20 +27,28 @@ export default function EditAgentPage() {
 
   useEffect(() => {
     const { id } = params;
-    const storedUsers: User[] = JSON.parse(localStorage.getItem('users') || '[]');
-    let foundUser = usersData.find(i => i.id === id && i.role === 'agent');
-    const storedUser = storedUsers.find(i => i.id === id && i.role === 'agent');
+    if (!id) return;
     
-    if (storedUser) {
-      foundUser = { ...foundUser, ...storedUser };
-    } else if (!foundUser && storedUsers.length > 0) {
-      foundUser = storedUsers.find(i => i.id === id && i.role === 'agent');
-    }
-    
-    if (foundUser) {
-      setAgent(foundUser);
-    }
-    setLoading(false);
+    setLoading(true);
+    fetch(`/api/users/${id}`)
+      .then(res => {
+        if (res.ok) {
+          return res.json();
+        }
+        throw new Error('Agent not found');
+      })
+      .then((data: User) => {
+        if (data && data.role === 'agent') {
+          setAgent(data);
+        } else {
+          setAgent(null);
+        }
+      })
+      .catch(err => {
+        console.error(err);
+        setAgent(null);
+      })
+      .finally(() => setLoading(false));
   }, [params]);
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -60,13 +67,11 @@ export default function EditAgentPage() {
       status: formData.get('status') as 'active' | 'inactive',
     };
     
-    const storedUsers: User[] = JSON.parse(localStorage.getItem('users') || '[]');
-    const updatedUsers = storedUsers.map(i => i.id === agent.id ? updatedAgent : i);
-    localStorage.setItem('users', JSON.stringify(updatedUsers));
-
+    // NOTE: This change is not persisted. This is for demonstration purposes only.
+    // In a real application, you would make a PUT/PATCH request to your API to update the data.
     toast({
-      title: 'Agent Updated',
-      description: `${updatedAgent.name}'s details have been updated.`,
+      title: 'Agent Updated (Not Persisted)',
+      description: `${updatedAgent.name}'s details have been updated for this session.`,
     });
     router.push(`/agents/${agent.id}`);
   };

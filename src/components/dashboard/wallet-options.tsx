@@ -9,9 +9,10 @@ import {
 } from "@/components/ui/sheet"
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Separator } from "../ui/separator";
-import { investorsData, cryptoData } from "@/lib/data";
+import type { User } from "@/lib/types";
 import TokenIcon from "../ui/token-icon";
 import { ScrollArea } from "../ui/scroll-area";
+import { useEffect, useState } from "react";
 
 const XverseIcon = () => (
     <img src="https://spark.satsterminal.com/xverse.svg" alt="Xverse logo" className="h-8 w-8" />
@@ -25,9 +26,21 @@ interface WalletOptionsProps {
 
 function ConnectedView({ onDisconnect }: { onDisconnect: () => void }) {
     const { toast } = useToast();
-    const investor = investorsData.find(inv => inv.id === 'inv-001');
-    const totalValue = investor?.holdings.reduce((acc, token) => acc + token.amount * token.value, 0) || 0;
-    const bitcoin = cryptoData.find(c => c.ticker === 'BTC');
+    const [investor, setInvestor] = useState<any | null>(null);
+    const [crypto, setCrypto] = useState<any[]>([]);
+
+    useEffect(() => {
+        Promise.all([
+            fetch('/api/investors/inv-001').then(res => res.json()),
+            fetch('/api/crypto').then(res => res.json())
+        ]).then(([investorData, cryptoData]) => {
+            setInvestor(investorData);
+            setCrypto(cryptoData);
+        }).catch(console.error);
+    }, []);
+
+    const totalValue = investor?.holdings.reduce((acc: number, token: any) => acc + token.amount * token.value, 0) || 0;
+    const bitcoin = crypto.find(c => c.ticker === 'BTC');
 
 
     const copyAddress = () => {
@@ -94,7 +107,7 @@ function ConnectedView({ onDisconnect }: { onDisconnect: () => void }) {
                         <p className="font-mono">${(bitcoin.balance * bitcoin.value).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                     </div>
                 )}
-                {investor?.holdings?.map(token => (
+                {investor?.holdings?.map((token:any) => (
                     <div key={token.tokenId} className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                             <TokenIcon token={token} className="h-10 w-10" />

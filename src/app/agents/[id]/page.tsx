@@ -10,7 +10,6 @@ import {
 } from '@/components/ui/sidebar';
 import SidebarNav from '@/components/dashboard/sidebar-nav';
 import HeaderDynamic from '@/components/dashboard/header-dynamic';
-import { usersData } from '@/lib/data';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Power, PowerOff } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -61,35 +60,39 @@ export default function AgentDetailsPage() {
 
   useEffect(() => {
     const { id } = params;
-    const storedUsers: User[] = JSON.parse(localStorage.getItem('users') || '[]');
-    let finalUser = usersData.find(i => i.id === id && i.role === 'agent');
-    const storedUser = storedUsers.find(i => i.id === id && i.role === 'agent');
-    
-    if (storedUser) {
-      finalUser = { ...finalUser, ...storedUser };
-    } else if (!finalUser && storedUsers.length > 0) {
-      finalUser = storedUsers.find(i => i.id === id && i.role === 'agent');
-    }
-    
-    if (finalUser) {
-      setAgent(finalUser);
-    }
-    
-    setLoading(false);
+    if (!id) return;
+    setLoading(true);
+    fetch(`/api/users/${id}`)
+      .then(res => {
+        if (res.ok) {
+          return res.json();
+        }
+        throw new Error('Agent not found');
+      })
+      .then((data: User) => {
+        if (data && data.role === 'agent') {
+            setAgent(data);
+        } else {
+            setAgent(null);
+        }
+      })
+      .catch(err => {
+        console.error(err);
+        setAgent(null);
+      })
+      .finally(() => setLoading(false));
   }, [params]);
 
   const handleToggleStatus = () => {
     if (!agent) return;
     const newStatus = agent.status === 'active' ? 'inactive' : 'active';
     const updatedAgent = { ...agent, status: newStatus };
-    
-    const storedUsers: User[] = JSON.parse(localStorage.getItem('users') || '[]');
-    const updatedUsers = storedUsers.map(i => i.id === agent.id ? updatedAgent : i);
-    localStorage.setItem('users', JSON.stringify(updatedUsers));
     setAgent(updatedAgent);
     
+    // NOTE: This change is not persisted. This is for demonstration purposes only.
+    // In a real application, you would make a PUT/PATCH request to your API to update the data.
     toast({
-        title: "Status Updated",
+        title: "Status Updated (Not Persisted)",
         description: `Agent "${agent.name}" is now ${newStatus}.`,
     });
   };

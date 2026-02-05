@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { usersData, exampleTokens } from '@/lib/data';
 import type { User, TokenDetails } from '@/lib/types';
 import { Card } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -41,26 +40,30 @@ export default function AgentList() {
     const router = useRouter();
 
     useEffect(() => {
-        // Fetch agents
-        const allUsers: User[] = JSON.parse(localStorage.getItem('users') || JSON.stringify(usersData));
-        setAgents(allUsers.filter(user => user.role === 'agent'));
+        setLoading(true);
+        Promise.all([
+            fetch('/api/users').then(res => res.json()),
+            fetch('/api/tokens').then(res => res.json()),
+            // In a real app, assignments would be fetched from a dedicated endpoint.
+            // For this demo, we'll keep it in local state.
+        ]).then(([usersData, tokensData]) => {
+            setAgents(usersData.filter((user: User) => user.role === 'agent'));
+            setActiveTokens(tokensData.filter((token: TokenDetails) => token.status === 'active'));
+            
+            // NOTE: Assignments are not persisted on the server in this demo.
+            // They are only stored in local component state.
+            // const storedAssignments = JSON.parse(localStorage.getItem('agentTokenAssignments') || '{}');
+            // setAssignments(storedAssignments);
+        }).catch(console.error)
+        .finally(() => setLoading(false));
 
-        // Fetch active tokens
-        const storedTokens: TokenDetails[] = JSON.parse(localStorage.getItem('createdTokens') || '[]');
-        const allTokens: TokenDetails[] = [...exampleTokens, ...storedTokens];
-        setActiveTokens(allTokens.filter(token => token.status === 'active'));
-
-        // Fetch assignments
-        const storedAssignments = JSON.parse(localStorage.getItem('agentTokenAssignments') || '{}');
-        setAssignments(storedAssignments);
-
-        setLoading(false);
     }, []);
     
     const handleUpdateAssignments = (agentId: string, tokenIds: string[]) => {
         const newAssignments = { ...assignments, [agentId]: tokenIds };
         setAssignments(newAssignments);
-        localStorage.setItem('agentTokenAssignments', JSON.stringify(newAssignments));
+        // NOTE: This change is not persisted. This is for demonstration purposes only.
+        // localStorage.setItem('agentTokenAssignments', JSON.stringify(newAssignments));
     };
 
     const filteredAgents = useMemo(() => {
