@@ -2,6 +2,15 @@
 import { NextResponse } from 'next/server';
 import { investorsData } from '../data';
 import type { User } from '@/lib/types';
+import { z } from 'zod';
+
+const patchSchema = z.object({
+  name: z.string().min(1, "Name is required").optional(),
+  email: z.string().email("Invalid email address").optional(),
+  kycStatus: z.enum(['verified', 'pending', 'rejected']).optional(),
+  walletAddress: z.string().min(1, "Wallet address is required").optional(),
+  isFrozen: z.boolean().optional(),
+});
 
 
 export async function GET(
@@ -19,15 +28,24 @@ export async function PATCH(
   request: Request,
   { params }: { params: { id: string } }
 ) {
-  const investorIndex = (investorsData as User[]).findIndex((inv) => inv.id === params.id);
-  if (investorIndex === -1) {
-    return new Response('Investor not found', { status: 404 });
+  try {
+    const investorIndex = (investorsData as User[]).findIndex((inv) => inv.id === params.id);
+    if (investorIndex === -1) {
+      return new Response('Investor not found', { status: 404 });
+    }
+    
+    const body = await request.json();
+    const validatedData = patchSchema.parse(body);
+
+    investorsData[investorIndex] = { ...investorsData[investorIndex], ...validatedData };
+    
+    return NextResponse.json(investorsData[investorIndex]);
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+        return NextResponse.json({ errors: error.errors }, { status: 400 });
+    }
+    return NextResponse.json({ message: 'An unexpected error occurred' }, { status: 500 });
   }
-  
-  const body = await request.json();
-  investorsData[investorIndex] = { ...investorsData[investorIndex], ...body };
-  
-  return NextResponse.json(investorsData[investorIndex]);
 }
 
 export async function DELETE(
