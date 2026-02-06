@@ -239,20 +239,33 @@ export default function UserList({ view, setView }: { view: ViewMode, setView: (
     }
   };
 
-  const handleToggleStatus = (id: string) => {
-    let updatedUser: User | undefined;
-    const updatedUsers = users.map(user => {
-      if (user.id === id) {
-        updatedUser = { ...user, status: user.status === 'active' ? 'inactive' : 'active' };
-        return updatedUser;
-      }
-      return user;
-    });
-    setUsers(updatedUsers);
-    if (updatedUser) {
+  const handleToggleStatus = async (id: string) => {
+    const targetUser = users.find(user => user.id === id);
+    if (!targetUser) return;
+
+    const newStatus = targetUser.status === 'active' ? 'inactive' : 'active';
+    
+    try {
+        const response = await fetch(`/api/users/${id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status: newStatus }),
+        });
+        if (!response.ok) throw new Error('Failed to update status');
+
+        const updatedUser = await response.json();
+        setUsers(prev => prev.map(user => (user.id === id ? updatedUser : user)));
+        
         toast({
-            title: "Status Updated (Not Persisted)",
+            title: "Status Updated",
             description: `User "${updatedUser.name}" is now ${updatedUser.status}.`
+        });
+    } catch(error) {
+        console.error(error);
+        toast({
+            variant: 'destructive',
+            title: 'Error',
+            description: 'Could not update user status.'
         });
     }
   };

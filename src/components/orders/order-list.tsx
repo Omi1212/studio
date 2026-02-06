@@ -211,13 +211,33 @@ export default function OrderList() {
     }
   };
 
-  const updateOrderStatus = (id: string, status: 'completed' | 'rejected') => {
-    setOrders(prev => prev.map(order => order.id === id ? { ...order, status } : order));
+  const updateOrderStatus = async (id: string, status: 'completed' | 'rejected') => {
+     try {
+        const response = await fetch(`/api/orders/${id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status }),
+        });
 
-    toast({
-        title: `Order ${status === 'completed' ? 'Accepted' : 'Rejected'} (Not Persisted)`,
-        description: `The order #${id} has been updated for this session.`
-    });
+        if (!response.ok) {
+            throw new Error('Failed to update order status');
+        }
+
+        const updatedOrder = await response.json();
+        setOrders(prev => prev.map(order => order.id === id ? updatedOrder : order));
+
+        toast({
+            title: `Order ${status === 'completed' ? 'Accepted' : 'Rejected'}`,
+            description: `The order #${id} has been updated.`
+        });
+    } catch (error) {
+        console.error(error);
+        toast({
+            variant: 'destructive',
+            title: 'Error',
+            description: 'Could not update the order status.',
+        });
+    }
   }
 
   const handleApprove = (id: string) => {
