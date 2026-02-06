@@ -177,15 +177,19 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
       setInvestors(investorsData);
       setAllTokens(tokensData);
     }).catch(console.error).finally(() => setLoading(false));
+  }, []);
 
+  useEffect(() => {
     const handleTokenChange = () => {
+      if (allTokens.length > 0) {
         const storedTokenId = localStorage.getItem('selectedTokenId');
-        if (storedTokenId && allTokens.length > 0) {
+        if (storedTokenId) {
             const foundToken = allTokens.find(t => t.id === storedTokenId);
             setSelectedToken(foundToken || null);
         } else {
             setSelectedToken(null);
         }
+      }
     };
 
     handleTokenChange();
@@ -194,7 +198,6 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
     return () => {
         window.removeEventListener('tokenChanged', handleTokenChange);
     };
-
   }, [allTokens]);
 
   const filteredInvestors = useMemo(() => {
