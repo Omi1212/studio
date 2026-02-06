@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -16,7 +15,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import type { User, TokenDetails } from '@/lib/types';
-import { useToast } from '@/hooks/use-toast';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -47,8 +45,6 @@ export function AssignTokenDialog({ agent, allTokens, assignedTokenIds, onUpdate
         }
     }, [isOpen, assignedTokenIds]);
 
-    const { toast } = useToast();
-
     const handleCheckboxChange = (tokenId: string, checked: boolean) => {
         setSelectedTokenIds(prev => 
             checked ? [...prev, tokenId] : prev.filter(id => id !== tokenId)
@@ -58,10 +54,6 @@ export function AssignTokenDialog({ agent, allTokens, assignedTokenIds, onUpdate
     const handleSave = () => {
         onUpdate(agent.id, selectedTokenIds);
         setIsOpen(false);
-        toast({
-            title: "Assignments Updated (Not Persisted)",
-            description: `Token assignments for ${agent.name} have been saved for this session.`,
-        });
     };
     
     // Sort tokens to show assigned ones first
