@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { subscriptionsData } from '../subscriptions/data';
+import { subscriptionsData } from '../../subscriptions/data';
 import type { SubscriptionStatus } from '@/lib/types';
 
 export async function GET(
