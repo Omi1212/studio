@@ -85,10 +85,11 @@ export default function IssuerTokens({ issuerId }: { issuerId: string }) {
 
   useEffect(() => {
     setLoading(true);
-    fetch('/api/tokens')
+    fetch('/api/tokens?perPage=999')
       .then(res => res.json())
-      .then((allTokens: TokenDetails[]) => {
-        const filteredTokens = allTokens.filter(token => token.issuerId === issuerId);
+      .then((tokensResponse) => {
+        const allTokens = tokensResponse.tokens || [];
+        const filteredTokens = allTokens.filter((token: TokenDetails) => token.issuerId === issuerId);
         setIssuerTokens(filteredTokens);
       })
       .catch(console.error)

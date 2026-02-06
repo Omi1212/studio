@@ -35,8 +35,9 @@ function DashboardRenderer() {
             if (userRole === 'issuer' || userRole === 'agent') {
                 const storedTokenId = localStorage.getItem('selectedTokenId');
                 try {
-                    const response = await fetch('/api/tokens');
-                    const allTokens: TokenDetails[] = await response.json();
+                    const response = await fetch('/api/tokens?perPage=999');
+                    const tokensResponse = await response.json();
+                    const allTokens: TokenDetails[] = tokensResponse.tokens || [];
 
                     if (storedTokenId) {
                         const foundToken = allTokens.find(t => t.id === storedTokenId);

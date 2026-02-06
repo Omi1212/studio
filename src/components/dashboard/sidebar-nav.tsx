@@ -113,9 +113,9 @@ export default function SidebarNav() {
     setUserRole(role);
 
     Promise.all([
-      fetch('/api/tokens').then(res => res.json()),
+      fetch('/api/tokens?perPage=999').then(res => res.json()),
       fetch('/api/companies').then(res => res.json())
-    ]).then(([tokensData, companiesData]) => {
+    ]).then(([tokensResponse, companiesData]) => {
         setCompanies(companiesData);
         
         if (role === 'investor' || role === 'issuer') {
@@ -129,7 +129,7 @@ export default function SidebarNav() {
             }
         }
         
-        let combinedTokens: TokenDetails[] = tokensData.map((t: any) => ({
+        let combinedTokens: TokenDetails[] = (tokensResponse.tokens || []).map((t: any) => ({
           ...t,
           decimals: t.decimals ?? 0,
           isFreezable: t.isFreezable ?? false,

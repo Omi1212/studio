@@ -49,10 +49,10 @@ export default function AgentTokens({ agent }: AgentTokensProps) {
     useEffect(() => {
         setLoading(true);
         Promise.all([
-            fetch('/api/tokens').then(res => res.json()),
+            fetch('/api/tokens?perPage=999').then(res => res.json()),
             fetch(`/api/agents/${agent.id}/assignments`).then(res => res.json())
-        ]).then(([tokensData, agentTokenIds]) => {
-            const activeTokens = tokensData.filter((token: TokenDetails) => token.status === 'active');
+        ]).then(([tokensResponse, agentTokenIds]) => {
+            const activeTokens = (tokensResponse.tokens || []).filter((token: TokenDetails) => token.status === 'active');
             setAllTokens(activeTokens);
             
             const agentTokens = activeTokens.filter((token: TokenDetails) => agentTokenIds.includes(token.id));

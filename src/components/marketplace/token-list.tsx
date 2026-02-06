@@ -137,12 +137,12 @@ export default function TokenList() {
   useEffect(() => {
     setLoading(true);
     Promise.all([
-      fetch('/api/tokens').then(res => res.json()),
+      fetch('/api/tokens?perPage=999').then(res => res.json()),
       fetch('/api/investors/inv-001/subscriptions').then(res => res.ok ? res.json() : {})
-    ]).then(([tokensData, subscriptionsData]: [TokenDetails[], Record<string, SubscriptionStatus>]) => {
-      const activeTokens = tokensData
-        .filter(t => t.status === 'active')
-        .map(t => ({
+    ]).then(([tokensResponse, subscriptionsData]: [any, Record<string, SubscriptionStatus>]) => {
+      const activeTokens = (tokensResponse.tokens || [])
+        .filter((t: TokenDetails) => t.status === 'active')
+        .map((t: TokenDetails) => ({
           ...t,
           decimals: t.decimals ?? 0,
           isFreezable: t.isFreezable ?? false,

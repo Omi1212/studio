@@ -175,12 +175,13 @@ export default function TokensList() {
     React.useEffect(() => {
         Promise.all([
             fetch('/api/investors/inv-001').then(res => res.json()),
-            fetch('/api/tokens').then(res => res.json())
-        ]).then(([investor, allTokens]: [any, TokenDetails[]]) => {
+            fetch('/api/tokens?perPage=999').then(res => res.json())
+        ]).then(([investor, tokensResponse]: [any, any]) => {
             if (!investor) return;
 
+            const allTokens = tokensResponse.tokens || [];
             const pTokens = investor.holdings.map((holding: any) => {
-                const tokenDetail = allTokens.find(t => t.id === holding.tokenId);
+                const tokenDetail = allTokens.find((t: TokenDetails) => t.id === holding.tokenId);
                 return {
                     id: holding.tokenId,
                     name: holding.tokenName,
