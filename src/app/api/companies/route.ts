@@ -1,5 +1,10 @@
 import { NextResponse } from 'next/server';
-import { companiesData } from '@/lib/data';
+
+const companiesData = [
+  { id: 'bstratus-securities', name: 'Bstratus Securities' },
+  { id: 'neobank-sa-de-cv', name: 'NeoBank SA de CV' },
+  { id: 'tradfi-bank-sa', name: 'TradFi Bank SA' },
+];
 
 export async function GET() {
   return NextResponse.json(companiesData);
