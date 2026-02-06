@@ -16,15 +16,26 @@ const investorPostSchema = z.object({
   isFrozen: z.boolean(),
 });
 
+const querySchema = z.object({
+    page: z.coerce.number().int().min(1).default(1),
+    perPage: z.coerce.number().int().min(1).max(100).default(10),
+    status: z.enum(['frozen', 'whitelisted', 'all']).optional(),
+    kycStatus: z.enum(['verified', 'pending', 'rejected']).optional(),
+    query: z.string().optional(),
+    tokenId: z.string().optional(),
+    onlyVerified: z.string().optional(),
+});
+
+
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const page = parseInt(searchParams.get('page') || '1', 10);
-  const perPage = parseInt(searchParams.get('perPage') || '10', 10);
-  const status = searchParams.get('status'); // For investor-list (frozen/whitelisted)
-  const kycStatus = searchParams.get('kycStatus'); // For whitelisting-requests
-  const query = searchParams.get('query');
-  const tokenId = searchParams.get('tokenId');
-  const onlyVerified = searchParams.get('onlyVerified');
+  const validation = querySchema.safeParse(Object.fromEntries(searchParams.entries()));
+
+  if (!validation.success) {
+      return NextResponse.json({ errors: validation.error.errors }, { status: 400 });
+  }
+
+  const { page, perPage, status, kycStatus, query, tokenId, onlyVerified } = validation.data;
 
   let filteredInvestors: User[] = investorsData;
 
@@ -42,7 +53,7 @@ export async function GET(request: Request) {
     filteredInvestors = filteredInvestors.filter(investor => investor.kycStatus === kycStatus);
   }
 
-  if (status) {
+  if (status && status !== 'all') {
     filteredInvestors = filteredInvestors.filter(inv => {
         if (status === 'frozen') return inv.isFrozen;
         if (status === 'whitelisted') return !inv.isFrozen;

@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { z } from 'zod';
 
 const transactionData = [
   {
@@ -111,13 +112,23 @@ const transactionData = [
   },
 ];
 
+const querySchema = z.object({
+    page: z.coerce.number().int().min(1).default(1),
+    perPage: z.coerce.number().int().min(1).max(100).default(10),
+    filter: z.enum(['in', 'out', 'all']).optional(),
+    search: z.string().optional(),
+});
+
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const page = parseInt(searchParams.get('page') || '1', 10);
-  const perPage = parseInt(searchParams.get('perPage') || '10', 10);
-  const filter = searchParams.get('filter');
-  const search = searchParams.get('search');
+  const validation = querySchema.safeParse(Object.fromEntries(searchParams.entries()));
+
+  if (!validation.success) {
+      return NextResponse.json({ errors: validation.error.errors }, { status: 400 });
+  }
+
+  const { page, perPage, filter, search } = validation.data;
 
   let filteredData = transactionData;
 

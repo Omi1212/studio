@@ -1,13 +1,25 @@
 import { NextResponse } from 'next/server';
 import { transfersData } from './data';
+import { z } from 'zod';
+
+const querySchema = z.object({
+    page: z.coerce.number().int().min(1).default(1),
+    perPage: z.coerce.number().int().min(1).max(100).default(10),
+    type: z.enum(['Transfer', 'Mint', 'Burn', 'all']).optional(),
+    query: z.string().optional(),
+    tokenTicker: z.string().optional(),
+});
+
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const page = parseInt(searchParams.get('page') || '1', 10);
-  const perPage = parseInt(searchParams.get('perPage') || '10', 10);
-  const type = searchParams.get('type');
-  const query = searchParams.get('query');
-  const tokenTicker = searchParams.get('tokenTicker');
+  const validation = querySchema.safeParse(Object.fromEntries(searchParams.entries()));
+
+  if (!validation.success) {
+      return NextResponse.json({ errors: validation.error.errors }, { status: 400 });
+  }
+  
+  const { page, perPage, type, query, tokenTicker } = validation.data;
 
   let filteredTransfers = transfersData;
 
