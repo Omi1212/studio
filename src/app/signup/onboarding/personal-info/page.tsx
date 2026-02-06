@@ -64,55 +64,61 @@ export default function PersonalInfoPage() {
         phoneCountryCode: countryCode,
         dob: parsedUser.dob || ''
       });
+    } else {
+        router.push('/signup');
     }
     setLoading(false);
-  }, [form]);
+  }, [form, router]);
   
   const handleContinue = async (data: PersonalInfoFormValues) => {
     if (!user) return;
     setIsSubmitting(true);
 
-    const countryCodeData = countryCallingCodes.find(c => c.code === data.phoneCountryCode);
-    const fullPhoneNumber = `${countryCodeData?.dial_code || ''}${data.phone}`;
+    try {
+        const countryCodeData = countryCallingCodes.find(c => c.code === data.phoneCountryCode);
+        const fullPhoneNumber = `${countryCodeData?.dial_code || ''}${data.phone}`;
 
-    const updatedUser: User = {
-      ...user,
-      name: data.legalName, // Also update name field for display purposes
-      legalName: data.legalName,
-      phone: fullPhoneNumber,
-      dob: data.dob,
-    };
-    
-    // Update currentUser in localStorage
-    localStorage.setItem('currentUser', JSON.stringify(updatedUser));
-    
-    // Update user in the main users array in localStorage (optional but good practice)
-    const existingUsersData = localStorage.getItem('users') || '[]';
-    const existingUsers: User[] = JSON.parse(existingUsersData);
-    const userIndex = existingUsers.findIndex(u => u.id === user.id);
-    if (userIndex > -1) {
-      existingUsers[userIndex] = updatedUser;
-    } else {
-      existingUsers.push(updatedUser);
+        const updatedUserData = {
+            name: data.legalName, // Also update name field for display purposes
+            legalName: data.legalName,
+            phone: fullPhoneNumber,
+            dob: data.dob,
+        };
+
+        const response = await fetch(`/api/users/${user.id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(updatedUserData)
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to update personal information.');
+        }
+
+        const updatedUserFromApi = await response.json();
+        
+        // Update currentUser in localStorage with the latest data from the API
+        localStorage.setItem('currentUser', JSON.stringify(updatedUserFromApi));
+        
+        toast({
+          title: 'Personal Info Saved!',
+        });
+
+        router.push('/signup/onboarding/verify');
+
+    } catch (error: any) {
+        toast({
+            variant: 'destructive',
+            title: 'Error Saving Info',
+            description: error.message || 'Could not save your information. Please try again.',
+        });
+    } finally {
+        setIsSubmitting(false);
     }
-    localStorage.setItem('users', JSON.stringify(existingUsers));
-    
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    
-    toast({
-      title: 'Personal Info Saved!',
-    });
-
-    router.push('/signup/onboarding/verify');
   };
   
-  if (loading) {
+  if (loading || !user) {
     return <div className="flex items-center justify-center min-h-screen bg-background p-4"><Loader2 className="h-8 w-8 animate-spin" /></div>;
-  }
-
-  if (!user) {
-     router.push('/login');
-     return <div className="flex items-center justify-center min-h-screen bg-background p-4"><Loader2 className="h-8 w-8 animate-spin" /></div>;
   }
 
   return (

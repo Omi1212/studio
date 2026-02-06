@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -55,6 +54,8 @@ export default function DetailsPage() {
         country: countryValue,
         city: parsedUser.city || ''
       });
+    } else {
+        router.push('/signup');
     }
     setLoading(false);
   }, [router, form]);
@@ -63,34 +64,41 @@ export default function DetailsPage() {
     if (!user) return;
     setIsSubmitting(true);
 
-    const updatedUser: User = {
-      ...user,
-      country: data.country,
-      city: data.city,
-    };
-    
-    // Update currentUser in localStorage
-    localStorage.setItem('currentUser', JSON.stringify(updatedUser));
+    try {
+        const updatedUserData = {
+            country: data.country,
+            city: data.city,
+        };
 
-    // Update user in the main users array in localStorage
-    const existingUsersData = localStorage.getItem('users') || '[]';
-    const existingUsers: User[] = JSON.parse(existingUsersData);
-    const userIndex = existingUsers.findIndex(u => u.id === user.id);
-    if (userIndex > -1) {
-      existingUsers[userIndex] = updatedUser;
-    } else {
-      existingUsers.push(updatedUser);
+        const response = await fetch(`/api/users/${user.id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(updatedUserData),
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to update details.');
+        }
+        
+        const updatedUserFromApi = await response.json();
+        
+        localStorage.setItem('currentUser', JSON.stringify(updatedUserFromApi));
+        
+        toast({
+          title: 'Profile Updated!',
+          description: 'You are all set. Welcome!',
+        });
+
+        router.push('/dashboard');
+    } catch (error: any) {
+        toast({
+            variant: 'destructive',
+            title: 'Error',
+            description: error.message || 'Could not save details.',
+        });
+    } finally {
+        setIsSubmitting(false);
     }
-    localStorage.setItem('users', JSON.stringify(existingUsers));
-    
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    
-    toast({
-      title: 'Profile Updated!',
-      description: 'You are all set. Welcome!',
-    });
-
-    router.push('/dashboard');
   };
   
   if (loading || !user) {

@@ -18,7 +18,7 @@ import { Separator } from '@/components/ui/separator';
 import { Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import { useToast } from '@/hooks/use-toast';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import type { User } from '@/lib/types';
 
 export default function SignupForm() {
@@ -75,46 +75,52 @@ export default function SignupForm() {
 
     setIsSubmitting(true);
     
-    const res = await fetch('/api/users');
-    const existingUsers: User[] = await res.json();
-    const emailExists = existingUsers.some(user => user.email === email);
+    try {
+        const generatedName = email.split('@')[0].replace(/[._-]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
 
-    if (emailExists) {
+        const newUserPayload = {
+            name: generatedName,
+            email,
+            role,
+            walletAddress: `spark1q...${Math.random().toString(36).substring(2, 11)}`,
+            kycStatus: 'pending' as const,
+            status: 'active' as const,
+            kycLevel: 1,
+        };
+        
+        const response = await fetch('/api/users', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(newUserPayload),
+        });
+
+        if (!response.ok) {
+             // Basic error handling, can be improved to check for specific status codes
+            const errorData = await response.json().catch(() => ({ message: 'Failed to create account.' }));
+            throw new Error(errorData.message || 'Failed to create account.');
+        }
+        
+        const createdUser: User = await response.json();
+
+        localStorage.setItem('userRole', createdUser.role);
+        localStorage.setItem('currentUser', JSON.stringify(createdUser));
+
+        toast({
+          title: 'Account Created!',
+          description: 'Welcome to BlockStratus.',
+        });
+
+        router.push('/signup/onboarding');
+
+    } catch (error: any) {
         toast({
             variant: 'destructive',
-            title: 'Email already in use',
-            description: 'Please use a different email address or log in.',
+            title: 'Error creating account',
+            description: error.message || 'Please try again.',
         });
-        setIsSubmitting(false);
-        return;
+    } finally {
+      setIsSubmitting(false);
     }
-
-    const generatedName = email.split('@')[0].replace(/[._-]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-
-    const newUser: User = {
-      id: `user-${Math.random().toString(36).substring(2, 9)}`,
-      name: generatedName,
-      email,
-      role,
-      walletAddress: `spark1q...${Math.random().toString(36).substring(2, 11)}`,
-      kycStatus: 'pending',
-      status: 'active',
-      kycLevel: 1,
-    };
-
-    // NOTE: New user is not persisted on the server in this demo.
-    // We only store it in localStorage for the session.
-    localStorage.setItem('userRole', newUser.role);
-    localStorage.setItem('currentUser', JSON.stringify(newUser));
-
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    
-    toast({
-      title: 'Account Created!',
-      description: 'Welcome to BlockStratus.',
-    });
-
-    router.push('/signup/onboarding');
   };
 
   return (
