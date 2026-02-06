@@ -22,27 +22,44 @@ export default function NewInvestorPage() {
   const router = useRouter();
   const { toast } = useToast();
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
-    const newInvestor = {
-      id: `inv-${Math.random().toString(36).substring(2, 9)}`,
+    const newInvestorData = {
       name: formData.get('name') as string,
       email: formData.get('email') as string,
-      status: formData.get('status') as 'whitelisted' | 'pending',
+      kycStatus: formData.get('kycStatus') as 'verified' | 'pending',
       walletAddress: formData.get('walletAddress') as string,
+      role: 'investor' as const,
       joinedDate: new Date().toISOString().split('T')[0],
       totalInvested: 0,
       holdings: [],
+      transactions: [],
       isFrozen: false,
     };
     
-    // NOTE: This change is not persisted. This is for demonstration purposes only.
-    toast({
-      title: 'Investor Added (Not Persisted)',
-      description: `${newInvestor.name} has been added for this session.`,
-    });
-    router.push('/investors');
+    try {
+        const response = await fetch('/api/investors', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(newInvestorData),
+        });
+        if (!response.ok) throw new Error('Failed to add investor');
+        
+        const newInvestor = await response.json();
+        toast({
+          title: 'Investor Added',
+          description: `${newInvestor.name} has been added to the list.`,
+        });
+        router.push('/investors');
+    } catch(error) {
+        console.error(error);
+        toast({
+            variant: 'destructive',
+            title: 'Error',
+            description: 'Could not add the investor.'
+        });
+    }
   };
 
   return (
@@ -74,14 +91,14 @@ export default function NewInvestorPage() {
                             <Input id="walletAddress" name="walletAddress" placeholder="e.g. spark1q..." required />
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="status">Status</Label>
-                             <Select name="status" defaultValue="pending">
-                                <SelectTrigger id="status">
+                            <Label htmlFor="kycStatus">Status</Label>
+                             <Select name="kycStatus" defaultValue="pending">
+                                <SelectTrigger id="kycStatus">
                                     <SelectValue placeholder="Select status" />
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="pending">Pending</SelectItem>
-                                    <SelectItem value="whitelisted">Whitelisted</SelectItem>
+                                    <SelectItem value="verified">Whitelisted</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>

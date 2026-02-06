@@ -52,19 +52,9 @@ export default function PayOrderPage() {
     if (!id) return;
 
     setLoading(true);
-    // Because a newly created order is only in localStorage, we check there first.
-    const storedOrders: Order[] = JSON.parse(localStorage.getItem('orders') || '[]');
-    const foundOrder = storedOrders.find(o => o.id === id);
     
-    let orderPromise: Promise<Order | null>;
-
-    if (foundOrder) {
-        orderPromise = Promise.resolve(foundOrder);
-    } else {
-        orderPromise = fetch(`/api/orders/${id}`).then(res => res.ok ? res.json() : null);
-    }
-    
-    orderPromise.then(orderData => {
+    fetch(`/api/orders/${id}`).then(res => res.ok ? res.json() : null)
+    .then(orderData => {
       if (orderData) {
         setOrder(orderData);
         return fetch(`/api/tokens/${orderData.tokenId}`);

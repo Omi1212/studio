@@ -43,25 +43,36 @@ export default function EditInvestorPage() {
       .finally(() => setLoading(false));
   }, [params]);
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!investor) return;
 
     const formData = new FormData(event.currentTarget);
-    const updatedInvestor = {
-      ...investor,
+    const updatedInvestorData = {
       name: formData.get('name') as string,
       email: formData.get('email') as string,
       kycStatus: formData.get('kycStatus') as 'verified' | 'pending' | 'rejected',
       walletAddress: formData.get('walletAddress') as string,
     };
     
-    // NOTE: This change is not persisted. This is for demonstration purposes only.
-    toast({
-      title: 'Investor Updated (Not Persisted)',
-      description: `${updatedInvestor.name}'s details have been updated for this session.`,
-    });
-    router.push(`/investors/${investor.id}`);
+    try {
+        const response = await fetch(`/api/investors/${investor.id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(updatedInvestorData),
+        });
+        if (!response.ok) throw new Error('Failed to update investor');
+
+        const updatedInvestor = await response.json();
+        toast({
+          title: 'Investor Updated',
+          description: `${updatedInvestor.name}'s details have been saved.`,
+        });
+        router.push(`/investors/${investor.id}`);
+    } catch (error) {
+        console.error(error);
+        toast({ variant: 'destructive', title: 'Error', description: 'Could not update investor.' });
+    }
   };
 
   if (loading) {

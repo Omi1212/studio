@@ -1,6 +1,6 @@
 import type { Order } from '@/lib/types';
 
-export const ordersData: Order[] = [
+export let ordersData: Order[] = [
     {
         id: 'order-001',
         investorId: 'inv-001',

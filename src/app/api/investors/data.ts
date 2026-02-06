@@ -9,7 +9,7 @@ const txToken3 = { ...allTokens.find(t => t.id === 'example-3')!, id: 'example-3
 const txToken4 = { ...allTokens.find(t => t.id === 'example-4')!, id: 'example-4' };
 
 
-export const investorsData: User[] = [
+export let investorsData: User[] = [
     {
         id: 'inv-001',
         name: 'Alice Johnson',

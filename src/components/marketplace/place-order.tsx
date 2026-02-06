@@ -44,7 +44,7 @@ export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced, 
         setQuantity(e.target.value);
     };
 
-    const handlePlaceOrder = () => {
+    const handlePlaceOrder = async () => {
         const tokenAmount = parseFloat(quantity);
          if (!tokenAmount || tokenAmount <= 0 || !prospectusConfirmed || !orderInfoConfirmed) {
             return;
@@ -58,9 +58,7 @@ export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced, 
             return;
         }
 
-        const newOrderId = `INV-${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
-        const newOrder: Order = {
-             id: newOrderId,
+        const newOrderData = {
             investorId: 'inv-001', // Hardcoded for demo
             investorName: 'Alice Johnson', // Hardcoded for demo
             tokenId: token.id,
@@ -71,18 +69,35 @@ export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced, 
             date: new Date().toISOString(),
             status: 'waiting payment' as const
         };
-        
-        // NOTE: In a real app, this would be a POST request to an API endpoint.
-        // For this demo, we use localStorage to pass the new order to the payment page.
-        const existingOrders: Order[] = JSON.parse(localStorage.getItem('orders') || '[]');
-        localStorage.setItem('orders', JSON.stringify([newOrder, ...existingOrders]));
 
-        localStorage.setItem('selectedTokenId', token.id);
+        try {
+            const response = await fetch('/api/orders', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(newOrderData),
+            });
 
-        if (onOrderPlaced) {
-            onOrderPlaced();
+            if (!response.ok) {
+                throw new Error('Failed to create order');
+            }
+
+            const createdOrder: Order = await response.json();
+            
+            if (onOrderPlaced) {
+                onOrderPlaced();
+            }
+            router.push(`/orders/${createdOrder.id}/pay`);
+
+        } catch (error) {
+            console.error(error);
+            toast({
+                variant: 'destructive',
+                title: 'Error placing order',
+                description: 'Could not place the order. Please try again.',
+            });
         }
-        router.push(`/orders/${newOrderId}/pay`);
     }
 
     const isOrderButtonDisabled = !quantity || parseFloat(quantity) <= 0 || !prospectusConfirmed || !orderInfoConfirmed || !isSubscribed;

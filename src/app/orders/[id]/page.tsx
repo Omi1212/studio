@@ -72,59 +72,59 @@ export default function OrderDetailsPage() {
     if (!id) return;
     
     setLoading(true);
-    // Because a newly created order is only in localStorage, we check there first.
-    const storedOrders: Order[] = JSON.parse(localStorage.getItem('orders') || '[]');
-    const foundOrder = storedOrders.find(o => o.id === id);
-
-    if (foundOrder) {
-      Promise.all([
-          Promise.resolve(foundOrder),
-          fetch(`/api/investors/${foundOrder.investorId}`).then(res => res.json()),
-          fetch(`/api/tokens/${foundOrder.tokenId}`).then(res => res.json())
-      ]).then(([orderData, investorData, tokenData]) => {
-          setOrder(orderData);
-          setInvestor(investorData);
-          setToken(tokenData);
-      }).catch(err => {
-          console.error(err);
-          setOrder(null);
-      }).finally(() => setLoading(false));
-    } else {
-      fetch(`/api/orders/${id}`)
-        .then(res => {
-          if (res.ok) return res.json();
-          throw new Error('Order not found');
-        })
-        .then((orderData: Order) => {
-          setOrder(orderData);
-          return Promise.all([
-            fetch(`/api/investors/${orderData.investorId}`).then(res => res.json()),
-            fetch(`/api/tokens/${orderData.tokenId}`).then(res => res.json())
-          ]);
-        })
-        .then(([investorData, tokenData]) => {
-          setInvestor(investorData);
-          setToken(tokenData);
-        })
-        .catch(err => {
-          console.error(err);
-          setOrder(null);
-        })
-        .finally(() => setLoading(false));
-    }
-
+    fetch(`/api/orders/${id}`)
+      .then(res => {
+        if (res.ok) return res.json();
+        throw new Error('Order not found');
+      })
+      .then((orderData: Order) => {
+        setOrder(orderData);
+        return Promise.all([
+          fetch(`/api/investors/${orderData.investorId}`).then(res => res.json()),
+          fetch(`/api/tokens/${orderData.tokenId}`).then(res => res.json())
+        ]);
+      })
+      .then(([investorData, tokenData]) => {
+        setInvestor(investorData);
+        setToken(tokenData);
+      })
+      .catch(err => {
+        console.error(err);
+        setOrder(null);
+      })
+      .finally(() => setLoading(false));
   }, [params]);
   
-  const handleUpdateStatus = (status: 'completed' | 'rejected') => {
+  const handleUpdateStatus = async (status: 'completed' | 'rejected') => {
     if (!order) return;
     
-    setOrder({ ...order, status });
+    try {
+        const response = await fetch(`/api/orders/${order.id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status }),
+        });
 
-    toast({
-        title: `Order ${status === 'completed' ? 'Accepted' : 'Rejected'} (Not Persisted)`,
-        description: `The order #${order.id} has been updated for this session.`
-    });
-    router.push('/orders');
+        if (!response.ok) {
+            throw new Error('Failed to update order status');
+        }
+
+        const updatedOrder = await response.json();
+        setOrder(updatedOrder);
+
+        toast({
+            title: `Order ${status === 'completed' ? 'Accepted' : 'Rejected'}`,
+            description: `The order #${order.id} has been updated.`
+        });
+        router.push('/orders');
+    } catch (error) {
+        console.error(error);
+        toast({
+            variant: 'destructive',
+            title: 'Error',
+            description: 'Could not update the order status.',
+        });
+    }
   };
 
   if (loading) {

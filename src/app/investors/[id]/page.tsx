@@ -114,24 +114,50 @@ export default function InvestorDetailsPage() {
   }, [investor, selectedToken]);
 
 
-  const handleToggleFreeze = () => {
+  const handleToggleFreeze = async () => {
     if (!investor) return;
-    const updatedInvestor = { ...investor, isFrozen: !investor.isFrozen };
-    setInvestor(updatedInvestor);
+    
+    const newFrozenState = !investor.isFrozen;
 
-    toast({
-        title: `Address ${updatedInvestor.isFrozen ? 'Frozen' : 'Unfrozen'} (Not Persisted)`,
-        description: `The wallet address for "${investor.name}" has been updated for this session.`,
-    });
+    try {
+      const response = await fetch(`/api/investors/${investor.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isFrozen: newFrozenState }),
+      });
+      if (!response.ok) throw new Error('Failed to update status');
+
+      const updatedInvestor = await response.json();
+      setInvestor(updatedInvestor);
+
+      toast({
+          title: `Address ${updatedInvestor.isFrozen ? 'Frozen' : 'Unfrozen'}`,
+          description: `The wallet address for "${investor.name}" has been updated.`,
+      });
+
+    } catch (error) {
+      console.error(error);
+      toast({ variant: 'destructive', title: 'Error', description: 'Could not update status.' });
+    }
   }
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (!investor) return;
-    toast({
-        title: "Investor Deleted (Not Persisted)",
-        description: `"${investor.name}" has been removed for this session.`,
-    });
-    router.push('/investors');
+    try {
+        const response = await fetch(`/api/investors/${investor.id}`, {
+            method: 'DELETE',
+        });
+        if (!response.ok) throw new Error('Failed to delete investor');
+
+        toast({
+            title: "Investor Deleted",
+            description: `"${investor.name}" has been permanently removed.`,
+        });
+        router.push('/investors');
+    } catch (error) {
+        console.error(error);
+        toast({ variant: 'destructive', title: 'Error', description: 'Could not delete investor.' });
+    }
   };
 
   if (loading) {
@@ -178,7 +204,7 @@ export default function InvestorDetailsPage() {
                             <AlertDialogHeader>
                                 <AlertDialogTitle>Are you sure?</AlertDialogTitle>
                                 <AlertDialogDescription>
-                                This will permanently delete the investor "{investor.name}" and all associated data. (This change will not be persisted).
+                                This will permanently delete the investor "{investor.name}" and all associated data.
                                 </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
