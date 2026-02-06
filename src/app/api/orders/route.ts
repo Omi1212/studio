@@ -1,6 +1,19 @@
 import { NextResponse } from 'next/server';
 import { ordersData } from './data';
 import type { Order } from '@/lib/types';
+import { z } from 'zod';
+
+const orderPostSchema = z.object({
+    investorId: z.string(),
+    investorName: z.string(),
+    tokenId: z.string(),
+    tokenTicker: z.string(),
+    type: z.enum(['Buy', 'Sell']),
+    amount: z.number().positive(),
+    price: z.number(),
+    date: z.string(),
+    status: z.enum(['pending', 'completed', 'rejected', 'waiting payment'])
+});
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -45,11 +58,20 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  const newOrder = (await request.json()) as Omit<Order, 'id'>;
-  const orderWithId: Order = {
-    ...newOrder,
-    id: `order-${Math.random().toString(36).substring(2, 9)}`,
-  };
-  ordersData.unshift(orderWithId); // Add to the beginning of the array
-  return NextResponse.json(orderWithId, { status: 201 });
+  try {
+    const body = await request.json();
+    const newOrderData = orderPostSchema.parse(body);
+
+    const orderWithId: Order = {
+      ...newOrderData,
+      id: `order-${Math.random().toString(36).substring(2, 9)}`,
+    };
+    ordersData.unshift(orderWithId); // Add to the beginning of the array
+    return NextResponse.json(orderWithId, { status: 201 });
+  } catch (error) {
+      if (error instanceof z.ZodError) {
+          return NextResponse.json({ errors: error.errors }, { status: 400 });
+      }
+      return NextResponse.json({ message: 'An unexpected error occurred' }, { status: 500 });
+  }
 }

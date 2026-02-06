@@ -1,6 +1,20 @@
 import { NextResponse } from 'next/server';
 import { investorsData } from './data';
 import type { User } from '@/lib/types';
+import { z } from 'zod';
+
+const investorPostSchema = z.object({
+  name: z.string().min(1, { message: "Name is required" }),
+  email: z.string().email({ message: "Invalid email address" }),
+  walletAddress: z.string().min(1, { message: "Wallet address is required" }),
+  kycStatus: z.enum(['verified', 'pending']),
+  role: z.literal('investor'),
+  joinedDate: z.string(),
+  totalInvested: z.number(),
+  holdings: z.array(z.any()),
+  transactions: z.array(z.any()),
+  isFrozen: z.boolean(),
+});
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -56,11 +70,21 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  const newInvestorData = await request.json();
-  const newUser: User = {
-    ...newInvestorData,
-    id: `inv-${Math.random().toString(36).substring(2, 9)}`,
-  };
-  investorsData.unshift(newUser);
-  return NextResponse.json(newUser, { status: 201 });
+  try {
+    const body = await request.json();
+    const newInvestorData = investorPostSchema.parse(body);
+
+    const newUser: User = {
+      ...newInvestorData,
+      id: `inv-${Math.random().toString(36).substring(2, 9)}`,
+      status: 'active',
+    };
+    investorsData.unshift(newUser);
+    return NextResponse.json(newUser, { status: 201 });
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+        return NextResponse.json({ errors: error.errors }, { status: 400 });
+    }
+    return NextResponse.json({ message: 'An unexpected error occurred' }, { status: 500 });
+  }
 }

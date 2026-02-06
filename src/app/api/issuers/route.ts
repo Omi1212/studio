@@ -1,6 +1,16 @@
 import { NextResponse } from 'next/server';
 import { issuersData } from './data';
 import type { Issuer } from '@/lib/types';
+import { z } from 'zod';
+
+const issuerSchema = z.object({
+  name: z.string().min(1, 'Issuer Name is required'),
+  email: z.string().email('Invalid email address'),
+  walletAddress: z.string().min(1, 'Wallet address is required'),
+  issuedTokens: z.number().int().nonnegative(),
+  pendingTokens: z.number().int().nonnegative(),
+  status: z.enum(['active', 'inactive']),
+});
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -35,11 +45,20 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  const newIssuerData = await request.json();
-  const newIssuer: Issuer = {
-    ...newIssuerData,
-    id: `iss-${Math.random().toString(36).substring(2, 9)}`,
-  };
-  issuersData.unshift(newIssuer);
-  return NextResponse.json(newIssuer, { status: 201 });
+  try {
+    const body = await request.json();
+    const newIssuerData = issuerSchema.parse(body);
+
+    const newIssuer: Issuer = {
+      ...newIssuerData,
+      id: `iss-${Math.random().toString(36).substring(2, 9)}`,
+    };
+    issuersData.unshift(newIssuer);
+    return NextResponse.json(newIssuer, { status: 201 });
+  } catch (error) {
+      if (error instanceof z.ZodError) {
+          return NextResponse.json({ errors: error.errors }, { status: 400 });
+      }
+      return NextResponse.json({ message: 'An unexpected error occurred' }, { status: 500 });
+  }
 }

@@ -1,6 +1,20 @@
 import { NextResponse } from 'next/server';
 import { exampleTokens } from './data';
 import type { TokenDetails } from '@/lib/types';
+import { z } from 'zod';
+
+const tokenPostSchema = z.object({
+  tokenName: z.string().min(1),
+  tokenTicker: z.string().min(1).max(5),
+  destinationAddress: z.string().min(1),
+  decimals: z.number().int().min(0).max(18),
+  maxSupply: z.number().positive(),
+  isFreezable: z.boolean(),
+  network: z.string().min(1),
+  status: z.enum(['pending', 'active', 'frozen', 'draft']),
+  issuerId: z.string().optional()
+});
+
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -39,11 +53,21 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-    const newTokenData = await request.json();
-    const newToken: Omit<TokenDetails, 'tokenIcon' | 'whitepaper' | 'legalTokenizationDoc' | 'tokenIssuanceLegalDoc' | 'publicKey'> = {
-        ...newTokenData,
-        id: `btkn1...${Math.random().toString(36).substring(2, 10)}`, // Simulate new ID
-    };
-    (exampleTokens as any[]).unshift(newToken);
-    return NextResponse.json(newToken, { status: 201 });
+    try {
+        const body = await request.json();
+        // We don't validate file-related fields here as they are not sent in the JSON body
+        const newTokenData = tokenPostSchema.parse(body);
+
+        const newToken: Omit<TokenDetails, 'tokenIcon' | 'whitepaper' | 'legalTokenizationDoc' | 'tokenIssuanceLegalDoc' | 'publicKey'> = {
+            ...newTokenData,
+            id: `btkn1...${Math.random().toString(36).substring(2, 10)}`, // Simulate new ID
+        };
+        (exampleTokens as any[]).unshift(newToken);
+        return NextResponse.json(newToken, { status: 201 });
+    } catch (error) {
+        if (error instanceof z.ZodError) {
+            return NextResponse.json({ errors: error.errors }, { status: 400 });
+        }
+        return NextResponse.json({ message: 'An unexpected error occurred' }, { status: 500 });
+    }
 }
