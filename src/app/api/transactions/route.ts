@@ -112,6 +112,30 @@ const transactionData = [
 ];
 
 
-export async function GET() {
-  return NextResponse.json(transactionData);
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const page = parseInt(searchParams.get('page') || '1', 10);
+  const perPage = parseInt(searchParams.get('perPage') || '10', 10);
+  const filter = searchParams.get('filter');
+  const search = searchParams.get('search');
+
+  let filteredData = transactionData;
+
+  if (filter && filter !== 'all') {
+    filteredData = filteredData.filter(tx => tx.direction === filter);
+  }
+
+  if (search) {
+    const lowercasedSearch = search.toLowerCase();
+    filteredData = filteredData.filter(tx => tx.address.toLowerCase().includes(lowercasedSearch));
+  }
+
+  const total = filteredData.length;
+  const startIndex = (page - 1) * perPage;
+  const paginatedData = filteredData.slice(startIndex, startIndex + perPage);
+
+  return NextResponse.json({
+    transactions: paginatedData,
+    total,
+  });
 }

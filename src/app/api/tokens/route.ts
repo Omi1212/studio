@@ -5,7 +5,7 @@ import type { TokenDetails } from '@/lib/types';
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const page = parseInt(searchParams.get('page') || '1', 10);
-  const limit = parseInt(searchParams.get('limit') || '10', 10);
+  const perPage = parseInt(searchParams.get('perPage') || '10', 10);
   const status = searchParams.get('status');
   const query = searchParams.get('query');
   const excludeStatus = searchParams.get('excludeStatus');
@@ -29,8 +29,8 @@ export async function GET(request: Request) {
   }
   
   const total = filteredTokens.length;
-  const startIndex = (page - 1) * limit;
-  const paginatedTokens = filteredTokens.slice(startIndex, startIndex + limit);
+  const startIndex = (page - 1) * perPage;
+  const paginatedTokens = filteredTokens.slice(startIndex, startIndex + perPage);
 
   return NextResponse.json({
     tokens: paginatedTokens,

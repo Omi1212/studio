@@ -84,7 +84,7 @@ export default function TransferList({ searchQuery, typeFilter }: { searchQuery:
       setLoading(true);
       const params = new URLSearchParams({
         page: currentPage.toString(),
-        limit: ITEMS_PER_PAGE.toString(),
+        perPage: ITEMS_PER_PAGE.toString(),
       });
 
       if ((userRole === 'issuer' || userRole === 'agent') && selectedToken) {

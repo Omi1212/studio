@@ -146,7 +146,7 @@ export default function ExistingTokens({ view, setView }: { view: ViewMode, setV
     setLoading(true);
     const params = new URLSearchParams({
         page: currentPage.toString(),
-        limit: ITEMS_PER_PAGE.toString(),
+        perPage: ITEMS_PER_PAGE.toString(),
     });
     fetch(`/api/tokens?${params.toString()}`)
         .then(res => res.json())

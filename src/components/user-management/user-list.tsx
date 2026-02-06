@@ -1,5 +1,3 @@
-
-
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
@@ -198,7 +196,7 @@ export default function UserList({ view, setView }: { view: ViewMode, setView: (
     setLoading(true);
     const params = new URLSearchParams({
         page: currentPage.toString(),
-        limit: ITEMS_PER_PAGE.toString(),
+        perPage: ITEMS_PER_PAGE.toString(),
     });
     if (roleFilter !== 'all') {
         params.append('role', roleFilter);

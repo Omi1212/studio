@@ -207,7 +207,7 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
     setLoading(true);
     const params = new URLSearchParams({
         page: currentPage.toString(),
-        limit: ITEMS_PER_PAGE.toString(),
+        perPage: ITEMS_PER_PAGE.toString(),
         tokenId: selectedToken.id,
         onlyVerified: 'true'
     });

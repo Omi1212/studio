@@ -5,7 +5,7 @@ import type { User } from '@/lib/types';
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const page = parseInt(searchParams.get('page') || '1', 10);
-  const limit = parseInt(searchParams.get('limit') || '10', 10);
+  const perPage = parseInt(searchParams.get('perPage') || '10', 10);
   const role = searchParams.get('role');
   const status = searchParams.get('status');
   const query = searchParams.get('query');
@@ -30,8 +30,8 @@ export async function GET(request: Request) {
   }
 
   const total = filteredUsers.length;
-  const startIndex = (page - 1) * limit;
-  const paginatedUsers = filteredUsers.slice(startIndex, startIndex + limit);
+  const startIndex = (page - 1) * perPage;
+  const paginatedUsers = filteredUsers.slice(startIndex, startIndex + perPage);
 
   return NextResponse.json({
     users: paginatedUsers,

@@ -115,7 +115,7 @@ export default function IssuerList() {
     setLoading(true);
     const params = new URLSearchParams({
       page: currentPage.toString(),
-      limit: ITEMS_PER_PAGE.toString(),
+      perPage: ITEMS_PER_PAGE.toString(),
     });
     if (statusFilter !== 'all') {
       params.append('status', statusFilter);

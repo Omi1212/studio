@@ -154,7 +154,7 @@ export default function RequestList({ view, setView }: { view: ViewMode, setView
     setLoading(true);
     const params = new URLSearchParams({
         page: currentPage.toString(),
-        limit: ITEMS_PER_PAGE.toString(),
+        perPage: ITEMS_PER_PAGE.toString(),
         excludeStatus: 'draft',
     });
     if (statusFilter !== 'all') {

@@ -56,7 +56,7 @@ export default function AgentList() {
         setLoading(true);
         const params = new URLSearchParams({
             page: currentPage.toString(),
-            limit: ITEMS_PER_PAGE.toString(),
+            perPage: ITEMS_PER_PAGE.toString(),
             role: 'agent',
         });
         if (searchQuery) {

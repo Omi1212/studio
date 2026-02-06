@@ -5,7 +5,6 @@ import {
   Card,
   CardContent,
   CardHeader,
-  CardTitle,
 } from '@/components/ui/card';
 import { ArrowDownLeft, ArrowUpRight, ExternalLink, Search } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -29,6 +28,7 @@ type Transaction = {
 
 export default function AllTransactions({ className }: { className?: string }) {
   const [transactions, setTransactions] = React.useState<Transaction[]>([]);
+  const [totalTransactions, setTotalTransactions] = React.useState(0);
   const [loading, setLoading] = React.useState(true);
   const [filter, setFilter] = React.useState('all');
   const [search, setSearch] = React.useState('');
@@ -36,26 +36,22 @@ export default function AllTransactions({ className }: { className?: string }) {
 
   React.useEffect(() => {
     setLoading(true);
-    fetch('/api/transactions')
+    const params = new URLSearchParams({
+        page: currentPage.toString(),
+        perPage: ITEMS_PER_PAGE.toString(),
+        filter,
+        search,
+    });
+    fetch(`/api/transactions?${params.toString()}`)
       .then(res => res.json())
       .then(data => {
-        setTransactions(data);
+        setTransactions(data.transactions);
+        setTotalTransactions(data.total);
       })
       .finally(() => setLoading(false));
-  }, []);
+  }, [currentPage, filter, search]);
 
-  const filteredTransactions = React.useMemo(() => {
-    return transactions
-      .filter(tx => filter === 'all' || tx.direction === filter)
-      .filter(tx => search === '' || tx.address.toLowerCase().includes(search.toLowerCase()));
-  }, [transactions, filter, search]);
-
-  const totalPages = Math.ceil(filteredTransactions.length / ITEMS_PER_PAGE);
-
-  const paginatedTransactions = React.useMemo(() => {
-    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-    return filteredTransactions.slice(startIndex, startIndex + ITEMS_PER_PAGE);
-  }, [filteredTransactions, currentPage]);
+  const totalPages = Math.ceil(totalTransactions / ITEMS_PER_PAGE);
 
   const handlePageChange = (page: number) => {
     if (page >= 1 && page <= totalPages) {
@@ -112,7 +108,7 @@ export default function AllTransactions({ className }: { className?: string }) {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {paginatedTransactions.map((transaction) => (
+              {transactions.map((transaction) => (
                 <TableRow key={transaction.id}>
                   <TableCell className="px-4 sm:px-6">
                     <div className="flex items-center gap-3">
