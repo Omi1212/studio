@@ -20,10 +20,10 @@ export default function AssignedAgents({ tokenId }: AssignedAgentsProps) {
     useEffect(() => {
         setLoading(true);
         Promise.all([
-            fetch('/api/users').then(res => res.json()),
+            fetch('/api/users?role=agent&perPage=999').then(res => res.json()),
             fetch('/api/agents/assignments').then(res => res.json())
-        ]).then(([allUsers, allAssignments]: [User[], Record<string, string[]>]) => {
-                const allAgents = allUsers.filter(user => user.role === 'agent');
+        ]).then(([usersResponse, allAssignments]: [{ users: User[] }, Record<string, string[]>]) => {
+                const allAgents = usersResponse.users;
 
                 const agentIdsForToken: string[] = [];
                 for (const agentId in allAssignments) {
