@@ -1,37 +1,5 @@
 import type { Order, TokenDetails, Transfer, Issuer, User } from './types';
 
-export const volumeData = [
-  {
-    title: "Today's Volume",
-    value: '25,320',
-    change: 2.5,
-  },
-  {
-    title: 'Yesterday',
-    value: '22,180',
-    change: -1.8,
-  },
-  {
-    title: 'Last 7 Days',
-    value: '180,950',
-    change: 12.1,
-  },
-  {
-    title: 'Last 30 Days',
-    value: '750,430',
-    change: 7.2,
-  },
-];
-
-export const paymentData = [
-  { month: 'January', income: 18600, expense: 8000 },
-  { month: 'February', income: 30500, expense: 12000 },
-  { month: 'March', income: 23700, expense: 18000 },
-  { month: 'April', income: 27800, expense: 11000 },
-  { month: 'May', income: 18900, expense: 15000 },
-  { month: 'June', income: 23900, expense: 17000 },
-];
-
 export const transactionData = [
   {
     id: 1,
@@ -168,33 +136,6 @@ export const tokenData = [
     maxSupply: 2000000,
     decimals: 8,
     network: 'rgb',
-  },
-];
-
-export const cryptoData = [
-  {
-    ticker: 'BTC',
-    name: 'Bitcoin',
-    balance: 0,
-    value: 0.00,
-    icon: 'btc',
-    isToken: false,
-  },
-  {
-    ticker: 'JMT',
-    name: 'MoisesToken',
-    balance: 2500,
-    value: 0.00,
-    icon: null,
-    isToken: true,
-  },
-  {
-    ticker: 'OMI',
-    name: 'Omar',
-    balance: 10000,
-    value: 0.00,
-    icon: null,
-    isToken: true,
   },
 ];
 
@@ -663,26 +604,6 @@ export const transfersData: Transfer[] = [
     { txId: 'a1b2c3...d4e5f6', type: 'Burn', from: 'spark1...sasg4v', to: 'Burn Address', amount: 50, tokenTicker: 'DUSD', date: '2024-07-18' },
     { txId: 'd4e5f6...g7h8i9', type: 'Mint', from: 'Token Issuer', to: 'spark1...rq83he', amount: 10000, tokenTicker: 'CRBN', date: '2024-07-17' },
     { txId: 'g7h8i9...j0k1l2', type: 'Transfer', from: 'spark1...zxy987', to: 'spark1...6n7dvn', amount: 800, tokenTicker: 'GLDT', date: '2024-07-16' },
-];
-
-export const tokenPriceHistory = [
-  { month: 'Jan', price: 68.5 },
-  { month: 'Feb', price: 72.3 },
-  { month: 'Mar', price: 80.1 },
-  { month: 'Apr', price: 75.6 },
-  { month: 'May', price: 85.4 },
-  { month: 'Jun', price: 92.2 },
-  { month: 'Jul', price: 88.9 },
-];
-
-export const portfolioHistoryData = [
-  { date: '2024-07-01', value: 25000 },
-  { date: '2024-07-05', value: 28510 },
-  { date: '2024-07-10', value: 27900 },
-  { date: '2024-07-15', value: 25880 },
-  { date: '2024-07-20', value: 31180 },
-  { date: '2024-07-25', value: 32750 },
-  { date: '2024-07-30', value: 32750 },
 ];
 
 export const issuersData: Issuer[] = [
