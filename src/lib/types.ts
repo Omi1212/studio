@@ -69,3 +69,5 @@ export type User = {
   holdings?: any[];
   transactions?: any[];
 };
+
+export type SubscriptionStatus = 'none' | 'pending' | 'approved';

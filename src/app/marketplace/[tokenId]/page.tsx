@@ -9,7 +9,7 @@ import {
 } from '@/components/ui/sidebar';
 import SidebarNav from '@/components/dashboard/sidebar-nav';
 import HeaderDynamic from '@/components/dashboard/header-dynamic';
-import type { TokenDetails } from '@/lib/types';
+import type { TokenDetails, SubscriptionStatus } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Globe, FileText } from 'lucide-react';
 import Link from 'next/link';
@@ -25,8 +25,6 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import PlaceOrder from '@/components/marketplace/place-order';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-
-type SubscriptionStatus = 'none' | 'pending' | 'approved';
 
 const chartConfig = {
   price: {
@@ -74,7 +72,8 @@ function TokenOfferingPage({ params }: { params: { tokenId: string } }) {
     Promise.all([
       fetch(`/api/tokens/${tokenId}`).then(res => res.ok ? res.json() : null),
       fetch('/api/token-price-history').then(res => res.ok ? res.json() : []),
-    ]).then(([tokenData, priceHistoryData]) => {
+      fetch('/api/investors/inv-001/subscriptions').then(res => res.ok ? res.json() : {}),
+    ]).then(([tokenData, priceHistoryData, subscriptionsData]) => {
       if (tokenData) {
         setToken({
           ...tokenData,
@@ -83,9 +82,8 @@ function TokenOfferingPage({ params }: { params: { tokenId: string } }) {
           publicKey: tokenData.publicKey ?? `02f...${tokenData.id.slice(-10)}`,
         });
         
-        // Load subscription status from localStorage
-        const storedSubscriptions = JSON.parse(localStorage.getItem('whitelisting_subscriptions') || '{}');
-        setSubscriptionStatus(storedSubscriptions[tokenId] || 'none');
+        // Load subscription status from API
+        setSubscriptionStatus(subscriptionsData[tokenId] || 'none');
       }
       setPriceHistory(priceHistoryData);
     }).catch(err => {
@@ -98,15 +96,25 @@ function TokenOfferingPage({ params }: { params: { tokenId: string } }) {
   }, [params]);
 
   
-  const handleSubscribe = () => {
+  const handleSubscribe = async () => {
     if (!token) return;
 
     setSubscriptionStatus('pending');
-    const storedSubscriptions = JSON.parse(localStorage.getItem('whitelisting_subscriptions') || '{}');
-    const newSubscriptions = { ...storedSubscriptions, [token.id]: 'pending' };
-    localStorage.setItem('whitelisting_subscriptions', JSON.stringify(newSubscriptions));
 
-    toast({ title: 'Whitelisting Request Sent (Not Persisted)!', description: "Your request to be whitelisted for this token is now pending approval for this session." });
+    try {
+        const response = await fetch('/api/investors/inv-001/subscriptions', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ tokenId: token.id, status: 'pending' }),
+        });
+        if (!response.ok) throw new Error('Failed to update subscription');
+
+        toast({ title: 'Whitelisting Request Sent!', description: "Your request to be whitelisted for this token is now pending approval." });
+    } catch (error) {
+        console.error(error);
+        toast({ variant: 'destructive', title: 'Error', description: 'Could not send request.' });
+        setSubscriptionStatus('none'); // Revert on error
+    }
 };
 
 

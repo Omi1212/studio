@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import type { TokenDetails, ViewMode, User } from '@/lib/types';
+import type { TokenDetails, ViewMode, SubscriptionStatus } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/card';
 import TokenIcon from '../ui/token-icon';
 import { Button } from '../ui/button';
@@ -13,8 +13,6 @@ import { Input } from '../ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Dialog, DialogContent, DialogTrigger } from '../ui/dialog';
 import PlaceOrder from './place-order';
-
-type SubscriptionStatus = 'none' | 'pending' | 'approved';
 
 const networkMap: { [key: string]: string } = {
     spark: 'Spark',
@@ -138,8 +136,10 @@ export default function TokenList() {
 
   useEffect(() => {
     setLoading(true);
-    fetch('/api/tokens').then(res => res.json())
-    .then((tokensData: TokenDetails[]) => {
+    Promise.all([
+      fetch('/api/tokens').then(res => res.json()),
+      fetch('/api/investors/inv-001/subscriptions').then(res => res.ok ? res.json() : {})
+    ]).then(([tokensData, subscriptionsData]: [TokenDetails[], Record<string, SubscriptionStatus>]) => {
       const activeTokens = tokensData
         .filter(t => t.status === 'active')
         .map(t => ({
@@ -154,15 +154,7 @@ export default function TokenList() {
           price: t.price || 0,
         }));
       setAllTokens(activeTokens);
-      
-      const storedSubscriptions = JSON.parse(localStorage.getItem('whitelisting_subscriptions') || '{}');
-      // Pre-populate for demo purposes if it's the first visit
-      if (Object.keys(storedSubscriptions).length === 0) {
-        storedSubscriptions['example-1'] = 'approved';
-        localStorage.setItem('whitelisting_subscriptions', JSON.stringify(storedSubscriptions));
-      }
-      setSubscriptions(storedSubscriptions);
-
+      setSubscriptions(subscriptionsData);
     }).catch(console.error)
     .finally(() => setLoading(false));
 
@@ -186,14 +178,33 @@ export default function TokenList() {
     return filtered;
   }, [allTokens, searchQuery, filterStatus, subscriptions]);
   
-  const handleSubscriptionAction = (token: TokenDetails) => {
+  const handleSubscriptionAction = async (token: TokenDetails) => {
     const currentStatus = subscriptions[token.id] || 'none';
     
     if (currentStatus === 'none') {
-        const newSubscriptions = { ...subscriptions, [token.id]: 'pending' };
+        const newSubscriptions = { ...subscriptions, [token.id]: 'pending' as SubscriptionStatus };
         setSubscriptions(newSubscriptions);
-        localStorage.setItem('whitelisting_subscriptions', JSON.stringify(newSubscriptions));
-        toast({ title: 'Whitelisting Request Sent (Not Persisted)!', description: "Your request to be whitelisted for this token is now pending approval for this session." });
+        
+        try {
+            const response = await fetch('/api/investors/inv-001/subscriptions', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ tokenId: token.id, status: 'pending' }),
+            });
+            if (!response.ok) throw new Error('Failed to update subscription');
+    
+            toast({ title: 'Whitelisting Request Sent!', description: "Your request is now pending approval." });
+        } catch (error) {
+            console.error(error);
+            toast({ variant: 'destructive', title: 'Error', description: 'Could not send request.' });
+            // Revert state on error
+            const revertedSubscriptions = { ...subscriptions };
+            if (revertedSubscriptions[token.id]) {
+                delete revertedSubscriptions[token.id];
+            }
+            setSubscriptions(revertedSubscriptions);
+        }
+
     } else if (currentStatus === 'approved') {
         setSelectedToken(token);
         setIsModalOpen(true);

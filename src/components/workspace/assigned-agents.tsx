@@ -19,18 +19,15 @@ export default function AssignedAgents({ tokenId }: AssignedAgentsProps) {
 
     useEffect(() => {
         setLoading(true);
-        fetch('/api/users')
-            .then(res => res.json())
-            .then((allUsers: User[]) => {
+        Promise.all([
+            fetch('/api/users').then(res => res.json()),
+            fetch('/api/agents/assignments').then(res => res.json())
+        ]).then(([allUsers, allAssignments]: [User[], Record<string, string[]>]) => {
                 const allAgents = allUsers.filter(user => user.role === 'agent');
-                
-                // NOTE: Assignments are not persisted. This is for demonstration purposes only.
-                // In a real app, this data would come from the backend.
-                const storedAssignments: Record<string, string[]> = JSON.parse(localStorage.getItem('agentTokenAssignments') || '{}');
 
                 const agentIdsForToken: string[] = [];
-                for (const agentId in storedAssignments) {
-                    if (storedAssignments[agentId].includes(tokenId)) {
+                for (const agentId in allAssignments) {
+                    if (allAssignments[agentId].includes(tokenId)) {
                         agentIdsForToken.push(agentId);
                     }
                 }
