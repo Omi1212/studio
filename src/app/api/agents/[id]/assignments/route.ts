@@ -1,5 +1,3 @@
-'use client';
-
 import { NextResponse } from 'next/server';
 import { agentTokenAssignments } from '../../assignments/data';
 import { z } from 'zod';
