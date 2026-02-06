@@ -12,6 +12,8 @@ import Link from 'next/link';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
 import type { ViewMode } from '@/app/issue-token/page';
 
+const ITEMS_PER_PAGE = 6;
+
 function getStatusBadge(status: TokenDetails['status']) {
   switch (status) {
     case 'active':
@@ -135,14 +137,21 @@ function TokenTable({ tokens }: { tokens: TokenDetails[] }) {
 }
 
 export default function ExistingTokens({ view, setView }: { view: ViewMode, setView: (mode: ViewMode) => void }) {
-  const [allTokens, setAllTokens] = useState<TokenDetails[]>([]);
+  const [tokens, setTokens] = useState<TokenDetails[]>([]);
+  const [totalTokens, setTotalTokens] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
-    fetch('/api/tokens')
+    setLoading(true);
+    const params = new URLSearchParams({
+        page: currentPage.toString(),
+        limit: ITEMS_PER_PAGE.toString(),
+    });
+    fetch(`/api/tokens?${params.toString()}`)
         .then(res => res.json())
-        .then((tokensFromApi: TokenDetails[]) => {
-            const mappedTokens = tokensFromApi.map(t => ({
+        .then((tokensResponse) => {
+            const mappedTokens = tokensResponse.tokens.map((t: any) => ({
             ...t,
             decimals: t.decimals ?? 0,
             isFreezable: t.isFreezable ?? false,
@@ -152,10 +161,48 @@ export default function ExistingTokens({ view, setView }: { view: ViewMode, setV
             network: t.network || 'unknown',
             maxSupply: t.maxSupply || 0,
             }));
-            setAllTokens(mappedTokens);
+            setTokens(mappedTokens);
+            setTotalTokens(tokensResponse.total);
         })
         .finally(() => setLoading(false));
-  }, []);
+  }, [currentPage]);
+  
+  const totalPages = Math.ceil(totalTokens / ITEMS_PER_PAGE);
+
+  const handlePageChange = (page: number) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+  };
+  
+   const renderPagination = () => {
+    if (totalPages <= 1) return null;
+    return (
+      <div className="flex justify-between items-center pt-4">
+        <span className="text-sm text-muted-foreground">
+          Page {currentPage} of {totalPages}
+        </span>
+        <div className="flex gap-2">
+          <Button 
+            variant="outline"
+            size="sm"
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+          >
+            Previous
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
+          >
+            Next
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
@@ -174,7 +221,7 @@ export default function ExistingTokens({ view, setView }: { view: ViewMode, setV
     );
   }
   
-  if (allTokens.length === 0) {
+  if (tokens.length === 0) {
       return (
         <div className="border-dashed border-2 border-muted-foreground/50 rounded-lg h-96 flex flex-col items-center justify-center text-center p-4">
             <Rocket className="h-16 w-16 text-muted-foreground mb-4" />
@@ -211,13 +258,19 @@ export default function ExistingTokens({ view, setView }: { view: ViewMode, setV
         </div>
       </div>
         {view === 'card' ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {allTokens.map(token => (
-                    <TokenCard key={token.id} token={token} />
-                ))}
-            </div>
+            <>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {tokens.map(token => (
+                        <TokenCard key={token.id} token={token} />
+                    ))}
+                </div>
+                 {renderPagination()}
+            </>
         ) : (
-            <TokenTable tokens={allTokens} />
+            <>
+                <TokenTable tokens={tokens} />
+                {renderPagination()}
+            </>
         )}
     </div>
   );

@@ -13,6 +13,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '.
 import { Input } from '../ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 
+const ITEMS_PER_PAGE = 6;
+
 function getStatusBadge(status: TokenDetails['status']) {
   switch (status) {
     case 'active':
@@ -139,15 +141,20 @@ function TokenTable({ tokens, issuers }: { tokens: TokenDetails[], issuers: Issu
 
 export default function AssetList() {
   const [tokens, setTokens] = useState<TokenDetails[]>([]);
+  const [totalTokens, setTotalTokens] = useState(0);
   const [issuers, setIssuers] = useState<Issuer[]>([]);
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState<ViewMode>('card');
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     setLoading(true);
-    const params = new URLSearchParams();
+    const params = new URLSearchParams({
+        page: currentPage.toString(),
+        limit: ITEMS_PER_PAGE.toString(),
+    });
     if (statusFilter !== 'all') {
       params.append('status', statusFilter);
     }
@@ -158,7 +165,7 @@ export default function AssetList() {
     Promise.all([
       fetch(`/api/tokens?${params.toString()}`).then(res => res.json()),
       fetch('/api/issuers').then(res => res.json()) // Fetch all issuers to map names
-    ]).then(([tokensResponse, issuersData]) => {
+    ]).then(([tokensResponse, issuersResponse]) => {
       const combinedTokens: TokenDetails[] = tokensResponse.tokens.map((t: TokenDetails) => ({
         ...t,
         decimals: t.decimals ?? 0,
@@ -170,9 +177,47 @@ export default function AssetList() {
         maxSupply: t.maxSupply || 0,
       }));
       setTokens(combinedTokens);
-      setIssuers(issuersData);
+      setTotalTokens(tokensResponse.total);
+      setIssuers(issuersResponse.issuers || issuersResponse);
     }).catch(console.error).finally(() => setLoading(false));
-  }, [searchQuery, statusFilter]);
+  }, [searchQuery, statusFilter, currentPage]);
+
+  const totalPages = Math.ceil(totalTokens / ITEMS_PER_PAGE);
+
+  const handlePageChange = (page: number) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+  };
+
+  const renderPagination = () => {
+    if (totalPages <= 1) return null;
+    return (
+      <div className="flex justify-between items-center pt-4">
+        <span className="text-sm text-muted-foreground">
+          Page {currentPage} of {totalPages}
+        </span>
+        <div className="flex gap-2">
+          <Button 
+            variant="outline"
+            size="sm"
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+          >
+            Previous
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
+          >
+            Next
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
@@ -262,14 +307,20 @@ export default function AssetList() {
                 <p className="text-muted-foreground mb-4">Try a different search term or filter.</p>
             </div>
         ) : view === 'card' ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {tokens.map(token => {
-                  const issuer = issuers.find(i => i.id === token.issuerId);
-                  return <TokenCard key={token.id} token={token} issuer={issuer} />
-                })}
-            </div>
+            <>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {tokens.map(token => {
+                    const issuer = issuers.find(i => i.id === token.issuerId);
+                    return <TokenCard key={token.id} token={token} issuer={issuer} />
+                    })}
+                </div>
+                {renderPagination()}
+            </>
         ) : (
-            <TokenTable tokens={tokens} issuers={issuers} />
+            <>
+                <TokenTable tokens={tokens} issuers={issuers} />
+                {renderPagination()}
+            </>
         )}
     </div>
   );
