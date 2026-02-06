@@ -39,7 +39,7 @@ export default function NewTokenPage() {
   const stepFormRef = useRef<HTMLFormElement>(null);
   
   useEffect(() => {
-    fetch('/api/issuers').then(res => res.json()).then(setIssuers);
+    fetch('/api/issuers').then(res => res.json()).then(response => setIssuers(response.data));
   }, []);
 
   const steps = [

@@ -151,7 +151,7 @@ export default function ExistingTokens({ view, setView }: { view: ViewMode, setV
     fetch(`/api/tokens?${params.toString()}`)
         .then(res => res.json())
         .then((tokensResponse) => {
-            const mappedTokens = tokensResponse.tokens.map((t: any) => ({
+            const mappedTokens = tokensResponse.data.map((t: any) => ({
             ...t,
             decimals: t.decimals ?? 0,
             isFreezable: t.isFreezable ?? false,
@@ -162,7 +162,7 @@ export default function ExistingTokens({ view, setView }: { view: ViewMode, setV
             maxSupply: t.maxSupply || 0,
             }));
             setTokens(mappedTokens);
-            setTotalTokens(tokensResponse.total);
+            setTotalTokens(tokensResponse.meta.total);
         })
         .finally(() => setLoading(false));
   }, [currentPage]);
