@@ -178,10 +178,10 @@ export default function ProfilePage() {
     if (storedUser) {
         const parsedUser: User = JSON.parse(storedUser);
         // Fetch the most up-to-date user data from the API
-        fetch(`/api/users`)
+        fetch(`/api/users?perPage=999`)
             .then(res => res.json())
-            .then((allUsers: User[]) => {
-                const apiUser = allUsers.find(u => u.id === parsedUser.id);
+            .then((allUsers: {data: User[]}) => {
+                const apiUser = allUsers.data.find(u => u.id === parsedUser.id);
                 // Merge localStorage data with API data, localStorage is source of truth for session-edits
                 setUser(apiUser ? { ...apiUser, ...parsedUser } : parsedUser);
             })

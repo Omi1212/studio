@@ -35,7 +35,7 @@ export default function TransactionsList({ className, limit }: { className?: str
     fetch(`/api/transactions?${params.toString()}`)
       .then(res => res.json())
       .then(data => {
-        setTransactions(data.transactions);
+        setTransactions(data.data);
       })
       .finally(() => setLoading(false));
   }, [limit]);

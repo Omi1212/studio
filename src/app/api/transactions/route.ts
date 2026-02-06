@@ -135,7 +135,12 @@ export async function GET(request: Request) {
   const paginatedData = filteredData.slice(startIndex, startIndex + perPage);
 
   return NextResponse.json({
-    transactions: paginatedData,
-    total,
+    data: paginatedData,
+    meta: {
+      page,
+      perPage,
+      total,
+      totalPages: Math.ceil(total / perPage),
+    },
   });
 }

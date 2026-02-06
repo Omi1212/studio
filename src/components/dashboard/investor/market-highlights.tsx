@@ -17,7 +17,7 @@ export default function MarketHighlights() {
         fetch('/api/tokens').then(res => res.json())
       ]).then(([investorData, tokensData]) => {
         const holdingsIds = investorData?.holdings.map((h: any) => h.tokenId) || [];
-        const filteredHighlights = tokensData
+        const filteredHighlights = tokensData.data
           .filter((token: TokenDetails) => !holdingsIds.includes(token.id) && token.status === 'active')
           .slice(0, 2);
         setHighlights(filteredHighlights);

@@ -45,8 +45,8 @@ export default function AllTransactions({ className }: { className?: string }) {
     fetch(`/api/transactions?${params.toString()}`)
       .then(res => res.json())
       .then(data => {
-        setTransactions(data.transactions);
-        setTotalTransactions(data.total);
+        setTransactions(data.data);
+        setTotalTransactions(data.meta.total);
       })
       .finally(() => setLoading(false));
   }, [currentPage, filter, search]);

@@ -44,9 +44,9 @@ export default function LoginForm() {
     setIsSubmitting(true);
     
     // Find user by email
-    const res = await fetch('/api/users');
-    const usersData: User[] = await res.json();
-    const user = usersData.find(u => u.email === email);
+    const res = await fetch('/api/users?perPage=999');
+    const usersData: { data: User[] } = await res.json();
+    const user = usersData.data.find(u => u.email === email);
 
     if (user) {
       localStorage.setItem('userRole', user.role);

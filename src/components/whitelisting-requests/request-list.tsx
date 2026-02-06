@@ -197,7 +197,7 @@ export default function RequestList({ view, setView }: { view: ViewMode, setView
     setLoading(true);
     const params = new URLSearchParams({
         page: currentPage.toString(),
-        limit: ITEMS_PER_PAGE.toString(),
+        perPage: ITEMS_PER_PAGE.toString(),
     });
     if (statusFilter !== 'all') {
         const kycStatus = statusFilter === 'accepted' ? 'verified' : statusFilter;
@@ -211,8 +211,8 @@ export default function RequestList({ view, setView }: { view: ViewMode, setView
         try {
             const response = await fetch(`/api/investors?${params.toString()}`);
             const data = await response.json();
-            setRequests(data.investors);
-            setTotalRequests(data.total);
+            setRequests(data.data);
+            setTotalRequests(data.meta.total);
         } catch (error) {
             console.error("Failed to fetch requests:", error);
         } finally {

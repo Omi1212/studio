@@ -47,8 +47,13 @@ export async function GET(request: Request) {
   const paginatedTokens = filteredTokens.slice(startIndex, startIndex + perPage);
 
   return NextResponse.json({
-    tokens: paginatedTokens,
-    total,
+    data: paginatedTokens,
+    meta: {
+      page,
+      perPage,
+      total,
+      totalPages: Math.ceil(total / perPage),
+    },
   });
 }
 

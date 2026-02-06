@@ -32,7 +32,12 @@ export async function GET(request: Request) {
   const paginatedTransfers = filteredTransfers.slice(startIndex, startIndex + perPage);
 
   return NextResponse.json({
-    transfers: paginatedTransfers,
-    total,
+    data: paginatedTransfers,
+    meta: {
+      page,
+      perPage,
+      total,
+      totalPages: Math.ceil(total / perPage),
+    },
   });
 }

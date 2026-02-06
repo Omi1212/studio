@@ -64,8 +64,13 @@ export async function GET(request: Request) {
   const paginatedInvestors = filteredInvestors.slice(startIndex, startIndex + perPage);
 
   return NextResponse.json({
-    investors: paginatedInvestors,
-    total,
+    data: paginatedInvestors,
+    meta: {
+      page,
+      perPage,
+      total,
+      totalPages: Math.ceil(total / perPage),
+    },
   });
 }
 

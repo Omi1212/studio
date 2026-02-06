@@ -52,8 +52,13 @@ export async function GET(request: Request) {
   const paginatedOrders = filteredOrders.slice(startIndex, startIndex + perPage);
 
   return NextResponse.json({
-    orders: paginatedOrders,
-    total,
+    data: paginatedOrders,
+    meta: {
+      page,
+      perPage,
+      total,
+      totalPages: Math.ceil(total / perPage),
+    },
   });
 }
 

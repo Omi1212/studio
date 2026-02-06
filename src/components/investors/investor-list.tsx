@@ -171,7 +171,7 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
 
   useEffect(() => {
     fetch('/api/tokens').then(res => res.json()).then(tokensData => {
-        setAllTokens(tokensData.tokens);
+        setAllTokens(tokensData.data);
     }).catch(console.error);
   }, []);
 
@@ -222,8 +222,8 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
         try {
             const response = await fetch(`/api/investors?${params.toString()}`);
             const data = await response.json();
-            setInvestors(data.investors);
-            setTotalInvestors(data.total);
+            setInvestors(data.data);
+            setTotalInvestors(data.meta.total);
         } catch (error) {
             console.error("Failed to fetch investors:", error);
         } finally {

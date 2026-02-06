@@ -140,7 +140,7 @@ export default function TokenList() {
       fetch('/api/tokens?perPage=999').then(res => res.json()),
       fetch('/api/investors/inv-001/subscriptions').then(res => res.ok ? res.json() : {})
     ]).then(([tokensResponse, subscriptionsData]: [any, Record<string, SubscriptionStatus>]) => {
-      const activeTokens = (tokensResponse.tokens || [])
+      const activeTokens = (tokensResponse.data || [])
         .filter((t: TokenDetails) => t.status === 'active')
         .map((t: TokenDetails) => ({
           ...t,
