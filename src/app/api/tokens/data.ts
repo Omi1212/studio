@@ -1,6 +1,6 @@
 import type { TokenDetails } from '@/lib/types';
 
-export const exampleTokens: Omit<TokenDetails, 'tokenIcon' | 'whitepaper' | 'legalTokenizationDoc' | 'tokenIssuanceLegalDoc' | 'publicKey'>[] = [
+export let exampleTokens: Omit<TokenDetails, 'tokenIcon' | 'whitepaper' | 'legalTokenizationDoc' | 'tokenIssuanceLegalDoc' | 'publicKey'>[] = [
   {
     id: 'example-1',
     tokenName: 'Digital Dollar',

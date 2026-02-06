@@ -83,18 +83,29 @@ export default function AgentDetailsPage() {
       .finally(() => setLoading(false));
   }, [params]);
 
-  const handleToggleStatus = () => {
+  const handleToggleStatus = async () => {
     if (!agent) return;
     const newStatus = agent.status === 'active' ? 'inactive' : 'active';
-    const updatedAgent = { ...agent, status: newStatus };
-    setAgent(updatedAgent);
     
-    // NOTE: This change is not persisted. This is for demonstration purposes only.
-    // In a real application, you would make a PUT/PATCH request to your API to update the data.
-    toast({
-        title: "Status Updated (Not Persisted)",
-        description: `Agent "${agent.name}" is now ${newStatus}.`,
-    });
+    try {
+        const response = await fetch(`/api/users/${agent.id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status: newStatus }),
+        });
+
+        if (!response.ok) throw new Error('Failed to update status');
+        const updatedAgent = await response.json();
+        setAgent(updatedAgent);
+
+        toast({
+            title: "Status Updated",
+            description: `Agent "${agent.name}" is now ${newStatus}.`,
+        });
+    } catch (error) {
+        console.error(error);
+        toast({ variant: 'destructive', title: 'Error', description: 'Could not update status.' });
+    }
   };
 
   if (loading) {

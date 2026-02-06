@@ -51,29 +51,36 @@ export default function EditAgentPage() {
       .finally(() => setLoading(false));
   }, [params]);
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!agent) return;
 
     const formData = new FormData(event.currentTarget);
-    const updatedAgent = {
-      ...agent,
-      // Keep original values for disabled fields
-      name: agent.name,
-      email: agent.email,
-      walletAddress: agent.walletAddress,
-      // Update from form data
+    const updatedAgentData = {
       role: formData.get('role') as 'investor' | 'issuer' | 'agent' | 'superadmin',
       status: formData.get('status') as 'active' | 'inactive',
     };
     
-    // NOTE: This change is not persisted. This is for demonstration purposes only.
-    // In a real application, you would make a PUT/PATCH request to your API to update the data.
-    toast({
-      title: 'Agent Updated (Not Persisted)',
-      description: `${updatedAgent.name}'s details have been updated for this session.`,
-    });
-    router.push(`/agents/${agent.id}`);
+    try {
+        const response = await fetch(`/api/users/${agent.id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(updatedAgentData),
+        });
+        if (!response.ok) throw new Error('Failed to update agent');
+        
+        const updatedAgent = await response.json();
+        
+        toast({
+          title: 'Agent Updated',
+          description: `${updatedAgent.name}'s details have been updated.`,
+        });
+        router.push(`/agents/${agent.id}`);
+
+    } catch (error) {
+        console.error(error);
+        toast({ variant: 'destructive', title: 'Error', description: 'Could not update agent details.' });
+    }
   };
 
   if (loading) {

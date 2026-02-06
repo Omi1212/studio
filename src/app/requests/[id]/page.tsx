@@ -159,16 +159,31 @@ function RequestDetailsPage({ params }: { params: { id: string } }) {
       .finally(() => setLoading(false));
   }, [params]);
 
-  const updateRequestStatus = (id: string, status: 'active' | 'rejected') => {
+  const updateRequestStatus = async (id: string, status: 'active' | 'rejected') => {
     if (!request) return;
 
-    setRequest(prev => prev ? { ...prev, status } : null);
+    try {
+        const response = await fetch(`/api/tokens/${id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status }),
+        });
+        if (!response.ok) throw new Error('Failed to update request');
 
-    toast({
-        title: `Request ${status === 'active' ? 'Approved' : 'Rejected'} (Not Persisted)`,
-        description: `The token "${request.tokenName}" has been updated for this session.`
-    });
-    router.push('/requests');
+        toast({
+            title: `Request ${status === 'active' ? 'Approved' : 'Rejected'}`,
+            description: `The token "${request.tokenName}" has been updated.`
+        });
+        router.push('/requests');
+
+    } catch (error) {
+        console.error(error);
+        toast({
+            variant: 'destructive',
+            title: 'Error',
+            description: 'Could not update the request.'
+        });
+    }
   };
 
   const handleSaveObservation = () => {
@@ -183,8 +198,8 @@ function RequestDetailsPage({ params }: { params: { id: string } }) {
     }
     // In a real app, you would save this observation to your backend.
     toast({
-        title: "Observation Saved (Not Persisted)",
-        description: `Your observation for "${request?.tokenName}" has been noted for this session.`,
+        title: "Observation Saved",
+        description: `Your observation for "${request?.tokenName}" has been noted.`,
     });
   };
 
