@@ -71,7 +71,7 @@ function TokenOfferingPage({ params }: { params: { tokenId: string } }) {
     
     Promise.all([
       fetch(`/api/tokens/${tokenId}`).then(res => res.ok ? res.json() : null),
-      fetch('/api/token-price-history').then(res => res.ok ? res.json() : []),
+      fetch('/api/token-price-history').then(res => res.ok ? res.json() : { data: [] }),
       fetch('/api/investors/inv-001/subscriptions').then(res => res.ok ? res.json() : {}),
     ]).then(([tokenData, priceHistoryData, subscriptionsData]) => {
       if (tokenData) {
@@ -85,7 +85,7 @@ function TokenOfferingPage({ params }: { params: { tokenId: string } }) {
         // Load subscription status from API
         setSubscriptionStatus(subscriptionsData[tokenId] || 'none');
       }
-      setPriceHistory(priceHistoryData);
+      setPriceHistory(priceHistoryData.data || []);
     }).catch(err => {
       console.error("Failed to fetch page data:", err);
       setToken(null);

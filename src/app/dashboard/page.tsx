@@ -37,7 +37,7 @@ function DashboardRenderer() {
                 try {
                     const response = await fetch('/api/tokens?perPage=999');
                     const tokensResponse = await response.json();
-                    const allTokens: TokenDetails[] = tokensResponse.tokens || [];
+                    const allTokens: TokenDetails[] = tokensResponse.data || [];
 
                     if (storedTokenId) {
                         const foundToken = allTokens.find(t => t.id === storedTokenId);

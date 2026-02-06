@@ -10,6 +10,22 @@ const portfolioHistoryData = [
   { date: '2024-07-30', value: 32750 },
 ];
 
-export async function GET() {
-  return NextResponse.json(portfolioHistoryData);
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const page = parseInt(searchParams.get('page') || '1', 10);
+  const perPage = parseInt(searchParams.get('perPage') || '10', 10);
+  
+  const total = portfolioHistoryData.length;
+  const startIndex = (page - 1) * perPage;
+  const paginatedData = portfolioHistoryData.slice(startIndex, startIndex + perPage);
+
+  return NextResponse.json({
+    data: paginatedData,
+    meta: {
+      page,
+      perPage,
+      total,
+      totalPages: Math.ceil(total / perPage),
+    },
+  });
 }

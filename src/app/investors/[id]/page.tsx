@@ -73,10 +73,10 @@ export default function InvestorDetailsPage() {
 
     Promise.all([
         fetch(`/api/investors/${id}`).then(res => res.ok ? res.json() : null),
-        fetch(`/api/tokens?perPage=999`).then(res => res.ok ? res.json() : { tokens: [] })
+        fetch(`/api/tokens?perPage=999`).then(res => res.ok ? res.json() : { data: [] })
     ]).then(([investorData, tokensResponse]) => {
         setInvestor(investorData);
-        setAllTokens(tokensResponse.tokens || []);
+        setAllTokens(tokensResponse.data || []);
         setLoading(false);
     }).catch(err => {
         console.error(err);

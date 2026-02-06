@@ -32,7 +32,7 @@ export default function AssignmentView() {
             fetch('/api/tokens').then(res => res.json()),
             fetch('/api/agents/assignments').then(res => res.json()),
         ]).then(([tokensData, assignmentsData]) => {
-            setActiveTokens(tokensData.tokens.filter((token: TokenDetails) => token.status === 'active'));
+            setActiveTokens(tokensData.data.filter((token: TokenDetails) => token.status === 'active'));
             setAssignments(assignmentsData);
         }).catch(console.error);
     }, []);
@@ -52,8 +52,8 @@ export default function AssignmentView() {
             try {
                 const response = await fetch(`/api/users?${params.toString()}`);
                 const data = await response.json();
-                setAgents(data.users);
-                setTotalAgents(data.total);
+                setAgents(data.data);
+                setTotalAgents(data.meta.total);
             } catch (error) {
                 console.error("Failed to fetch agents:", error);
             } finally {
