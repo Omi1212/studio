@@ -161,21 +161,31 @@ export default function IssuerList() {
     }
   };
 
-  const handleToggleStatus = (id: string) => {
-    let updatedIssuer: Issuer | undefined;
-    const updatedIssuers = issuers.map(issuer => {
-      if (issuer.id === id) {
-        updatedIssuer = { ...issuer, status: issuer.status === 'active' ? 'inactive' : 'active' };
-        return updatedIssuer;
-      }
-      return issuer;
-    });
-    setIssuers(updatedIssuers);
-    if (updatedIssuer) {
-        toast({
-            title: "Status Updated",
-            description: `Issuer "${updatedIssuer.name}" is now ${updatedIssuer.status}. (Change not persisted)`
-        });
+  const handleToggleStatus = async (id: string) => {
+    const targetIssuer = issuers.find(issuer => issuer.id === id);
+    if (!targetIssuer) return;
+
+    const newStatus = targetIssuer.status === 'active' ? 'inactive' : 'active';
+    
+    try {
+      const response = await fetch(`/api/issuers/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus }),
+      });
+      if (!response.ok) throw new Error('Failed to update status');
+
+      const updatedIssuer = await response.json();
+      setIssuers(prev => prev.map(issuer => (issuer.id === id ? updatedIssuer : issuer)));
+
+      toast({
+          title: "Status Updated",
+          description: `Issuer "${updatedIssuer.name}" is now ${updatedIssuer.status}.`
+      });
+
+    } catch (error) {
+      console.error(error);
+      toast({ variant: 'destructive', title: 'Error', description: 'Could not update status.' });
     }
   };
   

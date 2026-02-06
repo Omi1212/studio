@@ -46,7 +46,7 @@ function getStatusBadge(investor: Investor) {
   }
 }
 
-function InvestorCard({ investor, onToggleFreeze }: { investor: Investor, onToggleFreeze: (id: string) => void }) {
+function InvestorCard({ investor, onToggleFreeze }: { investor: Investor, onToggleFreeze: () => void }) {
   return (
     <Card>
       <CardHeader>
@@ -67,9 +67,11 @@ function InvestorCard({ investor, onToggleFreeze }: { investor: Investor, onTogg
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onSelect={() => onToggleFreeze(investor.id)}>
-                <Snowflake className="mr-2 h-4 w-4" /> {investor.isFrozen ? 'Unfreeze' : 'Freeze'} Address
-              </DropdownMenuItem>
+              <AlertDialogTrigger asChild>
+                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                  <Snowflake className="mr-2 h-4 w-4" /> {investor.isFrozen ? 'Unfreeze' : 'Freeze'} Address
+                </DropdownMenuItem>
+              </AlertDialogTrigger>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
@@ -97,7 +99,7 @@ function InvestorCard({ investor, onToggleFreeze }: { investor: Investor, onTogg
   );
 }
 
-function InvestorTableRow({ investor, selectedToken, onToggleFreeze }: { investor: Investor, selectedToken: TokenDetails | null, onToggleFreeze: (id: string) => void }) {
+function InvestorTableRow({ investor, selectedToken, onToggleFreeze }: { investor: Investor, selectedToken: TokenDetails | null, onToggleFreeze: () => void }) {
   const router = useRouter();
 
   return (
@@ -142,9 +144,11 @@ function InvestorTableRow({ investor, selectedToken, onToggleFreeze }: { investo
             <DropdownMenuItem asChild>
               <Link href={`/investors/${investor.id}`}>View Details</Link>
             </DropdownMenuItem>
-             <DropdownMenuItem onSelect={() => onToggleFreeze(investor.id)}>
-              {investor.isFrozen ? 'Unfreeze' : 'Freeze'} Address
-            </DropdownMenuItem>
+             <AlertDialogTrigger asChild>
+                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                  {investor.isFrozen ? 'Unfreeze' : 'Freeze'} Address
+                </DropdownMenuItem>
+             </AlertDialogTrigger>
           </DropdownMenuContent>
         </DropdownMenu>
       </TableCell>
@@ -162,6 +166,7 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
   const [currentPage, setCurrentPage] = useState(1);
   const [allTokens, setAllTokens] = useState<TokenDetails[]>([]);
   const [selectedToken, setSelectedToken] = useState<TokenDetails | null>(null);
+  const [dialogInvestor, setDialogInvestor] = useState<Investor | null>(null);
 
   useEffect(() => {
     setLoading(true);
@@ -236,22 +241,31 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
     }
   };
   
-  const handleToggleFreeze = (id: string) => {
-    let targetInvestor: Investor | undefined;
-    const updatedInvestors = investors.map(inv => {
-      if (inv.id === id) {
-        targetInvestor = { ...inv, isFrozen: !inv.isFrozen };
-        return targetInvestor;
-      }
-      return inv;
-    });
-    setInvestors(updatedInvestors);
-    
-    if(targetInvestor) {
-        toast({
-            title: `Address ${targetInvestor.isFrozen ? 'Frozen' : 'Unfrozen'} (Not Persisted)`,
-            description: `The wallet address for "${targetInvestor.name}" has been updated for this session.`,
-        });
+  const handleToggleFreeze = async () => {
+    if (!dialogInvestor) return;
+
+    const newFrozenState = !dialogInvestor.isFrozen;
+
+    try {
+      const response = await fetch(`/api/investors/${dialogInvestor.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isFrozen: newFrozenState }),
+      });
+      if (!response.ok) throw new Error('Failed to update status');
+
+      const updatedInvestor = await response.json();
+      setInvestors(prev => prev.map(inv => (inv.id === dialogInvestor.id ? updatedInvestor : inv)));
+
+      toast({
+          title: `Address ${updatedInvestor.isFrozen ? 'Frozen' : 'Unfrozen'}`,
+          description: `The wallet address for "${updatedInvestor.name}" has been updated.`,
+      });
+    } catch (error) {
+      console.error(error);
+      toast({ variant: 'destructive', title: 'Error', description: 'Could not update status.' });
+    } finally {
+        setDialogInvestor(null);
     }
   };
 
@@ -312,102 +326,121 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-headline font-semibold">Investors {selectedToken && `for ${selectedToken.tokenTicker}`}</h1>
-      </div>
-
+    <AlertDialog onOpenChange={() => setDialogInvestor(null)}>
       <div className="space-y-4">
         <div className="flex justify-between items-center">
-          <h2 className="text-xl font-semibold">Your Investors</h2>
+          <h1 className="text-3xl font-headline font-semibold">Investors {selectedToken && `for ${selectedToken.tokenTicker}`}</h1>
         </div>
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-            <div className="relative w-full sm:w-auto flex-grow sm:flex-grow-0">
-                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input
-                    placeholder="Search by name, email, wallet..."
-                    className="pl-8 w-full sm:w-64"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                />
-            </div>
-             <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-full sm:w-[180px]">
-                    <SelectValue placeholder="Filter by status" />
-                </SelectTrigger>
-                <SelectContent>
-                    <SelectItem value="all">All Statuses</SelectItem>
-                    <SelectItem value="whitelisted">Whitelisted</SelectItem>
-                    <SelectItem value="frozen">Frozen</SelectItem>
-                </SelectContent>
-            </Select>
-            <div className="hidden sm:flex items-center gap-1 bg-muted p-1 rounded-lg ml-auto">
-                <Button
-                    variant={view === 'card' ? 'secondary' : 'ghost'}
-                    size="icon"
-                    className="h-8 w-8"
-                    onClick={() => setView('card')}
-                    aria-label="Card View"
-                >
-                    <LayoutGrid className="h-4 w-4" />
-                </Button>
-                <Button
-                    variant={view === 'table' ? 'secondary' : 'ghost'}
-                    size="icon"
-                    className="h-8 w-8"
-                    onClick={() => setView('table')}
-                    aria-label="Table View"
-                >
-                    <List className="h-4 w-4" />
-                </Button>
-            </div>
-        </div>
-      </div>
 
-
-       {paginatedInvestors.length === 0 ? (
-        <div className="border-dashed border-2 border-muted-foreground/50 rounded-lg h-96 flex flex-col items-center justify-center text-center p-4">
-            <UserPlus className="h-16 w-16 text-muted-foreground mb-4" />
-            <h2 className="text-xl font-semibold mb-2">No investors found</h2>
-            <p className="text-muted-foreground mb-4">
-                {searchQuery || statusFilter !== 'all' ? "Try adjusting your search or filter." : `There are no whitelisted investors for ${selectedToken?.tokenTicker}.`}
-            </p>
-        </div>
-      ) : view === 'card' ? (
-        <>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {paginatedInvestors.map(investor => (
-              <AlertDialog key={investor.id}>
-                  <InvestorCard investor={investor} onToggleFreeze={handleToggleFreeze} />
-              </AlertDialog>
-            ))}
+        <div className="space-y-4">
+          <div className="flex justify-between items-center">
+            <h2 className="text-xl font-semibold">Your Investors</h2>
           </div>
-          {renderPagination()}
-        </>
-      ) : (
-        <Card>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Investor</TableHead>
-                <TableHead className="hidden sm:table-cell">Token</TableHead>
-                <TableHead className="hidden md:table-cell">Total Invested</TableHead>
-                <TableHead className="hidden lg:table-cell">Wallet</TableHead>
-                <TableHead className="hidden sm:table-cell">Status</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+              <div className="relative w-full sm:w-auto flex-grow sm:flex-grow-0">
+                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Input
+                      placeholder="Search by name, email, wallet..."
+                      className="pl-8 w-full sm:w-64"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+              </div>
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                  <SelectTrigger className="w-full sm:w-[180px]">
+                      <SelectValue placeholder="Filter by status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                      <SelectItem value="all">All Statuses</SelectItem>
+                      <SelectItem value="whitelisted">Whitelisted</SelectItem>
+                      <SelectItem value="frozen">Frozen</SelectItem>
+                  </SelectContent>
+              </Select>
+              <div className="hidden sm:flex items-center gap-1 bg-muted p-1 rounded-lg ml-auto">
+                  <Button
+                      variant={view === 'card' ? 'secondary' : 'ghost'}
+                      size="icon"
+                      className="h-8 w-8"
+                      onClick={() => setView('card')}
+                      aria-label="Card View"
+                  >
+                      <LayoutGrid className="h-4 w-4" />
+                  </Button>
+                  <Button
+                      variant={view === 'table' ? 'secondary' : 'ghost'}
+                      size="icon"
+                      className="h-8 w-8"
+                      onClick={() => setView('table')}
+                      aria-label="Table View"
+                  >
+                      <List className="h-4 w-4" />
+                  </Button>
+              </div>
+          </div>
+        </div>
+
+
+        {paginatedInvestors.length === 0 ? (
+          <div className="border-dashed border-2 border-muted-foreground/50 rounded-lg h-96 flex flex-col items-center justify-center text-center p-4">
+              <UserPlus className="h-16 w-16 text-muted-foreground mb-4" />
+              <h2 className="text-xl font-semibold mb-2">No investors found</h2>
+              <p className="text-muted-foreground mb-4">
+                  {searchQuery || statusFilter !== 'all' ? "Try adjusting your search or filter." : `There are no whitelisted investors for ${selectedToken?.tokenTicker}.`}
+              </p>
+          </div>
+        ) : view === 'card' ? (
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {paginatedInvestors.map(investor => (
-                <AlertDialog key={investor.id}>
-                  <InvestorTableRow investor={investor} selectedToken={selectedToken} onToggleFreeze={handleToggleFreeze} />
-                </AlertDialog>
+                    <InvestorCard 
+                        key={investor.id} 
+                        investor={investor} 
+                        onToggleFreeze={() => setDialogInvestor(investor)} 
+                    />
               ))}
-            </TableBody>
-          </Table>
-          {renderPagination()}
-        </Card>
-      )}
-    </div>
+            </div>
+            {renderPagination()}
+          </>
+        ) : (
+          <Card>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Investor</TableHead>
+                  <TableHead className="hidden sm:table-cell">Token</TableHead>
+                  <TableHead className="hidden md:table-cell">Total Invested</TableHead>
+                  <TableHead className="hidden lg:table-cell">Wallet</TableHead>
+                  <TableHead className="hidden sm:table-cell">Status</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {paginatedInvestors.map(investor => (
+                    <InvestorTableRow 
+                        key={investor.id} 
+                        investor={investor} 
+                        selectedToken={selectedToken} 
+                        onToggleFreeze={() => setDialogInvestor(investor)} 
+                    />
+                ))}
+              </TableBody>
+            </Table>
+            {renderPagination()}
+          </Card>
+        )}
+        <AlertDialogContent>
+            <AlertDialogHeader>
+                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                <AlertDialogDescription>
+                    This will {dialogInvestor?.isFrozen ? 'unfreeze' : 'freeze'} the wallet address for &quot;{dialogInvestor?.name}&quot;.
+                </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={handleToggleFreeze}>Confirm</AlertDialogAction>
+            </AlertDialogFooter>
+        </AlertDialogContent>
+      </div>
+    </AlertDialog>
   )
 }

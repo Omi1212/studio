@@ -246,12 +246,31 @@ export default function RequestList({ view, setView }: { view: ViewMode, setView
   };
 
 
-  const updateRequestStatus = (id: string, status: 'verified' | 'rejected') => {
-    setRequests(prev => prev.map(req => req.id === id ? { ...req, kycStatus: status } : req));
-    toast({
-        title: `Request ${status === 'verified' ? 'Approved' : 'Rejected'} (Not Persisted)`,
-        description: `The request has been updated for this session.`
-    });
+  const updateRequestStatus = async (id: string, status: 'verified' | 'rejected') => {
+    try {
+      const response = await fetch(`/api/investors/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ kycStatus: status }),
+      });
+      if (!response.ok) throw new Error('Failed to update request');
+      
+      const updatedRequest = await response.json();
+      setRequests(prev => prev.map(req => (req.id === id ? updatedRequest : req)));
+
+      toast({
+          title: `Request ${status === 'verified' ? 'Approved' : 'Rejected'}`,
+          description: `The request for "${updatedRequest.name}" has been updated.`
+      });
+
+    } catch (error) {
+      console.error(error);
+      toast({
+          variant: 'destructive',
+          title: 'Error',
+          description: 'Could not update the request.'
+      });
+    }
   }
 
   const handleApprove = (id: string) => {
