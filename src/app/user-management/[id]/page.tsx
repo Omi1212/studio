@@ -88,17 +88,33 @@ export default function UserDetailsPage() {
         .finally(() => setLoading(false));
   }, [params]);
 
-  const handleToggleStatus = () => {
+  const handleToggleStatus = async () => {
     if (!user) return;
     const newStatus = user.status === 'active' ? 'inactive' : 'active';
-    const updatedUser = { ...user, status: newStatus };
-    setUser(updatedUser);
     
-    // NOTE: This change is not persisted.
-    toast({
-        title: "Status Updated (Not Persisted)",
-        description: `User "${user.name}" is now ${newStatus}.`,
-    });
+    try {
+        const response = await fetch(`/api/users/${user.id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status: newStatus }),
+        });
+        if (!response.ok) throw new Error('Failed to update status');
+
+        const updatedUser = await response.json();
+        setUser(updatedUser);
+        
+        toast({
+            title: "Status Updated",
+            description: `User "${user.name}" is now ${newStatus}.`,
+        });
+    } catch(error) {
+        console.error(error);
+        toast({
+            variant: 'destructive',
+            title: 'Error',
+            description: 'Could not update user status.'
+        });
+    }
   };
 
   if (loading) {

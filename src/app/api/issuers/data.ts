@@ -1,6 +1,6 @@
 import type { Issuer } from '@/lib/types';
 
-export const issuersData: Issuer[] = [
+export let issuersData: Issuer[] = [
     {
         id: 'iss-001',
         name: 'Prime Issuance',

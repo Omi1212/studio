@@ -44,25 +44,36 @@ export default function EditIssuerPage() {
         .finally(() => setLoading(false));
   }, [params]);
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!issuer) return;
 
     const formData = new FormData(event.currentTarget);
-    const updatedIssuer = {
-      ...issuer,
+    const updatedIssuerData = {
       name: formData.get('name') as string,
       email: formData.get('email') as string,
       status: formData.get('status') as 'active' | 'inactive',
       walletAddress: formData.get('walletAddress') as string,
     };
     
-    // NOTE: This change is not persisted.
-    toast({
-      title: 'Issuer Updated (Not Persisted)',
-      description: `${updatedIssuer.name}'s details have been updated for this session.`,
-    });
-    router.push(`/issuer-management/${issuer.id}`);
+    try {
+        const response = await fetch(`/api/issuers/${issuer.id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(updatedIssuerData),
+        });
+        if (!response.ok) throw new Error('Failed to update issuer');
+
+        const updatedIssuer = await response.json();
+        toast({
+          title: 'Issuer Updated',
+          description: `${updatedIssuer.name}'s details have been saved.`,
+        });
+        router.push(`/issuer-management/${issuer.id}`);
+    } catch (error) {
+        console.error(error);
+        toast({ variant: 'destructive', title: 'Error', description: 'Could not update issuer.' });
+    }
   };
 
   if (loading) {

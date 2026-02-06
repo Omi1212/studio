@@ -43,27 +43,39 @@ export default function EditUserPage() {
         .finally(() => setLoading(false));
   }, [params]);
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!user) return;
 
     const formData = new FormData(event.currentTarget);
-    const updatedUser = {
-      ...user,
-      name: user.name,
-      email: user.email,
-      walletAddress: user.walletAddress,
+    const updatedUserData = {
       role: formData.get('role') as 'investor' | 'issuer' | 'agent' | 'superadmin',
       status: formData.get('status') as 'active' | 'inactive',
       kycStatus: formData.get('kycStatus') as 'verified' | 'pending' | 'rejected',
     };
     
-    // NOTE: This change is not persisted.
-    toast({
-      title: 'User Updated (Not Persisted)',
-      description: `${updatedUser.name}'s details have been updated for this session.`,
-    });
-    router.push(`/user-management/${user.id}`);
+    try {
+        const response = await fetch(`/api/users/${user.id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(updatedUserData),
+        });
+        if (!response.ok) throw new Error('Failed to update user');
+
+        const updatedUser = await response.json();
+        toast({
+          title: 'User Updated',
+          description: `${updatedUser.name}'s details have been saved.`,
+        });
+        router.push(`/user-management/${user.id}`);
+    } catch(error) {
+        console.error(error);
+        toast({
+            variant: 'destructive',
+            title: 'Error',
+            description: 'Could not update the user.'
+        });
+    }
   };
 
   if (loading) {

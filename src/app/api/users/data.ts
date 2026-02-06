@@ -1,6 +1,6 @@
 import type { User } from '@/lib/types';
 
-export const usersData: User[] = [
+export let usersData: User[] = [
     {
         id: 'user-001',
         name: 'John Doe',

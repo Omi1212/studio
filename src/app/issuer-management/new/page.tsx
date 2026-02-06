@@ -21,11 +21,10 @@ export default function NewIssuerPage() {
   const router = useRouter();
   const { toast } = useToast();
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
-    const newIssuer = {
-      id: `iss-${Math.random().toString(36).substring(2, 9)}`,
+    const newIssuerData = {
       name: formData.get('name') as string,
       email: formData.get('email') as string,
       walletAddress: formData.get('walletAddress') as string,
@@ -34,12 +33,28 @@ export default function NewIssuerPage() {
       status: 'active' as const,
     };
     
-    // NOTE: This change is not persisted.
-    toast({
-      title: 'Issuer Added (Not Persisted)',
-      description: `${newIssuer.name} has been added for this session.`,
-    });
-    router.push('/issuer-management');
+    try {
+        const response = await fetch('/api/issuers', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(newIssuerData),
+        });
+        if (!response.ok) throw new Error('Failed to add issuer');
+
+        const newIssuer = await response.json();
+        toast({
+          title: 'Issuer Added',
+          description: `${newIssuer.name} has been added.`,
+        });
+        router.push('/issuer-management');
+    } catch(error) {
+        console.error(error);
+        toast({
+            variant: 'destructive',
+            title: 'Error',
+            description: 'Could not add the issuer.'
+        });
+    }
   };
 
   return (

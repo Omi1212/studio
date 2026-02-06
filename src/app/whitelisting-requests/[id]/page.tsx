@@ -79,16 +79,34 @@ export default function RequestDetailsPage() {
         .finally(() => setLoading(false));
   }, [params]);
   
-  const handleUpdateStatus = (status: 'verified' | 'rejected') => {
+  const handleUpdateStatus = async (status: 'verified' | 'rejected') => {
     if (!request) return;
 
-    setRequest(prev => prev ? { ...prev, kycStatus: status } : null);
+    try {
+      const response = await fetch(`/api/investors/${request.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ kycStatus: status }),
+      });
+      if (!response.ok) throw new Error('Failed to update request');
+      
+      const updatedRequest = await response.json();
+      setRequest(updatedRequest);
 
-    toast({
-        title: `Request ${status === 'verified' ? 'Approved' : 'Rejected'} (Not Persisted)`,
-        description: `The request for "${request.name}" has been updated for this session.`
-    });
-    router.push('/whitelisting-requests');
+      toast({
+          title: `Request ${status === 'verified' ? 'Approved' : 'Rejected'}`,
+          description: `The request for "${request.name}" has been updated.`
+      });
+      router.push('/whitelisting-requests');
+
+    } catch (error) {
+      console.error(error);
+      toast({
+          variant: 'destructive',
+          title: 'Error',
+          description: 'Could not update the request.'
+      });
+    }
   };
 
   if (loading) {

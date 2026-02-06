@@ -42,24 +42,42 @@ export default function EditRequestPage() {
         .finally(() => setLoading(false));
   }, [params]);
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!request) return;
 
     const formData = new FormData(event.currentTarget);
-    const updatedRequest = {
-      ...request,
+    const updatedRequestData = {
       name: formData.get('name') as string,
       email: formData.get('email') as string,
       kycStatus: formData.get('kycStatus') as 'verified' | 'pending' | 'rejected',
       walletAddress: formData.get('walletAddress') as string,
     };
     
-    toast({
-      title: 'Request Updated (Not Persisted)',
-      description: `The request for ${updatedRequest.name} has been updated for this session.`,
-    });
-    router.push(`/whitelisting-requests/${request.id}`);
+    try {
+        const response = await fetch(`/api/investors/${request.id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(updatedRequestData),
+        });
+
+        if (!response.ok) throw new Error('Failed to update request');
+
+        const updatedRequest = await response.json();
+        toast({
+          title: 'Request Updated',
+          description: `The request for ${updatedRequest.name} has been updated.`,
+        });
+        router.push(`/whitelisting-requests/${request.id}`);
+
+    } catch(error) {
+        console.error(error);
+        toast({
+            variant: 'destructive',
+            title: 'Error',
+            description: 'Could not update the request.'
+        });
+    }
   };
 
   if (loading) {

@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import {
@@ -21,11 +22,10 @@ export default function NewUserPage() {
   const router = useRouter();
   const { toast } = useToast();
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
     const newUser = {
-      id: `user-${Math.random().toString(36).substring(2, 9)}`,
       name: formData.get('name') as string,
       email: formData.get('email') as string,
       walletAddress: formData.get('walletAddress') as string,
@@ -34,12 +34,28 @@ export default function NewUserPage() {
       status: 'active' as const,
     };
     
-    // NOTE: This change is not persisted.
-    toast({
-      title: 'User Added (Not Persisted)',
-      description: `${newUser.name} has been added for this session.`,
-    });
-    router.push('/user-management');
+    try {
+        const response = await fetch('/api/users', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(newUser),
+        });
+        if (!response.ok) throw new Error('Failed to add user');
+        
+        const createdUser = await response.json();
+        toast({
+          title: 'User Added',
+          description: `${createdUser.name} has been added.`,
+        });
+        router.push('/user-management');
+    } catch(error) {
+        console.error(error);
+        toast({
+            variant: 'destructive',
+            title: 'Error',
+            description: 'Could not add the user.'
+        });
+    }
   };
 
   return (
