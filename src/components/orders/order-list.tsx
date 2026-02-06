@@ -139,8 +139,8 @@ export default function OrderList() {
       fetch('/api/tokens').then(res => res.json()),
       fetch('/api/investors').then(res => res.json())
     ]).then(([tokensData, investorsData]) => {
-      setTokens(tokensData.tokens || tokensData);
-      setInvestors(investorsData.investors || investorsData);
+      setTokens(tokensData.data || []);
+      setInvestors(investorsData.data || []);
     }).catch(console.error);
   }, []);
 
@@ -192,8 +192,8 @@ export default function OrderList() {
         try {
             const response = await fetch(`/api/orders?${params.toString()}`);
             const data = await response.json();
-            setOrders(data.orders);
-            setTotalOrders(data.total);
+            setOrders(data.data);
+            setTotalOrders(data.meta.total);
         } catch (error) {
             console.error("Failed to fetch orders:", error);
         } finally {

@@ -166,7 +166,7 @@ export default function AssetList() {
       fetch(`/api/tokens?${params.toString()}`).then(res => res.json()),
       fetch('/api/issuers').then(res => res.json()) // Fetch all issuers to map names
     ]).then(([tokensResponse, issuersResponse]) => {
-      const combinedTokens: TokenDetails[] = tokensResponse.tokens.map((t: TokenDetails) => ({
+      const combinedTokens: TokenDetails[] = tokensResponse.data.map((t: TokenDetails) => ({
         ...t,
         decimals: t.decimals ?? 0,
         isFreezable: t.isFreezable ?? false,
@@ -177,8 +177,8 @@ export default function AssetList() {
         maxSupply: t.maxSupply || 0,
       }));
       setTokens(combinedTokens);
-      setTotalTokens(tokensResponse.total);
-      setIssuers(issuersResponse.issuers || issuersResponse);
+      setTotalTokens(tokensResponse.meta.total);
+      setIssuers(issuersResponse.data || []);
     }).catch(console.error).finally(() => setLoading(false));
   }, [searchQuery, statusFilter, currentPage]);
 

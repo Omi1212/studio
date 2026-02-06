@@ -22,8 +22,8 @@ export default function AssignedAgents({ tokenId }: AssignedAgentsProps) {
         Promise.all([
             fetch('/api/users?role=agent&perPage=999').then(res => res.json()),
             fetch('/api/agents/assignments').then(res => res.json())
-        ]).then(([usersResponse, allAssignments]: [{ users: User[] }, Record<string, string[]>]) => {
-                const allAgents = usersResponse.users;
+        ]).then(([usersResponse, allAssignments]: [{ data: User[] }, Record<string, string[]>]) => {
+                const allAgents = usersResponse.data;
 
                 const agentIdsForToken: string[] = [];
                 for (const agentId in allAssignments) {

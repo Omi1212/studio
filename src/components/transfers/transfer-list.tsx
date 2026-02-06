@@ -106,8 +106,8 @@ export default function TransferList({ searchQuery, typeFilter }: { searchQuery:
       try {
         const response = await fetch(`/api/transfers?${params.toString()}`);
         const data = await response.json();
-        setTransfers(data.transfers);
-        setTotalTransfers(data.total);
+        setTransfers(data.data);
+        setTotalTransfers(data.meta.total);
       } catch (error) {
         console.error("Failed to fetch transfers:", error);
       } finally {

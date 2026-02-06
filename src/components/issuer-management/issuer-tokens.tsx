@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -88,7 +87,7 @@ export default function IssuerTokens({ issuerId }: { issuerId: string }) {
     fetch('/api/tokens?perPage=999')
       .then(res => res.json())
       .then((tokensResponse) => {
-        const allTokens = tokensResponse.tokens || [];
+        const allTokens = tokensResponse.data || [];
         const filteredTokens = allTokens.filter((token: TokenDetails) => token.issuerId === issuerId);
         setIssuerTokens(filteredTokens);
       })

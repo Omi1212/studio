@@ -168,9 +168,9 @@ export default function RequestList({ view, setView }: { view: ViewMode, setView
       fetch(`/api/tokens?${params.toString()}`).then(res => res.json()),
       fetch('/api/issuers').then(res => res.json())
     ]).then(([tokensResponse, issuersData]) => {
-      const combinedRequests = tokensResponse.tokens.map((token: TokenDetails) => ({
+      const combinedRequests = tokensResponse.data.map((token: TokenDetails) => ({
         ...token,
-        issuer: issuersData.issuers.find((issuer: Issuer) => issuer.id === token.issuerId)
+        issuer: (issuersData.data || []).find((issuer: Issuer) => issuer.id === token.issuerId)
       }));
 
         const statusOrder = { 'pending': 1, 'active': 2, 'rejected': 3 };
@@ -181,7 +181,7 @@ export default function RequestList({ view, setView }: { view: ViewMode, setView
         });
 
       setRequests(combinedRequests);
-      setTotalRequests(tokensResponse.total);
+      setTotalRequests(tokensResponse.meta.total);
     }).catch(console.error).finally(() => setLoading(false));
   }, [currentPage, searchQuery, statusFilter]);
 

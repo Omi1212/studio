@@ -212,8 +212,8 @@ export default function UserList({ view, setView }: { view: ViewMode, setView: (
         try {
             const response = await fetch(`/api/users?${params.toString()}`);
             const data = await response.json();
-            setUsers(data.users);
-            setTotalUsers(data.total);
+            setUsers(data.data);
+            setTotalUsers(data.meta.total);
         } catch (error) {
             console.error("Failed to fetch users:", error);
         } finally {

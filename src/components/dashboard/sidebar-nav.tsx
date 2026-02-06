@@ -115,7 +115,8 @@ export default function SidebarNav() {
     Promise.all([
       fetch('/api/tokens?perPage=999').then(res => res.json()),
       fetch('/api/companies').then(res => res.json())
-    ]).then(([tokensResponse, companiesData]) => {
+    ]).then(([tokensResponse, companiesResponse]) => {
+        const companiesData = companiesResponse.data || [];
         setCompanies(companiesData);
         
         if (role === 'investor' || role === 'issuer') {
@@ -129,7 +130,7 @@ export default function SidebarNav() {
             }
         }
         
-        let combinedTokens: TokenDetails[] = (tokensResponse.tokens || []).map((t: any) => ({
+        let combinedTokens: TokenDetails[] = (tokensResponse.data || []).map((t: any) => ({
           ...t,
           decimals: t.decimals ?? 0,
           isFreezable: t.isFreezable ?? false,

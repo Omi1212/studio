@@ -128,8 +128,8 @@ export default function IssuerList() {
       try {
         const response = await fetch(`/api/issuers?${params.toString()}`);
         const data = await response.json();
-        setIssuers(data.issuers);
-        setTotalIssuers(data.total);
+        setIssuers(data.data);
+        setTotalIssuers(data.meta.total);
       } catch (error) {
         console.error("Failed to fetch issuers:", error);
       } finally {
