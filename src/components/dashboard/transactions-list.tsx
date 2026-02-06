@@ -28,11 +28,14 @@ export default function TransactionsList({ className, limit }: { className?: str
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('/api/transactions')
+    const params = new URLSearchParams({
+        page: '1',
+        perPage: limit ? limit.toString() : '7',
+    });
+    fetch(`/api/transactions?${params.toString()}`)
       .then(res => res.json())
-      .then((data: Transaction[]) => {
-        const limitedData = limit ? data.slice(0, limit) : data;
-        setTransactions(limitedData);
+      .then(data => {
+        setTransactions(data.transactions);
       })
       .finally(() => setLoading(false));
   }, [limit]);
