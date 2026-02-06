@@ -144,6 +144,7 @@ function RequestTableRow({ request }: { request: CombinedRequest }) {
 
 export default function RequestList({ view, setView }: { view: ViewMode, setView: (mode: ViewMode) => void }) {
   const [requests, setRequests] = useState<CombinedRequest[]>([]);
+  const [totalRequests, setTotalRequests] = useState(0);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -151,16 +152,26 @@ export default function RequestList({ view, setView }: { view: ViewMode, setView
 
   useEffect(() => {
     setLoading(true);
+    const params = new URLSearchParams({
+        page: currentPage.toString(),
+        limit: ITEMS_PER_PAGE.toString(),
+        excludeStatus: 'draft',
+    });
+    if (statusFilter !== 'all') {
+        params.append('status', statusFilter);
+    }
+    if (searchQuery) {
+        params.append('query', searchQuery);
+    }
+
     Promise.all([
-      fetch('/api/tokens').then(res => res.json()),
+      fetch(`/api/tokens?${params.toString()}`).then(res => res.json()),
       fetch('/api/issuers').then(res => res.json())
-    ]).then(([tokensData, issuersData]) => {
-      const combinedRequests = tokensData
-        .filter((token: TokenDetails) => token.status !== 'draft')
-        .map((token: TokenDetails) => ({
-          ...token,
-          issuer: issuersData.find((issuer: Issuer) => issuer.id === token.issuerId)
-        }));
+    ]).then(([tokensResponse, issuersData]) => {
+      const combinedRequests = tokensResponse.tokens.map((token: TokenDetails) => ({
+        ...token,
+        issuer: issuersData.issuers.find((issuer: Issuer) => issuer.id === token.issuerId)
+      }));
 
         const statusOrder = { 'pending': 1, 'active': 2, 'rejected': 3 };
         combinedRequests.sort((a, b) => {
@@ -170,39 +181,11 @@ export default function RequestList({ view, setView }: { view: ViewMode, setView
         });
 
       setRequests(combinedRequests);
+      setTotalRequests(tokensResponse.total);
     }).catch(console.error).finally(() => setLoading(false));
-  }, []);
+  }, [currentPage, searchQuery, statusFilter]);
 
-  const filteredRequests = useMemo(() => {
-    let filtered = [...requests];
-
-    if (statusFilter !== 'all') {
-      filtered = filtered.filter(req => req.status === statusFilter);
-    }
-    
-    if (searchQuery) {
-      const lowercasedQuery = searchQuery.toLowerCase();
-      filtered = filtered.filter(req => 
-        req.tokenName.toLowerCase().includes(lowercasedQuery) ||
-        req.tokenTicker.toLowerCase().includes(lowercasedQuery) ||
-        req.issuer?.name.toLowerCase().includes(lowercasedQuery) ||
-        req.issuer?.email.toLowerCase().includes(lowercasedQuery)
-      );
-    }
-
-    return filtered;
-  }, [requests, searchQuery, statusFilter]);
-
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchQuery, statusFilter]);
-
-  const totalPages = Math.ceil(filteredRequests.length / ITEMS_PER_PAGE);
-
-  const paginatedRequests = useMemo(() => {
-    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-    return filteredRequests.slice(startIndex, startIndex + ITEMS_PER_PAGE);
-  }, [filteredRequests, currentPage]);
+  const totalPages = Math.ceil(totalRequests / ITEMS_PER_PAGE);
 
   const handlePageChange = (page: number) => {
     if (page >= 1 && page <= totalPages) {
@@ -299,7 +282,7 @@ export default function RequestList({ view, setView }: { view: ViewMode, setView
         </div>
       </div>
 
-       {paginatedRequests.length === 0 ? (
+       {requests.length === 0 ? (
         <div className="border-dashed border-2 border-muted-foreground/50 rounded-lg h-96 flex flex-col items-center justify-center text-center p-4">
             <FilePenLine className="h-16 w-16 text-muted-foreground mb-4" />
             <h2 className="text-xl font-semibold mb-2">No Requests Found</h2>
@@ -310,7 +293,7 @@ export default function RequestList({ view, setView }: { view: ViewMode, setView
       ) : view === 'card' ? (
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {paginatedRequests.map(request => (
+            {requests.map(request => (
               <RequestCard key={request.id} request={request} />
             ))}
           </div>
@@ -329,7 +312,7 @@ export default function RequestList({ view, setView }: { view: ViewMode, setView
               </TableRow>
             </TableHeader>
             <TableBody>
-              {paginatedRequests.map(request => (
+              {requests.map(request => (
                   <RequestTableRow key={request.id} request={request} />
               ))}
             </TableBody>

@@ -104,6 +104,7 @@ function IssuerTableRow({ issuer, onToggleStatus, onCopy }: { issuer: Issuer, on
 
 export default function IssuerList() {
   const [issuers, setIssuers] = useState<Issuer[]>([]);
+  const [totalIssuers, setTotalIssuers] = useState(0);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
@@ -111,12 +112,24 @@ export default function IssuerList() {
   const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
+    setLoading(true);
+    const params = new URLSearchParams({
+      page: currentPage.toString(),
+      limit: ITEMS_PER_PAGE.toString(),
+    });
+    if (statusFilter !== 'all') {
+      params.append('status', statusFilter);
+    }
+    if (searchQuery) {
+      params.append('query', searchQuery);
+    }
+
     const fetchIssuers = async () => {
-      setLoading(true);
       try {
-        const response = await fetch('/api/issuers');
+        const response = await fetch(`/api/issuers?${params.toString()}`);
         const data = await response.json();
-        setIssuers(data);
+        setIssuers(data.issuers);
+        setTotalIssuers(data.total);
       } catch (error) {
         console.error("Failed to fetch issuers:", error);
       } finally {
@@ -124,36 +137,9 @@ export default function IssuerList() {
       }
     };
     fetchIssuers();
-  }, []);
+  }, [currentPage, searchQuery, statusFilter]);
 
-  const filteredIssuers = useMemo(() => {
-    let filtered = [...issuers];
-
-    if (statusFilter !== 'all') {
-      filtered = filtered.filter(issuer => issuer.status === statusFilter);
-    }
-
-    if (searchQuery) {
-      const lowercasedQuery = searchQuery.toLowerCase();
-      filtered = filtered.filter(issuer => 
-        issuer.name.toLowerCase().includes(lowercasedQuery) ||
-        issuer.email.toLowerCase().includes(lowercasedQuery) ||
-        issuer.walletAddress.toLowerCase().includes(lowercasedQuery)
-      );
-    }
-
-    return filtered;
-  }, [issuers, searchQuery, statusFilter]);
-  
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchQuery, statusFilter]);
-
-  const totalPages = Math.ceil(filteredIssuers.length / ITEMS_PER_PAGE);
-  const paginatedIssuers = useMemo(() => {
-    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-    return filteredIssuers.slice(startIndex, startIndex + ITEMS_PER_PAGE);
-  }, [filteredIssuers, currentPage]);
+  const totalPages = Math.ceil(totalIssuers / ITEMS_PER_PAGE);
 
   const handlePageChange = (page: number) => {
     if (page >= 1 && page <= totalPages) {
@@ -267,7 +253,7 @@ export default function IssuerList() {
       </div>
 
 
-       {paginatedIssuers.length === 0 ? (
+       {issuers.length === 0 ? (
         <div className="border-dashed border-2 border-muted-foreground/50 rounded-lg h-96 flex flex-col items-center justify-center text-center p-4">
             <Plus className="h-16 w-16 text-muted-foreground mb-4" />
             <h2 className="text-xl font-semibold mb-2">No issuers found</h2>
@@ -292,7 +278,7 @@ export default function IssuerList() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {paginatedIssuers.map(issuer => (
+              {issuers.map(issuer => (
                 <AlertDialog key={issuer.id}>
                   <IssuerTableRow issuer={issuer} onToggleStatus={handleToggleStatus} onCopy={handleCopy} />
                 </AlertDialog>

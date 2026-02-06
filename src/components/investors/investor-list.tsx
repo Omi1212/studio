@@ -159,6 +159,7 @@ function InvestorTableRow({ investor, selectedToken, onToggleFreeze }: { investo
 
 export default function InvestorList({ view, setView }: { view: ViewMode, setView: (mode: ViewMode) => void }) {
   const [investors, setInvestors] = useState<Investor[]>([]);
+  const [totalInvestors, setTotalInvestors] = useState(0);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
@@ -169,14 +170,9 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
   const [dialogInvestor, setDialogInvestor] = useState<Investor | null>(null);
 
   useEffect(() => {
-    setLoading(true);
-    Promise.all([
-      fetch('/api/investors').then(res => res.json()),
-      fetch('/api/tokens').then(res => res.json())
-    ]).then(([investorsData, tokensData]) => {
-      setInvestors(investorsData);
-      setAllTokens(tokensData);
-    }).catch(console.error).finally(() => setLoading(false));
+    fetch('/api/tokens').then(res => res.json()).then(tokensData => {
+        setAllTokens(tokensData.tokens);
+    }).catch(console.error);
   }, []);
 
   useEffect(() => {
@@ -200,43 +196,45 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
     };
   }, [allTokens]);
 
-  const filteredInvestors = useMemo(() => {
-    if (!selectedToken) return [];
-
-    let filtered = investors.filter(investor => 
-        investor.kycStatus === 'verified' &&
-        investor.transactions?.some(tx => tx.token.id === selectedToken.id)
-    );
-
-    if (statusFilter !== 'all') {
-      filtered = filtered.filter(inv => {
-        if (statusFilter === 'frozen') return inv.isFrozen;
-        if (statusFilter === 'whitelisted') return !inv.isFrozen;
-        return true;
-      });
-    }
-
-    if (searchQuery) {
-      const lowercasedQuery = searchQuery.toLowerCase();
-      filtered = filtered.filter(inv => 
-        inv.name.toLowerCase().includes(lowercasedQuery) ||
-        inv.email.toLowerCase().includes(lowercasedQuery) ||
-        inv.walletAddress.toLowerCase().includes(lowercasedQuery)
-      );
-    }
-
-    return filtered;
-  }, [investors, searchQuery, statusFilter, selectedToken]);
-  
   useEffect(() => {
-    setCurrentPage(1);
-  }, [searchQuery, statusFilter, selectedToken]);
+    if (!selectedToken) {
+        setInvestors([]);
+        setTotalInvestors(0);
+        setLoading(false);
+        return;
+    };
+    
+    setLoading(true);
+    const params = new URLSearchParams({
+        page: currentPage.toString(),
+        limit: ITEMS_PER_PAGE.toString(),
+        tokenId: selectedToken.id,
+        onlyVerified: 'true'
+    });
+    if (statusFilter !== 'all') {
+        params.append('status', statusFilter);
+    }
+    if (searchQuery) {
+        params.append('query', searchQuery);
+    }
 
-  const totalPages = Math.ceil(filteredInvestors.length / ITEMS_PER_PAGE);
-  const paginatedInvestors = useMemo(() => {
-    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-    return filteredInvestors.slice(startIndex, startIndex + ITEMS_PER_PAGE);
-  }, [filteredInvestors, currentPage]);
+    const fetchInvestors = async () => {
+        try {
+            const response = await fetch(`/api/investors?${params.toString()}`);
+            const data = await response.json();
+            setInvestors(data.investors);
+            setTotalInvestors(data.total);
+        } catch (error) {
+            console.error("Failed to fetch investors:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+    
+    fetchInvestors();
+  }, [currentPage, searchQuery, statusFilter, selectedToken]);
+  
+  const totalPages = Math.ceil(totalInvestors / ITEMS_PER_PAGE);
 
   const handlePageChange = (page: number) => {
     if (page >= 1 && page <= totalPages) {
@@ -383,7 +381,7 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
         </div>
 
 
-        {paginatedInvestors.length === 0 ? (
+        {investors.length === 0 ? (
           <div className="border-dashed border-2 border-muted-foreground/50 rounded-lg h-96 flex flex-col items-center justify-center text-center p-4">
               <UserPlus className="h-16 w-16 text-muted-foreground mb-4" />
               <h2 className="text-xl font-semibold mb-2">No investors found</h2>
@@ -394,7 +392,7 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
         ) : view === 'card' ? (
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {paginatedInvestors.map(investor => (
+              {investors.map(investor => (
                     <InvestorCard 
                         key={investor.id} 
                         investor={investor} 
@@ -418,7 +416,7 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {paginatedInvestors.map(investor => (
+                {investors.map(investor => (
                     <InvestorTableRow 
                         key={investor.id} 
                         investor={investor} 

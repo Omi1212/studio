@@ -120,6 +120,7 @@ function OrderTableRow({ order, tokens, investors, onApprove, onReject, userRole
 
 export default function OrderList() {
   const [orders, setOrders] = useState<Order[]>([]);
+  const [totalOrders, setTotalOrders] = useState(0);
   const [tokens, setTokens] = useState<TokenDetails[]>([]);
   const [investors, setInvestors] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
@@ -133,17 +134,14 @@ export default function OrderList() {
   useEffect(() => {
     const role = localStorage.getItem('userRole');
     setUserRole(role);
-    setLoading(true);
-
+    
     Promise.all([
-      fetch('/api/orders').then(res => res.json()),
       fetch('/api/tokens').then(res => res.json()),
       fetch('/api/investors').then(res => res.json())
-    ]).then(([ordersData, tokensData, investorsData]) => {
-      setOrders(ordersData);
-      setTokens(tokensData);
-      setInvestors(investorsData);
-    }).catch(console.error).finally(() => setLoading(false));
+    ]).then(([tokensData, investorsData]) => {
+      setTokens(tokensData.tokens || tokensData);
+      setInvestors(investorsData.investors || investorsData);
+    }).catch(console.error);
   }, []);
 
   useEffect(() => {
@@ -165,45 +163,47 @@ export default function OrderList() {
     };
   }, [tokens]);
 
-  const filteredOrders = useMemo(() => {
-    let filtered = [...orders];
+  useEffect(() => {
+    setLoading(true);
+    const params = new URLSearchParams({
+      page: currentPage.toString(),
+      limit: ITEMS_PER_PAGE.toString(),
+    });
 
-    if ((userRole === 'issuer' || userRole === 'agent') && selectedToken) {
-        filtered = orders.filter(order => order.tokenId === selectedToken.id);
-    }
-    else if (userRole === 'investor') {
-        filtered = orders.filter(order => order.investorId === 'inv-001'); // Hardcoded for demo
-    } else {
-        // Issuers and agents see no orders if no token is selected.
-        filtered = (userRole === 'issuer' || userRole === 'agent') ? [] : (userRole === 'investor' ? filtered : []);
+    if (userRole === 'investor') {
+        params.append('investorId', 'inv-001'); // Hardcoded for demo
+    } else if ((userRole === 'issuer' || userRole === 'agent') && selectedToken) {
+        params.append('tokenId', selectedToken.id);
+    } else if ((userRole === 'issuer' || userRole === 'agent') && !selectedToken) {
+        setOrders([]);
+        setTotalOrders(0);
+        setLoading(false);
+        return;
     }
 
     if (statusFilter !== 'all') {
-        filtered = filtered.filter(req => req.status === statusFilter);
+      params.append('status', statusFilter);
     }
-    
     if (searchQuery) {
-      const lowercasedQuery = searchQuery.toLowerCase();
-      filtered = filtered.filter(order => 
-        order.investorName.toLowerCase().includes(lowercasedQuery) ||
-        order.tokenTicker.toLowerCase().includes(lowercasedQuery) ||
-        order.id.toLowerCase().includes(lowercasedQuery)
-      );
+      params.append('query', searchQuery);
     }
 
-    return filtered;
-  }, [orders, searchQuery, statusFilter, selectedToken, userRole]);
+    const fetchOrders = async () => {
+        try {
+            const response = await fetch(`/api/orders?${params.toString()}`);
+            const data = await response.json();
+            setOrders(data.orders);
+            setTotalOrders(data.total);
+        } catch (error) {
+            console.error("Failed to fetch orders:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+    fetchOrders();
+  }, [currentPage, searchQuery, statusFilter, selectedToken, userRole]);
   
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchQuery, statusFilter, selectedToken]);
-
-  const totalPages = Math.ceil(filteredOrders.length / ITEMS_PER_PAGE);
-
-  const paginatedOrders = useMemo(() => {
-    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-    return filteredOrders.slice(startIndex, startIndex + ITEMS_PER_PAGE);
-  }, [filteredOrders, currentPage]);
+  const totalPages = Math.ceil(totalOrders / ITEMS_PER_PAGE);
 
   const handlePageChange = (page: number) => {
     if (page >= 1 && page <= totalPages) {
@@ -348,7 +348,7 @@ export default function OrderList() {
         </div>
       </div>
 
-       {paginatedOrders.length === 0 ? (
+       {orders.length === 0 ? (
          <div className="border-dashed border-2 border-muted-foreground/50 rounded-lg h-96 flex flex-col items-center justify-center text-center p-4">
             <ShoppingBag className="h-16 w-16 text-muted-foreground mb-4" />
             <h2 className="text-xl font-semibold mb-2">{noOrdersMessage().title}</h2>
@@ -371,7 +371,7 @@ export default function OrderList() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {paginatedOrders.map(order => (
+              {orders.map(order => (
                   <OrderTableRow key={order.id} order={order} tokens={tokens} investors={investors} onApprove={handleApprove} onReject={handleReject} userRole={userRole} />
               ))}
             </TableBody>

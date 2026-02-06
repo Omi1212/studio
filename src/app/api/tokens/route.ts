@@ -2,8 +2,40 @@ import { NextResponse } from 'next/server';
 import { exampleTokens } from './data';
 import type { TokenDetails } from '@/lib/types';
 
-export async function GET() {
-  return NextResponse.json(exampleTokens);
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const page = parseInt(searchParams.get('page') || '1', 10);
+  const limit = parseInt(searchParams.get('limit') || '10', 10);
+  const status = searchParams.get('status');
+  const query = searchParams.get('query');
+  const excludeStatus = searchParams.get('excludeStatus');
+
+  let filteredTokens = exampleTokens;
+
+  if (excludeStatus) {
+    filteredTokens = filteredTokens.filter(token => token.status !== excludeStatus);
+  }
+
+  if (status && status !== 'all') {
+    filteredTokens = filteredTokens.filter(token => token.status === status);
+  }
+
+  if (query) {
+    const lowercasedQuery = query.toLowerCase();
+    filteredTokens = filteredTokens.filter(token =>
+        (token.tokenName || '').toLowerCase().includes(lowercasedQuery) ||
+        (token.tokenTicker || '').toLowerCase().includes(lowercasedQuery)
+    );
+  }
+  
+  const total = filteredTokens.length;
+  const startIndex = (page - 1) * limit;
+  const paginatedTokens = filteredTokens.slice(startIndex, startIndex + limit);
+
+  return NextResponse.json({
+    tokens: paginatedTokens,
+    total,
+  });
 }
 
 export async function POST(request: Request) {

@@ -33,6 +33,7 @@ function getStatusBadge(status: User['status']) {
 
 export default function AgentList() {
     const [agents, setAgents] = useState<Agent[]>([]);
+    const [totalAgents, setTotalAgents] = useState(0);
     const [activeTokens, setActiveTokens] = useState<TokenDetails[]>([]);
     const [assignments, setAssignments] = useState<Assignments>({});
     const [loading, setLoading] = useState(true);
@@ -42,19 +43,41 @@ export default function AgentList() {
     const { toast } = useToast();
 
     useEffect(() => {
-        setLoading(true);
         Promise.all([
-            fetch('/api/users').then(res => res.json()),
             fetch('/api/tokens').then(res => res.json()),
             fetch('/api/agents/assignments').then(res => res.json()),
-        ]).then(([usersData, tokensData, assignmentsData]) => {
-            setAgents(usersData.filter((user: User) => user.role === 'agent'));
-            setActiveTokens(tokensData.filter((token: TokenDetails) => token.status === 'active'));
+        ]).then(([tokensData, assignmentsData]) => {
+            setActiveTokens(tokensData.tokens.filter((token: TokenDetails) => token.status === 'active'));
             setAssignments(assignmentsData);
-        }).catch(console.error)
-        .finally(() => setLoading(false));
-
+        }).catch(console.error);
     }, []);
+
+    useEffect(() => {
+        setLoading(true);
+        const params = new URLSearchParams({
+            page: currentPage.toString(),
+            limit: ITEMS_PER_PAGE.toString(),
+            role: 'agent',
+        });
+        if (searchQuery) {
+            params.append('query', searchQuery);
+        }
+
+        const fetchAgents = async () => {
+            try {
+                const response = await fetch(`/api/users?${params.toString()}`);
+                const data = await response.json();
+                setAgents(data.users);
+                setTotalAgents(data.total);
+            } catch (error) {
+                console.error("Failed to fetch agents:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchAgents();
+    }, [currentPage, searchQuery]);
     
     const handleUpdateAssignments = async (agentId: string, tokenIds: string[]) => {
         try {
@@ -78,24 +101,7 @@ export default function AgentList() {
         }
     };
 
-    const filteredAgents = useMemo(() => {
-        if (!searchQuery) return agents;
-        const lowercasedQuery = searchQuery.toLowerCase();
-        return agents.filter(agent => 
-            agent.name.toLowerCase().includes(lowercasedQuery) ||
-            agent.email.toLowerCase().includes(lowercasedQuery)
-        );
-    }, [agents, searchQuery]);
-
-    useEffect(() => {
-        setCurrentPage(1);
-    }, [searchQuery]);
-
-    const totalPages = Math.ceil(filteredAgents.length / ITEMS_PER_PAGE);
-    const paginatedAgents = useMemo(() => {
-        const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-        return filteredAgents.slice(startIndex, startIndex + ITEMS_PER_PAGE);
-    }, [filteredAgents, currentPage]);
+    const totalPages = Math.ceil(totalAgents / ITEMS_PER_PAGE);
 
     const handlePageChange = (page: number) => {
         if (page >= 1 && page <= totalPages) {
@@ -161,7 +167,7 @@ export default function AgentList() {
                 </div>
             </div>
         
-            {paginatedAgents.length === 0 ? (
+            {agents.length === 0 ? (
                 <div className="border-dashed border-2 border-muted-foreground/50 rounded-lg h-96 flex flex-col items-center justify-center text-center p-4">
                     <ClipboardList className="h-16 w-16 text-muted-foreground mb-4" />
                     <h2 className="text-xl font-semibold mb-2">No agents found</h2>
@@ -181,7 +187,7 @@ export default function AgentList() {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {paginatedAgents.map(agent => {
+                            {agents.map(agent => {
                                 const assignedTokenIds = assignments[agent.id] || [];
                                 return (
                                     <TableRow key={agent.id} onClick={() => router.push(`/agents/${agent.id}`)} className="cursor-pointer">

@@ -186,6 +186,7 @@ function UserTableRow({ user, onToggleStatus, onCopy }: { user: User, onToggleSt
 
 export default function UserList({ view, setView }: { view: ViewMode, setView: (mode: ViewMode) => void }) {
   const [users, setUsers] = useState<User[]>([]);
+  const [totalUsers, setTotalUsers] = useState(0);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
@@ -195,44 +196,38 @@ export default function UserList({ view, setView }: { view: ViewMode, setView: (
 
   useEffect(() => {
     setLoading(true);
-    fetch('/api/users')
-      .then(res => res.json())
-      .then(data => setUsers(data))
-      .catch(console.error)
-      .finally(() => setLoading(false));
-  }, []);
-
-  const filteredUsers = useMemo(() => {
-    let filtered = [...users];
-
+    const params = new URLSearchParams({
+        page: currentPage.toString(),
+        limit: ITEMS_PER_PAGE.toString(),
+    });
     if (roleFilter !== 'all') {
-        filtered = filtered.filter(user => user.role === roleFilter);
+        params.append('role', roleFilter);
     }
     if (statusFilter !== 'all') {
-      filtered = filtered.filter(user => user.status === statusFilter);
+        params.append('status', statusFilter);
     }
     if (searchQuery) {
-      const lowercasedQuery = searchQuery.toLowerCase();
-      filtered = filtered.filter(user => 
-        user.name.toLowerCase().includes(lowercasedQuery) ||
-        user.email.toLowerCase().includes(lowercasedQuery) ||
-        user.walletAddress.toLowerCase().includes(lowercasedQuery)
-      );
+        params.append('query', searchQuery);
     }
 
-    return filtered;
-  }, [users, searchQuery, roleFilter, statusFilter]);
+    const fetchUsers = async () => {
+        try {
+            const response = await fetch(`/api/users?${params.toString()}`);
+            const data = await response.json();
+            setUsers(data.users);
+            setTotalUsers(data.total);
+        } catch (error) {
+            console.error("Failed to fetch users:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+    fetchUsers();
+
+  }, [currentPage, searchQuery, roleFilter, statusFilter]);
+
+  const totalPages = Math.ceil(totalUsers / ITEMS_PER_PAGE);
   
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchQuery, roleFilter, statusFilter]);
-
-  const totalPages = Math.ceil(filteredUsers.length / ITEMS_PER_PAGE);
-  const paginatedUsers = useMemo(() => {
-    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-    return filteredUsers.slice(startIndex, startIndex + ITEMS_PER_PAGE);
-  }, [filteredUsers, currentPage]);
-
   const handlePageChange = (page: number) => {
     if (page >= 1 && page <= totalPages) {
       setCurrentPage(page);
@@ -380,7 +375,7 @@ export default function UserList({ view, setView }: { view: ViewMode, setView: (
       </div>
 
 
-       {paginatedUsers.length === 0 ? (
+       {users.length === 0 ? (
         <div className="border-dashed border-2 border-muted-foreground/50 rounded-lg h-96 flex flex-col items-center justify-center text-center p-4">
             <Plus className="h-16 w-16 text-muted-foreground mb-4" />
             <h2 className="text-xl font-semibold mb-2">No users found</h2>
@@ -394,7 +389,7 @@ export default function UserList({ view, setView }: { view: ViewMode, setView: (
       ) : view === 'card' ? (
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {paginatedUsers.map(user => (
+            {users.map(user => (
               <AlertDialog key={user.id}>
                   <UserCard user={user} onToggleStatus={handleToggleStatus} onCopy={handleCopy} />
               </AlertDialog>
@@ -416,7 +411,7 @@ export default function UserList({ view, setView }: { view: ViewMode, setView: (
               </TableRow>
             </TableHeader>
             <TableBody>
-              {paginatedUsers.map(user => (
+              {users.map(user => (
                 <AlertDialog key={user.id}>
                   <UserTableRow user={user} onToggleStatus={handleToggleStatus} onCopy={handleCopy} />
                 </AlertDialog>

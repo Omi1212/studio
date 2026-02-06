@@ -138,7 +138,7 @@ function TokenTable({ tokens, issuers }: { tokens: TokenDetails[], issuers: Issu
 }
 
 export default function AssetList() {
-  const [allTokens, setAllTokens] = useState<TokenDetails[]>([]);
+  const [tokens, setTokens] = useState<TokenDetails[]>([]);
   const [issuers, setIssuers] = useState<Issuer[]>([]);
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState<ViewMode>('card');
@@ -147,11 +147,19 @@ export default function AssetList() {
 
   useEffect(() => {
     setLoading(true);
+    const params = new URLSearchParams();
+    if (statusFilter !== 'all') {
+      params.append('status', statusFilter);
+    }
+    if (searchQuery) {
+      params.append('query', searchQuery);
+    }
+
     Promise.all([
-      fetch('/api/tokens').then(res => res.json()),
-      fetch('/api/issuers').then(res => res.json())
-    ]).then(([tokensData, issuersData]) => {
-      const combinedTokens: TokenDetails[] = tokensData.map((t: TokenDetails) => ({
+      fetch(`/api/tokens?${params.toString()}`).then(res => res.json()),
+      fetch('/api/issuers').then(res => res.json()) // Fetch all issuers to map names
+    ]).then(([tokensResponse, issuersData]) => {
+      const combinedTokens: TokenDetails[] = tokensResponse.tokens.map((t: TokenDetails) => ({
         ...t,
         decimals: t.decimals ?? 0,
         isFreezable: t.isFreezable ?? false,
@@ -161,25 +169,10 @@ export default function AssetList() {
         network: t.network || 'unknown',
         maxSupply: t.maxSupply || 0,
       }));
-      setAllTokens(combinedTokens);
+      setTokens(combinedTokens);
       setIssuers(issuersData);
     }).catch(console.error).finally(() => setLoading(false));
-  }, []);
-
-  const filteredTokens = useMemo(() => {
-    let filtered = [...allTokens];
-    if (statusFilter !== 'all') {
-      filtered = filtered.filter(token => token.status === statusFilter);
-    }
-    if (searchQuery) {
-        const lowercasedQuery = searchQuery.toLowerCase();
-        filtered = filtered.filter(token =>
-            token.tokenName.toLowerCase().includes(lowercasedQuery) ||
-            token.tokenTicker.toLowerCase().includes(lowercasedQuery)
-        );
-    }
-    return filtered;
-  }, [allTokens, searchQuery, statusFilter]);
+  }, [searchQuery, statusFilter]);
 
   if (loading) {
     return (
@@ -200,7 +193,7 @@ export default function AssetList() {
     );
   }
   
-  if (allTokens.length === 0) {
+  if (tokens.length === 0 && !searchQuery && statusFilter === 'all') {
       return (
         <div className="border-dashed border-2 border-muted-foreground/50 rounded-lg h-96 flex flex-col items-center justify-center text-center p-4">
             <Rocket className="h-16 w-16 text-muted-foreground mb-4" />
@@ -262,7 +255,7 @@ export default function AssetList() {
             </div>
         </div>
 
-        {filteredTokens.length === 0 ? (
+        {tokens.length === 0 ? (
             <div className="border-dashed border-2 border-muted-foreground/50 rounded-lg h-96 flex flex-col items-center justify-center text-center p-4">
                 <Rocket className="h-16 w-16 text-muted-foreground mb-4" />
                 <h2 className="text-xl font-semibold mb-2">No assets match your search</h2>
@@ -270,13 +263,13 @@ export default function AssetList() {
             </div>
         ) : view === 'card' ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredTokens.map(token => {
+                {tokens.map(token => {
                   const issuer = issuers.find(i => i.id === token.issuerId);
                   return <TokenCard key={token.id} token={token} issuer={issuer} />
                 })}
             </div>
         ) : (
-            <TokenTable tokens={filteredTokens} issuers={issuers} />
+            <TokenTable tokens={tokens} issuers={issuers} />
         )}
     </div>
   );

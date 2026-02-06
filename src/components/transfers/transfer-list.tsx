@@ -39,6 +39,7 @@ function getTypeBadge(type: Transfer['type']) {
 export default function TransferList({ searchQuery, typeFilter }: { searchQuery: string, typeFilter: string }) {
   const router = useRouter();
   const [transfers, setTransfers] = useState<Transfer[]>([]);
+  const [totalTransfers, setTotalTransfers] = useState(0);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedToken, setSelectedToken] = useState<TokenDetails | null>(null);
@@ -48,19 +49,6 @@ export default function TransferList({ searchQuery, typeFilter }: { searchQuery:
   useEffect(() => {
     const role = localStorage.getItem('userRole');
     setUserRole(role);
-    
-    const fetchTransfers = async () => {
-        setLoading(true);
-        try {
-            const response = await fetch('/api/transfers');
-            const data = await response.json();
-            setTransfers(data);
-        } catch (error) {
-            console.error("Failed to fetch transfers:", error);
-        }
-    };
-
-    fetchTransfers();
     
     const handleTokenChange = async () => {
         const storedTokenId = localStorage.getItem('selectedTokenId');
@@ -84,7 +72,6 @@ export default function TransferList({ searchQuery, typeFilter }: { searchQuery:
 
     handleTokenChange();
     window.addEventListener('tokenChanged', handleTokenChange);
-    setLoading(false);
 
     return () => {
         window.removeEventListener('tokenChanged', handleTokenChange);
@@ -92,41 +79,46 @@ export default function TransferList({ searchQuery, typeFilter }: { searchQuery:
 
   }, []);
 
-  const filteredTransfers = useMemo(() => {
-    let filtered = [...transfers];
-
-    if ((userRole === 'issuer' || userRole === 'agent') && selectedToken) {
-        filtered = filtered.filter(t => t.tokenTicker === selectedToken.tokenTicker);
-    } else if ((userRole === 'issuer' || userRole === 'agent') && !selectedToken) {
-        return []; // No token selected, show no transfers for these roles
-    }
-    // Investor role sees all their transfers, so no token filtering is applied here.
-
-    if (typeFilter !== 'all') {
-        filtered = filtered.filter(t => t.type === typeFilter);
-    }
-    
-    if (searchQuery) {
-      const lowercasedQuery = searchQuery.toLowerCase();
-      filtered = filtered.filter(t => 
-        t.from.toLowerCase().includes(lowercasedQuery) ||
-        t.to.toLowerCase().includes(lowercasedQuery)
-      );
-    }
-
-    return filtered;
-  }, [transfers, searchQuery, typeFilter, selectedToken, userRole]);
-
   useEffect(() => {
-    setCurrentPage(1);
-  }, [searchQuery, typeFilter, selectedToken]);
+    const fetchTransfers = async () => {
+      setLoading(true);
+      const params = new URLSearchParams({
+        page: currentPage.toString(),
+        limit: ITEMS_PER_PAGE.toString(),
+      });
 
-  const totalPages = Math.ceil(filteredTransfers.length / ITEMS_PER_PAGE);
+      if ((userRole === 'issuer' || userRole === 'agent') && selectedToken) {
+        params.append('tokenTicker', selectedToken.tokenTicker);
+      } else if ((userRole === 'issuer' || userRole === 'agent') && !selectedToken) {
+        setTransfers([]);
+        setTotalTransfers(0);
+        setLoading(false);
+        return;
+      }
+      
+      if (typeFilter !== 'all') {
+          params.append('type', typeFilter);
+      }
+      if (searchQuery) {
+          params.append('query', searchQuery);
+      }
 
-  const paginatedTransfers = useMemo(() => {
-    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-    return filteredTransfers.slice(startIndex, startIndex + ITEMS_PER_PAGE);
-  }, [filteredTransfers, currentPage]);
+      try {
+        const response = await fetch(`/api/transfers?${params.toString()}`);
+        const data = await response.json();
+        setTransfers(data.transfers);
+        setTotalTransfers(data.total);
+      } catch (error) {
+        console.error("Failed to fetch transfers:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchTransfers();
+  }, [currentPage, searchQuery, typeFilter, selectedToken, userRole]);
+
+
+  const totalPages = Math.ceil(totalTransfers / ITEMS_PER_PAGE);
 
   const handlePageChange = (page: number) => {
     if (page >= 1 && page <= totalPages) {
@@ -141,7 +133,7 @@ export default function TransferList({ searchQuery, typeFilter }: { searchQuery:
     );
   }
 
-  if (paginatedTransfers.length === 0) {
+  if (transfers.length === 0) {
       const noTransfersMessage = () => {
           if ((userRole === 'issuer' || userRole === 'agent') && !selectedToken) {
               return {
@@ -187,7 +179,7 @@ export default function TransferList({ searchQuery, typeFilter }: { searchQuery:
               </TableRow>
             </TableHeader>
             <TableBody>
-              {paginatedTransfers.map((transfer) => (
+              {transfers.map((transfer) => (
                 <TableRow 
                   key={transfer.txId} 
                   onClick={() => router.push(`/transfers/${transfer.txId}`)}
