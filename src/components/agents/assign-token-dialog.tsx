@@ -25,7 +25,6 @@ import {
 } from "@/components/ui/alert-dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import type { User, TokenDetails } from '@/lib/types';
-import { useToast } from '@/hooks/use-toast';
 import { DropdownMenuItem, DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator } from '../ui/dropdown-menu';
 import TokenIcon from '../ui/token-icon';
 import { MoreVertical, Trash2, Search, Check } from 'lucide-react';
@@ -58,8 +57,6 @@ export function AssignTokenDialog({ agent, allTokens, assignedTokenIds, onUpdate
         }
     }, [isOpen, assignedTokenIds]);
 
-    const { toast } = useToast();
-
     const handleTokenAdd = (tokenId: string) => {
         if (tokenId && !selectedTokenIds.includes(tokenId)) {
             setSelectedTokenIds(prev => [...prev, tokenId]);
@@ -73,10 +70,6 @@ export function AssignTokenDialog({ agent, allTokens, assignedTokenIds, onUpdate
     const handleSave = () => {
         onUpdate(agent.id, selectedTokenIds);
         setIsOpen(false);
-        toast({
-            title: "Assignments Updated",
-            description: `Token assignments for ${agent.name} have been saved.`,
-        });
     };
     
     const assigned = useMemo(() => {

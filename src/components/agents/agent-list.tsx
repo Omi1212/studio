@@ -13,6 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '../ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
 import Link from 'next/link';
+import { useToast } from '@/hooks/use-toast';
 
 type Agent = User;
 type Assignments = Record<string, string[]>; // agentId: tokenId[]
@@ -38,32 +39,43 @@ export default function AgentList() {
     const [searchQuery, setSearchQuery] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const router = useRouter();
+    const { toast } = useToast();
 
     useEffect(() => {
         setLoading(true);
         Promise.all([
             fetch('/api/users').then(res => res.json()),
             fetch('/api/tokens').then(res => res.json()),
-            // In a real app, assignments would be fetched from a dedicated endpoint.
-            // For this demo, we'll keep it in local state.
-        ]).then(([usersData, tokensData]) => {
+            fetch('/api/agents/assignments').then(res => res.json()),
+        ]).then(([usersData, tokensData, assignmentsData]) => {
             setAgents(usersData.filter((user: User) => user.role === 'agent'));
             setActiveTokens(tokensData.filter((token: TokenDetails) => token.status === 'active'));
-            
-            // NOTE: Assignments are not persisted on the server in this demo.
-            // They are only stored in local component state.
-            // const storedAssignments = JSON.parse(localStorage.getItem('agentTokenAssignments') || '{}');
-            // setAssignments(storedAssignments);
+            setAssignments(assignmentsData);
         }).catch(console.error)
         .finally(() => setLoading(false));
 
     }, []);
     
-    const handleUpdateAssignments = (agentId: string, tokenIds: string[]) => {
-        const newAssignments = { ...assignments, [agentId]: tokenIds };
-        setAssignments(newAssignments);
-        // NOTE: This change is not persisted. This is for demonstration purposes only.
-        // localStorage.setItem('agentTokenAssignments', JSON.stringify(newAssignments));
+    const handleUpdateAssignments = async (agentId: string, tokenIds: string[]) => {
+        try {
+            const response = await fetch(`/api/agents/${agentId}/assignments`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ tokenIds }),
+            });
+
+            if (!response.ok) throw new Error('Failed to update assignments');
+            const updatedTokenIds = await response.json();
+            setAssignments(prev => ({ ...prev, [agentId]: updatedTokenIds }));
+            
+            toast({
+                title: "Assignments Updated",
+                description: `Token assignments have been updated for the agent.`,
+            });
+        } catch (error) {
+            console.error(error);
+            toast({ variant: 'destructive', title: 'Error', description: 'Could not update assignments.' });
+        }
     };
 
     const filteredAgents = useMemo(() => {

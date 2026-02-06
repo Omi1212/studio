@@ -39,7 +39,6 @@ const networkMap: { [key: string]: string } = {
 
 export default function AgentTokens({ agent }: AgentTokensProps) {
     const { toast } = useToast();
-    const [assignments, setAssignments] = useState<Record<string, string[]>>({});
     const [allTokens, setAllTokens] = useState<TokenDetails[]>([]);
     const [assignedTokens, setAssignedTokens] = useState<TokenDetails[]>([]);
     const [loading, setLoading] = useState(true);
@@ -48,45 +47,54 @@ export default function AgentTokens({ agent }: AgentTokensProps) {
     const [isAddingToken, setIsAddingToken] = useState(false);
 
     useEffect(() => {
-      setLoading(true);
-      fetch('/api/tokens')
-        .then(res => res.json())
-        .then((data: TokenDetails[]) => {
-          const activeTokens = data.filter(token => token.status === 'active');
-          setAllTokens(activeTokens);
-
-          // NOTE: Assignments are not persisted on the server in this demo.
-          // They are only stored in local component state. We're initializing it empty.
-          const agentTokenIds = assignments[agent.id] || [];
-          const agentTokens = activeTokens.filter(token => agentTokenIds.includes(token.id));
-          setAssignedTokens(agentTokens);
-          setSelectedTokenIds(agentTokenIds);
-        })
-        .catch(console.error)
+        setLoading(true);
+        Promise.all([
+            fetch('/api/tokens').then(res => res.json()),
+            fetch(`/api/agents/${agent.id}/assignments`).then(res => res.json())
+        ]).then(([tokensData, agentTokenIds]) => {
+            const activeTokens = tokensData.filter((token: TokenDetails) => token.status === 'active');
+            setAllTokens(activeTokens);
+            
+            const agentTokens = activeTokens.filter((token: TokenDetails) => agentTokenIds.includes(token.id));
+            setAssignedTokens(agentTokens);
+        }).catch(console.error)
         .finally(() => setLoading(false));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [agent.id]);
     
     useEffect(() => {
         if (isDialogOpen) {
-            setSelectedTokenIds(assignments[agent.id] || []);
+            setSelectedTokenIds(assignedTokens.map(t => t.id));
         } else {
             setIsAddingToken(false);
         }
-    }, [isDialogOpen, assignments, agent.id]);
+    }, [isDialogOpen, assignedTokens]);
 
-    const handleUpdateAssignments = () => {
-        const newAssignments = { ...assignments, [agent.id]: selectedTokenIds };
-        setAssignments(newAssignments);
-        // NOTE: This change is not persisted.
-        const updatedAssignedTokens = allTokens.filter(token => selectedTokenIds.includes(token.id));
-        setAssignedTokens(updatedAssignedTokens);
+    const handleUpdateAssignments = async () => {
+        try {
+            const response = await fetch(`/api/agents/${agent.id}/assignments`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ tokenIds: selectedTokenIds }),
+            });
+            if (!response.ok) throw new Error('Failed to update assignments');
 
-        toast({
-            title: "Assignments Updated (Not Persisted)",
-            description: `Token assignments for ${agent.name} have been saved for this session.`,
-        });
-        setIsDialogOpen(false);
+            const updatedTokenIds = await response.json();
+            const updatedAssignedTokens = allTokens.filter(token => updatedTokenIds.includes(token.id));
+            setAssignedTokens(updatedAssignedTokens);
+            
+            toast({
+                title: "Assignments Updated",
+                description: `Token assignments for ${agent.name} have been updated.`,
+            });
+            setIsDialogOpen(false);
+        } catch (error) {
+            console.error(error);
+            toast({
+                variant: 'destructive',
+                title: 'Error',
+                description: 'Could not update assignments.'
+            });
+        }
     };
 
     const handleTokenAdd = (tokenId: string) => {
@@ -100,11 +108,11 @@ export default function AgentTokens({ agent }: AgentTokensProps) {
         setSelectedTokenIds(prev => prev.filter(id => id !== tokenId));
     };
 
-    const assigned = useMemo(() => {
+    const assignedInDialog = useMemo(() => {
         return allTokens.filter(token => selectedTokenIds.includes(token.id));
     }, [allTokens, selectedTokenIds]);
     
-    const unassigned = useMemo(() => {
+    const unassignedInDialog = useMemo(() => {
         return allTokens.filter(token => !selectedTokenIds.includes(token.id));
     }, [allTokens, selectedTokenIds]);
 
@@ -131,7 +139,7 @@ export default function AgentTokens({ agent }: AgentTokensProps) {
 
                         <ScrollArea className="max-h-72 -mx-6 px-6">
                             <div className="space-y-3 py-2 pr-1">
-                                {assigned.map(token => (
+                                {assignedInDialog.map(token => (
                                     <Card key={token.id} className="p-4 flex items-center justify-between">
                                         <div className="flex items-center gap-4">
                                             <TokenIcon token={token} className="h-8 w-8" />
@@ -170,7 +178,7 @@ export default function AgentTokens({ agent }: AgentTokensProps) {
                                         </AlertDialog>
                                     </Card>
                                 ))}
-                                {assigned.length === 0 && (
+                                {assignedInDialog.length === 0 && (
                                     <div className="text-center text-muted-foreground py-10">
                                         <p>No tokens assigned yet.</p>
                                     </div>
@@ -191,8 +199,8 @@ export default function AgentTokens({ agent }: AgentTokensProps) {
                                         <SelectValue placeholder="Select a token to add..." />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        {unassigned.length > 0 ? (
-                                            unassigned.map(token => (
+                                        {unassignedInDialog.length > 0 ? (
+                                            unassignedInDialog.map(token => (
                                                 <SelectItem key={token.id} value={token.id}>
                                                      <div className="flex items-center gap-2">
                                                         <TokenIcon token={token} className="h-6 w-6" />
