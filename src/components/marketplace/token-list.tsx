@@ -138,10 +138,8 @@ export default function TokenList() {
 
   useEffect(() => {
     setLoading(true);
-    Promise.all([
-      fetch('/api/tokens').then(res => res.json()),
-      fetch('/api/investors').then(res => res.json())
-    ]).then(([tokensData, investorsData]: [TokenDetails[], User[]]) => {
+    fetch('/api/tokens').then(res => res.json())
+    .then((tokensData: TokenDetails[]) => {
       const activeTokens = tokensData
         .filter(t => t.status === 'active')
         .map(t => ({
@@ -157,16 +155,13 @@ export default function TokenList() {
         }));
       setAllTokens(activeTokens);
       
-      const myRequests = investorsData.filter(inv => inv.name === 'Market Subscriber');
-      
-      const initialSubscriptions: Record<string, SubscriptionStatus> = { 'example-1': 'approved' };
-      activeTokens.forEach(token => {
-          const requestForThisToken = myRequests.find(req => req.holdings && req.holdings.some((h: any) => h.tokenId === token.id));
-          if (requestForThisToken) {
-              initialSubscriptions[token.id] = requestForThisToken.status === 'accepted' ? 'approved' : 'pending';
-          }
-      });
-      setSubscriptions(initialSubscriptions);
+      const storedSubscriptions = JSON.parse(localStorage.getItem('whitelisting_subscriptions') || '{}');
+      // Pre-populate for demo purposes if it's the first visit
+      if (Object.keys(storedSubscriptions).length === 0) {
+        storedSubscriptions['example-1'] = 'approved';
+        localStorage.setItem('whitelisting_subscriptions', JSON.stringify(storedSubscriptions));
+      }
+      setSubscriptions(storedSubscriptions);
 
     }).catch(console.error)
     .finally(() => setLoading(false));
@@ -195,7 +190,9 @@ export default function TokenList() {
     const currentStatus = subscriptions[token.id] || 'none';
     
     if (currentStatus === 'none') {
-        setSubscriptions(prev => ({...prev, [token.id]: 'pending' }));
+        const newSubscriptions = { ...subscriptions, [token.id]: 'pending' };
+        setSubscriptions(newSubscriptions);
+        localStorage.setItem('whitelisting_subscriptions', JSON.stringify(newSubscriptions));
         toast({ title: 'Whitelisting Request Sent (Not Persisted)!', description: "Your request to be whitelisted for this token is now pending approval for this session." });
     } else if (currentStatus === 'approved') {
         setSelectedToken(token);

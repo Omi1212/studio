@@ -9,7 +9,7 @@ import {
 } from '@/components/ui/sidebar';
 import SidebarNav from '@/components/dashboard/sidebar-nav';
 import HeaderDynamic from '@/components/dashboard/header-dynamic';
-import type { TokenDetails, User } from '@/lib/types';
+import type { TokenDetails } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Globe, FileText } from 'lucide-react';
 import Link from 'next/link';
@@ -26,7 +26,7 @@ import PlaceOrder from '@/components/marketplace/place-order';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 
-type WhitelistRequest = User & { holdings?: any[] };
+type SubscriptionStatus = 'none' | 'pending' | 'approved';
 
 const chartConfig = {
   price: {
@@ -49,7 +49,7 @@ function TokenOfferingPage({ params }: { params: { tokenId: string } }) {
   const [token, setToken] = useState<TokenDetails | null>(null);
   const [priceHistory, setPriceHistory] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [subscriptionStatus, setSubscriptionStatus] = useState<'none' | 'pending' | 'approved'>('none');
+  const [subscriptionStatus, setSubscriptionStatus] = useState<SubscriptionStatus>('none');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { toast } = useToast();
 
@@ -74,8 +74,7 @@ function TokenOfferingPage({ params }: { params: { tokenId: string } }) {
     Promise.all([
       fetch(`/api/tokens/${tokenId}`).then(res => res.ok ? res.json() : null),
       fetch('/api/token-price-history').then(res => res.ok ? res.json() : []),
-      fetch('/api/investors').then(res => res.ok ? res.json() : [])
-    ]).then(([tokenData, priceHistoryData, investorsData]: [TokenDetails | null, any[], WhitelistRequest[]]) => {
+    ]).then(([tokenData, priceHistoryData]) => {
       if (tokenData) {
         setToken({
           ...tokenData,
@@ -83,25 +82,10 @@ function TokenOfferingPage({ params }: { params: { tokenId: string } }) {
           isFreezable: tokenData.isFreezable ?? false,
           publicKey: tokenData.publicKey ?? `02f...${tokenData.id.slice(-10)}`,
         });
-
-        // For demo, we identify the user's requests by a generic name. In a real app, this would use a user ID.
-        const myRequests = investorsData.filter(inv => inv.name === 'Market Subscriber');
-        const requestForThisToken = myRequests.find(req => req.holdings && req.holdings.some((h: any) => h.tokenId === tokenId));
-
-        if (requestForThisToken) {
-          if (requestForThisToken.status === 'accepted') {
-            setSubscriptionStatus('approved');
-          } else if (requestForThisToken.status === 'pending') {
-             setSubscriptionStatus('pending');
-          } else {
-             setSubscriptionStatus('none'); // Rejected or other status, allow to subscribe again
-          }
-        } else {
-          const defaultSubscriptions = { 'example-1': 'approved' };
-          // @ts-ignore
-          setSubscriptionStatus(defaultSubscriptions[tokenId] || 'none');
-        }
-
+        
+        // Load subscription status from localStorage
+        const storedSubscriptions = JSON.parse(localStorage.getItem('whitelisting_subscriptions') || '{}');
+        setSubscriptionStatus(storedSubscriptions[tokenId] || 'none');
       }
       setPriceHistory(priceHistoryData);
     }).catch(err => {
@@ -118,6 +102,10 @@ function TokenOfferingPage({ params }: { params: { tokenId: string } }) {
     if (!token) return;
 
     setSubscriptionStatus('pending');
+    const storedSubscriptions = JSON.parse(localStorage.getItem('whitelisting_subscriptions') || '{}');
+    const newSubscriptions = { ...storedSubscriptions, [token.id]: 'pending' };
+    localStorage.setItem('whitelisting_subscriptions', JSON.stringify(newSubscriptions));
+
     toast({ title: 'Whitelisting Request Sent (Not Persisted)!', description: "Your request to be whitelisted for this token is now pending approval for this session." });
 };
 
