@@ -22,7 +22,7 @@ export default function VolumeCards() {
     useEffect(() => {
         fetch('/api/volume')
             .then(res => res.json())
-            .then(data => setVolumeData(data))
+            .then(data => setVolumeData(data.data))
             .finally(() => setLoading(false));
     }, []);
 

@@ -25,7 +25,7 @@ export default function PortfolioOverview() {
     ]).then(([investorData, historyData]) => {
       const value = investorData?.holdings.reduce((acc: number, holding: any) => acc + (holding.amount * holding.value), 0) || 0;
       setTotalValue(value);
-      setChartData(historyData);
+      setChartData(historyData.data);
     }).catch(console.error)
     .finally(() => setLoading(false));
   }, []);

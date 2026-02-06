@@ -41,7 +41,7 @@ export default function PaymentSummary({ className }: { className?: string }) {
     useEffect(() => {
         fetch('/api/payments')
             .then(res => res.json())
-            .then(data => setPaymentData(data))
+            .then(data => setPaymentData(data.data))
             .finally(() => setLoading(false));
     }, []);
 

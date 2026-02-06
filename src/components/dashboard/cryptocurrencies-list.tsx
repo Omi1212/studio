@@ -27,7 +27,7 @@ export default function CryptocurrenciesList({ className }: { className?: string
   useEffect(() => {
       fetch('/api/crypto')
         .then(res => res.json())
-        .then(data => setCryptos(data))
+        .then(data => setCryptos(data.data))
         .finally(() => setLoading(false));
   }, []);
 
