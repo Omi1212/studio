@@ -12,12 +12,23 @@ const issuerSchema = z.object({
   status: z.enum(['active', 'inactive']),
 });
 
+const querySchema = z.object({
+    page: z.coerce.number().int().min(1).default(1),
+    perPage: z.coerce.number().int().min(1).max(100).default(10),
+    status: z.enum(['active', 'inactive', 'all']).optional(),
+    query: z.string().optional(),
+});
+
+
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const page = parseInt(searchParams.get('page') || '1', 10);
-  const perPage = parseInt(searchParams.get('perPage') || '10', 10);
-  const status = searchParams.get('status');
-  const query = searchParams.get('query');
+  const validation = querySchema.safeParse(Object.fromEntries(searchParams.entries()));
+
+  if (!validation.success) {
+      return NextResponse.json({ errors: validation.error.errors }, { status: 400 });
+  }
+
+  const { page, perPage, status, query } = validation.data;
 
   let filteredIssuers = issuersData;
 

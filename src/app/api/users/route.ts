@@ -3,7 +3,7 @@ import { usersData } from './data';
 import type { User } from '@/lib/types';
 import { z } from 'zod';
 
-const userSchema = z.object({
+const userPostSchema = z.object({
     name: z.string().min(1, { message: "Name is required" }),
     email: z.string().email({ message: "Invalid email address" }),
     walletAddress: z.string().min(1, { message: "Wallet address is required" }),
@@ -12,13 +12,23 @@ const userSchema = z.object({
     status: z.enum(['active', 'inactive']),
 });
 
+const querySchema = z.object({
+    page: z.coerce.number().int().min(1).default(1),
+    perPage: z.coerce.number().int().min(1).max(100).default(10),
+    role: z.enum(['investor', 'issuer', 'agent', 'superadmin', 'all']).optional(),
+    status: z.enum(['active', 'inactive', 'all']).optional(),
+    query: z.string().optional(),
+});
+
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const page = parseInt(searchParams.get('page') || '1', 10);
-  const perPage = parseInt(searchParams.get('perPage') || '10', 10);
-  const role = searchParams.get('role');
-  const status = searchParams.get('status');
-  const query = searchParams.get('query');
+  const validation = querySchema.safeParse(Object.fromEntries(searchParams.entries()));
+
+  if (!validation.success) {
+      return NextResponse.json({ errors: validation.error.errors }, { status: 400 });
+  }
+
+  const { page, perPage, role, status, query } = validation.data;
 
   let filteredUsers = usersData;
 
@@ -57,7 +67,7 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
     try {
         const body = await request.json();
-        const newUser = userSchema.parse(body);
+        const newUser = userPostSchema.parse(body);
 
         const userWithId: User = {
             ...newUser,
