@@ -39,7 +39,7 @@ export default function NewTokenPage() {
   const stepFormRef = useRef<HTMLFormElement>(null);
   
   useEffect(() => {
-    fetch('/api/issuers?perPage=999').then(res => res.json()).then(response => setIssuers(response.data));
+    fetch('/api/issuers?perPage=1000').then(res => res.json()).then(response => setIssuers(response.data));
   }, []);
 
   const steps = [
@@ -99,11 +99,6 @@ export default function NewTokenPage() {
         toast({
           title: 'Request Submitted!',
           description: `Your new token "${createdToken.tokenName}" has been submitted for review.`,
-          action: (
-             <Button variant="outline" size="sm" onClick={() => router.push('/requests')}>
-                View Requests
-            </Button>
-          ),
         });
         router.push('/issue-token');
 
