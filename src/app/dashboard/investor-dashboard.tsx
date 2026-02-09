@@ -13,10 +13,10 @@ export default function InvestorDashboard() {
     useEffect(() => {
         // For demo purposes, we'll just find the default investor user.
         // In a real app, you'd get the currently logged-in user.
-        fetch('/api/users')
+        fetch('/api/users?perPage=999')
           .then(res => res.json())
-          .then((usersData: User[]) => {
-            const investorUser = usersData.find((u: User) => u.role === 'investor');
+          .then((usersResponse: { data: User[] }) => {
+            const investorUser = usersResponse.data.find((u: User) => u.role === 'investor');
             if (investorUser) {
                 setUser(investorUser);
             }
