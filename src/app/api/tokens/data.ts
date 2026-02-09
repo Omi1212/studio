@@ -1,6 +1,11 @@
 import type { TokenDetails } from '@/lib/types';
 
-export let exampleTokens: Omit<TokenDetails, 'tokenIcon' | 'whitepaper' | 'legalTokenizationDoc' | 'tokenIssuanceLegalDoc' | 'publicKey'>[] = [
+// Use a global variable in development to preserve data across HMR
+declare global {
+  var __exampleTokens__: Omit<TokenDetails, 'tokenIcon' | 'whitepaper' | 'legalTokenizationDoc' | 'tokenIssuanceLegalDoc' | 'publicKey'>[] | undefined;
+}
+
+const initialData: Omit<TokenDetails, 'tokenIcon' | 'whitepaper' | 'legalTokenizationDoc' | 'tokenIssuanceLegalDoc' | 'publicKey'>[] = [
   {
     id: 'example-1',
     tokenName: 'Digital Dollar',
@@ -54,3 +59,10 @@ export let exampleTokens: Omit<TokenDetails, 'tokenIcon' | 'whitepaper' | 'legal
     destinationAddress: 'spark1q...iss3da',
   },
 ];
+
+// To prevent the data from being lost on hot-reloads in development
+if (process.env.NODE_ENV !== 'production' && !global.__exampleTokens__) {
+  global.__exampleTokens__ = [...initialData];
+}
+
+export let exampleTokens: Omit<TokenDetails, 'tokenIcon' | 'whitepaper' | 'legalTokenizationDoc' | 'tokenIssuanceLegalDoc' | 'publicKey'>[] = global.__exampleTokens__ || initialData;

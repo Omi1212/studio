@@ -1,7 +1,19 @@
 import type { SubscriptionStatus } from '@/lib/types';
 
-export let subscriptionsData: Record<string, Record<string, SubscriptionStatus>> = {
+// Use a global variable in development to preserve data across HMR
+declare global {
+  var __subscriptionsData__: Record<string, Record<string, SubscriptionStatus>> | undefined;
+}
+
+const initialData: Record<string, Record<string, SubscriptionStatus>> = {
     'inv-001': { // Hardcoded investor ID for demo
         'example-1': 'approved',
     }
 };
+
+// To prevent the data from being lost on hot-reloads in development
+if (process.env.NODE_ENV !== 'production' && !global.__subscriptionsData__) {
+  global.__subscriptionsData__ = JSON.parse(JSON.stringify(initialData));
+}
+
+export let subscriptionsData: Record<string, Record<string, SubscriptionStatus>> = global.__subscriptionsData__ || initialData;

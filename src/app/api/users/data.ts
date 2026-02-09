@@ -1,6 +1,11 @@
 import type { User } from '@/lib/types';
 
-export let usersData: User[] = [
+// Use a global variable in development to preserve data across HMR
+declare global {
+  var __usersData__: User[] | undefined;
+}
+
+const initialData: User[] = [
     {
         id: 'user-001',
         name: 'John Doe',
@@ -70,3 +75,10 @@ export let usersData: User[] = [
         kybLevel: 4,
     }
 ];
+
+// To prevent the data from being lost on hot-reloads in development
+if (process.env.NODE_ENV !== 'production' && !global.__usersData__) {
+  global.__usersData__ = [...initialData];
+}
+
+export let usersData: User[] = global.__usersData__ || initialData;

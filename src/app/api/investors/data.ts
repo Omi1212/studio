@@ -1,6 +1,11 @@
 import type { TokenDetails, User } from '@/lib/types';
 import { exampleTokens } from '../tokens/data';
 
+// Use a global variable in development to preserve data across HMR
+declare global {
+  var __investorsData__: User[] | undefined;
+}
+
 const allTokens: Omit<TokenDetails, 'tokenIcon' | 'whitepaper' | 'legalTokenizationDoc' | 'tokenIssuanceLegalDoc' | 'publicKey'>[] = exampleTokens;
 
 const txToken1 = { ...allTokens.find(t => t.id === 'example-1')!, id: 'example-1' };
@@ -9,7 +14,7 @@ const txToken3 = { ...allTokens.find(t => t.id === 'example-3')!, id: 'example-3
 const txToken4 = { ...allTokens.find(t => t.id === 'example-4')!, id: 'example-4' };
 
 
-export let investorsData: User[] = [
+const initialData: User[] = [
     {
         id: 'inv-001',
         name: 'Alice Johnson',
@@ -305,3 +310,10 @@ export let investorsData: User[] = [
         ]
     }
 ];
+
+// To prevent the data from being lost on hot-reloads in development
+if (process.env.NODE_ENV !== 'production' && !global.__investorsData__) {
+  global.__investorsData__ = [...initialData];
+}
+
+export let investorsData: User[] = global.__investorsData__ || initialData;

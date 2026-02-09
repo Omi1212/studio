@@ -1,6 +1,11 @@
 import type { Issuer } from '@/lib/types';
 
-export let issuersData: Issuer[] = [
+// Use a global variable in development to preserve data across HMR
+declare global {
+  var __issuersData__: Issuer[] | undefined;
+}
+
+const initialData: Issuer[] = [
     {
         id: 'iss-001',
         name: 'Prime Issuance',
@@ -29,3 +34,10 @@ export let issuersData: Issuer[] = [
         status: 'inactive',
     },
 ];
+
+// To prevent the data from being lost on hot-reloads in development
+if (process.env.NODE_ENV !== 'production' && !global.__issuersData__) {
+  global.__issuersData__ = [...initialData];
+}
+
+export let issuersData: Issuer[] = global.__issuersData__ || initialData;

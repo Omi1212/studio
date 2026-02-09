@@ -1,4 +1,11 @@
-export const transfersData = [
+import type { Transfer } from '@/lib/types';
+
+// Use a global variable in development to preserve data across HMR
+declare global {
+  var __transfersData__: Transfer[] | undefined;
+}
+
+const initialData: Transfer[] = [
     { txId: 's0t1u2...w3x4y5', type: 'Transfer', from: 'spark1q...nd654321', to: 'spark1q...oc151515', amount: 50, tokenTicker: 'GLDT', date: '2024-08-12' },
     { txId: 'r9s0t1...v2w3x4', type: 'Transfer', from: 'spark1q...mj232323', to: 'spark1q...nd654321', amount: 200, tokenTicker: 'GLDT', date: '2024-08-11' },
     { txId: 'q8r9s0...u1v2w3', type: 'Transfer', from: 'spark1q...user03', to: 'spark1q...user01', amount: 150, tokenTicker: 'DUSD', date: '2024-08-10' },
@@ -31,3 +38,10 @@ export const transfersData = [
     { txId: 'd4e5f6...g7h8i9', type: 'Mint', from: 'Token Issuer', to: 'spark1...rq83he', amount: 10000, tokenTicker: 'CRBN', date: '2024-07-17' },
     { txId: 'g7h8i9...j0k1l2', type: 'Transfer', from: 'spark1...zxy987', to: 'spark1...6n7dvn', amount: 800, tokenTicker: 'GLDT', date: '2024-07-16' },
 ];
+
+// To prevent the data from being lost on hot-reloads in development
+if (process.env.NODE_ENV !== 'production' && !global.__transfersData__) {
+  global.__transfersData__ = [...initialData];
+}
+
+export let transfersData: Transfer[] = global.__transfersData__ || initialData;
