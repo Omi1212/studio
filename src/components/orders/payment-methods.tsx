@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -519,23 +520,34 @@ export default function PaymentMethods({ order, token, onPaymentConfirmed }: Pay
         setSelectedPaymentMethod('');
     };
 
-    const handlePaymentMade = () => {
-        // NOTE: In a real app, this would be handled by a webhook or a confirmation check.
-        // For this demo, we simulate updating the order status in localStorage.
-        const storedOrders: Order[] = JSON.parse(localStorage.getItem('orders') || '[]');
-        const updatedOrders = storedOrders.map(o => 
-            o.id === order.id ? { ...o, status: 'pending' as const } : o
-        );
-        localStorage.setItem('orders', JSON.stringify(updatedOrders));
+    const handlePaymentMade = async () => {
+        try {
+            const response = await fetch(`/api/orders/${order.id}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: 'pending' }),
+            });
 
-        toast({
-            title: "Payment Submitted (Not Persisted)",
-            description: "Your payment is being processed. The order status will be updated for this session.",
-        });
-        if (onPaymentConfirmed) {
-            onPaymentConfirmed();
+            if (!response.ok) {
+                throw new Error('Failed to update order status.');
+            }
+
+            toast({
+                title: "Payment Submitted",
+                description: "Your payment is being processed. The order status will be updated shortly.",
+            });
+            if (onPaymentConfirmed) {
+                onPaymentConfirmed();
+            }
+            router.push('/orders');
+        } catch (error: any) {
+            console.error(error);
+            toast({
+                variant: 'destructive',
+                title: 'Error',
+                description: error.message || 'Could not submit payment confirmation.',
+            });
         }
-        router.push('/orders');
     };
 
     const renderRightColumn = () => {

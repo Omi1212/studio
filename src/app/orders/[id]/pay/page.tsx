@@ -51,30 +51,33 @@ export default function PayOrderPage() {
     const { id } = params;
     if (!id) return;
 
-    setLoading(true);
-    
-    fetch(`/api/orders/${id}`).then(res => res.ok ? res.json() : null)
-    .then(orderData => {
-      if (orderData) {
-        setOrder(orderData);
-        return fetch(`/api/tokens/${orderData.tokenId}`);
-      }
-      throw new Error('Order not found');
-    })
-    .then(res => {
-      if (res.ok) return res.json();
-      throw new Error('Token not found');
-    })
-    .then((tokenData: TokenDetails) => {
-      setToken(tokenData);
-    })
-    .catch(err => {
-      console.error(err);
-      setOrder(null);
-      setToken(null);
-    })
-    .finally(() => setLoading(false));
+    const loadOrderData = async () => {
+        setLoading(true);
+        try {
+            const orderRes = await fetch(`/api/orders/${id}`);
+            if (!orderRes.ok) {
+                throw new Error('Order not found');
+            }
+            const orderData: Order = await orderRes.json();
+            setOrder(orderData);
 
+            const tokenRes = await fetch(`/api/tokens/${orderData.tokenId}`);
+            if (!tokenRes.ok) {
+                throw new Error('Token for order not found');
+            }
+            const tokenData: TokenDetails = await tokenRes.json();
+            setToken(tokenData);
+
+        } catch (err) {
+            console.error(err);
+            setOrder(null);
+            setToken(null);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    loadOrderData();
   }, [params]);
 
   if (loading) {
