@@ -18,6 +18,7 @@ import { Separator } from '@/components/ui/separator';
 import { Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import type { User } from '@/lib/types';
+import { useToast } from '@/hooks/use-toast';
 
 type Role = 'agent' | 'superadmin' | 'investor' | 'issuer';
 
@@ -33,6 +34,7 @@ export default function LoginForm() {
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
+  const { toast } = useToast();
 
   const handleRoleSelect = (role: Role) => {
     setEmail(roleEmails[role]);
@@ -43,30 +45,58 @@ export default function LoginForm() {
     e.preventDefault();
     setIsSubmitting(true);
     
-    // Find user by email
-    const res = await fetch('/api/users?perPage=999');
-    const usersData: { data: User[] } = await res.json();
-    const user = usersData.data.find(u => u.email === email);
-
-    if (user) {
-      localStorage.setItem('userRole', user.role);
-      localStorage.setItem('currentUser', JSON.stringify(user));
-    } else {
-      // Fallback for emails not in usersData
-      const role = Object.keys(roleEmails).find(
-        (key) => roleEmails[key as Role] === email
-      ) as Role | undefined;
+    try {
+      // Find user by email
+      const res = await fetch(`/api/users?query=${encodeURIComponent(email)}`);
       
-      if (role) {
-        localStorage.setItem('userRole', role);
-      } else {
-        localStorage.removeItem('userRole');
+      if (!res.ok) {
+        throw new Error('Login failed. Please check your credentials.');
       }
-      localStorage.removeItem('currentUser');
-    }
+      
+      const usersData: { data: User[] } = await res.json();
+      
+      if (!usersData || !usersData.data) {
+          throw new Error('Invalid response from server.');
+      }
 
-    await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate async operation
-    router.push('/');
+      const user = usersData.data[0];
+
+      if (user) {
+        localStorage.setItem('userRole', user.role);
+        localStorage.setItem('currentUser', JSON.stringify(user));
+      } else {
+        // Fallback for demo emails not present in mock data
+        const demoRole = (Object.keys(roleEmails) as Role[]).find(
+          (key) => roleEmails[key] === email
+        );
+        
+        if (demoRole) {
+          localStorage.setItem('userRole', demoRole);
+           // Create a mock user object for consistency if needed, or clear it.
+          localStorage.removeItem('currentUser'); 
+        } else {
+          toast({
+            variant: 'destructive',
+            title: 'Login Failed',
+            description: 'User not found. Please check your email and password.',
+          });
+          setIsSubmitting(false);
+          return;
+        }
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate network latency
+      router.push('/');
+
+    } catch (error: any) {
+        console.error(error);
+        toast({
+            variant: 'destructive',
+            title: 'Login Error',
+            description: error.message || 'An unexpected error occurred. Please try again.',
+        });
+        setIsSubmitting(false);
+    }
   };
 
   return (
