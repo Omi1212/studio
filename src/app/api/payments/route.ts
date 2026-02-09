@@ -12,7 +12,7 @@ const paymentData = [
 
 const querySchema = z.object({
     page: z.coerce.number().int().min(1).default(1),
-    perPage: z.coerce.number().int().min(1).max(100).default(10),
+    perPage: z.coerce.number().int().min(1).max(1000).default(10),
 });
 
 export async function GET(request: Request) {

@@ -4,7 +4,7 @@ import { z } from 'zod';
 
 const querySchema = z.object({
     page: z.coerce.number().int().min(1).default(1),
-    perPage: z.coerce.number().int().min(1).max(100).default(10),
+    perPage: z.coerce.number().int().min(1).max(1000).default(10),
     type: z.enum(['Transfer', 'Mint', 'Burn', 'all']).optional(),
     query: z.string().optional(),
     tokenTicker: z.string().optional(),
