@@ -1,4 +1,3 @@
-'use client';
 
 import { NextResponse } from 'next/server';
 import { subscriptionsData } from '../../subscriptions/data';
