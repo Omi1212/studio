@@ -87,10 +87,10 @@ const issuerMenu = [
         { href: '/transfers', label: 'Transfers', icon: ArrowRightLeft },
     ]
   },
+  { href: '/settings', label: 'Settings', icon: Settings },
 ];
 
 const helpMenuItems = [
-  { href: '/settings', label: 'Settings', icon: Settings },
   { href: '/security', label: 'Security', icon: ShieldCheck },
   { href: '/help', label: 'Help', icon: LifeBuoy },
 ];
