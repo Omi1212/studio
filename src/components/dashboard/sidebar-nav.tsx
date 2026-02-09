@@ -87,7 +87,6 @@ const issuerMenu = [
         { href: '/transfers', label: 'Transfers', icon: ArrowRightLeft },
     ]
   },
-  { href: '/settings', label: 'Settings', icon: Settings },
 ];
 
 const helpMenuItems = [
@@ -349,6 +348,22 @@ export default function SidebarNav() {
         </SidebarMenu>
       </SidebarContent>
       <SidebarFooter className="p-2 space-y-2">
+        {isClient && userRole === 'issuer' && (
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                asChild
+                isActive={pathname.startsWith('/settings')}
+                tooltip={'Settings'}
+              >
+                <a href={'/settings'}>
+                  <Settings />
+                  <span>{'Settings'}</span>
+                </a>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        )}
         <SidebarMenu>
           {helpMenuItems.map((item) => (
             <SidebarMenuItem key={item.href}>
