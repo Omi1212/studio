@@ -182,10 +182,10 @@ export default function ProfilePage() {
                     <CardDescription>Manage your language, currency, and theme settings.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                    <div className="space-y-2">
+                    <div className="flex items-center justify-between">
                         <Label>Theme</Label>
-                        <Tabs defaultValue="dark" className="w-full">
-                            <TabsList className="grid w-full grid-cols-3">
+                        <Tabs defaultValue="dark" className="w-auto">
+                            <TabsList>
                                 <TabsTrigger value="light">Light</TabsTrigger>
                                 <TabsTrigger value="dark">Dark</TabsTrigger>
                                 <TabsTrigger value="system">System</TabsTrigger>
@@ -218,24 +218,6 @@ export default function ProfilePage() {
                                     <SelectItem value="btc">BTC - Bitcoin</SelectItem>
                                 </SelectContent>
                             </Select>
-                        </div>
-                    </div>
-                    <Separator />
-                    <div className="space-y-4">
-                        <h4 className="text-md font-medium">Email Notifications</h4>
-                        <div className="flex items-center justify-between rounded-lg border p-4">
-                            <div>
-                                <p className="font-medium">Marketing Emails</p>
-                                <p className="text-sm text-muted-foreground">Receive updates about new features and offers.</p>
-                            </div>
-                            <Switch defaultChecked />
-                        </div>
-                        <div className="flex items-center justify-between rounded-lg border p-4">
-                            <div>
-                                <p className="font-medium">Security Alerts</p>
-                                <p className="text-sm text-muted-foreground">Get notified about important security events.</p>
-                            </div>
-                            <Switch defaultChecked />
                         </div>
                     </div>
                 </CardContent>
