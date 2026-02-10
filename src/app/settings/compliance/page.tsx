@@ -278,7 +278,7 @@ export default function CompliancePage() {
         </div>
       </SidebarInset>
        <Dialog open={isVerificationModalOpen} onOpenChange={setIsVerificationModalOpen}>
-            <DialogContent className="sm:max-w-3xl">
+            <DialogContent className="sm:max-w-4xl">
                 <DialogHeader>
                     <DialogTitle>
                         {selectedVerification === 'kyc' ? 'KYC Verification' : 'KYB Verification Status'}

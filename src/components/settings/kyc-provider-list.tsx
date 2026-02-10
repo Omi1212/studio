@@ -25,13 +25,13 @@ export default function KycProviderList({ onViewStatus }: KycProviderListProps) 
       <p className="text-sm text-center text-muted-foreground">
         Choose a provider to continue with your identity verification.
       </p>
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {providers.map((provider) => (
           <Card
             key={provider.name}
-            className="flex flex-col items-center justify-center p-4 text-center cursor-pointer hover:bg-muted/50 transition-colors group"
+            className="flex flex-col items-center justify-center p-6 text-center cursor-pointer hover:bg-muted/50 transition-colors group"
           >
-            <div className="relative h-10 w-24 mb-3">
+            <div className="relative h-12 w-28 mb-4">
               <Image
                 src={provider.logo}
                 alt={`${provider.name} logo`}
@@ -41,7 +41,7 @@ export default function KycProviderList({ onViewStatus }: KycProviderListProps) 
                 className="brightness-0 invert group-hover:brightness-100 group-hover:invert-0 transition-all duration-300"
               />
             </div>
-            <CardTitle className="text-sm font-medium">{provider.name}</CardTitle>
+            <CardTitle className="text-base font-semibold">{provider.name}</CardTitle>
           </Card>
         ))}
       </div>
