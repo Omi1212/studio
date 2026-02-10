@@ -38,7 +38,7 @@ export default function KycProviderList({ onViewStatus }: KycProviderListProps) 
                 fill
                 style={{ objectFit: 'contain' }}
                 sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
-                className="brightness-0 invert group-hover:brightness-100 group-hover:invert-0 transition-all duration-300"
+                className="transition-all duration-300"
               />
             </div>
             <CardTitle className="text-base font-semibold">{provider.name}</CardTitle>
