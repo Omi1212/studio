@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import {
   Sidebar,
   SidebarInset,
@@ -48,6 +49,8 @@ const integrations = [
 ];
 
 function IntegrationCard({ name, logo, description }: { name: string; logo: string; description: string; }) {
+  const [isConnected, setIsConnected] = useState(false);
+
   return (
     <Card className="flex flex-col">
       <CardHeader className="flex-row items-start gap-4 space-y-0">
@@ -67,8 +70,8 @@ function IntegrationCard({ name, logo, description }: { name: string; logo: stri
       </CardHeader>
       <CardContent className="flex-1 flex items-end">
         <div className="flex items-center justify-between w-full">
-            <span className="text-sm font-medium text-muted-foreground">Connect</span>
-            <Switch />
+            <span className="text-sm font-medium text-muted-foreground">{isConnected ? "Connected" : "Connect"}</span>
+            <Switch checked={isConnected} onCheckedChange={setIsConnected} />
         </div>
       </CardContent>
     </Card>
