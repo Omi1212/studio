@@ -11,7 +11,7 @@ import { useEffect, useState } from 'react';
 import type { User } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { CheckCircle2, ShieldCheck, FileLock2, ArrowLeft } from 'lucide-react';
+import { CheckCircle2, ShieldCheck, FileLock2, ArrowLeft, ArrowRightLeft } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -225,7 +225,7 @@ function getVerificationStatusText(status: 'verified' | 'pending' | 'rejected' |
 export default function CompliancePage() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [selectedVerification, setSelectedVerification] = useState<'kyc' | 'kyb'>('kyc');
+  const [selectedVerification, setSelectedVerification] = useState<'kyc' | 'kyb' | 'kyt'>('kyc');
   const [isVerificationModalOpen, setIsVerificationModalOpen] = useState(false);
   const [kycStep, setKycStep] = useState<'providers' | 'status'>('providers');
   const [kybStep, setKybStep] = useState<'providers' | 'status'>('providers');
@@ -256,6 +256,11 @@ export default function CompliancePage() {
   const handleOpenKybDialog = () => {
     setSelectedVerification('kyb');
     setKybStep('providers');
+    setIsVerificationModalOpen(true);
+  };
+
+  const handleOpenKytDialog = () => {
+    setSelectedVerification('kyt');
     setIsVerificationModalOpen(true);
   };
 
@@ -302,7 +307,7 @@ export default function CompliancePage() {
                       <CardDescription>View and manage your KYC & KYB verification status.</CardDescription>
                   </CardHeader>
                   <CardContent>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                           <div
                               onClick={handleOpenKycDialog}
                               className="rounded-lg border p-6 text-center cursor-pointer transition-all space-y-2 hover:bg-muted/50"
@@ -322,6 +327,14 @@ export default function CompliancePage() {
                                 <p className={cn("text-sm", user.kybStatus === 'verified' ? 'text-green-500' : 'text-muted-foreground')}>{getVerificationStatusText(user.kybStatus)}</p>
                             </div>
                           )}
+                          <div
+                              onClick={handleOpenKytDialog}
+                              className="rounded-lg border p-6 text-center cursor-pointer transition-all space-y-2 hover:bg-muted/50"
+                          >
+                              <ArrowRightLeft className="mx-auto h-8 w-8 text-muted-foreground" />
+                              <p className="font-semibold">KYT (Know Your Transaction)</p>
+                              <p className={cn("text-sm", user.kytStatus === 'verified' ? 'text-green-500' : 'text-muted-foreground')}>{getVerificationStatusText(user.kytStatus)}</p>
+                          </div>
                       </div>
                   </CardContent>
               </Card>
@@ -333,7 +346,10 @@ export default function CompliancePage() {
             <DialogContent className="sm:max-w-4xl">
                 <DialogHeader>
                     <DialogTitle>
-                        {selectedVerification === 'kyc' ? 'KYC Verification' : 'KYB Verification'}
+                        {selectedVerification === 'kyc' ? 'KYC Verification' 
+                         : selectedVerification === 'kyb' ? 'KYB Verification'
+                         : 'KYT (Know Your Transaction)'
+                        }
                     </DialogTitle>
                 </DialogHeader>
                 <div className="pt-4">
@@ -353,7 +369,7 @@ export default function CompliancePage() {
                                 </div>
                             </div>
                         )
-                    ) : (
+                    ) : selectedVerification === 'kyb' ? (
                          kybStep === 'providers' ? (
                             <KybProviderList onViewStatus={() => setKybStep('status')} />
                          ) : (
@@ -369,6 +385,10 @@ export default function CompliancePage() {
                                 </div>
                             </div>
                         )
+                    ) : (
+                        <div className="text-center text-muted-foreground py-10">
+                            <p>KYT (Know Your Transaction) verification is not yet available.</p>
+                        </div>
                     )}
                 </div>
             </DialogContent>

@@ -14,6 +14,7 @@ const initialData: User[] = [
         walletAddress: 'spark1q...user01',
         kycStatus: 'verified',
         kybStatus: 'verified',
+        kytStatus: 'verified',
         status: 'active',
         phone: '+1 555-0101',
         kycLevel: 3,
