@@ -348,8 +348,8 @@ export default function SidebarNav() {
         </SidebarMenu>
       </SidebarContent>
       <SidebarFooter className="p-2 space-y-2">
-        {isClient && userRole === 'issuer' && (
-          <SidebarMenu>
+        <SidebarMenu>
+          {isClient && userRole === 'issuer' && (
             <SidebarMenuItem>
               <SidebarMenuButton
                 asChild
@@ -362,9 +362,7 @@ export default function SidebarNav() {
                 </a>
               </SidebarMenuButton>
             </SidebarMenuItem>
-          </SidebarMenu>
-        )}
-        <SidebarMenu>
+          )}
           {helpMenuItems.map((item) => (
             <SidebarMenuItem key={item.href}>
               <SidebarMenuButton
