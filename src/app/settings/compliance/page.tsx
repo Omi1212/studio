@@ -76,9 +76,9 @@ const kybLevels = [
 const kybProviders = [
   { name: 'Sumsub', logo: 'https://i.ibb.co/xKGcFvcs/1.png' },
   { name: 'Onfido', logo: 'https://i.ibb.co/8g2Qmknh/2.png' },
-  { name: 'Kyckr', logo: 'https://i.wpfc.ml/35/kyckr.svg' },
-  { name: 'Middesk', logo: 'https://i.wpfc.ml/35/middesk.svg' },
-  { name: "Moody's Analytics", logo: 'https://i.wpfc.ml/35/moodys.svg' },
+  { name: 'Kyckr', logo: 'https://i.ibb.co/0yYWB1Yb/8.png' },
+  { name: 'Middesk', logo: 'https://i.ibb.co/8DsyxCyR/9.png' },
+  { name: "Moody's Analytics", logo: 'https://i.ibb.co/Pzc00sHp/10.png' },
 ];
 
 interface KybProviderListProps {
