@@ -11,7 +11,7 @@ import { useEffect, useState } from 'react';
 import type { User } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { CheckCircle2, ShieldCheck, FileLock2, ArrowLeft, ArrowRightLeft, Building, Landmark, ArrowRight } from 'lucide-react';
+import { CheckCircle2, ArrowLeft, ArrowRightLeft, Building, ArrowRight, User as UserIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -120,11 +120,6 @@ function KybProviderList({ onViewStatus }: KybProviderListProps) {
           </Card>
         ))}
       </div>
-      <div className="flex justify-center">
-        <Button variant="link" onClick={onViewStatus} className="text-muted-foreground">
-          <ShieldCheck className="mr-2 h-4 w-4" /> Use Platform Verification
-        </Button>
-      </div>
     </div>
   );
 }
@@ -217,7 +212,7 @@ function VerificationPrompt({ user, isBusiness, onStart }: { user: User, isBusin
 
     return (
         <div className="flex flex-col items-center justify-center bg-muted/50 rounded-lg p-6 text-center h-full">
-            <ShieldCheck className="h-16 w-16 text-green-500 mb-4" />
+            <CheckCircle2 className="h-16 w-16 text-green-500 mb-4" />
             <h4 className="font-bold text-lg">You are fully verified!</h4>
             <p className="text-muted-foreground text-sm mt-2 mb-4">
                 You have successfully completed all identity verification steps.
@@ -361,7 +356,7 @@ export default function CompliancePage() {
                               onClick={handleOpenKycDialog}
                               className="rounded-lg border p-4 flex items-center gap-4 cursor-pointer transition-all hover:bg-muted/50"
                           >
-                              <ShieldCheck className="h-8 w-8 text-muted-foreground shrink-0" />
+                              <UserIcon className="h-8 w-8 text-muted-foreground shrink-0" />
                               <div className="flex-1">
                                   <p className="font-semibold">KYC (Know Your Customer)</p>
                                   <p className={cn("text-sm", user.kycStatus === 'verified' ? 'text-green-500' : 'text-muted-foreground')}>{getVerificationStatusText(user.kycStatus)}</p>
@@ -386,7 +381,7 @@ export default function CompliancePage() {
                               onClick={handleOpenKytDialog}
                               className="rounded-lg border p-4 flex items-center gap-4 cursor-pointer transition-all hover:bg-muted/50"
                           >
-                              <Landmark className="h-8 w-8 text-muted-foreground shrink-0" />
+                              <ArrowRightLeft className="h-8 w-8 text-muted-foreground shrink-0" />
                               <div className="flex-1">
                                   <p className="font-semibold">KYT (Know Your Transaction)</p>
                                   <p className={cn("text-sm", user.kytStatus === 'verified' ? 'text-green-500' : 'text-muted-foreground')}>{getVerificationStatusText(user.kytStatus)}</p>
