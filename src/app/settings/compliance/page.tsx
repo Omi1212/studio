@@ -17,6 +17,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import Link from 'next/link';
 import KycProviderList from '@/components/settings/kyc-provider-list';
+import Image from 'next/image';
 
 const kycLevels = [
   {
@@ -71,6 +72,53 @@ const kybLevels = [
     requirements: ['Business Bank Statements', 'Financial Reports'],
   },
 ];
+
+const kybProviders = [
+  { name: 'Sumsub', logo: 'https://i.wpfc.ml/35/sumsub.svg' },
+  { name: 'Onfido', logo: 'https://i.wpfc.ml/35/onfido.svg' },
+  { name: 'Kyckr', logo: 'https://i.wpfc.ml/35/kyckr.svg' },
+  { name: 'Middesk', logo: 'https://i.wpfc.ml/35/middesk.svg' },
+  { name: "Moody's Analytics", logo: 'https://i.wpfc.ml/35/moodys.svg' },
+];
+
+interface KybProviderListProps {
+  onViewStatus: () => void;
+}
+
+function KybProviderList({ onViewStatus }: KybProviderListProps) {
+  return (
+    <div className="space-y-6">
+      <p className="text-sm text-center text-muted-foreground">
+        Choose a provider to continue with your business verification.
+      </p>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {kybProviders.map((provider) => (
+          <Card
+            key={provider.name}
+            className="flex flex-col items-center justify-center p-6 text-center cursor-pointer hover:bg-muted/50 transition-colors group"
+          >
+            <div className="relative h-16 w-36 mb-4">
+              <Image
+                src={provider.logo}
+                alt={`${provider.name} logo`}
+                fill
+                style={{ objectFit: 'contain' }}
+                sizes="(max-width: 768px) 50vw, 33vw"
+                className="brightness-0 invert group-hover:brightness-100 group-hover:invert-0 transition-all duration-300"
+              />
+            </div>
+            <CardTitle className="text-base font-semibold">{provider.name}</CardTitle>
+          </Card>
+        ))}
+      </div>
+      <div className="flex justify-center">
+        <Button variant="link" onClick={onViewStatus} className="text-muted-foreground">
+          <ShieldCheck className="mr-2 h-4 w-4" /> View Verification Status
+        </Button>
+      </div>
+    </div>
+  );
+}
 
 
 function VerificationLevelIndicator({ currentLevel, levels }: { currentLevel: number, levels: typeof kycLevels | typeof kybLevels}) {
@@ -180,6 +228,7 @@ export default function CompliancePage() {
   const [selectedVerification, setSelectedVerification] = useState<'kyc' | 'kyb'>('kyc');
   const [isVerificationModalOpen, setIsVerificationModalOpen] = useState(false);
   const [kycStep, setKycStep] = useState<'providers' | 'status'>('providers');
+  const [kybStep, setKybStep] = useState<'providers' | 'status'>('providers');
 
   useEffect(() => {
     const storedUser = localStorage.getItem('currentUser');
@@ -201,6 +250,12 @@ export default function CompliancePage() {
   const handleOpenKycDialog = () => {
     setSelectedVerification('kyc');
     setKycStep('providers');
+    setIsVerificationModalOpen(true);
+  };
+  
+  const handleOpenKybDialog = () => {
+    setSelectedVerification('kyb');
+    setKybStep('providers');
     setIsVerificationModalOpen(true);
   };
 
@@ -259,10 +314,7 @@ export default function CompliancePage() {
                           
                           {isBusinessRole && (
                             <div
-                                onClick={() => {
-                                    setSelectedVerification('kyb');
-                                    setIsVerificationModalOpen(true);
-                                }}
+                                onClick={handleOpenKybDialog}
                                 className="rounded-lg border p-6 text-center cursor-pointer transition-all space-y-2 hover:bg-muted/50"
                             >
                                 <FileLock2 className="mx-auto h-8 w-8 text-muted-foreground" />
@@ -281,7 +333,7 @@ export default function CompliancePage() {
             <DialogContent className="sm:max-w-4xl">
                 <DialogHeader>
                     <DialogTitle>
-                        {selectedVerification === 'kyc' ? 'KYC Verification' : 'KYB Verification Status'}
+                        {selectedVerification === 'kyc' ? 'KYC Verification' : 'KYB Verification'}
                     </DialogTitle>
                 </DialogHeader>
                 <div className="pt-4">
@@ -302,17 +354,21 @@ export default function CompliancePage() {
                             </div>
                         )
                     ) : (
-                        <div>
-                            <h3 className="font-semibold">Status:</h3>
-                            <p className="text-muted-foreground text-sm mb-6">{getKybStatusDescription(user)}</p>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                <VerificationLevelIndicator 
-                                currentLevel={user.kybLevel || 0}
-                                levels={kybLevels}
-                                />
-                                <VerificationPrompt user={user} isBusiness={true} />
+                         kybStep === 'providers' ? (
+                            <KybProviderList onViewStatus={() => setKybStep('status')} />
+                         ) : (
+                            <div>
+                                <h3 className="font-semibold">Status:</h3>
+                                <p className="text-muted-foreground text-sm mb-6">{getKybStatusDescription(user)}</p>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                    <VerificationLevelIndicator 
+                                    currentLevel={user.kybLevel || 0}
+                                    levels={kybLevels}
+                                    />
+                                    <VerificationPrompt user={user} isBusiness={true} onStart={() => setKybStep('providers')} />
+                                </div>
                             </div>
-                        </div>
+                        )
                     )}
                 </div>
             </DialogContent>
