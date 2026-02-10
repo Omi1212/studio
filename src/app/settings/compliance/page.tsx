@@ -86,7 +86,7 @@ const kytProviders = [
   { name: 'Crystal Intelligence', logo: 'https://i.ibb.co/jv0cDR9Z/12.png' },
   { name: 'Chainalysis', logo: 'https://i.ibb.co/ZRBJWJ5T/13.png' },
   { name: 'TRM Labs', logo: 'https://i.ibb.co/zhRZJDbW/14.png' },
-  { name: 'Merkle Science', logo: 'https://i.ibb.co/dZddJQ2/Dise-o-sin-t-tulo-14.png' },
+  { name: 'Merkle Science', logo: 'https://i.ibb.co/dZddJQ2/merkle-science.png' },
 ];
 
 
