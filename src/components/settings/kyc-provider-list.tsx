@@ -6,13 +6,13 @@ import { Card, CardTitle } from '../ui/card';
 import Image from 'next/image';
 
 const providers = [
-  { name: 'Sumsub', logo: 'https://i.wpfc.ml/35/sumsub.svg' },
-  { name: 'Onfido', logo: 'https://i.wpfc.ml/35/onfido.svg' },
-  { name: 'Veriff', logo: 'https://i.wpfc.ml/35/veriff.svg' },
-  { name: 'Shufti Pro', logo: 'https://i.wpfc.ml/35/shuftipro.svg' },
-  { name: 'Jumio', logo: 'https://i.wpfc.ml/35/jumio.svg' },
-  { name: 'Persona', logo: 'https://i.wpfc.ml/35/persona.svg' },
-  { name: 'Trulioo', logo: 'https://i.wpfc.ml/35/trulioo.svg' },
+  { name: 'Sumsub', logo: 'https://i.ibb.co/xKGcFvcs/1.png' },
+  { name: 'Onfido', logo: 'https://i.ibb.co/8g2Qmknh/2.png' },
+  { name: 'Veriff', logo: 'https://i.ibb.co/JW2JLXp6/3.png' },
+  { name: 'Shufti Pro', logo: 'https://i.ibb.co/bMT2x7YG/4.png' },
+  { name: 'Jumio', logo: 'https://i.ibb.co/QFm6xmyM/5.png' },
+  { name: 'Persona', logo: 'https://i.ibb.co/xkfbNB6/6.png' },
+  { name: 'Trulioo', logo: 'https://i.ibb.co/pDLtKw4/7.png' },
 ];
 
 interface KycProviderListProps {
@@ -29,7 +29,7 @@ export default function KycProviderList({ onViewStatus }: KycProviderListProps) 
         {providers.map((provider) => (
           <Card
             key={provider.name}
-            className="flex flex-col items-center justify-center p-6 text-center cursor-pointer hover:bg-muted/50 transition-colors group"
+            className="flex flex-col items-center justify-center p-6 text-center cursor-pointer hover:bg-muted/50 transition-colors group rounded-xl"
           >
             <div className="relative h-12 w-28 mb-4">
               <Image
