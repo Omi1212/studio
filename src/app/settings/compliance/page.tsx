@@ -74,8 +74,8 @@ const kybLevels = [
 ];
 
 const kybProviders = [
-  { name: 'Sumsub', logo: 'https://i.wpfc.ml/35/sumsub.svg' },
-  { name: 'Onfido', logo: 'https://i.wpfc.ml/35/onfido.svg' },
+  { name: 'Sumsub', logo: 'https://i.ibb.co/xKGcFvcs/1.png' },
+  { name: 'Onfido', logo: 'https://i.ibb.co/8g2Qmknh/2.png' },
   { name: 'Kyckr', logo: 'https://i.wpfc.ml/35/kyckr.svg' },
   { name: 'Middesk', logo: 'https://i.wpfc.ml/35/middesk.svg' },
   { name: "Moody's Analytics", logo: 'https://i.wpfc.ml/35/moodys.svg' },
@@ -95,7 +95,7 @@ function KybProviderList({ onViewStatus }: KybProviderListProps) {
         {kybProviders.map((provider) => (
           <Card
             key={provider.name}
-            className="flex flex-col items-center justify-center p-6 text-center cursor-pointer hover:bg-muted/50 transition-colors group"
+            className="flex flex-col items-center justify-center p-6 text-center cursor-pointer hover:bg-muted/50 transition-colors group rounded-xl"
           >
             <div className="relative h-12 w-28 mb-4">
               <Image
@@ -104,7 +104,7 @@ function KybProviderList({ onViewStatus }: KybProviderListProps) {
                 fill
                 style={{ objectFit: 'contain' }}
                 sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
-                className="brightness-0 invert group-hover:brightness-100 group-hover:invert-0 transition-all duration-300"
+                className="transition-all duration-300 rounded-md"
               />
             </div>
             <CardTitle className="text-base font-semibold">{provider.name}</CardTitle>
