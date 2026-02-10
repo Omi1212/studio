@@ -185,10 +185,10 @@ export default function ProfilePage() {
                     <div className="flex items-center justify-between">
                         <Label>Theme</Label>
                         <Tabs defaultValue="dark" className="w-auto">
-                            <TabsList>
-                                <TabsTrigger value="light">Light</TabsTrigger>
-                                <TabsTrigger value="dark">Dark</TabsTrigger>
-                                <TabsTrigger value="system">System</TabsTrigger>
+                            <TabsList className="h-auto">
+                                <TabsTrigger value="light" className="px-6 py-2">Light</TabsTrigger>
+                                <TabsTrigger value="dark" className="px-6 py-2">Dark</TabsTrigger>
+                                <TabsTrigger value="system" className="px-6 py-2">System</TabsTrigger>
                             </TabsList>
                         </Tabs>
                     </div>
