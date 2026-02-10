@@ -36,7 +36,7 @@ const settingsItems = [
     icon: Puzzle,
     title: 'Third Party Integrations',
     description: 'Connect and manage third-party applications.',
-    href: '#',
+    href: '/settings/integrations',
   },
   {
     icon: Lock,
