@@ -84,9 +84,9 @@ const kybProviders = [
 const kytProviders = [
   { name: 'Scorechain', logo: 'https://i.ibb.co/xKGcFvcs/1.png' },
   { name: 'Crystal Intelligence', logo: 'https://i.ibb.co/8g2Qmknh/2.png' },
-  { name: 'Chainalysis', logo: 'https://i.ibb.co/0yYWB1Yb/8.png' },
-  { name: 'TRM Labs', logo: 'https://i.ibb.co/8DsyxCyR/9.png' },
-  { name: 'Arkham', logo: 'https://i.ibb.co/Pzc00sHp/10.png' },
+  { name: 'Chainalysis', logo: 'https://i.ibb.co/JW2JLXp6/3.png' },
+  { name: 'TRM Labs', logo: 'https://i.ibb.co/bMT2x7YG/4.png' },
+  { name: 'Arkham', logo: 'https://i.ibb.co/QFm6xmyM/5.png' },
 ];
 
 
@@ -129,11 +129,9 @@ function KybProviderList({ onViewStatus }: KybProviderListProps) {
   );
 }
 
-interface KytProviderListProps {
-  onViewStatus: () => void;
-}
+interface KytProviderListProps {}
 
-function KytProviderList({ onViewStatus }: KytProviderListProps) {
+function KytProviderList({}: KytProviderListProps) {
   return (
     <div className="space-y-6">
       <p className="text-sm text-center text-muted-foreground">
@@ -158,11 +156,6 @@ function KytProviderList({ onViewStatus }: KytProviderListProps) {
             <CardTitle className="text-base font-semibold">{provider.name}</CardTitle>
           </Card>
         ))}
-      </div>
-      <div className="flex justify-center">
-        <Button variant="link" onClick={onViewStatus} className="text-muted-foreground">
-          <ShieldCheck className="mr-2 h-4 w-4" /> Use Platform Verification
-        </Button>
       </div>
     </div>
   );
@@ -285,7 +278,6 @@ export default function CompliancePage() {
   const [isVerificationModalOpen, setIsVerificationModalOpen] = useState(false);
   const [kycStep, setKycStep] = useState<'providers' | 'status'>('providers');
   const [kybStep, setKybStep] = useState<'providers' | 'status'>('providers');
-  const [kytStep, setKytStep] = useState<'providers' | 'status'>('providers');
 
   useEffect(() => {
     const storedUser = localStorage.getItem('currentUser');
@@ -318,7 +310,6 @@ export default function CompliancePage() {
 
   const handleOpenKytDialog = () => {
     setSelectedVerification('kyt');
-    setKytStep('providers');
     setIsVerificationModalOpen(true);
   };
 
@@ -453,22 +444,7 @@ export default function CompliancePage() {
                             </div>
                         )
                     ) : selectedVerification === 'kyt' ? (
-                         kytStep === 'providers' ? (
-                            <KytProviderList onViewStatus={() => setKytStep('status')} />
-                         ) : (
-                            <div>
-                                <h3 className="font-semibold">Status:</h3>
-                                <p className="text-muted-foreground text-sm mb-6">{getKytStatusDescription(user)}</p>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                    <div className="text-center text-muted-foreground py-10 col-span-1 md:col-span-2">
-                                        <p>KYT status details will be shown here.</p>
-                                        <Button variant="outline" onClick={() => setKytStep('providers')} className="mt-4">
-                                            <ArrowLeft className="mr-2 h-4 w-4" /> Back to Providers
-                                        </Button>
-                                    </div>
-                                </div>
-                            </div>
-                        )
+                         <KytProviderList />
                     ) : (
                         <div className="text-center text-muted-foreground py-10">
                             <p>Select a verification type.</p>
