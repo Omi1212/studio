@@ -53,27 +53,32 @@ function IntegrationCard({ name, logo, description }: { name: string; logo: stri
 
   return (
     <Card className="flex flex-col">
-      <CardHeader className="flex-row items-start gap-4 space-y-0">
-        <div className="relative h-12 w-12 shrink-0">
-          <Image
-            src={logo}
-            alt={`${name} logo`}
-            fill
-            style={{ objectFit: 'contain' }}
-            className="rounded-md"
-          />
-        </div>
-        <div className="flex-1">
-          <CardTitle>{name}</CardTitle>
-          <CardDescription>{description}</CardDescription>
+      <CardHeader>
+        <div className="flex items-center gap-4">
+            <div className="relative h-10 w-10 shrink-0">
+              <Image
+                src={logo}
+                alt={`${name} logo`}
+                fill
+                style={{ objectFit: 'contain' }}
+                sizes="40px"
+                className="rounded-md"
+              />
+            </div>
+            <CardTitle className="text-lg">{name}</CardTitle>
         </div>
       </CardHeader>
-      <CardContent className="flex-1 flex items-end">
+      <CardContent className="flex-1">
+        <CardDescription>{description}</CardDescription>
+      </CardContent>
+      <CardFooter>
         <div className="flex items-center justify-between w-full">
-            <span className="text-sm font-medium text-muted-foreground">{isConnected ? "Connected" : "Connect"}</span>
+            <span className={`text-sm font-medium ${isConnected ? 'text-green-500' : 'text-muted-foreground'}`}>
+                {isConnected ? "Connected" : "Not Connected"}
+            </span>
             <Switch checked={isConnected} onCheckedChange={setIsConnected} />
         </div>
-      </CardContent>
+      </CardFooter>
     </Card>
   );
 }
