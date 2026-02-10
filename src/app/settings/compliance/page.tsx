@@ -82,11 +82,11 @@ const kybProviders = [
 ];
 
 const kytProviders = [
-  { name: 'Scorechain', logo: 'https://i.ibb.co/xKGcFvcs/1.png' },
-  { name: 'Crystal Intelligence', logo: 'https://i.ibb.co/8g2Qmknh/2.png' },
-  { name: 'Chainalysis', logo: 'https://i.ibb.co/JW2JLXp6/3.png' },
-  { name: 'TRM Labs', logo: 'https://i.ibb.co/bMT2x7YG/4.png' },
-  { name: 'Arkham', logo: 'https://i.ibb.co/QFm6xmyM/5.png' },
+  { name: 'Scorechain', logo: 'https://i.ibb.co/hFk9xwJW/11.png' },
+  { name: 'Crystal Intelligence', logo: 'https://i.ibb.co/jv0cDR9Z/12.png' },
+  { name: 'Chainalysis', logo: 'https://i.ibb.co/ZRBJWJ5T/13.png' },
+  { name: 'TRM Labs', logo: 'https://i.ibb.co/zhRZJDbW/14.png' },
+  { name: 'Arkham', logo: 'https://i.ibb.co/yBynJvfV/15.png' },
 ];
 
 
