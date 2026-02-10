@@ -38,7 +38,7 @@ export default function KycProviderList({ onViewStatus }: KycProviderListProps) 
                 fill
                 style={{ objectFit: 'contain' }}
                 sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
-                className="transition-all duration-300"
+                className="transition-all duration-300 rounded-md"
               />
             </div>
             <CardTitle className="text-base font-semibold">{provider.name}</CardTitle>
