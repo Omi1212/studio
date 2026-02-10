@@ -18,32 +18,32 @@ import Image from 'next/image';
 const integrations = [
   {
     name: 'HubSpot',
-    logo: 'https://i.ibb.co/k2A0V0b/hubspot.png',
+    logo: 'https://i.ibb.co/JjfssTr2/16.png',
     description: 'Sync contacts, companies, and deals.'
   },
   {
     name: 'Salesforce',
-    logo: 'https://i.ibb.co/hZ2vYv1/salesforce.png',
+    logo: 'https://i.ibb.co/PvMcS85n/17.png',
     description: 'Sync leads, accounts, and opportunities.'
   },
   {
     name: 'Zoho CRM',
-    logo: 'https://i.ibb.co/j3v4n5N/zoho.png',
+    logo: 'https://i.ibb.co/jk96dZs1/18.png',
     description: 'Sync leads, contacts, and potentials.'
   },
   {
     name: 'Pipedrive',
-    logo: 'https://i.ibb.co/1nQY0jH/pipedrive.png',
+    logo: 'https://i.ibb.co/s9PXkzk6/19.png',
     description: 'Sync people, organizations, and deals.'
   },
   {
     name: 'Copper',
-    logo: 'https://i.ibb.co/yQWJzFq/copper.png',
+    logo: 'https://i.ibb.co/ZRNkPFv6/20.png',
     description: 'Sync people, companies, and opportunities.'
   },
   {
     name: 'Dynamics 365',
-    logo: 'https://i.ibb.co/gDF8qP5/dynamics365.png',
+    logo: 'https://i.ibb.co/N65ZQsr2/21.png',
     description: 'Sync leads, accounts, and contacts.'
   },
 ];
