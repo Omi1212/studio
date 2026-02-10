@@ -16,6 +16,7 @@ import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import Link from 'next/link';
+import KycProviderList from '@/components/settings/kyc-provider-list';
 
 const kycLevels = [
   {
@@ -103,7 +104,7 @@ function VerificationLevelIndicator({ currentLevel, levels }: { currentLevel: nu
   );
 }
 
-function VerificationPrompt({ user, isBusiness }: { user: User, isBusiness: boolean }) {
+function VerificationPrompt({ user, isBusiness, onStart }: { user: User, isBusiness: boolean, onStart?: () => void }) {
     const levels = isBusiness ? kybLevels : kycLevels;
     const currentLevel = (isBusiness ? user.kybLevel : user.kycLevel) || 0;
     const nextLevel = levels.find(level => level.level === currentLevel + 1);
@@ -118,7 +119,7 @@ function VerificationPrompt({ user, isBusiness }: { user: User, isBusiness: bool
             <ul className="text-sm text-muted-foreground list-disc list-inside mb-4 text-left">
                 {nextLevel.requirements.map(req => <li key={req}>{req}</li>)}
             </ul>
-            <Button>
+            <Button onClick={onStart}>
             Start {nextLevel.title}
             </Button>
         </div>
@@ -127,11 +128,14 @@ function VerificationPrompt({ user, isBusiness }: { user: User, isBusiness: bool
 
     return (
         <div className="flex flex-col items-center justify-center bg-muted/50 rounded-lg p-6 text-center h-full">
-        <ShieldCheck className="h-16 w-16 text-green-500 mb-4" />
-        <h4 className="font-bold text-lg">You are fully verified!</h4>
-        <p className="text-muted-foreground text-sm mt-2">
-            You have successfully completed all identity verification steps.
-        </p>
+            <ShieldCheck className="h-16 w-16 text-green-500 mb-4" />
+            <h4 className="font-bold text-lg">You are fully verified!</h4>
+            <p className="text-muted-foreground text-sm mt-2 mb-4">
+                You have successfully completed all identity verification steps.
+            </p>
+             <Button variant="outline" onClick={onStart}>
+                <ArrowLeft className="mr-2 h-4 w-4" /> Back to Providers
+            </Button>
         </div>
     );
 }
@@ -175,6 +179,7 @@ export default function CompliancePage() {
   const [loading, setLoading] = useState(true);
   const [selectedVerification, setSelectedVerification] = useState<'kyc' | 'kyb'>('kyc');
   const [isVerificationModalOpen, setIsVerificationModalOpen] = useState(false);
+  const [kycStep, setKycStep] = useState<'providers' | 'status'>('providers');
 
   useEffect(() => {
     const storedUser = localStorage.getItem('currentUser');
@@ -192,6 +197,12 @@ export default function CompliancePage() {
         setLoading(false);
     }
   }, []);
+
+  const handleOpenKycDialog = () => {
+    setSelectedVerification('kyc');
+    setKycStep('providers');
+    setIsVerificationModalOpen(true);
+  };
 
   if (loading) {
       return (
@@ -238,10 +249,7 @@ export default function CompliancePage() {
                   <CardContent>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <div
-                              onClick={() => {
-                                  setSelectedVerification('kyc');
-                                  setIsVerificationModalOpen(true);
-                              }}
+                              onClick={handleOpenKycDialog}
                               className="rounded-lg border p-6 text-center cursor-pointer transition-all space-y-2 hover:bg-muted/50"
                           >
                               <FileLock2 className="mx-auto h-8 w-8 text-muted-foreground" />
@@ -273,22 +281,26 @@ export default function CompliancePage() {
             <DialogContent className="sm:max-w-3xl">
                 <DialogHeader>
                     <DialogTitle>
-                        {selectedVerification === 'kyc' ? 'KYC Verification Status' : 'KYB Verification Status'}
+                        {selectedVerification === 'kyc' ? 'KYC Verification' : 'KYB Verification Status'}
                     </DialogTitle>
                 </DialogHeader>
                 <div className="pt-4">
                     {selectedVerification === 'kyc' ? (
-                        <div>
-                            <h3 className="font-semibold">Status:</h3>
-                            <p className="text-muted-foreground text-sm mb-6">{getKycStatusDescription(user)}</p>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                <VerificationLevelIndicator 
-                                currentLevel={user.kycLevel || 0}
-                                levels={kycLevels}
-                                />
-                                <VerificationPrompt user={user} isBusiness={false} />
+                        kycStep === 'providers' ? (
+                            <KycProviderList onViewStatus={() => setKycStep('status')} />
+                        ) : (
+                            <div>
+                                <h3 className="font-semibold">Status:</h3>
+                                <p className="text-muted-foreground text-sm mb-6">{getKycStatusDescription(user)}</p>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                    <VerificationLevelIndicator
+                                    currentLevel={user.kycLevel || 0}
+                                    levels={kycLevels}
+                                    />
+                                    <VerificationPrompt user={user} isBusiness={false} onStart={() => setKycStep('providers')} />
+                                </div>
                             </div>
-                        </div>
+                        )
                     ) : (
                         <div>
                             <h3 className="font-semibold">Status:</h3>
