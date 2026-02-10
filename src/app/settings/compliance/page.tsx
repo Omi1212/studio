@@ -81,6 +81,15 @@ const kybProviders = [
   { name: "Moody's Analytics", logo: 'https://i.ibb.co/Pzc00sHp/10.png' },
 ];
 
+const kytProviders = [
+  { name: 'Scorechain', logo: 'https://i.ibb.co/xKGcFvcs/1.png' },
+  { name: 'Crystal Intelligence', logo: 'https://i.ibb.co/8g2Qmknh/2.png' },
+  { name: 'Chainalysis', logo: 'https://i.ibb.co/0yYWB1Yb/8.png' },
+  { name: 'TRM Labs', logo: 'https://i.ibb.co/8DsyxCyR/9.png' },
+  { name: 'Arkham', logo: 'https://i.ibb.co/Pzc00sHp/10.png' },
+];
+
+
 interface KybProviderListProps {
   onViewStatus: () => void;
 }
@@ -104,7 +113,46 @@ function KybProviderList({ onViewStatus }: KybProviderListProps) {
                 fill
                 style={{ objectFit: 'contain' }}
                 sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
-                className="transition-all duration-300 rounded-md"
+                className="rounded-md"
+              />
+            </div>
+            <CardTitle className="text-base font-semibold">{provider.name}</CardTitle>
+          </Card>
+        ))}
+      </div>
+      <div className="flex justify-center">
+        <Button variant="link" onClick={onViewStatus} className="text-muted-foreground">
+          <ShieldCheck className="mr-2 h-4 w-4" /> Use Platform Verification
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+interface KytProviderListProps {
+  onViewStatus: () => void;
+}
+
+function KytProviderList({ onViewStatus }: KytProviderListProps) {
+  return (
+    <div className="space-y-6">
+      <p className="text-sm text-center text-muted-foreground">
+        Choose a provider to continue with your transaction monitoring.
+      </p>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {kytProviders.map((provider) => (
+          <Card
+            key={provider.name}
+            className="flex flex-col items-center justify-center p-6 text-center cursor-pointer hover:bg-muted/50 transition-colors group rounded-xl"
+          >
+            <div className="relative h-12 w-28 mb-4">
+              <Image
+                src={provider.logo}
+                alt={`${provider.name} logo`}
+                fill
+                style={{ objectFit: 'contain' }}
+                sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
+                className="rounded-md"
               />
             </div>
             <CardTitle className="text-base font-semibold">{provider.name}</CardTitle>
@@ -222,6 +270,14 @@ function getVerificationStatusText(status: 'verified' | 'pending' | 'rejected' |
       return 'Business verification not started.';
   }
 
+  function getKytStatusDescription(user: User) {
+    if (user.kytStatus === 'pending') return `Your verification is currently under review.`;
+    if (user.kytStatus === 'verified') return 'Your transactions are being monitored.';
+    if (user.kytStatus === 'rejected') return `Your KYT verification was rejected.`;
+    return 'Transaction monitoring not started.';
+}
+
+
 export default function CompliancePage() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -229,6 +285,7 @@ export default function CompliancePage() {
   const [isVerificationModalOpen, setIsVerificationModalOpen] = useState(false);
   const [kycStep, setKycStep] = useState<'providers' | 'status'>('providers');
   const [kybStep, setKybStep] = useState<'providers' | 'status'>('providers');
+  const [kytStep, setKytStep] = useState<'providers' | 'status'>('providers');
 
   useEffect(() => {
     const storedUser = localStorage.getItem('currentUser');
@@ -261,6 +318,7 @@ export default function CompliancePage() {
 
   const handleOpenKytDialog = () => {
     setSelectedVerification('kyt');
+    setKytStep('providers');
     setIsVerificationModalOpen(true);
   };
 
@@ -394,9 +452,26 @@ export default function CompliancePage() {
                                 </div>
                             </div>
                         )
+                    ) : selectedVerification === 'kyt' ? (
+                         kytStep === 'providers' ? (
+                            <KytProviderList onViewStatus={() => setKytStep('status')} />
+                         ) : (
+                            <div>
+                                <h3 className="font-semibold">Status:</h3>
+                                <p className="text-muted-foreground text-sm mb-6">{getKytStatusDescription(user)}</p>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                    <div className="text-center text-muted-foreground py-10 col-span-1 md:col-span-2">
+                                        <p>KYT status details will be shown here.</p>
+                                        <Button variant="outline" onClick={() => setKytStep('providers')} className="mt-4">
+                                            <ArrowLeft className="mr-2 h-4 w-4" /> Back to Providers
+                                        </Button>
+                                    </div>
+                                </div>
+                            </div>
+                        )
                     ) : (
                         <div className="text-center text-muted-foreground py-10">
-                            <p>KYT (Know Your Transaction) verification is not yet available.</p>
+                            <p>Select a verification type.</p>
                         </div>
                     )}
                 </div>
