@@ -91,19 +91,19 @@ function KybProviderList({ onViewStatus }: KybProviderListProps) {
       <p className="text-sm text-center text-muted-foreground">
         Choose a provider to continue with your business verification.
       </p>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {kybProviders.map((provider) => (
           <Card
             key={provider.name}
             className="flex flex-col items-center justify-center p-6 text-center cursor-pointer hover:bg-muted/50 transition-colors group"
           >
-            <div className="relative h-16 w-36 mb-4">
+            <div className="relative h-12 w-28 mb-4">
               <Image
                 src={provider.logo}
                 alt={`${provider.name} logo`}
                 fill
                 style={{ objectFit: 'contain' }}
-                sizes="(max-width: 768px) 50vw, 33vw"
+                sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
                 className="brightness-0 invert group-hover:brightness-100 group-hover:invert-0 transition-all duration-300"
               />
             </div>
