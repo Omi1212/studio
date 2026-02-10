@@ -274,8 +274,8 @@ function getVerificationStatusText(status: 'verified' | 'pending' | 'rejected' |
 export default function CompliancePage() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [selectedVerification, setSelectedVerification] = useState<'kyc' | 'kyb' | 'kyt'>('kyc');
   const [isVerificationModalOpen, setIsVerificationModalOpen] = useState(false);
+  const [selectedVerification, setSelectedVerification] = useState<'kyc' | 'kyb' | 'kyt'>('kyc');
   const [kycStep, setKycStep] = useState<'providers' | 'status'>('providers');
   const [kybStep, setKybStep] = useState<'providers' | 'status'>('providers');
 
@@ -353,7 +353,7 @@ export default function CompliancePage() {
               <Card>
                   <CardHeader>
                       <CardTitle>Verification Status</CardTitle>
-                      <CardDescription>View and manage your KYC & KYB verification status.</CardDescription>
+                      <CardDescription>View and manage your KYC, KYB & KYT verification status.</CardDescription>
                   </CardHeader>
                   <CardContent>
                       <div className="space-y-4">

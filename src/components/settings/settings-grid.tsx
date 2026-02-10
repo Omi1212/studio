@@ -23,7 +23,7 @@ const settingsItems = [
   {
     icon: ShieldCheck,
     title: 'Compliance',
-    description: 'View and manage your KYC & KYB verification status.',
+    description: 'View and manage your KYC, KYB & KYT verification status.',
     href: '/settings/compliance',
   },
   {
