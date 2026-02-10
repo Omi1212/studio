@@ -11,7 +11,7 @@ import { useEffect, useState } from 'react';
 import type { User } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { CheckCircle2, ShieldCheck, FileLock2, ArrowLeft, ArrowRightLeft } from 'lucide-react';
+import { CheckCircle2, ShieldCheck, FileLock2, ArrowLeft, ArrowRightLeft, Building, Landmark } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -312,7 +312,7 @@ export default function CompliancePage() {
                               onClick={handleOpenKycDialog}
                               className="rounded-lg border p-6 text-center cursor-pointer transition-all space-y-2 hover:bg-muted/50"
                           >
-                              <FileLock2 className="mx-auto h-8 w-8 text-muted-foreground" />
+                              <ShieldCheck className="mx-auto h-8 w-8 text-muted-foreground" />
                               <p className="font-semibold">KYC (Know Your Customer)</p>
                               <p className={cn("text-sm", user.kycStatus === 'verified' ? 'text-green-500' : 'text-muted-foreground')}>{getVerificationStatusText(user.kycStatus)}</p>
                           </div>
@@ -322,7 +322,7 @@ export default function CompliancePage() {
                                 onClick={handleOpenKybDialog}
                                 className="rounded-lg border p-6 text-center cursor-pointer transition-all space-y-2 hover:bg-muted/50"
                             >
-                                <FileLock2 className="mx-auto h-8 w-8 text-muted-foreground" />
+                                <Building className="mx-auto h-8 w-8 text-muted-foreground" />
                                 <p className="font-semibold">KYB (Know Your Business)</p>
                                 <p className={cn("text-sm", user.kybStatus === 'verified' ? 'text-green-500' : 'text-muted-foreground')}>{getVerificationStatusText(user.kybStatus)}</p>
                             </div>
@@ -331,7 +331,7 @@ export default function CompliancePage() {
                               onClick={handleOpenKytDialog}
                               className="rounded-lg border p-6 text-center cursor-pointer transition-all space-y-2 hover:bg-muted/50"
                           >
-                              <ArrowRightLeft className="mx-auto h-8 w-8 text-muted-foreground" />
+                              <Landmark className="mx-auto h-8 w-8 text-muted-foreground" />
                               <p className="font-semibold">KYT (Know Your Transaction)</p>
                               <p className={cn("text-sm", user.kytStatus === 'verified' ? 'text-green-500' : 'text-muted-foreground')}>{getVerificationStatusText(user.kytStatus)}</p>
                           </div>
