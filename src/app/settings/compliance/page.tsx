@@ -113,7 +113,7 @@ function KybProviderList({ onViewStatus }: KybProviderListProps) {
       </div>
       <div className="flex justify-center">
         <Button variant="link" onClick={onViewStatus} className="text-muted-foreground">
-          <ShieldCheck className="mr-2 h-4 w-4" /> View Verification Status
+          <ShieldCheck className="mr-2 h-4 w-4" /> Use Platform Verification
         </Button>
       </div>
     </div>
