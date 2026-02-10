@@ -48,7 +48,7 @@ const settingsItems = [
     icon: Bell,
     title: 'Notifications & Alerts',
     description: 'Customize how and when you receive notifications.',
-    href: '#',
+    href: '/settings/notifications',
   },
   {
     icon: FileText,
