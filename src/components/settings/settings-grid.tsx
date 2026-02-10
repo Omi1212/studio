@@ -52,7 +52,7 @@ const settingsItems = [
   },
   {
     icon: FileText,
-    title: 'Reports & Tax Data',
+    title: 'Data Management',
     description: 'Download your transaction reports and tax documents.',
     href: '#',
   },
