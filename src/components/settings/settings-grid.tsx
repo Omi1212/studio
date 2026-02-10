@@ -73,7 +73,7 @@ interface SettingCardProps {
 
 function SettingCard({ icon: Icon, title, description, href }: SettingCardProps) {
   return (
-    <Link href={href} className="flex">
+    <Link href={href} className="flex h-full">
       <Card className="flex w-full flex-col hover:bg-muted/50 transition-colors">
         <CardHeader className="flex-1">
           <div className="flex flex-col items-start gap-4">
