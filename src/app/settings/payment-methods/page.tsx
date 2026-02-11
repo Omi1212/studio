@@ -11,21 +11,6 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft, Banknote, Bitcoin, Plus, DollarSign, Zap } from 'lucide-react';
 import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Separator } from '@/components/ui/separator';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-
-function SettingsInput({ id, label, description, placeholder, value }: { id: string, label: string, description?: string, placeholder?: string, value?: string }) {
-    return (
-        <div className="space-y-2">
-            <Label htmlFor={id}>{label}</Label>
-            {description && <p className="text-sm text-muted-foreground">{description}</p>}
-            <Input id={id} placeholder={placeholder} defaultValue={value} />
-        </div>
-    );
-}
-
 
 export default function PaymentMethodsPage() {
   return (
@@ -80,26 +65,16 @@ export default function PaymentMethodsPage() {
                         Configure your Bitcoin addresses for receiving payments.
                     </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-6">
-                    <SettingsInput 
-                        id="btc-address"
-                        label="On-chain BTC Address"
-                        placeholder="bc1..."
-                    />
-                    <SettingsInput 
-                        id="btc-xpub"
-                        label="Bitcoin xPub / zPub"
-                        description="Used for generating new addresses for each invoice."
-                        placeholder="xpub..."
-                    />
-                     <SettingsInput 
-                        id="lightning-address"
-                        label="Lightning Address / LNURL"
-                        placeholder="name@provider.com"
-                    />
+                <CardContent>
+                   <div className="text-center text-muted-foreground p-8 border-dashed border-2 rounded-lg">
+                        <p>No Bitcoin addresses configured yet.</p>
+                   </div>
                 </CardContent>
                 <CardFooter>
-                    <Button>Save Bitcoin Settings</Button>
+                    <Button variant="outline">
+                        <Plus className="mr-2 h-4 w-4" />
+                        Configure Bitcoin
+                    </Button>
                 </CardFooter>
               </Card>
 
@@ -113,20 +88,16 @@ export default function PaymentMethodsPage() {
                         Configure addresses for other supported networks.
                     </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-6">
-                     <SettingsInput 
-                        id="spark-address"
-                        label="Spark Address"
-                        placeholder="spark1..."
-                    />
-                      <SettingsInput 
-                        id="liquid-usdt-address"
-                        label="Liquid USDT Address"
-                        placeholder="lq1..."
-                    />
+                <CardContent>
+                    <div className="text-center text-muted-foreground p-8 border-dashed border-2 rounded-lg">
+                        <p>No other network addresses configured yet.</p>
+                    </div>
                 </CardContent>
                  <CardFooter>
-                    <Button>Save Network Settings</Button>
+                    <Button variant="outline">
+                        <Plus className="mr-2 h-4 w-4" />
+                        Configure Networks
+                    </Button>
                 </CardFooter>
               </Card>
 
@@ -140,34 +111,16 @@ export default function PaymentMethodsPage() {
                        Manage your stablecoin addresses and payout preferences.
                     </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-6">
-                    <SettingsInput 
-                        id="erc20-address"
-                        label="ERC-20 USDT/USDC Address"
-                        placeholder="0x..."
-                    />
-                    <SettingsInput 
-                        id="polygon-address"
-                        label="Polygon Stablecoin Address"
-                        placeholder="0x..."
-                    />
-                    <Separator />
-                     <div className="space-y-2">
-                        <Label htmlFor="payout-method">Stablecoin Payout Method</Label>
-                        <p className="text-sm text-muted-foreground">Choose how you want to receive stablecoin payouts.</p>
-                        <Select defaultValue="automatic">
-                            <SelectTrigger id="payout-method">
-                                <SelectValue placeholder="Select a method" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="automatic">Automatic</SelectItem>
-                                <SelectItem value="manual">Manual</SelectItem>
-                            </SelectContent>
-                        </Select>
+                <CardContent>
+                    <div className="text-center text-muted-foreground p-8 border-dashed border-2 rounded-lg">
+                        <p>No stablecoin addresses configured yet.</p>
                     </div>
                 </CardContent>
                  <CardFooter>
-                    <Button>Save Stablecoin Settings</Button>
+                    <Button variant="outline">
+                        <Plus className="mr-2 h-4 w-4" />
+                        Configure Stablecoins
+                    </Button>
                 </CardFooter>
               </Card>
 
