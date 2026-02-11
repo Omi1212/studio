@@ -6,6 +6,7 @@ import { Card, CardTitle } from '../ui/card';
 import Image from 'next/image';
 
 const providers = [
+  { name: 'Didit', logo: 'https://i.ibb.co/XrPTRgRf/Dise-o-sin-t-tulo-15.png' },
   { name: 'Sumsub', logo: 'https://i.ibb.co/xKGcFvcs/1.png' },
   { name: 'Onfido', logo: 'https://i.ibb.co/8g2Qmknh/2.png' },
   { name: 'Veriff', logo: 'https://i.ibb.co/JW2JLXp6/3.png' },
