@@ -56,12 +56,6 @@ const settingsItems = [
     description: 'Download your transaction reports and data.',
     href: '/settings/data-management',
   },
-  {
-    icon: Briefcase,
-    title: 'Workspace Settings',
-    description: 'Manage general settings for your workspace.',
-    href: '#',
-  },
 ];
 
 interface SettingCardProps {
