@@ -10,7 +10,8 @@ import HeaderDynamic from '@/components/dashboard/header-dynamic';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Banknote, Bitcoin, Plus, DollarSign } from 'lucide-react';
 import Link from 'next/link';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
 export default function PaymentMethodsPage() {
   return (
@@ -31,76 +32,89 @@ export default function PaymentMethodsPage() {
                 </h1>
             </div>
             
-            <div className="max-w-4xl mx-auto space-y-6">
-              <Card>
-                <CardHeader>
-                    <div className="flex items-center gap-3">
-                        <Banknote className="h-6 w-6" />
-                        <CardTitle>Bank Accounts</CardTitle>
-                    </div>
-                    <CardDescription>
-                        Manage your linked bank accounts for payouts.
-                    </CardDescription>
-                </CardHeader>
-                <CardContent>
-                   <div className="text-center text-muted-foreground p-8 border-dashed border-2 rounded-lg">
-                        <p>No bank accounts added yet.</p>
-                   </div>
-                </CardContent>
-                <CardFooter>
-                    <Button variant="outline">
-                        <Plus className="mr-2 h-4 w-4" />
-                        Add Bank Account
-                    </Button>
-                </CardFooter>
-              </Card>
+            <div className="max-w-4xl mx-auto">
+              <Accordion type="single" collapsible className="w-full space-y-6">
+                <AccordionItem value="bank-accounts" className="border-b-0">
+                  <Card>
+                    <AccordionTrigger className="p-6 hover:no-underline text-left">
+                        <div className="flex items-center gap-4">
+                            <Banknote className="h-6 w-6" />
+                            <div className="space-y-1">
+                                <h3 className="text-lg font-semibold leading-none tracking-tight">Bank Accounts</h3>
+                                <p className="text-sm text-muted-foreground">Manage your linked bank accounts for payouts.</p>
+                            </div>
+                        </div>
+                    </AccordionTrigger>
+                    <AccordionContent className="pt-0">
+                        <CardContent>
+                           <div className="text-center text-muted-foreground p-8 border-dashed border-2 rounded-lg">
+                                <p>No bank accounts added yet.</p>
+                           </div>
+                        </CardContent>
+                        <CardFooter>
+                            <Button variant="outline">
+                                <Plus className="mr-2 h-4 w-4" />
+                                Add Bank Account
+                            </Button>
+                        </CardFooter>
+                    </AccordionContent>
+                  </Card>
+                </AccordionItem>
 
-              <Card>
-                <CardHeader>
-                    <div className="flex items-center gap-3">
-                        <Bitcoin className="h-6 w-6" />
-                        <CardTitle>Bitcoin</CardTitle>
-                    </div>
-                    <CardDescription>
-                        Configure your Bitcoin addresses for receiving payments.
-                    </CardDescription>
-                </CardHeader>
-                <CardContent>
-                   <div className="text-center text-muted-foreground p-8 border-dashed border-2 rounded-lg">
-                        <p>No Bitcoin addresses configured yet.</p>
-                   </div>
-                </CardContent>
-                <CardFooter>
-                    <Button variant="outline">
-                        <Plus className="mr-2 h-4 w-4" />
-                        Configure Bitcoin
-                    </Button>
-                </CardFooter>
-              </Card>
+                <AccordionItem value="bitcoin" className="border-b-0">
+                  <Card>
+                    <AccordionTrigger className="p-6 hover:no-underline text-left">
+                        <div className="flex items-center gap-4">
+                            <Bitcoin className="h-6 w-6" />
+                            <div className="space-y-1">
+                                <h3 className="text-lg font-semibold leading-none tracking-tight">Bitcoin</h3>
+                                <p className="text-sm text-muted-foreground">Configure your Bitcoin addresses for receiving payments.</p>
+                            </div>
+                        </div>
+                    </AccordionTrigger>
+                    <AccordionContent className="pt-0">
+                        <CardContent>
+                           <div className="text-center text-muted-foreground p-8 border-dashed border-2 rounded-lg">
+                                <p>No Bitcoin addresses configured yet.</p>
+                           </div>
+                        </CardContent>
+                        <CardFooter>
+                            <Button variant="outline">
+                                <Plus className="mr-2 h-4 w-4" />
+                                Configure Bitcoin
+                            </Button>
+                        </CardFooter>
+                    </AccordionContent>
+                  </Card>
+                </AccordionItem>
 
-              <Card>
-                <CardHeader>
-                     <div className="flex items-center gap-3">
-                        <DollarSign className="h-6 w-6" />
-                        <CardTitle>Stablecoins</CardTitle>
-                    </div>
-                    <CardDescription>
-                       Manage your stablecoin addresses and payout preferences.
-                    </CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <div className="text-center text-muted-foreground p-8 border-dashed border-2 rounded-lg">
-                        <p>No stablecoin addresses configured yet.</p>
-                    </div>
-                </CardContent>
-                 <CardFooter>
-                    <Button variant="outline">
-                        <Plus className="mr-2 h-4 w-4" />
-                        Configure Stablecoins
-                    </Button>
-                </CardFooter>
-              </Card>
-
+                <AccordionItem value="stablecoins" className="border-b-0">
+                    <Card>
+                        <AccordionTrigger className="p-6 hover:no-underline text-left">
+                            <div className="flex items-center gap-4">
+                                <DollarSign className="h-6 w-6" />
+                                <div className="space-y-1">
+                                    <h3 className="text-lg font-semibold leading-none tracking-tight">Stablecoins</h3>
+                                    <p className="text-sm text-muted-foreground">Manage your stablecoin addresses and payout preferences.</p>
+                                </div>
+                            </div>
+                        </AccordionTrigger>
+                        <AccordionContent className="pt-0">
+                             <CardContent>
+                                <div className="text-center text-muted-foreground p-8 border-dashed border-2 rounded-lg">
+                                    <p>No stablecoin addresses configured yet.</p>
+                                </div>
+                            </CardContent>
+                             <CardFooter>
+                                <Button variant="outline">
+                                    <Plus className="mr-2 h-4 w-4" />
+                                    Configure Stablecoins
+                                </Button>
+                            </CardFooter>
+                        </AccordionContent>
+                    </Card>
+                </AccordionItem>
+              </Accordion>
             </div>
           </main>
         </div>
