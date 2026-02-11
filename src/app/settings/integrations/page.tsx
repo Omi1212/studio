@@ -72,12 +72,18 @@ function IntegrationCard({ name, logo, description }: { name: string; logo: stri
         <CardDescription>{description}</CardDescription>
       </CardContent>
       <CardFooter>
-        <div className="flex items-center justify-between w-full">
-            <span className={`text-sm font-medium ${isConnected ? 'text-green-500' : 'text-muted-foreground'}`}>
-                {isConnected ? "Connected" : "Not Connected"}
+        {isConnected ? (
+          <div className="flex items-center justify-between w-full">
+            <span className="text-sm font-medium text-green-500">
+              Connected
             </span>
             <Switch checked={isConnected} onCheckedChange={setIsConnected} />
-        </div>
+          </div>
+        ) : (
+          <Button variant="outline" className="w-full" onClick={() => setIsConnected(true)}>
+            Connect
+          </Button>
+        )}
       </CardFooter>
     </Card>
   );
