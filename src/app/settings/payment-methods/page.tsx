@@ -8,7 +8,7 @@ import {
 import SidebarNav from '@/components/dashboard/sidebar-nav';
 import HeaderDynamic from '@/components/dashboard/header-dynamic';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Banknote, Bitcoin, Plus, DollarSign, Zap } from 'lucide-react';
+import { ArrowLeft, Banknote, Bitcoin, Plus, DollarSign } from 'lucide-react';
 import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 
@@ -74,29 +74,6 @@ export default function PaymentMethodsPage() {
                     <Button variant="outline">
                         <Plus className="mr-2 h-4 w-4" />
                         Configure Bitcoin
-                    </Button>
-                </CardFooter>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                    <div className="flex items-center gap-3">
-                        <Zap className="h-6 w-6" />
-                        <CardTitle>Other Networks</CardTitle>
-                    </div>
-                    <CardDescription>
-                        Configure addresses for other supported networks.
-                    </CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <div className="text-center text-muted-foreground p-8 border-dashed border-2 rounded-lg">
-                        <p>No other network addresses configured yet.</p>
-                    </div>
-                </CardContent>
-                 <CardFooter>
-                    <Button variant="outline">
-                        <Plus className="mr-2 h-4 w-4" />
-                        Configure Networks
                     </Button>
                 </CardFooter>
               </Card>
