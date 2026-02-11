@@ -30,7 +30,7 @@ const settingsItems = [
     icon: CreditCard,
     title: 'Payment Methods',
     description: 'Add and manage your linked bank accounts and cards.',
-    href: '#',
+    href: '/settings/payment-methods',
   },
   {
     icon: Puzzle,
