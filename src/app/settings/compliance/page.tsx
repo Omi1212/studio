@@ -18,6 +18,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import Link from 'next/link';
 import KycProviderList from '@/components/settings/kyc-provider-list';
 import Image from 'next/image';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const kycLevels = [
   {
@@ -397,55 +398,72 @@ export default function CompliancePage() {
       </SidebarInset>
        <Dialog open={isVerificationModalOpen} onOpenChange={setIsVerificationModalOpen}>
             <DialogContent className="sm:max-w-4xl">
-                <DialogHeader>
-                    <DialogTitle>
-                        {selectedVerification === 'kyc' ? 'KYC Verification' 
-                         : selectedVerification === 'kyb' ? 'KYB Verification'
-                         : 'KYT (Know Your Transaction)'
-                        }
-                    </DialogTitle>
-                </DialogHeader>
-                <div className="pt-4">
-                    {selectedVerification === 'kyc' ? (
-                        kycStep === 'providers' ? (
-                            <KycProviderList onViewStatus={() => setKycStep('status')} />
-                        ) : (
-                            <div>
-                                <h3 className="font-semibold">Status:</h3>
-                                <p className="text-muted-foreground text-sm mb-6">{getKycStatusDescription(user)}</p>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                    <VerificationLevelIndicator
-                                    currentLevel={user.kycLevel || 0}
-                                    levels={kycLevels}
-                                    />
-                                    <VerificationPrompt user={user} isBusiness={false} onStart={() => setKycStep('providers')} />
-                                </div>
-                            </div>
-                        )
-                    ) : selectedVerification === 'kyb' ? (
-                         kybStep === 'providers' ? (
-                            <KybProviderList onViewStatus={() => setKybStep('status')} />
-                         ) : (
-                            <div>
-                                <h3 className="font-semibold">Status:</h3>
-                                <p className="text-muted-foreground text-sm mb-6">{getKybStatusDescription(user)}</p>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                    <VerificationLevelIndicator 
-                                    currentLevel={user.kybLevel || 0}
-                                    levels={kybLevels}
-                                    />
-                                    <VerificationPrompt user={user} isBusiness={true} onStart={() => setKybStep('providers')} />
-                                </div>
-                            </div>
-                        )
-                    ) : selectedVerification === 'kyt' ? (
-                         <KytProviderList />
-                    ) : (
-                        <div className="text-center text-muted-foreground py-10">
-                            <p>Select a verification type.</p>
+                 {selectedVerification === 'kyc' || selectedVerification === 'kyb' ? (
+                    <>
+                        <DialogHeader>
+                            <DialogTitle>Identity & Business Verification</DialogTitle>
+                        </DialogHeader>
+                        <Tabs defaultValue={selectedVerification} className="w-full pt-4">
+                            <TabsList className="grid w-full grid-cols-2">
+                                <TabsTrigger value="kyc">KYC (Individual)</TabsTrigger>
+                                <TabsTrigger value="kyb" disabled={!isBusinessRole}>KYB (Business)</TabsTrigger>
+                            </TabsList>
+                            <TabsContent value="kyc" className="pt-4">
+                                {kycStep === 'providers' ? (
+                                    <KycProviderList onViewStatus={() => setKycStep('status')} />
+                                ) : (
+                                    <div>
+                                        <h3 className="font-semibold">Status:</h3>
+                                        <p className="text-muted-foreground text-sm mb-6">{getKycStatusDescription(user)}</p>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                            <VerificationLevelIndicator
+                                            currentLevel={user.kycLevel || 0}
+                                            levels={kycLevels}
+                                            />
+                                            <VerificationPrompt user={user} isBusiness={false} onStart={() => setKycStep('providers')} />
+                                        </div>
+                                    </div>
+                                )}
+                            </TabsContent>
+                            <TabsContent value="kyb" className="pt-4">
+                                {isBusinessRole ? (
+                                    kybStep === 'providers' ? (
+                                        <KybProviderList onViewStatus={() => setKybStep('status')} />
+                                    ) : (
+                                        <div>
+                                            <h3 className="font-semibold">Status:</h3>
+                                            <p className="text-muted-foreground text-sm mb-6">{getKybStatusDescription(user)}</p>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                                <VerificationLevelIndicator 
+                                                currentLevel={user.kybLevel || 0}
+                                                levels={kybLevels}
+                                                />
+                                                <VerificationPrompt user={user} isBusiness={true} onStart={() => setKybStep('providers')} />
+                                            </div>
+                                        </div>
+                                    )
+                                ) : (
+                                    <div className="text-center text-muted-foreground py-10">
+                                        <p>KYB is not applicable for your user role.</p>
+                                    </div>
+                                )}
+                            </TabsContent>
+                        </Tabs>
+                    </>
+                ) : selectedVerification === 'kyt' ? (
+                    <>
+                        <DialogHeader>
+                            <DialogTitle>KYT (Know Your Transaction)</DialogTitle>
+                        </DialogHeader>
+                        <div className="pt-4">
+                            <KytProviderList />
                         </div>
-                    )}
-                </div>
+                    </>
+                ) : (
+                    <div className="text-center text-muted-foreground py-10">
+                        <p>Select a verification type.</p>
+                    </div>
+                )}
             </DialogContent>
         </Dialog>
     </SidebarProvider>
