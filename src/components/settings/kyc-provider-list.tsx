@@ -13,11 +13,9 @@ const providers = [
   { name: 'Persona', logo: 'https://i.ibb.co/xkfbNB6/6.png' },
 ];
 
-interface KycProviderListProps {
-  onViewStatus: () => void;
-}
+interface KycProviderListProps {}
 
-export default function KycProviderList({ onViewStatus }: KycProviderListProps) {
+export default function KycProviderList({}: KycProviderListProps) {
   return (
     <div className="space-y-6">
       <p className="text-sm text-center text-muted-foreground">
@@ -42,11 +40,6 @@ export default function KycProviderList({ onViewStatus }: KycProviderListProps) 
             <CardTitle className="text-base font-semibold">{provider.name}</CardTitle>
           </Card>
         ))}
-      </div>
-      <div className="flex justify-center">
-        <Button variant="link" onClick={onViewStatus} className="text-muted-foreground">
-          <ShieldCheck className="mr-2 h-4 w-4" /> Use Platform Verification
-        </Button>
       </div>
     </div>
   );
