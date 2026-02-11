@@ -5,7 +5,7 @@ import {
   ShieldCheck,
   CreditCard,
   Puzzle,
-  Lock,
+  KeyRound,
   Bell,
   FileText,
   Briefcase,
@@ -39,10 +39,10 @@ const settingsItems = [
     href: '/settings/integrations',
   },
   {
-    icon: Lock,
+    icon: KeyRound,
     title: 'Security & Access',
     description: 'Manage your password, 2FA, and session history.',
-    href: '#',
+    href: '/settings/security',
   },
   {
     icon: Bell,
