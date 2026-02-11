@@ -31,21 +31,6 @@ const integrations = [
     logo: 'https://i.ibb.co/jk96dZs1/18.png',
     description: 'Sync leads, contacts, and potentials.'
   },
-  {
-    name: 'Pipedrive',
-    logo: 'https://i.ibb.co/s9PXkzk6/19.png',
-    description: 'Sync people, organizations, and deals.'
-  },
-  {
-    name: 'Copper',
-    logo: 'https://i.ibb.co/ZRNkPFv6/20.png',
-    description: 'Sync people, companies, and opportunities.'
-  },
-  {
-    name: 'Dynamics 365',
-    logo: 'https://i.ibb.co/N65ZQsr2/21.png',
-    description: 'Sync leads, accounts, and contacts.'
-  },
 ];
 
 function IntegrationCard({ name, logo, description }: { name: string; logo: string; description: string; }) {
