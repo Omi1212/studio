@@ -11,7 +11,7 @@ import { useEffect, useState } from 'react';
 import type { User } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { CheckCircle2, ArrowLeft, ArrowRightLeft, Building, ArrowRight, User as UserIcon } from 'lucide-react';
+import { CheckCircle2, ArrowLeft, ArrowRightLeft, ArrowRight, User as UserIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -298,12 +298,6 @@ export default function CompliancePage() {
     setIsVerificationModalOpen(true);
   };
   
-  const handleOpenKybDialog = () => {
-    setSelectedVerification('kyb');
-    setKybStep('providers');
-    setIsVerificationModalOpen(true);
-  };
-
   const handleOpenKytDialog = () => {
     setSelectedVerification('kyt');
     setIsVerificationModalOpen(true);
@@ -359,25 +353,19 @@ export default function CompliancePage() {
                           >
                               <UserIcon className="h-8 w-8 text-muted-foreground shrink-0" />
                               <div className="flex-1">
-                                  <p className="font-semibold">KYC (Know Your Customer)</p>
-                                  <p className={cn("text-sm", user.kycStatus === 'verified' ? 'text-green-500' : 'text-muted-foreground')}>{getVerificationStatusText(user.kycStatus)}</p>
+                                  <p className="font-semibold">KYC & KYB</p>
+                                  <p className="text-sm text-muted-foreground">
+                                    KYC: <span className={cn(user.kycStatus === 'verified' ? 'text-green-500' : 'text-muted-foreground')}>{getVerificationStatusText(user.kycStatus)}</span>
+                                    {isBusinessRole && (
+                                        <>
+                                            , KYB: <span className={cn(user.kybStatus === 'verified' ? 'text-green-500' : 'text-muted-foreground')}>{getVerificationStatusText(user.kybStatus)}</span>
+                                        </>
+                                    )}
+                                </p>
                               </div>
                               <ArrowRight className="h-5 w-5 text-muted-foreground" />
                           </div>
                           
-                          {isBusinessRole && (
-                            <div
-                                onClick={handleOpenKybDialog}
-                                className="rounded-lg border p-4 flex items-center gap-4 cursor-pointer transition-all hover:bg-muted/50"
-                            >
-                                <Building className="h-8 w-8 text-muted-foreground shrink-0" />
-                                <div className="flex-1">
-                                    <p className="font-semibold">KYB (Know Your Business)</p>
-                                    <p className={cn("text-sm", user.kybStatus === 'verified' ? 'text-green-500' : 'text-muted-foreground')}>{getVerificationStatusText(user.kybStatus)}</p>
-                                </div>
-                                <ArrowRight className="h-5 w-5 text-muted-foreground" />
-                            </div>
-                          )}
                           <div
                               onClick={handleOpenKytDialog}
                               className="rounded-lg border p-4 flex items-center gap-4 cursor-pointer transition-all hover:bg-muted/50"
