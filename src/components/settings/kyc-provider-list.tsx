@@ -9,10 +9,7 @@ const providers = [
   { name: 'Sumsub', logo: 'https://i.ibb.co/xKGcFvcs/1.png' },
   { name: 'Onfido', logo: 'https://i.ibb.co/8g2Qmknh/2.png' },
   { name: 'Veriff', logo: 'https://i.ibb.co/JW2JLXp6/3.png' },
-  { name: 'Shufti Pro', logo: 'https://i.ibb.co/bMT2x7YG/4.png' },
-  { name: 'Jumio', logo: 'https://i.ibb.co/QFm6xmyM/5.png' },
   { name: 'Persona', logo: 'https://i.ibb.co/xkfbNB6/6.png' },
-  { name: 'Trulioo', logo: 'https://i.ibb.co/pDLtKw4/7.png' },
 ];
 
 interface KycProviderListProps {
