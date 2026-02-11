@@ -54,7 +54,7 @@ const settingsItems = [
     icon: FileText,
     title: 'Data Management',
     description: 'Download your transaction reports and data.',
-    href: '#',
+    href: '/settings/data-management',
   },
   {
     icon: Briefcase,
