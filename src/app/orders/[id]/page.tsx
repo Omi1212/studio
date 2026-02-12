@@ -12,7 +12,7 @@ import {
 import SidebarNav from '@/components/dashboard/sidebar-nav';
 import HeaderDynamic from '@/components/dashboard/header-dynamic';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Check, X, ArrowUpRight, ArrowDownLeft } from 'lucide-react';
+import { ArrowLeft, Check, X, ArrowUpRight, ArrowDownLeft, ExternalLink } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -63,6 +63,28 @@ function PaymentDetailsCard({ details }: { details: Order['paymentDetails'] }) {
         return null;
     }
 
+    const getExplorer = () => {
+        if (!details.transactionId || !details.method) return null;
+        if (details.method === 'Bank Transfer') return null;
+
+        switch (details.method) {
+            case 'Bitcoin':
+                if (details.network === 'On-chain') return { name: 'Mempool', url: `https://mempool.space/tx/${details.transactionId}` };
+                return null;
+            case 'Bitcoin Spark':
+                return { name: 'Sparkscan', url: `https://sparkscan.io/tx/${details.transactionId}` };
+            case 'Stablecoin':
+                if (details.network === 'tron') return { name: 'TRONSCAN', url: `https://tronscan.org/#/transaction/${details.transactionId}` };
+                if (details.network === 'ethereum') return { name: 'Etherscan', url: `https://etherscan.io/tx/${details.transactionId}` };
+                if (details.network === 'polygon') return { name: 'Polygonscan', url: `https://polygonscan.com/tx/${details.transactionId}` };
+                return null;
+            default:
+                return null;
+        }
+    }
+    
+    const explorer = getExplorer();
+
     return (
         <Card>
             <CardHeader>
@@ -76,7 +98,21 @@ function PaymentDetailsCard({ details }: { details: Order['paymentDetails'] }) {
                 {details.stablecoin && <InfoRow label="Stablecoin" value={details.stablecoin} />}
                 {details.network && <InfoRow label="Network" value={details.network} />}
                 {details.cryptoAddress && <InfoRow label="Payment Address" value={<span className="font-mono break-all">{details.cryptoAddress}</span>} />}
-                {details.transactionId && <InfoRow label="Transaction ID" value={<span className="font-mono break-all">{details.transactionId}</span>} />}
+                {details.transactionId && (
+                    <div className="flex items-start justify-between">
+                         <p className="text-sm text-muted-foreground shrink-0">txId</p>
+                         <div className="flex items-center gap-2 text-right">
+                             <span className="font-mono text-sm break-all">{details.transactionId}</span>
+                             {explorer && (
+                                 <Button asChild variant="ghost" size="icon" className="h-5 w-5 shrink-0">
+                                     <a href={explorer.url} target="_blank" rel="noopener noreferrer" title={`View on ${explorer.name}`}>
+                                         <ExternalLink className="h-4 w-4" />
+                                     </a>
+                                 </Button>
+                             )}
+                         </div>
+                    </div>
+                )}
             </CardContent>
         </Card>
     )

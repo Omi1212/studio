@@ -524,6 +524,21 @@ interface PaymentMethodsProps {
     onPaymentConfirmed: () => void;
 }
 
+const generateTxId = (method: string, network?: string): string => {
+    const randomHex = [...Array(64)].map(() => Math.floor(Math.random() * 16).toString(16)).join('');
+    
+    if (method === 'Bitcoin' || method === 'Stablecoin') {
+        if (network === 'ethereum' || network === 'polygon') return `0x${randomHex}`;
+        return randomHex; // For BTC on-chain and Tron
+    }
+    if (method === 'Bitcoin Spark') {
+        return `spark_tx_${randomHex.slice(0, 56)}`;
+    }
+    // Lightning invoice is passed as cryptoAddress, txid is different. A real app would get it after payment.
+    // For demo, we just generate a random one.
+    return randomHex;
+};
+
 export default function PaymentMethods({ order, token, onPaymentConfirmed }: PaymentMethodsProps) {
     const { toast } = useToast();
     const router = useRouter();
@@ -556,9 +571,14 @@ export default function PaymentMethods({ order, token, onPaymentConfirmed }: Pay
 
     const handlePaymentMade = async (details: Partial<Omit<PaymentDetails, 'transactionId'>>) => {
         try {
+            let txId: string | undefined;
+            if (details.method !== 'Bank Transfer') {
+                txId = generateTxId(details.method!, details.network);
+            }
+
             const paymentDetails: PaymentDetails = {
                 ...details,
-                transactionId: `${details.method?.toLowerCase().replace(/\s/g, '-')}-tx-${Math.random().toString(36).substring(2, 9)}`
+                transactionId: txId,
             } as PaymentDetails;
             
             const response = await fetch(`/api/orders/${order.id}`, {
