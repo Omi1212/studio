@@ -532,7 +532,7 @@ const generateTxId = (method: string, network?: string): string => {
         return randomHex; // For BTC on-chain and Tron
     }
     if (method === 'Bitcoin Spark') {
-        return `spark_tx_${randomHex.slice(0, 56)}`;
+        return randomHex.slice(0, 32);
     }
     // Lightning invoice is passed as cryptoAddress, txid is different. A real app would get it after payment.
     // For demo, we just generate a random one.

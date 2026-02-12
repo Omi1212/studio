@@ -97,10 +97,10 @@ function PaymentDetailsCard({ details }: { details: Order['paymentDetails'] }) {
                 {details.reference && <InfoRow label="Reference" value={<span className="font-mono">{details.reference}</span>} />}
                 {details.stablecoin && <InfoRow label="Stablecoin" value={details.stablecoin} />}
                 {details.network && <InfoRow label="Network" value={details.network} />}
-                {details.cryptoAddress && <InfoRow label="Payment Address" value={<span className="font-mono break-all">{details.cryptoAddress}</span>} />}
+                {details.cryptoAddress && <InfoRow label="Payment Address" value={<span className="font-mono break-all">{`${details.cryptoAddress.slice(0, 7)}...${details.cryptoAddress.slice(-4)}`}</span>} />}
                 {details.transactionId && (
                     <div className="flex items-start justify-between">
-                         <p className="text-sm text-muted-foreground shrink-0">txId</p>
+                         <p className="text-sm text-muted-foreground shrink-0">Transaction ID</p>
                          <div className="flex items-center gap-2 text-right">
                              <span className="font-mono text-sm break-all">{details.transactionId}</span>
                              {explorer && (

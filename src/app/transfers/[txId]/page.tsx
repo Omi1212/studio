@@ -36,11 +36,13 @@ function InfoRow({ label, value, onCopy }: { label: string; value: string; onCop
 }
 
 function AddressInfo({ label, value, onCopy }: { label: string; value: string; onCopy: () => void }) {
+    const displayValue = value.startsWith('spark1') ? `${value.slice(0, 7)}...${value.slice(-4)}` : value;
+
   return (
       <div className="flex-1">
           <p className="text-sm text-muted-foreground mb-1">{label}</p>
           <div className="flex items-center gap-2">
-              <p className="font-mono text-sm break-all">{value}</p>
+              <p className="font-mono text-sm break-all" title={value}>{displayValue}</p>
               <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0" onClick={onCopy}>
                   <Copy className="h-4 w-4" />
               </Button>

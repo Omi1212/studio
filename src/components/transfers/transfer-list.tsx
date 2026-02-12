@@ -186,9 +186,9 @@ export default function TransferList({ searchQuery, typeFilter }: { searchQuery:
                   className="cursor-pointer"
                 >
                   <TableCell>{getTypeBadge(transfer.type)}</TableCell>
-                  <TableCell className="font-mono">{transfer.from}</TableCell>
+                  <TableCell className="font-mono">{transfer.from.startsWith('spark1') ? `${transfer.from.slice(0, 7)}...${transfer.from.slice(-4)}` : transfer.from}</TableCell>
                   <TableCell className="px-0 text-muted-foreground"><ArrowRight className="h-4 w-4" /></TableCell>
-                  <TableCell className={cn("font-mono", transfer.type === 'Burn' && 'text-red-500')}>{transfer.to}</TableCell>
+                  <TableCell className={cn("font-mono", transfer.type === 'Burn' && 'text-red-500')}>{transfer.to.startsWith('spark1') ? `${transfer.to.slice(0, 7)}...${transfer.to.slice(-4)}` : transfer.to}</TableCell>
                   <TableCell className={cn("font-mono text-right", getAmountClass(transfer.type))}>
                     {transfer.amount.toLocaleString()} {transfer.tokenTicker}
                   </TableCell>
