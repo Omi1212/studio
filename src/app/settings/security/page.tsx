@@ -111,18 +111,30 @@ export default function SecurityPage() {
                                 </div>
                             </AccordionTrigger>
                             <AccordionContent className="pt-0">
-                                <CardContent>
+                                <CardContent className="space-y-4">
                                     <div className="flex items-start justify-between rounded-lg border p-4">
-                                        <div className="space-y-1">
-                                            <div className="flex items-center gap-2">
+                                        <div className="space-y-1.5">
+                                            <Label htmlFor="2fa-app-switch" className="text-base font-medium flex items-center gap-2">
                                                 <ShieldAlert className="h-5 w-5 text-yellow-500" />
-                                                <Label htmlFor="2fa-switch" className="text-base font-medium">Enable 2FA</Label>
-                                            </div>
+                                                Authenticator App
+                                            </Label>
                                             <p className="text-sm text-muted-foreground pl-7">
-                                                When you sign in, you&apos;ll be asked to enter a code from your authenticator app.
+                                                Use an app like Google Authenticator to get codes.
                                             </p>
                                         </div>
-                                        <Switch id="2fa-switch" />
+                                        <Switch id="2fa-app-switch" />
+                                    </div>
+                                    <div className="flex items-start justify-between rounded-lg border p-4">
+                                        <div className="space-y-1.5">
+                                            <Label htmlFor="2fa-sms-switch" className="text-base font-medium flex items-center gap-2">
+                                                <Smartphone className="h-5 w-5 text-blue-500" />
+                                                SMS Text Message
+                                            </Label>
+                                            <p className="text-sm text-muted-foreground pl-7">
+                                                Receive a code via text message to your phone.
+                                            </p>
+                                        </div>
+                                        <Switch id="2fa-sms-switch" />
                                     </div>
                                 </CardContent>
                             </AccordionContent>
