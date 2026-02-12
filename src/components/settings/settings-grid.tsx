@@ -9,16 +9,17 @@ import {
   Bell,
   FileText,
   Briefcase,
+  Settings,
 } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import Link from 'next/link';
 
 const settingsItems = [
   {
-    icon: User,
-    title: 'User Profile',
-    description: 'Manage your personal information and preferences.',
-    href: '/profile',
+    icon: Settings,
+    title: 'General',
+    description: 'Manage your language, currency, and theme settings.',
+    href: '/settings/general',
   },
   {
     icon: ShieldCheck,

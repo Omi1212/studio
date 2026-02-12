@@ -18,11 +18,6 @@ import { ShieldCheck, User as UserIcon, Mail, Phone, Building, FileLock2 } from 
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 import { countries } from '@/lib/countries';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Separator } from '@/components/ui/separator';
-import { Switch } from '@/components/ui/switch';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 function InfoRow({ icon: Icon, label, value }: { icon: React.ElementType, label: string, value: string | undefined }) {
   return (
@@ -175,53 +170,6 @@ export default function ProfilePage() {
                     </CardContent>
                 </Card>
               </div>
-
-              <Card>
-                <CardHeader>
-                    <CardTitle>User Preferences</CardTitle>
-                    <CardDescription>Manage your language, currency, and theme settings.</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                    <div className="flex items-center justify-between">
-                        <Label>Theme</Label>
-                        <Tabs defaultValue="dark" className="w-auto">
-                            <TabsList className="h-auto">
-                                <TabsTrigger value="light" className="px-6 py-2">Light</TabsTrigger>
-                                <TabsTrigger value="dark" className="px-6 py-2">Dark</TabsTrigger>
-                                <TabsTrigger value="system" className="px-6 py-2">System</TabsTrigger>
-                            </TabsList>
-                        </Tabs>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="space-y-2">
-                            <Label htmlFor="language">Language</Label>
-                            <Select defaultValue="en">
-                                <SelectTrigger id="language">
-                                    <SelectValue placeholder="Select language" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="en">English</SelectItem>
-                                    <SelectItem value="es">Español</SelectItem>
-                                    <SelectItem value="fr">Français</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="currency">Currency</Label>
-                            <Select defaultValue="usd">
-                                <SelectTrigger id="currency">
-                                    <SelectValue placeholder="Select currency" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="usd">USD - US Dollar</SelectItem>
-                                    <SelectItem value="eur">EUR - Euro</SelectItem>
-                                    <SelectItem value="btc">BTC - Bitcoin</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
-                    </div>
-                </CardContent>
-              </Card>
             </div>
           </main>
         </div>
