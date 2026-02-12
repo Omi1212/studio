@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import {
@@ -14,8 +15,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ShieldCheck, User as UserIcon, Mail, Phone, Building, FileLock2 } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { ShieldCheck, User as UserIcon, Phone, Building } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { countries } from '@/lib/countries';
 
@@ -41,7 +41,7 @@ function PersonalInfoRow({ label, value, actionLabel, onActionClick }: { label: 
                         {actionLabel}
                     </Button>
                 )}
-                <p className="text-sm font-medium text-right">{value}</p>
+                <div className="text-sm font-medium text-right">{value}</div>
             </div>
         </div>
     );
