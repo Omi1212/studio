@@ -6,12 +6,12 @@ import { Card, CardTitle, CardHeader, CardContent, CardFooter, CardDescription }
 import { Switch } from '../ui/switch';
 import Image from 'next/image';
 
-const providers = [
-  { name: 'Didit', logo: 'https://i.ibb.co/XrPTRgRf/Dise-o-sin-t-tulo-15.png', description: 'Verify user identities with Didit.' },
-  { name: 'Sumsub', logo: 'https://i.ibb.co/xKGcFvcs/1.png', description: 'All-in-one verification platform.' },
-  { name: 'Onfido', logo: 'https://i.ibb.co/8g2Qmknh/2.png', description: 'AI-powered identity verification.' },
-  { name: 'Veriff', logo: 'https://i.ibb.co/JW2JLXp6/3.png', description: 'Secure and scalable identity verification.' },
-  { name: 'Persona', logo: 'https://i.ibb.co/xkfbNB6/6.png', description: 'Identity infrastructure for businesses.' },
+const kytProviders = [
+  { name: 'Scorechain', logo: 'https://i.ibb.co/hFk9xwJW/11.png', description: 'Cryptocurrency transaction monitoring.' },
+  { name: 'Crystal Intelligence', logo: 'https://i.ibb.co/jv0cDR9Z/12.png', description: 'Blockchain analytics and AML compliance.' },
+  { name: 'Chainalysis', logo: 'https://i.ibb.co/ZRBJWJ5T/13.png', description: 'The blockchain data platform.' },
+  { name: 'TRM Labs', logo: 'https://i.ibb.co/zhRZJDbW/14.png', description: 'Monitor, detect, and investigate crypto fraud.' },
+  { name: 'Merkle Science', logo: 'https://i.ibb.co/dZddJQ2/merkle-science.png', description: 'Predictive crypto risk intelligence.' },
 ];
 
 function ProviderCard({ name, logo, description }: { name: string; logo: string; description: string; }) {
@@ -55,15 +55,14 @@ function ProviderCard({ name, logo, description }: { name: string; logo: string;
   );
 }
 
-
-export default function KycProviderList() {
+export default function KytProviderList() {
   return (
     <div className="space-y-6">
       <p className="text-sm text-center text-muted-foreground">
-        Choose a provider to continue with your identity verification.
+        Choose a provider to continue with your transaction monitoring.
       </p>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {providers.map((provider) => (
+        {kytProviders.map((provider) => (
           <ProviderCard key={provider.name} {...provider} />
         ))}
       </div>

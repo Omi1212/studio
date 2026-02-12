@@ -6,12 +6,12 @@ import { Card, CardTitle, CardHeader, CardContent, CardFooter, CardDescription }
 import { Switch } from '../ui/switch';
 import Image from 'next/image';
 
-const providers = [
-  { name: 'Didit', logo: 'https://i.ibb.co/XrPTRgRf/Dise-o-sin-t-tulo-15.png', description: 'Verify user identities with Didit.' },
+const kybProviders = [
   { name: 'Sumsub', logo: 'https://i.ibb.co/xKGcFvcs/1.png', description: 'All-in-one verification platform.' },
   { name: 'Onfido', logo: 'https://i.ibb.co/8g2Qmknh/2.png', description: 'AI-powered identity verification.' },
-  { name: 'Veriff', logo: 'https://i.ibb.co/JW2JLXp6/3.png', description: 'Secure and scalable identity verification.' },
-  { name: 'Persona', logo: 'https://i.ibb.co/xkfbNB6/6.png', description: 'Identity infrastructure for businesses.' },
+  { name: 'Kyckr', logo: 'https://i.ibb.co/0yYWB1Yb/8.png', description: 'Real-time company registry data.' },
+  { name: 'Middesk', logo: 'https://i.ibb.co/8DsyxCyR/9.png', description: 'Business verification and compliance.' },
+  { name: "Moody's Analytics", logo: 'https://i.ibb.co/Pzc00sHp/10.png', description: 'Comprehensive risk assessment.' },
 ];
 
 function ProviderCard({ name, logo, description }: { name: string; logo: string; description: string; }) {
@@ -55,15 +55,14 @@ function ProviderCard({ name, logo, description }: { name: string; logo: string;
   );
 }
 
-
-export default function KycProviderList() {
+export default function KybProviderList() {
   return (
     <div className="space-y-6">
       <p className="text-sm text-center text-muted-foreground">
-        Choose a provider to continue with your identity verification.
+        Choose a provider to continue with your business verification.
       </p>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {providers.map((provider) => (
+        {kybProviders.map((provider) => (
           <ProviderCard key={provider.name} {...provider} />
         ))}
       </div>
