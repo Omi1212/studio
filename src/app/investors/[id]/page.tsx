@@ -12,7 +12,7 @@ import {
 import SidebarNav from '@/components/dashboard/sidebar-nav';
 import HeaderDynamic from '@/components/dashboard/header-dynamic';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Trash2, Snowflake, ArrowUpRight, ArrowDownLeft } from 'lucide-react';
+import { ArrowLeft, Snowflake, ArrowUpRight, ArrowDownLeft } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -141,25 +141,6 @@ export default function InvestorDetailsPage() {
     }
   }
 
-  const handleDelete = async () => {
-    if (!investor) return;
-    try {
-        const response = await fetch(`/api/investors/${investor.id}`, {
-            method: 'DELETE',
-        });
-        if (!response.ok) throw new Error('Failed to delete investor');
-
-        toast({
-            title: "Investor Deleted",
-            description: `"${investor.name}" has been permanently removed.`,
-        });
-        router.push('/investors');
-    } catch (error) {
-        console.error(error);
-        toast({ variant: 'destructive', title: 'Error', description: 'Could not delete investor.' });
-    }
-  };
-
   if (loading) {
     return (
       <div className="flex-1 p-4 sm:p-6 lg:p-8 flex items-center justify-center">
@@ -194,25 +175,6 @@ export default function InvestorDetailsPage() {
                     <Button variant={investor.isFrozen ? "secondary" : "outline"} onClick={handleToggleFreeze}>
                         <Snowflake className="mr-2 h-4 w-4" /> {investor.isFrozen ? 'Unfreeze' : 'Freeze'} Address
                     </Button>
-                    <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                             <Button variant="destructive">
-                                <Trash2 className="mr-2 h-4 w-4" /> Delete Investor
-                             </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                            <AlertDialogHeader>
-                                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                This will permanently delete the investor "{investor.name}" and all associated data.
-                                </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction onClick={handleDelete}>Delete</AlertDialogAction>
-                            </AlertDialogFooter>
-                        </AlertDialogContent>
-                    </AlertDialog>
                 </div>
             </div>
             
