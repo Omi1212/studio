@@ -272,12 +272,40 @@ export default function InvestorDetailsPage() {
                             <PersonalInfoRow label="Date of Birth" value={investor.dob || 'Not set'} />
                             <PersonalInfoRow label="Identification Documents" value={investor.idDoc || 'Not set'} />
                             <PersonalInfoRow label="Address" value={investor.address || 'Not set'} />
-                            <PersonalInfoRow label="Wallet Address" value={<span className="font-mono">{investor.walletAddress}</span>} />
                             <PersonalInfoRow label="Email Address" value={maskEmail(investor.email)} />
-                             {investor.joinedDate && <PersonalInfoRow label="Joined Date" value={new Date(investor.joinedDate).toLocaleDateString()} />}
-                             {investor.totalInvested !== undefined && <PersonalInfoRow label="Total Invested" value={<span className="font-mono">${investor.totalInvested.toLocaleString()}</span>} />}
                         </CardContent>
                     </Card>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {investor.joinedDate && (
+                        <Card>
+                            <CardHeader className="pb-2">
+                                <CardTitle className="text-sm font-medium text-muted-foreground">Joined Date</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <p className="text-2xl font-bold">{new Date(investor.joinedDate).toLocaleDateString()}</p>
+                            </CardContent>
+                        </Card>
+                    )}
+                    <Card>
+                        <CardHeader className="pb-2">
+                            <CardTitle className="text-sm font-medium text-muted-foreground">Wallet Address</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <p className="text-xl font-bold font-mono truncate" title={investor.walletAddress}>{investor.walletAddress}</p>
+                        </CardContent>
+                    </Card>
+                    {investor.totalInvested !== undefined && (
+                        <Card>
+                            <CardHeader className="pb-2">
+                                <CardTitle className="text-sm font-medium text-muted-foreground">Total Invested</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <p className="text-2xl font-bold font-mono">${investor.totalInvested.toLocaleString()}</p>
+                            </CardContent>
+                        </Card>
+                    )}
                 </div>
 
 
@@ -348,5 +376,6 @@ export default function InvestorDetailsPage() {
     </SidebarProvider>
   );
 }
+
 
 
