@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -80,7 +81,7 @@ export default function DataManagementPage() {
                                         </Select>
                                     </div>
                                 </CardContent>
-                                <CardFooter>
+                                <CardFooter className="justify-end">
                                     <Button className="w-full sm:w-auto">
                                         <Download className="mr-2 h-4 w-4" />
                                         Download Report
