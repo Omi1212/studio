@@ -12,7 +12,7 @@ import {
 import SidebarNav from '@/components/dashboard/sidebar-nav';
 import HeaderDynamic from '@/components/dashboard/header-dynamic';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Check, X, ArrowUpRight, ArrowDownLeft, ExternalLink } from 'lucide-react';
+import { ArrowLeft, Check, X, ArrowUpRight, ArrowDownLeft, ExternalLink, Copy, MessageSquare } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -32,7 +32,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
+} from "@/components/ui/alert-dialog";
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 
 function getStatusBadge(status: Order['status']) {
   switch (status) {
@@ -187,6 +189,23 @@ export default function OrderDetailsPage() {
     }
   };
 
+  const handleSaveObservation = () => {
+    const observationText = (document.getElementById('observation') as HTMLTextAreaElement)?.value;
+    if (!observationText?.trim()) {
+        toast({
+            variant: "destructive",
+            title: "Observation is empty",
+            description: "Please write an observation before saving.",
+        });
+        return;
+    }
+    // In a real app, you would save this observation to your backend.
+    toast({
+        title: "Observation Saved",
+        description: `Your observation for order #${order?.id} has been noted.`,
+    });
+  };
+
   if (loading) {
     return (
       <div className="flex-1 p-4 sm:p-6 lg:p-8 flex items-center justify-center">
@@ -280,30 +299,41 @@ export default function OrderDetailsPage() {
              <Card>
                 <CardHeader>
                     <CardTitle>Actions</CardTitle>
+                    <CardDescription>Approve or reject this order. You can add an optional observation.</CardDescription>
                 </CardHeader>
-                <CardContent className="flex flex-col sm:flex-row gap-2">
-                    <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                            <Button variant="destructive" className="w-full">
-                                <X className="mr-2 h-4 w-4" /> Reject Order
-                            </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                            <AlertDialogHeader>
-                                <AlertDialogTitle>Are you sure you want to reject this order?</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                This action cannot be undone.
-                                </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction onClick={() => handleUpdateStatus('rejected')}>Reject</AlertDialogAction>
-                            </AlertDialogFooter>
-                        </AlertDialogContent>
-                    </AlertDialog>
-                    <Button className="w-full" onClick={() => handleUpdateStatus('completed')}>
-                        <Check className="mr-2 h-4 w-4" /> Accept Order
+                <CardContent className="space-y-4">
+                    <div className="space-y-2">
+                        <Label htmlFor="observation">Observation</Label>
+                        <Textarea id="observation" placeholder="Add an observation for the investor..." />
+                    </div>
+                    <Button variant="secondary" className="w-full" onClick={handleSaveObservation}>
+                        <MessageSquare className="mr-2 h-4 w-4" />
+                        Leave Observation
                     </Button>
+                    <div className="flex flex-col sm:flex-row gap-2">
+                        <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                                <Button variant="destructive" className="w-full">
+                                    <X className="mr-2 h-4 w-4" /> Reject Order
+                                </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                                <AlertDialogHeader>
+                                    <AlertDialogTitle>Are you sure you want to reject this order?</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                    This action cannot be undone.
+                                    </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction onClick={() => handleUpdateStatus('rejected')}>Reject</AlertDialogAction>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
+                        <Button className="w-full" onClick={() => handleUpdateStatus('completed')}>
+                            <Check className="mr-2 h-4 w-4" /> Accept Order
+                        </Button>
+                    </div>
                 </CardContent>
              </Card>
             )}
