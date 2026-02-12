@@ -39,13 +39,13 @@ import { Skeleton } from '@/components/ui/skeleton';
 function getStatusBadge(status: User['kycStatus']) {
   switch (status) {
     case 'verified':
-      return <Badge variant="outline" className="text-green-400 border-green-400">Whitelisted</Badge>;
+      return <Badge variant="outline" className="text-green-400 border-green-400"><ShieldCheck className="mr-2 h-4 w-4" /> KYC Verified</Badge>;
     case 'pending':
-      return <Badge variant="outline" className="text-yellow-400 border-yellow-400">Pending</Badge>;
+      return <Badge variant="outline" className="text-yellow-400 border-yellow-400"><ShieldCheck className="mr-2 h-4 w-4" /> KYC Pending</Badge>;
     case 'rejected':
-      return <Badge variant="destructive">Rejected</Badge>;
+      return <Badge variant="destructive"><ShieldCheck className="mr-2 h-4 w-4" /> KYC Rejected</Badge>;
     default:
-      return <Badge variant="secondary">Unknown</Badge>;
+      return <Badge variant="secondary"><ShieldCheck className="mr-2 h-4 w-4" /> KYC Unknown</Badge>;
   }
 }
 
@@ -348,4 +348,5 @@ export default function InvestorDetailsPage() {
     </SidebarProvider>
   );
 }
+
 
