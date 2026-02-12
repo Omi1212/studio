@@ -51,8 +51,8 @@ export default function PaymentMethodsPage() {
                                 <p>No bank accounts added yet.</p>
                            </div>
                         </CardContent>
-                        <CardFooter>
-                            <Button variant="outline">
+                        <CardFooter className="justify-end">
+                            <Button>
                                 <Plus className="mr-2 h-4 w-4" />
                                 Add Bank Account
                             </Button>
@@ -78,8 +78,8 @@ export default function PaymentMethodsPage() {
                                 <p>No Bitcoin addresses configured yet.</p>
                            </div>
                         </CardContent>
-                        <CardFooter>
-                            <Button variant="outline">
+                        <CardFooter className="justify-end">
+                            <Button>
                                 <Plus className="mr-2 h-4 w-4" />
                                 Configure Bitcoin
                             </Button>
@@ -105,8 +105,8 @@ export default function PaymentMethodsPage() {
                                     <p>No stablecoin addresses configured yet.</p>
                                 </div>
                             </CardContent>
-                             <CardFooter>
-                                <Button variant="outline">
+                             <CardFooter className="justify-end">
+                                <Button>
                                     <Plus className="mr-2 h-4 w-4" />
                                     Configure Stablecoins
                                 </Button>
