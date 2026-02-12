@@ -90,76 +90,6 @@ export default function NotificationsPage() {
                           </AccordionTrigger>
                           <AccordionContent className="p-6 pt-0">
                               <div className="space-y-6">
-                                  <div>
-                                      <Table>
-                                          <TableHeader>
-                                              <TableRow>
-                                                  <TableHead>Email Address</TableHead>
-                                                  <TableHead className="hidden sm:table-cell">Status</TableHead>
-                                                  <TableHead className="hidden md:table-cell">Date Added</TableHead>
-                                                  <TableHead className="text-right">Actions</TableHead>
-                                              </TableRow>
-                                          </TableHeader>
-                                          <TableBody>
-                                              <TableRow>
-                                                  <TableCell>
-                                                      <div className="flex items-center gap-3">
-                                                          <Mail className="h-4 w-4 text-muted-foreground" />
-                                                          <div>
-                                                              <p className="font-medium">superadmin@gmail.com</p>
-                                                              <Badge variant="secondary" className="mt-1">Primary</Badge>
-                                                          </div>
-                                                      </div>
-                                                  </TableCell>
-                                                  <TableCell className="hidden sm:table-cell">
-                                                      <Badge variant="outline" className="text-green-400 border-green-400">Verified</Badge>
-                                                  </TableCell>
-                                                  <TableCell className="hidden md:table-cell">Jan 15, 2024</TableCell>
-                                                  <TableCell className="text-right">
-                                                      <DropdownMenu>
-                                                          <DropdownMenuTrigger asChild>
-                                                              <Button variant="ghost" size="icon"><MoreVertical className="h-4 w-4" /></Button>
-                                                          </DropdownMenuTrigger>
-                                                          <DropdownMenuContent align="end">
-                                                              <DropdownMenuItem>Delete</DropdownMenuItem>
-                                                          </DropdownMenuContent>
-                                                      </DropdownMenu>
-                                                  </TableCell>
-                                              </TableRow>
-                                          </TableBody>
-                                      </Table>
-                                  </div>
-                                  <div className="flex justify-end">
-                                    <Dialog>
-                                      <DialogTrigger asChild>
-                                          <Button>
-                                              <Plus className="mr-2 h-4 w-4" />
-                                              Add Email Address
-                                          </Button>
-                                      </DialogTrigger>
-                                      <DialogContent>
-                                          <DialogHeader>
-                                              <DialogTitle>Add a new email address</DialogTitle>
-                                              <DialogDescription>
-                                                  We will send a verification link to this email address.
-                                              </DialogDescription>
-                                          </DialogHeader>
-                                          <div className="grid gap-4 py-4">
-                                              <div className="grid grid-cols-4 items-center gap-4">
-                                                  <Label htmlFor="email" className="text-right">Email</Label>
-                                                  <Input id="email" type="email" placeholder="name@example.com" className="col-span-3" />
-                                              </div>
-                                          </div>
-                                          <DialogFooter>
-                                              <DialogClose asChild>
-                                                  <Button type="button" variant="ghost">Cancel</Button>
-                                              </DialogClose>
-                                              <Button type="submit">Add and Verify</Button>
-                                          </DialogFooter>
-                                      </DialogContent>
-                                    </Dialog>
-                                  </div>
-                                  
                                   <div className="space-y-4">
                                     <NotificationRow 
                                       id="email-orders"
@@ -176,6 +106,78 @@ export default function NotificationsPage() {
                                       title="Newsletter"
                                       description="Subscribe to our weekly newsletter."
                                     />
+                                  </div>
+                                  
+                                  <div>
+                                      <div className="mb-4">
+                                          <Table>
+                                              <TableHeader>
+                                                  <TableRow>
+                                                      <TableHead>Email Address</TableHead>
+                                                      <TableHead className="hidden sm:table-cell">Status</TableHead>
+                                                      <TableHead className="hidden md:table-cell">Date Added</TableHead>
+                                                      <TableHead className="text-right">Actions</TableHead>
+                                                  </TableRow>
+                                              </TableHeader>
+                                              <TableBody>
+                                                  <TableRow>
+                                                      <TableCell>
+                                                          <div className="flex items-center gap-3">
+                                                              <Mail className="h-4 w-4 text-muted-foreground" />
+                                                              <div>
+                                                                  <p className="font-medium">superadmin@gmail.com</p>
+                                                                  <Badge variant="secondary" className="mt-1">Primary</Badge>
+                                                              </div>
+                                                          </div>
+                                                      </TableCell>
+                                                      <TableCell className="hidden sm:table-cell">
+                                                          <Badge variant="outline" className="text-green-400 border-green-400">Verified</Badge>
+                                                      </TableCell>
+                                                      <TableCell className="hidden md:table-cell">Jan 15, 2024</TableCell>
+                                                      <TableCell className="text-right">
+                                                          <DropdownMenu>
+                                                              <DropdownMenuTrigger asChild>
+                                                                  <Button variant="ghost" size="icon"><MoreVertical className="h-4 w-4" /></Button>
+                                                              </DropdownMenuTrigger>
+                                                              <DropdownMenuContent align="end">
+                                                                  <DropdownMenuItem>Delete</DropdownMenuItem>
+                                                              </DropdownMenuContent>
+                                                          </DropdownMenu>
+                                                      </TableCell>
+                                                  </TableRow>
+                                              </TableBody>
+                                          </Table>
+                                      </div>
+                                      <div className="flex justify-end">
+                                        <Dialog>
+                                          <DialogTrigger asChild>
+                                              <Button>
+                                                  <Plus className="mr-2 h-4 w-4" />
+                                                  Add Email Address
+                                              </Button>
+                                          </DialogTrigger>
+                                          <DialogContent>
+                                              <DialogHeader>
+                                                  <DialogTitle>Add a new email address</DialogTitle>
+                                                  <DialogDescription>
+                                                      We will send a verification link to this email address.
+                                                  </DialogDescription>
+                                              </DialogHeader>
+                                              <div className="grid gap-4 py-4">
+                                                  <div className="grid grid-cols-4 items-center gap-4">
+                                                      <Label htmlFor="email" className="text-right">Email</Label>
+                                                      <Input id="email" type="email" placeholder="name@example.com" className="col-span-3" />
+                                                  </div>
+                                              </div>
+                                              <DialogFooter>
+                                                  <DialogClose asChild>
+                                                      <Button type="button" variant="ghost">Cancel</Button>
+                                                  </DialogClose>
+                                                  <Button type="submit">Add and Verify</Button>
+                                              </DialogFooter>
+                                          </DialogContent>
+                                        </Dialog>
+                                      </div>
                                   </div>
                               </div>
                           </AccordionContent>
