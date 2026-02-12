@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -148,7 +149,7 @@ export default function ProfilePage() {
                         <CardTitle className="text-2xl pt-2">{isBusinessRole ? user.businessName || user.name : user.name}</CardTitle>
                         <CardDescription>{isBusinessRole ? `Business Level ${user.kybLevel || 0}` : `User Level ${user.kycLevel || 0}`}</CardDescription>
                         <Badge variant="outline" className={currentStatusBadge.className}>
-                            <ShieldCheck className="h-4 w-4 mr-2" />
+                            <ShieldCheck className="mr-2 h-4 w-4" />
                             {isBusinessRole ? 'KYB' : 'KYC'} Status: {currentStatusBadge.text}
                         </Badge>
                     </CardHeader>
@@ -171,7 +172,6 @@ export default function ProfilePage() {
                         {!isBusinessRole && <PersonalInfoRow label="Identification Documents" value={user.idDoc || 'Not set'} />}
                         <PersonalInfoRow label="Address" value={user.address || 'Not set'} />
                         <PersonalInfoRow label="Email Address" value={maskEmail(user.email)} />
-                        <PersonalInfoRow label="Password" value="******" actionLabel="Change" />
                     </CardContent>
                 </Card>
               </div>
