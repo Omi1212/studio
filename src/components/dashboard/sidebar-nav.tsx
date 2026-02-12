@@ -90,7 +90,6 @@ const issuerMenu = [
 ];
 
 const helpMenuItems = [
-  { href: '/settings', label: 'Settings', icon: Settings },
   { href: '/security', label: 'Security', icon: ShieldCheck },
   { href: '/help', label: 'Help', icon: LifeBuoy },
 ];
@@ -350,6 +349,20 @@ export default function SidebarNav() {
       </SidebarContent>
       <SidebarFooter className="p-2 space-y-2">
         <SidebarMenu>
+          {isClient && userRole === 'issuer' && (
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                asChild
+                isActive={pathname.startsWith('/settings')}
+                tooltip={'Settings'}
+              >
+                <a href={'/settings'}>
+                  <Settings />
+                  <span>{'Settings'}</span>
+                </a>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          )}
           {helpMenuItems.map((item) => (
             <SidebarMenuItem key={item.href}>
               <SidebarMenuButton

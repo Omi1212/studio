@@ -52,10 +52,12 @@ export type User = {
   walletAddress: string;
   kycStatus: 'verified' | 'pending' | 'rejected';
   kybStatus?: 'verified' | 'pending' | 'rejected';
+  kytStatus?: 'verified' | 'pending' | 'rejected';
   status: 'active' | 'inactive';
   phone?: string;
   kycLevel?: number;
   kybLevel?: number;
+  kytLevel?: number;
   country?: string;
   legalName?: string;
   dob?: string;

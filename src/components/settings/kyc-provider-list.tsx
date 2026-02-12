@@ -1,0 +1,46 @@
+'use client';
+
+import { ShieldCheck } from 'lucide-react';
+import { Button } from '../ui/button';
+import { Card, CardTitle } from '../ui/card';
+import Image from 'next/image';
+
+const providers = [
+  { name: 'Didit', logo: 'https://i.ibb.co/XrPTRgRf/Dise-o-sin-t-tulo-15.png' },
+  { name: 'Sumsub', logo: 'https://i.ibb.co/xKGcFvcs/1.png' },
+  { name: 'Onfido', logo: 'https://i.ibb.co/8g2Qmknh/2.png' },
+  { name: 'Veriff', logo: 'https://i.ibb.co/JW2JLXp6/3.png' },
+  { name: 'Persona', logo: 'https://i.ibb.co/xkfbNB6/6.png' },
+];
+
+interface KycProviderListProps {}
+
+export default function KycProviderList({}: KycProviderListProps) {
+  return (
+    <div className="space-y-6">
+      <p className="text-sm text-center text-muted-foreground">
+        Choose a provider to continue with your identity verification.
+      </p>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {providers.map((provider) => (
+          <Card
+            key={provider.name}
+            className="flex flex-col items-center justify-center p-6 text-center cursor-pointer hover:bg-muted/50 transition-colors group rounded-xl"
+          >
+            <div className="relative h-12 w-28 mb-4">
+              <Image
+                src={provider.logo}
+                alt={`${provider.name} logo`}
+                fill
+                style={{ objectFit: 'contain' }}
+                sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
+                className="transition-all duration-300 rounded-md"
+              />
+            </div>
+            <CardTitle className="text-base font-semibold">{provider.name}</CardTitle>
+          </Card>
+        ))}
+      </div>
+    </div>
+  );
+}

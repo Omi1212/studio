@@ -39,6 +39,12 @@ const nextConfig: NextConfig = {
         hostname: 'i.wpfc.ml',
         port: '',
         pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'i.ibb.co',
+        port: '',
+        pathname: '/**',
       }
     ],
   },
