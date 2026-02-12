@@ -89,36 +89,6 @@ export default function NotificationsPage() {
                               </div>
                           </AccordionTrigger>
                           <AccordionContent className="p-6 pt-0">
-                              <div className="flex justify-end mb-4">
-                                <Dialog>
-                                  <DialogTrigger asChild>
-                                      <Button>
-                                          <Plus className="mr-2 h-4 w-4" />
-                                          Add Email Address
-                                      </Button>
-                                  </DialogTrigger>
-                                  <DialogContent>
-                                      <DialogHeader>
-                                          <DialogTitle>Add a new email address</DialogTitle>
-                                          <DialogDescription>
-                                              We will send a verification link to this email address.
-                                          </DialogDescription>
-                                      </DialogHeader>
-                                      <div className="grid gap-4 py-4">
-                                          <div className="grid grid-cols-4 items-center gap-4">
-                                              <Label htmlFor="email" className="text-right">Email</Label>
-                                              <Input id="email" type="email" placeholder="name@example.com" className="col-span-3" />
-                                          </div>
-                                      </div>
-                                      <DialogFooter>
-                                          <DialogClose asChild>
-                                              <Button type="button" variant="ghost">Cancel</Button>
-                                          </DialogClose>
-                                          <Button type="submit">Add and Verify</Button>
-                                      </DialogFooter>
-                                  </DialogContent>
-                                </Dialog>
-                              </div>
                               <div className="space-y-6">
                                   <div>
                                       <Table>
@@ -159,9 +129,37 @@ export default function NotificationsPage() {
                                           </TableBody>
                                       </Table>
                                   </div>
+                                  <div className="flex justify-end">
+                                    <Dialog>
+                                      <DialogTrigger asChild>
+                                          <Button>
+                                              <Plus className="mr-2 h-4 w-4" />
+                                              Add Email Address
+                                          </Button>
+                                      </DialogTrigger>
+                                      <DialogContent>
+                                          <DialogHeader>
+                                              <DialogTitle>Add a new email address</DialogTitle>
+                                              <DialogDescription>
+                                                  We will send a verification link to this email address.
+                                              </DialogDescription>
+                                          </DialogHeader>
+                                          <div className="grid gap-4 py-4">
+                                              <div className="grid grid-cols-4 items-center gap-4">
+                                                  <Label htmlFor="email" className="text-right">Email</Label>
+                                                  <Input id="email" type="email" placeholder="name@example.com" className="col-span-3" />
+                                              </div>
+                                          </div>
+                                          <DialogFooter>
+                                              <DialogClose asChild>
+                                                  <Button type="button" variant="ghost">Cancel</Button>
+                                              </DialogClose>
+                                              <Button type="submit">Add and Verify</Button>
+                                          </DialogFooter>
+                                      </DialogContent>
+                                    </Dialog>
+                                  </div>
                                   
-                                  <Separator />
-
                                   <div className="space-y-4">
                                     <NotificationRow 
                                       id="email-orders"
