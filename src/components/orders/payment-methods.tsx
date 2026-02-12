@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -13,7 +14,7 @@ import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
-import type { Order, TokenDetails } from "@/lib/types";
+import type { Order, TokenDetails, PaymentDetails } from "@/lib/types";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import TokenIcon from '../ui/token-icon';
 import { ArrowLeft, Landmark, Copy, Eye } from 'lucide-react';
@@ -40,7 +41,7 @@ const UsdtIcon = () => (
     </svg>
 )
 
-function BankDetails({ orderReference, onPay }: { orderReference: string, onPay: () => void }) {
+function BankDetails({ orderReference, onPay }: { orderReference: string, onPay: (details: Partial<Omit<PaymentDetails, 'transactionId'>>) => void }) {
     const { toast } = useToast();
     const [selectedBank, setSelectedBank] = useState('banco-agricola');
 
@@ -68,6 +69,15 @@ function BankDetails({ orderReference, onPay }: { orderReference: string, onPay:
         toast({
             title: 'Copied!',
             description: `Copied to clipboard.`,
+        });
+    };
+    
+    const handlePayClick = () => {
+        onPay({
+            method: 'Bank Transfer',
+            bankName: currentBankDetails.Bank,
+            accountNumber: currentBankDetails['Account Number'],
+            reference: currentBankDetails.Reference,
         });
     };
 
@@ -105,13 +115,13 @@ function BankDetails({ orderReference, onPay }: { orderReference: string, onPay:
                 </Alert>
             </CardContent>
             <CardFooter>
-                 <Button className="w-full" onClick={onPay}>I&apos;ve made the payment</Button>
+                 <Button className="w-full" onClick={handlePayClick}>I&apos;ve made the payment</Button>
             </CardFooter>
         </Card>
     );
 }
 
-function BitcoinPaymentDetails({ orderReference, amount, onPay }: { orderReference: string; amount: number; onPay: () => void; }) {
+function BitcoinPaymentDetails({ orderReference, amount, onPay }: { orderReference: string; amount: number; onPay: (details: Partial<Omit<PaymentDetails, 'transactionId'>>) => void; }) {
     const { toast } = useToast();
     const [paymentType, setPaymentType] = useState('lightning');
     const [isAddressVisible, setIsAddressVisible] = useState(false);
@@ -153,6 +163,14 @@ function BitcoinPaymentDetails({ orderReference, amount, onPay }: { orderReferen
     const truncatedAddress = isAddressVisible ? fullAddress : `${fullAddress.slice(0,15)}...${fullAddress.slice(-15)}`;
     
     const satsAmount = (amount / 65000) * 100000000;
+    
+    const handlePayClick = () => {
+        onPay({
+            method: 'Bitcoin',
+            network: paymentType === 'lightning' ? 'Lightning' : 'On-chain',
+            cryptoAddress: fullAddress,
+        });
+    };
 
     return (
         <Card className="bg-muted/30">
@@ -210,13 +228,13 @@ function BitcoinPaymentDetails({ orderReference, amount, onPay }: { orderReferen
             </CardContent>
             <CardFooter className="flex flex-col gap-2">
                  <Button variant="outline" className="w-full" onClick={() => copyToClipboard(fullAddress, 'Address')}>Copy</Button>
-                 <Button className="w-full" onClick={onPay}>Open In Wallet</Button>
+                 <Button className="w-full" onClick={handlePayClick}>Open In Wallet</Button>
             </CardFooter>
         </Card>
     );
 }
 
-function SparkPaymentDetails({ orderReference, amount, onPay }: { orderReference: string; amount: number; onPay: () => void; }) {
+function SparkPaymentDetails({ orderReference, amount, onPay }: { orderReference: string; amount: number; onPay: (details: Partial<Omit<PaymentDetails, 'transactionId'>>) => void; }) {
     const { toast } = useToast();
     const [isAddressVisible, setIsAddressVisible] = useState(false);
     const [qrCodeDataUrl, setQrCodeDataUrl] = useState('');
@@ -248,6 +266,13 @@ function SparkPaymentDetails({ orderReference, amount, onPay }: { orderReference
         toast({
             title: 'Copied!',
             description: `${field} copied to clipboard.`,
+        });
+    };
+    
+    const handlePayClick = () => {
+        onPay({
+            method: 'Bitcoin Spark',
+            cryptoAddress: sparkAddress
         });
     };
 
@@ -302,13 +327,13 @@ function SparkPaymentDetails({ orderReference, amount, onPay }: { orderReference
             </CardContent>
             <CardFooter className="flex flex-col gap-2">
                  <Button variant="outline" className="w-full" onClick={() => copyToClipboard(sparkAddress, 'Address')}>Copy</Button>
-                 <Button className="w-full" onClick={onPay}>Open In Wallet</Button>
+                 <Button className="w-full" onClick={handlePayClick}>Open In Wallet</Button>
             </CardFooter>
         </Card>
     );
 }
 
-function StablecoinPaymentDetails({ orderReference, amount, onPay }: { orderReference: string; amount: number; onPay: () => void; }) {
+function StablecoinPaymentDetails({ orderReference, amount, onPay }: { orderReference: string; amount: number; onPay: (details: Partial<Omit<PaymentDetails, 'transactionId'>>) => void; }) {
     const { toast } = useToast();
     const [stablecoin, setStablecoin] = useState('usdt');
     const [network, setNetwork] = useState('tron');
@@ -358,6 +383,15 @@ function StablecoinPaymentDetails({ orderReference, amount, onPay }: { orderRefe
     };
 
     const truncatedAddress = isAddressVisible ? currentAddress : `${currentAddress.slice(0,10)}...${currentAddress.slice(-10)}`;
+    
+    const handlePayClick = () => {
+        onPay({
+            method: 'Stablecoin',
+            stablecoin: stablecoin.toUpperCase() as 'USDT' | 'USDC',
+            network: network,
+            cryptoAddress: currentAddress,
+        });
+    };
 
     return (
         <Card className="bg-muted/30">
@@ -421,7 +455,7 @@ function StablecoinPaymentDetails({ orderReference, amount, onPay }: { orderRefe
             </CardContent>
             <CardFooter className="flex flex-col gap-2">
                  <Button variant="outline" className="w-full" onClick={() => copyToClipboard(currentAddress)}>Copy</Button>
-                 <Button className="w-full" onClick={onPay}>Open In Wallet</Button>
+                 <Button className="w-full" onClick={handlePayClick}>Open In Wallet</Button>
             </CardFooter>
         </Card>
     );
@@ -520,12 +554,17 @@ export default function PaymentMethods({ order, token, onPaymentConfirmed }: Pay
         setSelectedPaymentMethod('');
     };
 
-    const handlePaymentMade = async () => {
+    const handlePaymentMade = async (details: Partial<Omit<PaymentDetails, 'transactionId'>>) => {
         try {
+            const paymentDetails: PaymentDetails = {
+                ...details,
+                transactionId: `${details.method?.toLowerCase().replace(/\s/g, '-')}-tx-${Math.random().toString(36).substring(2, 9)}`
+            } as PaymentDetails;
+            
             const response = await fetch(`/api/orders/${order.id}`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ status: 'pending' }),
+                body: JSON.stringify({ status: 'pending', paymentDetails }),
             });
 
             if (!response.ok) {

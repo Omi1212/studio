@@ -58,6 +58,30 @@ function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
   );
 }
 
+function PaymentDetailsCard({ details }: { details: Order['paymentDetails'] }) {
+    if (!details) {
+        return null;
+    }
+
+    return (
+        <Card>
+            <CardHeader>
+                <CardTitle>Payment Details</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+                <InfoRow label="Payment Method" value={details.method} />
+                {details.bankName && <InfoRow label="Bank" value={details.bankName} />}
+                {details.accountNumber && <InfoRow label="Account Number" value={<span className="font-mono">{details.accountNumber}</span>} />}
+                {details.reference && <InfoRow label="Reference" value={<span className="font-mono">{details.reference}</span>} />}
+                {details.stablecoin && <InfoRow label="Stablecoin" value={details.stablecoin} />}
+                {details.network && <InfoRow label="Network" value={details.network} />}
+                {details.cryptoAddress && <InfoRow label="Payment Address" value={<span className="font-mono break-all">{details.cryptoAddress}</span>} />}
+                {details.transactionId && <InfoRow label="Transaction ID" value={<span className="font-mono break-all">{details.transactionId}</span>} />}
+            </CardContent>
+        </Card>
+    )
+}
+
 export default function OrderDetailsPage() {
   const params = useParams();
   const router = useRouter();
@@ -213,6 +237,8 @@ export default function OrderDetailsPage() {
                          } />
                     </CardContent>
                 </Card>
+                
+                <PaymentDetailsCard details={order.paymentDetails} />
 
             {order.status === 'pending' && (
              <Card>

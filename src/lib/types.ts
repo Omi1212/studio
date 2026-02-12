@@ -11,6 +11,17 @@ export interface TokenDetails extends TokenFormValues {
 
 export type ViewMode = 'card' | 'table';
 
+export type PaymentDetails = {
+    method: 'Bank Transfer' | 'Bitcoin' | 'Bitcoin Spark' | 'Stablecoin';
+    bankName?: string;
+    accountNumber?: string;
+    reference?: string;
+    cryptoAddress?: string;
+    network?: string;
+    transactionId?: string;
+    stablecoin?: 'USDT' | 'USDC';
+};
+
 export type Order = {
   id: string;
   investorId: string;
@@ -22,6 +33,7 @@ export type Order = {
   price: number;
   date: string;
   status: 'pending' | 'completed' | 'rejected' | 'waiting payment';
+  paymentDetails?: PaymentDetails;
 }
 
 export type Transfer = {

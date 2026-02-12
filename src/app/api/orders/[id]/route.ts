@@ -2,9 +2,22 @@ import { NextResponse } from 'next/server';
 import { ordersData } from '../data';
 import { z } from 'zod';
 
-const patchSchema = z.object({
-  status: z.enum(['pending', 'completed', 'rejected', 'waiting payment']),
+const paymentDetailsSchema = z.object({
+    method: z.enum(['Bank Transfer', 'Bitcoin', 'Bitcoin Spark', 'Stablecoin']),
+    bankName: z.string().optional(),
+    accountNumber: z.string().optional(),
+    reference: z.string().optional(),
+    cryptoAddress: z.string().optional(),
+    network: z.string().optional(),
+    transactionId: z.string().optional(),
+    stablecoin: z.enum(['USDT', 'USDC']).optional(),
 });
+
+const patchSchema = z.object({
+  status: z.enum(['pending', 'completed', 'rejected', 'waiting payment']).optional(),
+  paymentDetails: paymentDetailsSchema.optional()
+});
+
 
 export async function GET(
   request: Request,
@@ -29,9 +42,9 @@ export async function PATCH(
         }
         
         const body = await request.json();
-        const { status } = patchSchema.parse(body);
+        const validatedData = patchSchema.parse(body);
 
-        ordersData[orderIndex].status = status;
+        ordersData[orderIndex] = { ...ordersData[orderIndex], ...validatedData };
         return NextResponse.json(ordersData[orderIndex]);
     } catch (error) {
         if (error instanceof z.ZodError) {
