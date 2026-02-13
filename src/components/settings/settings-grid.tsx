@@ -13,8 +13,9 @@ import {
 } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
 
-const settingsItems = [
+const allSettingsItems = [
   {
     icon: Settings,
     title: 'General',
@@ -88,6 +89,25 @@ function SettingCard({ icon: Icon, title, description, href }: SettingCardProps)
 
 
 export default function SettingsGrid() {
+  const [userRole, setUserRole] = useState<string | null>(null);
+
+  useEffect(() => {
+    const role = localStorage.getItem('userRole');
+    setUserRole(role);
+  }, []);
+
+  const investorSettings = [
+    'General',
+    'Security & Access',
+    'Notifications & Alerts',
+    'Data Management',
+  ];
+
+  const settingsItems =
+    userRole === 'investor'
+      ? allSettingsItems.filter((item) => investorSettings.includes(item.title))
+      : allSettingsItems;
+
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
       {settingsItems.map((item) => (

@@ -349,7 +349,7 @@ export default function SidebarNav() {
       </SidebarContent>
       <SidebarFooter className="p-2 space-y-2">
         <SidebarMenu>
-          {isClient && userRole === 'issuer' && (
+          {isClient && (userRole === 'issuer' || userRole === 'investor') && (
             <SidebarMenuItem>
               <SidebarMenuButton
                 asChild
