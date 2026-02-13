@@ -55,6 +55,50 @@ export default function ProfilePage() {
     const storedUser = localStorage.getItem('currentUser');
     if (storedUser) {
         const parsedUser: User = JSON.parse(storedUser);
+
+        const applyDefaultData = (user: User): User => {
+            let finalUser = { ...user };
+
+            if (finalUser.role === 'investor') {
+                const defaultData = {
+                    country: 'El Salvador',
+                    city: 'San Salvador',
+                    legalName: finalUser.name,
+                    dob: '1990-01-01',
+                    idDoc: 'ID Card, 01234567-8',
+                    address: '123 Main St, San Salvador',
+                    phone: '+503 2250-1234'
+                };
+                finalUser.country = finalUser.country || defaultData.country;
+                finalUser.city = finalUser.city || defaultData.city;
+                finalUser.legalName = finalUser.legalName || defaultData.legalName;
+                finalUser.dob = finalUser.dob || defaultData.dob;
+                finalUser.idDoc = finalUser.idDoc || defaultData.idDoc;
+                finalUser.address = finalUser.address || defaultData.address;
+                finalUser.phone = finalUser.phone || defaultData.phone;
+            } else if (finalUser.role === 'issuer') {
+                const defaultData = {
+                    country: 'Mexico',
+                    city: 'Mexico City',
+                    legalName: 'Soluciones Financieras Globales S.A.',
+                    dob: '2018-10-01',
+                    idDoc: 'Business Reg. ID, SFG181001XYZ',
+                    address: 'Paseo de la Reforma 222, 06600, CDMX',
+                    phone: '+52 55 8765 4321',
+                    businessName: finalUser.name,
+                };
+                finalUser.country = finalUser.country || defaultData.country;
+                finalUser.city = finalUser.city || defaultData.city;
+                finalUser.legalName = finalUser.legalName || defaultData.legalName;
+                finalUser.dob = finalUser.dob || defaultData.dob;
+                finalUser.idDoc = finalUser.idDoc || defaultData.idDoc;
+                finalUser.address = finalUser.address || defaultData.address;
+                finalUser.phone = finalUser.phone || defaultData.phone;
+                finalUser.businessName = finalUser.businessName || defaultData.businessName;
+            }
+            return finalUser;
+        };
+        
         // Fetch the most up-to-date user data from the API
         fetch(`/api/users?perPage=999`)
             .then(res => res.json())
@@ -62,51 +106,10 @@ export default function ProfilePage() {
                 const apiUser = allUsers.data.find(u => u.id === parsedUser.id);
                 // Merge localStorage data with API data, localStorage is source of truth for session-edits
                 let finalUser: User = apiUser ? { ...apiUser, ...parsedUser } : parsedUser;
-
-                if (finalUser.role === 'investor' || finalUser.role === 'issuer') {
-                    const defaultData = {
-                        country: 'El Salvador',
-                        city: 'San Salvador',
-                        legalName: finalUser.name,
-                        dob: '1990-01-01',
-                        idDoc: 'ID Card, 01234567-8',
-                        address: '123 Main St, San Salvador',
-                        phone: '+503 2250-1234'
-                    };
-
-                    finalUser.country = finalUser.country || defaultData.country;
-                    finalUser.city = finalUser.city || defaultData.city;
-                    finalUser.legalName = finalUser.legalName || defaultData.legalName;
-                    finalUser.dob = finalUser.dob || defaultData.dob;
-                    finalUser.idDoc = finalUser.idDoc || defaultData.idDoc;
-                    finalUser.address = finalUser.address || defaultData.address;
-                    finalUser.phone = finalUser.phone || defaultData.phone;
-                }
-
-                setUser(finalUser);
+                setUser(applyDefaultData(finalUser));
             })
             .catch(() => {
-                 let finalUser: User = parsedUser;
-                if (finalUser.role === 'investor' || finalUser.role === 'issuer') {
-                    const defaultData = {
-                        country: 'El Salvador',
-                        city: 'San Salvador',
-                        legalName: finalUser.name,
-                        dob: '1990-01-01',
-                        idDoc: 'ID Card, 01234567-8',
-                        address: '123 Main St, San Salvador',
-                        phone: '+503 2250-1234'
-                    };
-
-                    finalUser.country = finalUser.country || defaultData.country;
-                    finalUser.city = finalUser.city || defaultData.city;
-                    finalUser.legalName = finalUser.legalName || defaultData.legalName;
-                    finalUser.dob = finalUser.dob || defaultData.dob;
-                    finalUser.idDoc = finalUser.idDoc || defaultData.idDoc;
-                    finalUser.address = finalUser.address || defaultData.address;
-                    finalUser.phone = finalUser.phone || defaultData.phone;
-                }
-                setUser(finalUser)
+                setUser(applyDefaultData(parsedUser));
             })
             .finally(() => setLoading(false));
     } else {
@@ -208,7 +211,7 @@ export default function ProfilePage() {
                         <PersonalInfoRow label="City" value={user.city || 'Not set'} />
                         <PersonalInfoRow label="Legal Name" value={user.legalName || 'Not set'} />
                         <PersonalInfoRow label="Date of Birth" value={user.dob || 'Not set'} />
-                        {!isBusinessRole && <PersonalInfoRow label="Identification Documents" value={user.idDoc || 'Not set'} />}
+                        <PersonalInfoRow label="Identification Documents" value={user.idDoc || 'Not set'} />
                         <PersonalInfoRow label="Address" value={user.address || 'Not set'} />
                         <PersonalInfoRow label="Email Address" value={maskEmail(user.email)} />
                     </CardContent>
