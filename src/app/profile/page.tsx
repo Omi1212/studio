@@ -40,7 +40,7 @@ function PersonalInfoRow({ label, value, actionLabel, onActionClick }: { label: 
                         {actionLabel}
                     </Button>
                 )}
-                <div className="text-sm font-medium text-right">{value}</div>
+                <div className="text-sm font-medium text-right break-all">{value}</div>
             </div>
         </div>
     );
@@ -59,53 +59,39 @@ export default function ProfilePage() {
         const applyDefaultData = (user: User): User => {
             let finalUser = { ...user };
 
-            if (finalUser.role === 'investor') {
-                const defaultData = {
-                    country: 'El Salvador',
-                    city: 'San Salvador',
-                    legalName: finalUser.name,
-                    dob: '1990-01-01',
-                    idDoc: 'ID Card, 01234567-8',
-                    address: '123 Main St, San Salvador',
-                    phone: '+503 2250-1234'
-                };
-                finalUser.country = finalUser.country || defaultData.country;
-                finalUser.city = finalUser.city || defaultData.city;
-                finalUser.legalName = finalUser.legalName || defaultData.legalName;
-                finalUser.dob = finalUser.dob || defaultData.dob;
-                finalUser.idDoc = finalUser.idDoc || defaultData.idDoc;
-                finalUser.address = finalUser.address || defaultData.address;
-                finalUser.phone = finalUser.phone || defaultData.phone;
-            } else if (finalUser.role === 'issuer') {
-                const defaultData = {
-                    country: 'El Salvador',
-                    city: 'San Salvador',
-                    legalName: 'Emisores de Activos Digitales, S.A. de C.V.',
-                    dob: '2021-01-15',
-                    idDoc: 'NRC: 12345-6',
-                    address: 'Colonia San Benito, San Salvador',
-                    phone: '+503 2500-0000',
-                    businessName: finalUser.name,
-                };
-                finalUser.country = finalUser.country || defaultData.country;
-                finalUser.city = finalUser.city || defaultData.city;
-                finalUser.legalName = finalUser.legalName || defaultData.legalName;
-                finalUser.dob = finalUser.dob || defaultData.dob;
-                finalUser.idDoc = finalUser.idDoc || defaultData.idDoc;
-                finalUser.address = finalUser.address || defaultData.address;
-                finalUser.phone = finalUser.phone || defaultData.phone;
-                finalUser.businessName = finalUser.businessName || defaultData.businessName;
+            // Default personal data, applied if missing
+            const personalDefaults = {
+                country: 'El Salvador',
+                city: 'San Salvador',
+                legalName: user.name,
+                dob: '1990-01-01',
+                idDoc: 'DUI: 01234567-8',
+                address: '123 Calle Principal, San Salvador',
+                phone: '+503 7890-1234'
+            };
+
+            Object.keys(personalDefaults).forEach(key => {
+                const k = key as keyof typeof personalDefaults;
+                if (!finalUser[k]) {
+                    finalUser[k] = personalDefaults[k];
+                }
+            });
+
+            // Business defaults for issuer/agent/superadmin
+            if (user.role === 'issuer' || user.role === 'agent' || user.role === 'superadmin') {
+                if (!finalUser.businessName) {
+                    finalUser.businessName = finalUser.name; // Default business name to user's name
+                }
             }
+
             return finalUser;
         };
         
-        // Fetch the most up-to-date user data from the API
         fetch(`/api/users?perPage=999`)
             .then(res => res.json())
             .then((allUsers: {data: User[]}) => {
                 const apiUser = allUsers.data.find(u => u.id === parsedUser.id);
-                // Merge localStorage data with API data, localStorage is source of truth for session-edits
-                let finalUser: User = apiUser ? { ...apiUser, ...parsedUser } : parsedUser;
+                const finalUser: User = apiUser ? { ...apiUser, ...parsedUser } : parsedUser;
                 setUser(applyDefaultData(finalUser));
             })
             .catch(() => {
@@ -188,7 +174,7 @@ export default function ProfilePage() {
                         <Avatar className="h-24 w-24 text-4xl">
                             <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
                         </Avatar>
-                        <CardTitle className="text-2xl pt-2">{isBusinessRole ? user.businessName || user.name : user.name}</CardTitle>
+                        <CardTitle className="text-2xl pt-2">{user.name}</CardTitle>
                         <CardDescription>{isBusinessRole ? `Business Level ${user.kybLevel || 0}` : `User Level ${user.kycLevel || 0}`}</CardDescription>
                         <Badge variant="outline" className={currentStatusBadge.className}>
                             <ShieldCheck className="mr-2 h-4 w-4" />
@@ -198,7 +184,6 @@ export default function ProfilePage() {
                     <CardContent className="space-y-4">
                         <InfoRow icon={UserIcon} label="Username" value={user.name.toLowerCase().replace(/\s+/g, '')} />
                         <InfoRow icon={Phone} label="Phone Number" value={user.phone} />
-                         {isBusinessRole && user.businessName && <InfoRow icon={Building} label="Business Name" value={user.businessName} />}
                     </CardContent>
                 </Card>
 
@@ -217,6 +202,21 @@ export default function ProfilePage() {
                     </CardContent>
                 </Card>
               </div>
+
+               {isBusinessRole && (
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Business Information</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-1">
+                        <PersonalInfoRow label="Business Name" value={user.businessName || 'Not set'} />
+                        <PersonalInfoRow label="Business Legal Name" value={'Emisores de Activos Digitales, S.A. de C.V.'} />
+                        <PersonalInfoRow label="Business Registration ID" value={'NRC: 12345-6'} />
+                        <PersonalInfoRow label="Business Address" value={'Colonia San Benito, San Salvador'} />
+                    </CardContent>
+                </Card>
+              )}
+              
               {user.role === 'investor' && <IdentityVerification kycLevel={user.kycLevel || 0} />}
             </div>
           </main>
