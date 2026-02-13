@@ -10,7 +10,7 @@ import {
 import SidebarNav from '@/components/dashboard/sidebar-nav';
 import HeaderDynamic from '@/components/dashboard/header-dynamic';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Check, X, Edit, User as UserIcon, Phone } from 'lucide-react';
+import { ArrowLeft, Check, X, Edit, User as UserIcon, Phone, MessageSquare } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -29,6 +29,8 @@ import {
 } from "@/components/ui/alert-dialog"
 import type { User } from '@/lib/types';
 import { countries } from '@/lib/countries';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 
 
 type WhitelistRequest = User & {
@@ -127,6 +129,23 @@ export default function RequestDetailsPage() {
           description: 'Could not update the request.'
       });
     }
+  };
+
+  const handleSaveObservation = () => {
+    const observationText = (document.getElementById('observation') as HTMLTextAreaElement)?.value;
+    if (!observationText?.trim()) {
+        toast({
+            variant: "destructive",
+            title: "Observation is empty",
+            description: "Please write an observation before saving.",
+        });
+        return;
+    }
+    // In a real app, you would save this observation to your backend.
+    toast({
+        title: "Observation Saved",
+        description: `Your observation for the request from ${request?.name} has been noted.`,
+    });
   };
 
   const getInitials = (name: string) => {
@@ -249,30 +268,41 @@ export default function RequestDetailsPage() {
              <Card>
                 <CardHeader>
                     <CardTitle>Actions</CardTitle>
+                    <CardDescription>Approve or reject this request. You can add an optional observation.</CardDescription>
                 </CardHeader>
-                <CardContent className="flex flex-col sm:flex-row gap-2">
-                    <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                            <Button variant="destructive" className="w-full">
-                                <X className="mr-2 h-4 w-4" /> Reject Request
-                            </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                            <AlertDialogHeader>
-                                <AlertDialogTitle>Are you sure you want to reject this request?</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                This action cannot be undone.
-                                </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction onClick={() => handleUpdateStatus('rejected')}>Reject</AlertDialogAction>
-                            </AlertDialogFooter>
-                        </AlertDialogContent>
-                    </AlertDialog>
-                    <Button className="w-full" onClick={() => handleUpdateStatus('verified')}>
-                        <Check className="mr-2 h-4 w-4" /> Approve Request
+                <CardContent className="space-y-4">
+                    <div className="space-y-2">
+                        <Label htmlFor="observation">Observation</Label>
+                        <Textarea id="observation" placeholder="Add an observation for the user..." />
+                    </div>
+                    <Button variant="secondary" className="w-full" onClick={handleSaveObservation}>
+                        <MessageSquare className="mr-2 h-4 w-4" />
+                        Leave Observation
                     </Button>
+                    <div className="flex flex-col sm:flex-row gap-2">
+                        <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                                <Button variant="destructive" className="w-full">
+                                    <X className="mr-2 h-4 w-4" /> Reject Request
+                                </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                                <AlertDialogHeader>
+                                    <AlertDialogTitle>Are you sure you want to reject this request?</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                    This action cannot be undone.
+                                    </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction onClick={() => handleUpdateStatus('rejected')}>Reject</AlertDialogAction>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
+                        <Button className="w-full" onClick={() => handleUpdateStatus('verified')}>
+                            <Check className="mr-2 h-4 w-4" /> Approve Request
+                        </Button>
+                    </div>
                 </CardContent>
              </Card>
             )}
