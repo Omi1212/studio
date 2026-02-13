@@ -58,31 +58,38 @@ export default function ProfilePage() {
 
         const applyDefaultData = (user: User): User => {
             let finalUser = { ...user };
-
-            // Default personal data, applied if missing
-            const personalDefaults = {
+            
+            const investorDefaults = {
                 country: 'El Salvador',
                 city: 'San Salvador',
-                legalName: user.name,
+                legalName: finalUser.name,
                 dob: '1990-01-01',
                 idDoc: 'DUI: 01234567-8',
                 address: '123 Calle Principal, San Salvador',
                 phone: '+503 7890-1234'
             };
 
-            Object.keys(personalDefaults).forEach(key => {
-                const k = key as keyof typeof personalDefaults;
+            const issuerDefaults = {
+                 country: 'El Salvador',
+                city: 'San Salvador',
+                legalName: "Peter Bartholomew Jones",
+                dob: '2001-09-12',
+                idDoc: 'ID Card, 06**********38',
+                address: 'San Salvador Centro, El Salvador',
+                phone: '+503 2222-3333',
+                businessName: 'Emisores de Activos Digitales, S.A. de C.V.'
+            }
+
+            const defaults = finalUser.role === 'issuer' ? issuerDefaults : investorDefaults;
+
+            Object.keys(defaults).forEach(key => {
+                const k = key as keyof typeof defaults;
+                // @ts-ignore
                 if (!finalUser[k]) {
-                    finalUser[k] = personalDefaults[k];
+                    // @ts-ignore
+                    finalUser[k] = defaults[k];
                 }
             });
-
-            // Business defaults for issuer/agent/superadmin
-            if (user.role === 'issuer' || user.role === 'agent' || user.role === 'superadmin') {
-                if (!finalUser.businessName) {
-                    finalUser.businessName = finalUser.name; // Default business name to user's name
-                }
-            }
 
             return finalUser;
         };
@@ -91,8 +98,9 @@ export default function ProfilePage() {
             .then(res => res.json())
             .then((allUsers: {data: User[]}) => {
                 const apiUser = allUsers.data.find(u => u.id === parsedUser.id);
-                const finalUser: User = apiUser ? { ...apiUser, ...parsedUser } : parsedUser;
-                setUser(applyDefaultData(finalUser));
+                // Merge localStorage data over API data, then apply defaults
+                const mergedUser = apiUser ? { ...apiUser, ...parsedUser } : parsedUser;
+                setUser(applyDefaultData(mergedUser));
             })
             .catch(() => {
                 setUser(applyDefaultData(parsedUser));
@@ -121,7 +129,7 @@ export default function ProfilePage() {
   if (loading) {
       return (
         <div className="flex-1 p-4 sm:p-6 lg:p-8 flex items-center justify-center">
-            <Skeleton className="w-full max-w-4xl h-[600px]" />
+            <Skeleton className="w-full max-w-6xl h-[600px]" />
         </div>
       )
   }
@@ -175,11 +183,12 @@ export default function ProfilePage() {
                             <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
                         </Avatar>
                         <CardTitle className="text-2xl pt-2">{user.name}</CardTitle>
-                        <CardDescription>{isBusinessRole ? `Business Level ${user.kybLevel || 0}` : `User Level ${user.kycLevel || 0}`}</CardDescription>
-                        <Badge variant="outline" className={currentStatusBadge.className}>
-                            <ShieldCheck className="mr-2 h-4 w-4" />
-                            {isBusinessRole ? 'KYB' : 'KYC'} Status: {currentStatusBadge.text}
-                        </Badge>
+                        <div className="pt-1">
+                            <Badge variant="outline" className={currentStatusBadge.className}>
+                                <ShieldCheck className="mr-2 h-4 w-4" />
+                                {isBusinessRole ? 'KYB' : 'KYC'} Status: {currentStatusBadge.text}
+                            </Badge>
+                        </div>
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <InfoRow icon={UserIcon} label="Username" value={user.name.toLowerCase().replace(/\s+/g, '')} />
