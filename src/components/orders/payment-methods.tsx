@@ -41,7 +41,7 @@ const UsdtIcon = () => (
     </svg>
 )
 
-function BankDetails({ orderReference, onPay }: { orderReference: string, onPay: (details: Partial<Omit<PaymentDetails, 'transactionId'>>) => void }) {
+function BankDetails({ orderReference, onPay, amount }: { orderReference: string; amount: number; onPay: (details: Partial<Omit<PaymentDetails, 'transactionId'>>) => void }) {
     const { toast } = useToast();
     const [selectedBank, setSelectedBank] = useState('banco-agricola');
 
@@ -106,6 +106,12 @@ function BankDetails({ orderReference, onPay }: { orderReference: string, onPay:
                             </div>
                         </div>
                     ))}
+                    <div className="flex justify-between items-center">
+                        <span className="text-muted-foreground">Total:</span>
+                        <div className="flex items-center gap-2">
+                            <span className="font-medium font-mono">${amount.toFixed(2)}</span>
+                        </div>
+                    </div>
                 </div>
 
                  <Alert>
@@ -616,7 +622,7 @@ export default function PaymentMethods({ order, token, onPaymentConfirmed }: Pay
 
         switch (activePaymentMethod) {
             case 'bank':
-                return <BankDetails orderReference={order.id} onPay={handlePaymentMade} />;
+                return <BankDetails orderReference={order.id} onPay={handlePaymentMade} amount={investmentAmount} />;
             case 'btc':
                 return <BitcoinPaymentDetails orderReference={order.id} amount={investmentAmount} onPay={handlePaymentMade} />;
             case 'spark':
