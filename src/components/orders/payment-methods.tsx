@@ -1,5 +1,3 @@
-
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -109,7 +107,7 @@ function BankDetails({ orderReference, onPay, amount }: { orderReference: string
                     <div className="flex justify-between items-center">
                         <span className="text-muted-foreground">Total:</span>
                         <div className="flex items-center gap-2">
-                            <span className="font-medium font-mono">${amount.toFixed(2)}</span>
+                            <span className="font-medium font-mono text-primary">${amount.toFixed(2)}</span>
                         </div>
                     </div>
                 </div>
