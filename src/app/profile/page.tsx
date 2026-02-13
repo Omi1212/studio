@@ -61,9 +61,53 @@ export default function ProfilePage() {
             .then((allUsers: {data: User[]}) => {
                 const apiUser = allUsers.data.find(u => u.id === parsedUser.id);
                 // Merge localStorage data with API data, localStorage is source of truth for session-edits
-                setUser(apiUser ? { ...apiUser, ...parsedUser } : parsedUser);
+                let finalUser: User = apiUser ? { ...apiUser, ...parsedUser } : parsedUser;
+
+                if (finalUser.role === 'investor' || finalUser.role === 'issuer') {
+                    const defaultData = {
+                        country: 'El Salvador',
+                        city: 'San Salvador',
+                        legalName: finalUser.name,
+                        dob: '1990-01-01',
+                        idDoc: 'ID Card, 01234567-8',
+                        address: '123 Main St, San Salvador',
+                        phone: '+503 2250-1234'
+                    };
+
+                    finalUser.country = finalUser.country || defaultData.country;
+                    finalUser.city = finalUser.city || defaultData.city;
+                    finalUser.legalName = finalUser.legalName || defaultData.legalName;
+                    finalUser.dob = finalUser.dob || defaultData.dob;
+                    finalUser.idDoc = finalUser.idDoc || defaultData.idDoc;
+                    finalUser.address = finalUser.address || defaultData.address;
+                    finalUser.phone = finalUser.phone || defaultData.phone;
+                }
+
+                setUser(finalUser);
             })
-            .catch(() => setUser(parsedUser)) // Fallback to localStorage user on API error
+            .catch(() => {
+                 let finalUser: User = parsedUser;
+                if (finalUser.role === 'investor' || finalUser.role === 'issuer') {
+                    const defaultData = {
+                        country: 'El Salvador',
+                        city: 'San Salvador',
+                        legalName: finalUser.name,
+                        dob: '1990-01-01',
+                        idDoc: 'ID Card, 01234567-8',
+                        address: '123 Main St, San Salvador',
+                        phone: '+503 2250-1234'
+                    };
+
+                    finalUser.country = finalUser.country || defaultData.country;
+                    finalUser.city = finalUser.city || defaultData.city;
+                    finalUser.legalName = finalUser.legalName || defaultData.legalName;
+                    finalUser.dob = finalUser.dob || defaultData.dob;
+                    finalUser.idDoc = finalUser.idDoc || defaultData.idDoc;
+                    finalUser.address = finalUser.address || defaultData.address;
+                    finalUser.phone = finalUser.phone || defaultData.phone;
+                }
+                setUser(finalUser)
+            })
             .finally(() => setLoading(false));
     } else {
         setLoading(false);
@@ -71,6 +115,7 @@ export default function ProfilePage() {
   }, []);
 
   const getInitials = (name: string) => {
+    if (!name) return '';
     const names = name.split(' ');
     if (names.length > 1) {
       return `${names[0][0]}${names[names.length - 1][0]}`;
@@ -156,7 +201,7 @@ export default function ProfilePage() {
 
                 <Card className="lg:col-span-7">
                     <CardHeader>
-                        <CardTitle>{(user.role === 'agent' || user.role === 'superadmin') ? 'Business Information' : 'Personal Information'}</CardTitle>
+                        <CardTitle>Personal Information</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-1">
                         <PersonalInfoRow label="Country of Residence" value={countryDisplay || 'Not set'} actionLabel="Change" />
