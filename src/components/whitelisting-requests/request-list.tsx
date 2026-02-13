@@ -7,24 +7,12 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Avatar, AvatarFallback } from '../ui/avatar';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
-import { MoreVertical, LayoutGrid, List, Search, Check, X, FilePenLine } from 'lucide-react';
+import { LayoutGrid, List, Search, FilePenLine } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
 import Link from 'next/link';
 import { useToast } from '@/hooks/use-toast';
 import { Input } from '../ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
 
 type WhitelistRequest = User;
 
@@ -43,7 +31,7 @@ function getStatusBadge(request: WhitelistRequest) {
   }
 }
 
-function RequestCard({ request, onApprove, onReject }: { request: WhitelistRequest, onApprove: (id: string) => void, onReject: (id: string) => void }) {
+function RequestCard({ request }: { request: WhitelistRequest }) {
   return (
     <Card>
       <CardHeader>
@@ -57,21 +45,6 @@ function RequestCard({ request, onApprove, onReject }: { request: WhitelistReque
               <CardDescription>{request.email}</CardDescription>
             </div>
           </div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
-                <MoreVertical className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem asChild>
-                <Link href={`/whitelisting-requests/${request.id}`}>View Details</Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link href={`/whitelisting-requests/${request.id}/edit`}>Edit</Link>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
         </div>
       </CardHeader>
       <CardContent>
@@ -90,35 +63,16 @@ function RequestCard({ request, onApprove, onReject }: { request: WhitelistReque
             {getStatusBadge(request)}
         </div>
       </CardContent>
-      {request.kycStatus === 'pending' && (
-        <CardFooter className="flex gap-2">
-            <AlertDialog>
-                <AlertDialogTrigger asChild>
-                    <Button variant="outline" className="w-full">
-                        <X className="mr-2 h-4 w-4" /> Reject
-                    </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                    <AlertDialogHeader>
-                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                        <AlertDialogDescription>This will reject the request from {request.name}. This cannot be undone.</AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction onClick={() => onReject(request.id)}>Confirm Reject</AlertDialogAction>
-                    </AlertDialogFooter>
-                </AlertDialogContent>
-            </AlertDialog>
-            <Button className="w-full" onClick={() => onApprove(request.id)}>
-                <Check className="mr-2 h-4 w-4" /> Approve
-            </Button>
-        </CardFooter>
-      )}
+      <CardFooter>
+          <Button variant="outline" className="w-full" asChild>
+            <Link href={`/whitelisting-requests/${request.id}`}>View</Link>
+          </Button>
+      </CardFooter>
     </Card>
   );
 }
 
-function RequestTableRow({ request, onApprove, onReject }: { request: WhitelistRequest, onApprove: (id: string) => void, onReject: (id: string) => void }) {
+function RequestTableRow({ request }: { request: WhitelistRequest }) {
   const router = useRouter();
   return (
     <TableRow onClick={() => router.push(`/whitelisting-requests/${request.id}`)} className="cursor-pointer">
@@ -141,43 +95,9 @@ function RequestTableRow({ request, onApprove, onReject }: { request: WhitelistR
        </TableCell>
        <TableCell className="hidden sm:table-cell">{getStatusBadge(request)}</TableCell>
       <TableCell className="text-right">
-        <div className="flex items-center justify-end gap-2" onClick={(e) => e.stopPropagation()}>
-            {request.kycStatus === 'pending' && (
-                <>
-                    <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                            <Button size="sm" variant="outline">Reject</Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                            <AlertDialogHeader>
-                                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                                <AlertDialogDescription>This will reject the request from {request.name}. This cannot be undone.</AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction onClick={() => onReject(request.id)}>Confirm Reject</AlertDialogAction>
-                            </AlertDialogFooter>
-                        </AlertDialogContent>
-                    </AlertDialog>
-                    <Button size="sm" onClick={() => onApprove(request.id)}>Approve</Button>
-                </>
-            )}
-            <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8">
-                <MoreVertical className="h-4 w-4" />
-                </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-                <DropdownMenuItem asChild>
-                <Link href={`/whitelisting-requests/${request.id}`}>View Details</Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                <Link href={`/whitelisting-requests/${request.id}/edit`}>Edit</Link>
-                </DropdownMenuItem>
-            </DropdownMenuContent>
-            </DropdownMenu>
-        </div>
+        <Button asChild variant="outline" size="sm" onClick={(e) => e.stopPropagation()}>
+            <Link href={`/whitelisting-requests/${request.id}`}>View</Link>
+        </Button>
       </TableCell>
     </TableRow>
   );
@@ -188,7 +108,6 @@ export default function RequestList({ view, setView }: { view: ViewMode, setView
   const [requests, setRequests] = useState<WhitelistRequest[]>([]);
   const [totalRequests, setTotalRequests] = useState(0);
   const [loading, setLoading] = useState(true);
-  const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('pending');
   const [currentPage, setCurrentPage] = useState(1);
@@ -228,42 +147,6 @@ export default function RequestList({ view, setView }: { view: ViewMode, setView
     if (page >= 1 && page <= totalPages) {
       setCurrentPage(page);
     }
-  };
-
-
-  const updateRequestStatus = async (id: string, status: 'verified' | 'rejected') => {
-    try {
-      const response = await fetch(`/api/investors/${id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ kycStatus: status }),
-      });
-      if (!response.ok) throw new Error('Failed to update request');
-      
-      const updatedRequest = await response.json();
-      setRequests(prev => prev.map(req => (req.id === id ? updatedRequest : req)));
-
-      toast({
-          title: `Request ${status === 'verified' ? 'Approved' : 'Rejected'}`,
-          description: `The request for "${updatedRequest.name}" has been updated.`
-      });
-
-    } catch (error) {
-      console.error(error);
-      toast({
-          variant: 'destructive',
-          title: 'Error',
-          description: 'Could not update the request.'
-      });
-    }
-  }
-
-  const handleApprove = (id: string) => {
-    updateRequestStatus(id, 'verified');
-  };
-  
-  const handleReject = (id: string) => {
-    updateRequestStatus(id, 'rejected');
   };
 
   if (loading) {
@@ -367,7 +250,7 @@ export default function RequestList({ view, setView }: { view: ViewMode, setView
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {requests.map(request => (
-              <RequestCard key={request.id} request={request} onApprove={handleApprove} onReject={handleReject} />
+              <RequestCard key={request.id} request={request} />
             ))}
           </div>
           {renderPagination()}
@@ -386,7 +269,7 @@ export default function RequestList({ view, setView }: { view: ViewMode, setView
             </TableHeader>
             <TableBody>
               {requests.map(request => (
-                  <RequestTableRow key={request.id} request={request} onApprove={handleApprove} onReject={handleReject} />
+                  <RequestTableRow key={request.id} request={request} />
               ))}
             </TableBody>
           </Table>
