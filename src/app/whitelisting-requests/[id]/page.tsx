@@ -10,8 +10,8 @@ import {
 import SidebarNav from '@/components/dashboard/sidebar-nav';
 import HeaderDynamic from '@/components/dashboard/header-dynamic';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Check, X, Edit } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ArrowLeft, Check, X, Edit, User as UserIcon, Phone } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
@@ -28,11 +28,40 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import type { User } from '@/lib/types';
+import { countries } from '@/lib/countries';
 
 
 type WhitelistRequest = User & {
     joinedDate: string;
 };
+
+function InfoRowWithIcon({ icon: Icon, label, value }: { icon: React.ElementType, label: string, value: string | undefined }) {
+  return (
+    <div className="flex items-center gap-4">
+      <Icon className="h-5 w-5 text-muted-foreground" />
+      <div className="flex-1">
+        <p className="text-xs text-muted-foreground">{label}</p>
+        <p className="text-sm font-medium">{value || 'Not provided'}</p>
+      </div>
+    </div>
+  )
+}
+
+function PersonalInfoRow({ label, value, actionLabel, onActionClick }: { label: string; value: React.ReactNode; actionLabel?: string; onActionClick?: () => void; }) {
+    return (
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between py-2">
+            <p className="text-sm text-muted-foreground mb-1 sm:mb-0">{label}</p>
+            <div className="flex items-center gap-4">
+                {actionLabel && (
+                    <Button variant="link" className="text-sm p-0 h-auto text-primary hover:underline" onClick={onActionClick}>
+                        {actionLabel}
+                    </Button>
+                )}
+                <div className="text-sm font-medium text-right break-all">{value}</div>
+            </div>
+        </div>
+    );
+}
 
 function getStatusBadge(status: WhitelistRequest['kycStatus']) {
   switch (status) {
@@ -45,15 +74,6 @@ function getStatusBadge(status: WhitelistRequest['kycStatus']) {
     default:
       return <Badge variant="secondary">Unknown</Badge>;
   }
-}
-
-function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
-  return (
-    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-      <p className="text-sm text-muted-foreground w-40 shrink-0">{label}</p>
-      <div className="text-sm font-medium">{value}</div>
-    </div>
-  );
 }
 
 export default function RequestDetailsPage() {
@@ -109,6 +129,24 @@ export default function RequestDetailsPage() {
     }
   };
 
+  const getInitials = (name: string) => {
+    if (!name) return '';
+    const names = name.split(' ');
+    if (names.length > 1) {
+      return `${names[0][0]}${names[names.length - 1][0]}`;
+    }
+    return name.substring(0, 2);
+  };
+
+  const maskEmail = (email: string) => {
+      if (!email) return '';
+      const [local, domain] = email.split('@');
+      if (local.length > 3) {
+          return `${local.substring(0, 2)}***@${domain}`;
+      }
+      return email;
+  }
+
   if (loading) {
     return (
       <div className="flex-1 p-4 sm:p-6 lg:p-8 flex items-center justify-center">
@@ -120,6 +158,10 @@ export default function RequestDetailsPage() {
   if (!request) {
     notFound();
   }
+  
+  const countryObj = countries.find(c => c.value === request.country || c.label === request.country);
+  const countryDisplay = countryObj ? countryObj.label : request.country;
+
 
   return (
     <SidebarProvider>
@@ -147,26 +189,61 @@ export default function RequestDetailsPage() {
             </div>
             
             <div className="max-w-4xl mx-auto space-y-6">
-             <Card>
-                <CardHeader>
-                    <div className="flex items-center gap-4">
-                        <Avatar className="h-16 w-16 text-2xl">
-                            <AvatarFallback>{request.name.charAt(0)}</AvatarFallback>
-                        </Avatar>
-                        <div>
-                            <CardTitle className="text-2xl">{request.name}</CardTitle>
-                            <div className="flex items-center gap-2 mt-1">
+                <div className="grid grid-cols-1 lg:grid-cols-10 gap-6">
+                    <Card className="lg:col-span-3">
+                        <CardHeader className="items-center text-center">
+                            <Avatar className="h-24 w-24 text-4xl">
+                                <AvatarFallback>{getInitials(request.name)}</AvatarFallback>
+                            </Avatar>
+                            <CardTitle className="text-2xl pt-2">{request.name}</CardTitle>
+                            <CardDescription>User Level {request.kycLevel || 0}</CardDescription>
+                            <div className="flex items-center gap-2">
                                 {getStatusBadge(request.kycStatus)}
                             </div>
-                        </div>
-                    </div>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                    <InfoRow label="Email" value={request.email} />
-                    <InfoRow label="Wallet Address" value={<span className="font-mono">{request.walletAddress}</span>} />
-                    <InfoRow label="Request Date" value={new Date(request.joinedDate).toLocaleDateString()} />
-                </CardContent>
-            </Card>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <InfoRowWithIcon icon={UserIcon} label="Username" value={request.name.toLowerCase().replace(/\s+/g, '')} />
+                            <InfoRowWithIcon icon={Phone} label="Phone Number" value={request.phone} />
+                        </CardContent>
+                    </Card>
+
+                    <Card className="lg:col-span-7">
+                        <CardHeader>
+                            <CardTitle>Personal Information</CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-1">
+                            <PersonalInfoRow label="Country of Residence" value={countryDisplay || 'Not set'} />
+                            <PersonalInfoRow label="City" value={request.city || 'Not set'} />
+                            <PersonalInfoRow label="Legal Name" value={request.legalName || 'Not set'} />
+                            <PersonalInfoRow label="Date of Birth" value={request.dob || 'Not set'} />
+                            <PersonalInfoRow label="Identification Documents" value={request.idDoc || 'Not set'} />
+                            <PersonalInfoRow label="Address" value={request.address || 'Not set'} />
+                            <PersonalInfoRow label="Email Address" value={maskEmail(request.email)} />
+                        </CardContent>
+                    </Card>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {request.joinedDate && (
+                        <Card>
+                            <CardHeader className="pb-2">
+                                <CardTitle className="text-sm font-medium text-muted-foreground">Request Date</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <p className="text-2xl font-bold">{new Date(request.joinedDate).toLocaleDateString()}</p>
+                            </CardContent>
+                        </Card>
+                    )}
+                    <Card>
+                        <CardHeader className="pb-2">
+                            <CardTitle className="text-sm font-medium text-muted-foreground">Wallet Address</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <p className="text-xl font-bold font-mono truncate" title={request.walletAddress}>{request.walletAddress}</p>
+                        </CardContent>
+                    </Card>
+                </div>
+
 
             {request.kycStatus === 'pending' && (
              <Card>
