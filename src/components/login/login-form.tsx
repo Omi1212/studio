@@ -84,6 +84,11 @@ export default function LoginForm() {
           return;
         }
       }
+      
+      toast({
+        title: 'Login Successful',
+        description: 'Welcome to BlockStratus!',
+      });
 
       await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate network latency
       router.push('/');
