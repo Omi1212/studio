@@ -10,7 +10,7 @@ import {
 import SidebarNav from '@/components/dashboard/sidebar-nav';
 import HeaderDynamic from '@/components/dashboard/header-dynamic';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Check, X, Edit, User as UserIcon, Phone, MessageSquare } from 'lucide-react';
+import { ArrowLeft, Check, X, User as UserIcon, Phone, MessageSquare, ShieldCheck } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -68,13 +68,13 @@ function PersonalInfoRow({ label, value, actionLabel, onActionClick }: { label: 
 function getStatusBadge(status: WhitelistRequest['kycStatus']) {
   switch (status) {
     case 'verified':
-      return <Badge variant="outline" className="text-green-400 border-green-400">Accepted</Badge>;
+      return <Badge variant="outline" className="text-green-400 border-green-400"><ShieldCheck className="mr-2 h-4 w-4" /> Accepted</Badge>;
     case 'pending':
-      return <Badge variant="outline" className="text-yellow-400 border-yellow-400">Pending</Badge>;
+      return <Badge variant="outline" className="text-yellow-400 border-yellow-400"><ShieldCheck className="mr-2 h-4 w-4" /> Pending</Badge>;
     case 'rejected':
-      return <Badge variant="destructive">Rejected</Badge>;
+      return <Badge variant="destructive"><ShieldCheck className="mr-2 h-4 w-4" /> Rejected</Badge>;
     default:
-      return <Badge variant="secondary">Unknown</Badge>;
+      return <Badge variant="secondary"><ShieldCheck className="mr-2 h-4 w-4" /> Unknown</Badge>;
   }
 }
 
@@ -199,11 +199,6 @@ export default function RequestDetailsPage() {
                     <h1 className="text-3xl font-headline font-semibold">
                         Request Details
                     </h1>
-                </div>
-                <div className="flex gap-2">
-                    <Button variant="outline" asChild>
-                        <Link href={`/whitelisting-requests/${request.id}/edit`}><Edit className="mr-2 h-4 w-4" /> Edit</Link>
-                    </Button>
                 </div>
             </div>
             
