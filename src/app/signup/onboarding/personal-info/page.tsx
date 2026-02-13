@@ -17,7 +17,6 @@ import { countryCallingCodes } from '@/lib/country-calling-codes';
 
 const personalInfoSchema = z.object({
   legalName: z.string().min(1, 'Full name is required'),
-  dob: z.string().min(1, 'Date of birth is required'),
   phone: z.string().min(1, 'Phone number is required'),
   phoneCountryCode: z.string().min(1, "Country code is required"),
 });
@@ -35,7 +34,6 @@ export default function PersonalInfoPage() {
     resolver: zodResolver(personalInfoSchema),
     defaultValues: {
       legalName: '',
-      dob: '',
       phone: '',
       phoneCountryCode: 'US', // Default to US
     },
@@ -62,7 +60,6 @@ export default function PersonalInfoPage() {
         legalName: parsedUser.legalName || parsedUser.name || '',
         phone: phoneNumber,
         phoneCountryCode: countryCode,
-        dob: parsedUser.dob || ''
       });
     } else {
         router.push('/signup');
@@ -79,10 +76,9 @@ export default function PersonalInfoPage() {
         const fullPhoneNumber = `${countryCodeData?.dial_code || ''}${data.phone}`;
 
         const updatedUserData = {
-            name: data.legalName, // Also update name field for display purposes
+            name: data.legalName, // Also update name for display purposes
             legalName: data.legalName,
             phone: fullPhoneNumber,
-            dob: data.dob,
         };
 
         const response = await fetch(`/api/users/${user.id}`, {
@@ -149,19 +145,6 @@ export default function PersonalInfoPage() {
                                 <FormLabel>Full Name</FormLabel>
                                 <FormControl>
                                     <Input placeholder="e.g. John Doe" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                         <FormField
-                            control={form.control}
-                            name="dob"
-                            render={({ field }) => (
-                                <FormItem>
-                                <FormLabel>Date of Birth</FormLabel>
-                                <FormControl>
-                                    <Input type="date" {...field} />
                                 </FormControl>
                                 <FormMessage />
                                 </FormItem>
