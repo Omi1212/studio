@@ -77,6 +77,7 @@ export type User = {
   address?: string;
   city?: string;
   businessName?: string;
+  industry?: string;
   joinedDate?: string;
   totalInvested?: number;
   isFrozen?: boolean;

@@ -104,7 +104,11 @@ export default function PersonalInfoPage() {
           title: 'Personal Info Saved!',
         });
 
-        router.push('/signup/onboarding/verify');
+        if (updatedUserFromApi.role === 'issuer') {
+            router.push('/signup/onboarding/business-info');
+        } else {
+            router.push('/signup/onboarding/details');
+        }
 
     } catch (error: any) {
         toast({

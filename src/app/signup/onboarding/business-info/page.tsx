@@ -13,11 +13,20 @@ import { useToast } from '@/hooks/use-toast';
 import type { User } from '@/lib/types';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { countries } from '@/lib/countries';
+
+const industries = [
+  { value: 'banking', label: 'Banking' },
+  { value: 'fintech', label: 'FinTech' },
+  { value: 'real_estate', label: 'Real Estate' },
+  { value: 'venture_capital', label: 'Venture Capital' },
+  { value: 'asset_management', label: 'Asset Management' },
+  { value: 'government', label: 'Government' },
+  { value: 'other', label: 'Other' },
+];
 
 const businessInfoSchema = z.object({
-  businessName: z.string().min(1, 'Business name is required'),
-  country: z.string().min(1, 'Country is required'),
+  businessName: z.string().min(1, 'Company name is required'),
+  industry: z.string().min(1, 'Industry is required'),
 });
 
 type BusinessInfoFormValues = z.infer<typeof businessInfoSchema>;
@@ -33,7 +42,7 @@ export default function BusinessInfoPage() {
     resolver: zodResolver(businessInfoSchema),
     defaultValues: {
       businessName: '',
-      country: '',
+      industry: '',
     },
   });
 
@@ -48,11 +57,9 @@ export default function BusinessInfoPage() {
       }
       setUser(parsedUser);
       
-      const countryValue = countries.find(c => c.label === parsedUser.country)?.value || parsedUser.country || '';
-
       form.reset({
         businessName: parsedUser.businessName || '',
-        country: countryValue,
+        industry: parsedUser.industry || '',
       });
     } else {
         router.push('/signup');
@@ -67,7 +74,7 @@ export default function BusinessInfoPage() {
     try {
         const updatedUserData = {
             businessName: data.businessName,
-            country: data.country,
+            industry: data.industry,
             kybLevel: 1,
             kybStatus: 'pending' as const,
         };
@@ -130,7 +137,7 @@ export default function BusinessInfoPage() {
                             name="businessName"
                             render={({ field }) => (
                                 <FormItem>
-                                <FormLabel>Business Name</FormLabel>
+                                <FormLabel>Company Name</FormLabel>
                                 <FormControl>
                                     <Input placeholder="e.g. Awesome Inc." {...field} />
                                 </FormControl>
@@ -140,20 +147,20 @@ export default function BusinessInfoPage() {
                         />
                         <FormField
                             control={form.control}
-                            name="country"
+                            name="industry"
                             render={({ field }) => (
                                 <FormItem>
-                                <FormLabel>Country of Operation</FormLabel>
+                                <FormLabel>Industry</FormLabel>
                                 <Select onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
                                     <FormControl>
                                         <SelectTrigger>
-                                            <SelectValue placeholder="Select a country" />
+                                            <SelectValue placeholder="Select an industry" />
                                         </SelectTrigger>
                                     </FormControl>
                                     <SelectContent>
-                                        {countries.map(country => (
-                                            <SelectItem key={country.value} value={country.value}>
-                                                {country.label}
+                                        {industries.map(industry => (
+                                            <SelectItem key={industry.value} value={industry.value}>
+                                                {industry.label}
                                             </SelectItem>
                                         ))}
                                     </SelectContent>
