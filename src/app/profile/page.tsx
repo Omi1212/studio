@@ -1,5 +1,3 @@
-
-
 'use client';
 
 import {
@@ -158,7 +156,7 @@ export default function ProfilePage() {
 
                 <Card className="lg:col-span-7">
                     <CardHeader>
-                        <CardTitle>{isBusinessRole ? 'Business Information' : 'Personal Information'}</CardTitle>
+                        <CardTitle>{(user.role === 'agent' || user.role === 'superadmin') ? 'Business Information' : 'Personal Information'}</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-1">
                         <PersonalInfoRow label="Country of Residence" value={countryDisplay || 'Not set'} actionLabel="Change" />
