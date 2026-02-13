@@ -19,7 +19,6 @@ function VerificationStep({ level, title, description, isCompleted, isCurrent }:
         <div className={`flex items-center justify-center h-8 w-8 rounded-full ${isCompleted ? 'bg-green-500 text-white' : isCurrent ? 'border-2 border-primary text-primary' : 'bg-muted text-muted-foreground'}`}>
           {isCompleted ? <CheckCircle2 className="h-5 w-5" /> : <span className={isCurrent ? 'font-bold':''}>{level}</span>}
         </div>
-        {level < 4 && <div className={`w-px h-12 mt-2 ${isCompleted ? 'bg-green-500' : 'bg-border'}`}></div>}
       </div>
       <div className="pt-1">
         <h4 className="font-semibold">{title}</h4>
@@ -75,11 +74,11 @@ function VerificationCallToAction({ kycLevel }: { kycLevel: number }) {
   const nextStepInfo = levelsInfo[kycLevel];
 
   return (
-    <div className="bg-card-foreground/5 dark:bg-card-foreground/10 rounded-lg p-6 h-full flex flex-col">
+    <div className="bg-card-foreground/5 dark:bg-card-foreground/10 rounded-lg p-6 h-full flex flex-col text-center">
       <h4 className="font-semibold text-lg">{nextStepInfo.title}</h4>
       <p className="text-sm text-muted-foreground mt-2 whitespace-pre-line flex-1">{nextStepInfo.description}</p>
       {nextStepInfo.requirements.length > 0 && (
-        <ul className="list-disc pl-5 text-sm text-muted-foreground space-y-1 my-4">
+        <ul className="list-disc pl-5 text-sm text-muted-foreground space-y-1 my-4 max-w-max mx-auto text-left">
           {nextStepInfo.requirements.map(req => <li key={req}>{req}</li>)}
         </ul>
       )}
@@ -103,7 +102,7 @@ export default function IdentityVerification({ kycLevel }: { kycLevel: number })
         <CardTitle>Identity Verification</CardTitle>
       </CardHeader>
       <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
-          <div className="pt-1">
+          <div className="pt-1 space-y-8">
             {steps.map((step) => (
               <VerificationStep
                 key={step.level}
