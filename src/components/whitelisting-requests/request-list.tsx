@@ -134,7 +134,7 @@ function RequestTableRow({ request, onApprove, onReject }: { request: WhitelistR
         </div>
       </TableCell>
        <TableCell className="hidden lg:table-cell">
-        <span className="font-mono">{request.walletAddress.slice(0, 15)}...{request.walletAddress.slice(-4)}</span>
+        <span className="font-mono">{request.walletAddress.slice(0, 7)}...{request.walletAddress.slice(-4)}</span>
        </TableCell>
        <TableCell className="hidden md:table-cell">
         {request.joinedDate ? new Date(request.joinedDate).toLocaleDateString() : 'N/A'}
