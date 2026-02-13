@@ -18,6 +18,7 @@ import { Button } from '@/components/ui/button';
 import { ShieldCheck, User as UserIcon, Phone, Building } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { countries } from '@/lib/countries';
+import IdentityVerification from '@/components/profile/identity-verification';
 
 function InfoRow({ icon: Icon, label, value }: { icon: React.ElementType, label: string, value: string | undefined }) {
   return (
@@ -170,6 +171,7 @@ export default function ProfilePage() {
                     </CardContent>
                 </Card>
               </div>
+              {user.role === 'investor' && <IdentityVerification kycLevel={user.kycLevel || 0} />}
             </div>
           </main>
         </div>
