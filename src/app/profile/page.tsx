@@ -78,13 +78,13 @@ export default function ProfilePage() {
                 finalUser.phone = finalUser.phone || defaultData.phone;
             } else if (finalUser.role === 'issuer') {
                 const defaultData = {
-                    country: 'Mexico',
-                    city: 'Mexico City',
-                    legalName: 'Soluciones Financieras Globales S.A.',
-                    dob: '2018-10-01',
-                    idDoc: 'Business Reg. ID, SFG181001XYZ',
-                    address: 'Paseo de la Reforma 222, 06600, CDMX',
-                    phone: '+52 55 8765 4321',
+                    country: 'El Salvador',
+                    city: 'San Salvador',
+                    legalName: 'Emisores de Activos Digitales, S.A. de C.V.',
+                    dob: '2021-01-15',
+                    idDoc: 'NRC: 12345-6',
+                    address: 'Colonia San Benito, San Salvador',
+                    phone: '+503 2500-0000',
                     businessName: finalUser.name,
                 };
                 finalUser.country = finalUser.country || defaultData.country;
