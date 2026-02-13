@@ -37,28 +37,28 @@ function VerificationCallToAction({ kycLevel }: { kycLevel: number }) {
       title: "Continue to User Level 1", 
       description: "To get started, please verify your email and phone number.", 
       requirements: [], 
-      buttonText: "Start Verification" 
+      buttonText: "Verify Identity" 
     },
     // kycLevel 1
     { 
       title: "Continue to User Level 2", 
       description: "Provide your basic personal information to increase your account limits.", 
       requirements: ["Full Name", "Date of Birth", "Country of Residence"], 
-      buttonText: "Start User Level 2" 
+      buttonText: "Verify Identity" 
     },
     // kycLevel 2
     { 
       title: "Continue to User Level 3", 
       description: "To unlock higher limits and more features, please complete the next verification step.\n\nYou will need to provide:", 
       requirements: ["Passport or National ID", "Liveness Check"], 
-      buttonText: "Start User Level 3" 
+      buttonText: "Verify Identity" 
     },
     // kycLevel 3
     { 
       title: "Continue to User Level 4", 
       description: "Submit a proof of address to complete your verification and unlock all platform features.", 
       requirements: ["Utility bill or Bank statement"], 
-      buttonText: "Start User Level 4" 
+      buttonText: "Verify Identity" 
     },
   ];
 
