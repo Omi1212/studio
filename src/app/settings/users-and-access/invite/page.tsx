@@ -131,18 +131,17 @@ export default function InviteUsersPage() {
                     ))}
                 </div>
 
-                <div className="mt-6">
-                     <Button variant="outline" onClick={handleAddInvitation}>
+                <div className="mt-8 flex items-center justify-between">
+                    <Button variant="outline" onClick={handleAddInvitation}>
                         <Plus className="mr-2 h-4 w-4" />
                         Add New
                     </Button>
-                </div>
-
-                <div className="mt-8 flex justify-end gap-2">
-                    <Button variant="outline" asChild>
-                        <Link href="/settings/users-and-access">Cancel</Link>
-                    </Button>
-                    <Button onClick={handleSendInvitations}>Invite</Button>
+                    <div className="flex items-center gap-2">
+                        <Button variant="outline" asChild>
+                            <Link href="/settings/users-and-access">Cancel</Link>
+                        </Button>
+                        <Button onClick={handleSendInvitations}>Invite</Button>
+                    </div>
                 </div>
             </div>
           </main>
