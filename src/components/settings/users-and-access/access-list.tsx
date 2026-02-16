@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import Link from 'next/link';
 
 // Mock user data to simulate a team
 const mockTeamMembers: Partial<User>[] = [
@@ -83,9 +84,11 @@ export default function AccessList() {
                 <TabsTrigger value="users">Users</TabsTrigger>
                 <TabsTrigger value="invitations">Invitations</TabsTrigger>
             </TabsList>
-             <Button className="bg-primary hover:bg-primary/90">
-                <Plus className="mr-2 h-4 w-4" />
-                Invite users
+             <Button asChild>
+                <Link href="/settings/users-and-access/invite">
+                    <Plus className="mr-2 h-4 w-4" />
+                    Invite users
+                </Link>
             </Button>
         </div>
       
