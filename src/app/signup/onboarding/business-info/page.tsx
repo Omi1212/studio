@@ -67,7 +67,7 @@ export default function BusinessInfoPage() {
     setLoading(false);
   }, [router, form]);
   
-  const handleFinalSubmit = async (data: BusinessInfoFormValues) => {
+  const handleContinue = async (data: BusinessInfoFormValues) => {
     if (!user) return;
     setIsSubmitting(true);
 
@@ -75,8 +75,6 @@ export default function BusinessInfoPage() {
         const updatedUserData = {
             businessName: data.businessName,
             industry: data.industry,
-            kybLevel: 1,
-            kybStatus: 'pending' as const,
         };
         
         const response = await fetch(`/api/users/${user.id}`, {
@@ -94,11 +92,10 @@ export default function BusinessInfoPage() {
         localStorage.setItem('currentUser', JSON.stringify(updatedUserFromApi));
         
         toast({
-          title: 'Profile Updated!',
-          description: 'You are all set. Welcome!',
+          title: 'Business Info Saved!',
         });
 
-        router.push('/dashboard');
+        router.push('/signup/onboarding/business-details');
 
     } catch (error: any) {
         toast({
@@ -125,7 +122,7 @@ export default function BusinessInfoPage() {
             </p>
         </div>
         <Form {...form}>
-            <form onSubmit={form.handleSubmit(handleFinalSubmit)} className="space-y-6">
+            <form onSubmit={form.handleSubmit(handleContinue)} className="space-y-6">
                 <Card>
                     <CardHeader>
                         <CardTitle>Business Information</CardTitle>
@@ -183,7 +180,7 @@ export default function BusinessInfoPage() {
                             Saving...
                         </>
                         ) : (
-                        'Complete Profile'
+                        'Continue'
                         )}
                     </Button>
                 </div>

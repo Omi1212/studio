@@ -22,6 +22,9 @@ const patchSchema = z.object({
   address: z.string().optional(),
   city: z.string().optional(),
   businessName: z.string().optional(),
+  industry: z.string().optional(),
+  language: z.string().optional(),
+  currency: z.string().optional(),
 }).partial();
 
 export async function GET(
