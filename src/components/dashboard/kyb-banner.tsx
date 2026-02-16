@@ -18,7 +18,7 @@ export default function KybBanner() {
                 </div>
                  <div className="flex gap-2 mt-4 sm:mt-0 sm:ml-4 flex-shrink-0">
                     <Button variant="outline" asChild className="border-blue-400/50 text-blue-300 hover:bg-blue-400/20 hover:text-blue-200">
-                        <Link href="/profile">Complete KYB</Link>
+                        <Link href="/settings/general?open=kyb">Complete KYB</Link>
                     </Button>
                 </div>
             </div>
