@@ -44,9 +44,16 @@ function VerificationCallToAction({ kybLevel }: { kybLevel: number }) {
       requirements: ["Certificate of Incorporation", "Tax Identification Number"], 
       buttonText: "Verify Business" 
     },
+    // kybLevel 2
+    { 
+      title: "Continue to Beneficial Owners", 
+      description: "Provide information about the ultimate beneficial owners (UBOs).", 
+      requirements: ["Full Name", "Date of Birth", "Percentage of Ownership"], 
+      buttonText: "Verify Business" 
+    },
   ];
 
-  if (kybLevel >= 2) {
+  if (kybLevel >= 3) {
     return (
       <div className="bg-card-foreground/5 dark:bg-card-foreground/10 rounded-lg p-6 flex flex-col items-center justify-center text-center h-full">
         <CheckCircle2 className="h-12 w-12 text-green-500 mb-4" />
@@ -77,6 +84,7 @@ export default function BusinessVerification({ kybLevel }: { kybLevel: number })
   const steps = [
     { level: 1, title: "Basic Information", description: "Basic business information provided." },
     { level: 2, title: "Business Documents", description: "Business registration documents submitted." },
+    { level: 3, title: "Beneficial Owners", description: "Information about beneficial owners provided." },
   ];
 
   return (
