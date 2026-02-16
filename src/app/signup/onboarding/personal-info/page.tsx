@@ -16,7 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { countryCallingCodes } from '@/lib/country-calling-codes';
 
 const personalInfoSchema = z.object({
-  legalName: z.string().min(1, 'Full name is required'),
+  name: z.string().min(1, 'Full name is required'),
   phone: z.string().min(1, 'Phone number is required'),
   phoneCountryCode: z.string().min(1, "Country code is required"),
 });
@@ -33,7 +33,7 @@ export default function PersonalInfoPage() {
   const form = useForm<PersonalInfoFormValues>({
     resolver: zodResolver(personalInfoSchema),
     defaultValues: {
-      legalName: '',
+      name: '',
       phone: '',
       phoneCountryCode: 'US', // Default to US
     },
@@ -57,7 +57,7 @@ export default function PersonalInfoPage() {
       }
 
       form.reset({
-        legalName: parsedUser.legalName || parsedUser.name || '',
+        name: parsedUser.name || '',
         phone: phoneNumber,
         phoneCountryCode: countryCode,
       });
@@ -76,8 +76,7 @@ export default function PersonalInfoPage() {
         const fullPhoneNumber = `${countryCodeData?.dial_code || ''}${data.phone}`;
 
         const updatedUserData = {
-            name: data.legalName, // Also update name for display purposes
-            legalName: data.legalName,
+            name: data.name,
             phone: fullPhoneNumber,
         };
 
@@ -139,7 +138,7 @@ export default function PersonalInfoPage() {
                     <CardContent className="space-y-4">
                         <FormField
                             control={form.control}
-                            name="legalName"
+                            name="name"
                             render={({ field }) => (
                                 <FormItem>
                                 <FormLabel>Full Name</FormLabel>
