@@ -19,7 +19,7 @@ function getRoleBadge(role: User['role']) {
       return <Badge variant="outline" className="text-primary border-primary bg-primary/10">OWNER</Badge>;
     case 'agent':
     case 'issuer':
-      return <Badge variant="secondary">ADMIN</Badge>;
+      return <Badge variant="outline" className="text-primary/90 border-primary/20 bg-primary/10">ADMIN</Badge>;
     default:
       return <Badge variant="secondary">{role.toUpperCase()}</Badge>;
   }
@@ -129,7 +129,7 @@ export default function AccessList() {
                 <TabsTrigger value="users">Users</TabsTrigger>
                 <TabsTrigger value="invitations">Invitations</TabsTrigger>
             </TabsList>
-            <Button className="bg-orange-500 hover:bg-orange-600 text-white">
+            <Button>
                 <Plus className="mr-2 h-4 w-4" />
                 Invite users
             </Button>
@@ -153,7 +153,7 @@ export default function AccessList() {
                             <TableCell>{user.email}</TableCell>
                             <TableCell>{getRoleBadge(user.role)}</TableCell>
                             <TableCell className="text-right">
-                                <Button variant="ghost" size="sm" className="text-orange-500 hover:text-orange-600">
+                                <Button variant="ghost" size="sm" className="text-primary hover:text-primary">
                                     <Edit className="mr-2 h-4 w-4" />
                                     Edit
                                 </Button>
