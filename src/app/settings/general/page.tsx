@@ -88,7 +88,7 @@ export default function GeneralSettingsPage() {
             
             <div className="max-w-4xl mx-auto">
               <Accordion type="single" collapsible defaultValue={user?.role === 'issuer' ? 'business-info' : 'user-preferences'} className="w-full">
-                {user?.role === 'issuer' ? (
+                {user?.role === 'issuer' && (
                   <AccordionItem value="business-info" className="border-b-0">
                       <Card>
                           <AccordionTrigger className="p-6 hover:no-underline text-left">
@@ -104,7 +104,7 @@ export default function GeneralSettingsPage() {
                               <div className="space-y-1">
                                 <PersonalInfoRow label="Business Name" value={selectedCompany?.name || user.businessName || 'Not set'} />
                                 <PersonalInfoRow label="Registered Business Name" value={user.legalName || 'Not set'} />
-                                <PersonalInfoRow label="Business Registration ID" value={user.businessRegistrationId || 'Not set'} />
+                                <PersonalInfoRow label="Business ID" value={user.businessRegistrationId || 'Not set'} />
                                 <PersonalInfoRow label="Industry" value={user.industry || 'Not set'} />
                                 <PersonalInfoRow label="KYB Level" value={user.kybLevel !== undefined ? `Level ${user.kybLevel}` : 'Not set'} />
                                 <PersonalInfoRow label="Business Address" value={user.address || 'Not set'} />
@@ -112,7 +112,8 @@ export default function GeneralSettingsPage() {
                           </AccordionContent>
                       </Card>
                   </AccordionItem>
-                ) : (
+                )}
+                {user?.role === 'investor' && (
                   <AccordionItem value="user-preferences" className="border-b-0">
                       <Card>
                           <AccordionTrigger className="p-6 hover:no-underline text-left">

@@ -183,7 +183,7 @@ export default function ProfilePage() {
               </div>
               
               <Accordion type="single" collapsible defaultValue="user-preferences" className="w-full">
-                {isBusinessRole ? (
+                {(user.role === 'agent' || user.role === 'superadmin' || user.role === 'issuer') && (
                   <AccordionItem value="user-preferences" className="border-b-0">
                       <Card>
                           <AccordionTrigger className="p-6 hover:no-underline text-left">
@@ -239,10 +239,10 @@ export default function ProfilePage() {
                           </AccordionContent>
                       </Card>
                   </AccordionItem>
-                ) : null}
+                )}
               </Accordion>
 
-              {(user.role === 'agent' || user.role === 'superadmin') && (
+              {(user.role === 'agent' || user.role === 'superadmin' || user.role === 'issuer') && (
                 <Card>
                     <CardHeader>
                         <CardTitle>Business Information</CardTitle>
@@ -250,7 +250,7 @@ export default function ProfilePage() {
                     <CardContent className="space-y-1">
                         <PersonalInfoRow label="Business Name" value={user.businessName || 'Not set'} />
                         <PersonalInfoRow label="Registered Business Name" value={user.legalName || 'Not set'} />
-                        <PersonalInfoRow label="Business Registration ID" value={user.businessRegistrationId || 'Not set'} />
+                        <PersonalInfoRow label="Business ID" value={user.businessRegistrationId || 'Not set'} />
                         <PersonalInfoRow label="Industry" value={user.industry || 'Not set'} />
                         <PersonalInfoRow label="KYB Level" value={user.kybLevel !== undefined ? `Level ${user.kybLevel}` : 'Not set'} />
                         <PersonalInfoRow label="Business Address" value={user.address || 'Not set'} />
