@@ -9,15 +9,63 @@ import { Plus } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
+// Mock user data to simulate a team
+const mockTeamMembers: Partial<User>[] = [
+    {
+        id: 'team-member-1',
+        name: 'John Doe',
+        email: 'john.d@example.com',
+        role: 'agent',
+    },
+    {
+        id: 'team-member-2',
+        name: 'Samantha Green',
+        email: 'samantha.g@example.com',
+        role: 'agent',
+    }
+];
+
+function RoleBadge({ role, isOwner }: { role: string, isOwner?: boolean }) {
+    if (isOwner) {
+        return <Badge variant="outline" className="text-primary border-primary bg-primary/10">OWNER</Badge>;
+    }
+    
+    switch (role.toUpperCase()) {
+        case 'ADMIN':
+            return <Badge variant="outline" className="text-orange-400 border-orange-400">ADMIN</Badge>;
+        case 'COLLABORATOR':
+            return <Badge variant="secondary">COLLABORATOR</Badge>;
+        default:
+            return <Badge variant="secondary">{role.toUpperCase()}</Badge>;
+    }
+}
+
 export default function AccessList() {
   const [user, setUser] = useState<User | null>(null);
+  const [team, setTeam] = useState<(Partial<User> & { displayRole: string })[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     setLoading(true);
     const storedUser = localStorage.getItem('currentUser');
     if (storedUser) {
-        setUser(JSON.parse(storedUser));
+        const parsedUser = JSON.parse(storedUser);
+        setUser(parsedUser);
+        
+        const fullTeam = [
+            { ...parsedUser, displayRole: 'Owner' },
+            { ...mockTeamMembers[0], displayRole: 'Admin' },
+            { ...mockTeamMembers[1], displayRole: 'Collaborator' },
+        ];
+        setTeam(fullTeam);
+
+    } else {
+        // Fallback for when no user is logged in
+        const fullTeam = [
+            { ...mockTeamMembers[0], displayRole: 'Admin' },
+            { ...mockTeamMembers[1], displayRole: 'Collaborator' },
+        ];
+         setTeam(fullTeam);
     }
     setLoading(false);
   }, []);
@@ -57,21 +105,23 @@ export default function AccessList() {
                     </TableRow>
                     </TableHeader>
                     <TableBody>
-                    {user ? (
-                        <TableRow key={user.id}>
-                            <TableCell className="font-medium">{user.name}</TableCell>
-                            <TableCell>{user.email}</TableCell>
-                            <TableCell>
-                                <Badge variant="outline" className="text-primary border-primary bg-primary/10">OWNER</Badge>
-                            </TableCell>
-                            <TableCell className="text-right">
-                                {/* No actions for owner */}
-                            </TableCell>
-                        </TableRow>
+                    {team.length > 0 ? (
+                        team.map((member, index) => (
+                             <TableRow key={member.id}>
+                                <TableCell className="font-medium">{member.name}</TableCell>
+                                <TableCell>{member.email}</TableCell>
+                                <TableCell>
+                                    <RoleBadge role={member.displayRole} isOwner={member.displayRole === 'Owner'} />
+                                </TableCell>
+                                <TableCell className="text-right">
+                                    {/* No actions for anyone in this demo */}
+                                </TableCell>
+                            </TableRow>
+                        ))
                     ) : (
                          <TableRow>
                             <TableCell colSpan={4} className="h-24 text-center">
-                                No user found.
+                                No users found.
                             </TableCell>
                         </TableRow>
                     )}
