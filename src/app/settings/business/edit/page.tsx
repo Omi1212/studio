@@ -170,7 +170,7 @@ export default function EditBusinessPage() {
                               <Input id="businessName" name="businessName" defaultValue={user.businessName} />
                           </div>
                           <div className="space-y-2">
-                              <Label htmlFor="legalName">Razón Social</Label>
+                              <Label htmlFor="legalName">Legal Name</Label>
                               <Input id="legalName" name="legalName" defaultValue={user.legalName} />
                           </div>
                         </div>

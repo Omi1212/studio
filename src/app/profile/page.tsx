@@ -259,7 +259,7 @@ export default function ProfilePage() {
                     </CardHeader>
                     <CardContent className="space-y-1 p-6">
                         <PersonalInfoRow label="Business Name" value={user.businessName || 'Not set'} />
-                        <PersonalInfoRow label="Razón Social" value={user.legalName || 'Not set'} />
+                        <PersonalInfoRow label="Legal Name" value={user.legalName || 'Not set'} />
                         <PersonalInfoRow label="Business ID" value={user.businessRegistrationId || 'Not set'} />
                         <PersonalInfoRow label="Industry" value={user.industry || 'Not set'} />
                         <PersonalInfoRow label="KYB Level" value={user.kybLevel !== undefined ? `Level ${user.kybLevel}` : 'Not set'} />

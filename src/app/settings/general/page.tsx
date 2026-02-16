@@ -87,7 +87,7 @@ export default function GeneralSettingsPage() {
             </div>
             
             <div className="max-w-4xl mx-auto">
-              <Accordion type="single" collapsible defaultValue={user?.role === 'issuer' || user?.role === 'agent' || user?.role === 'superadmin' ? 'business-info' : 'user-preferences'} className="w-full">
+              <Accordion type="single" collapsible defaultValue="business-info" className="w-full">
                 {(user?.role === 'issuer' || user?.role === 'agent' || user?.role === 'superadmin') && (
                   <AccordionItem value="business-info" className="border-b-0">
                       <Card>
@@ -103,7 +103,7 @@ export default function GeneralSettingsPage() {
                           <AccordionContent className="p-6 pt-0">
                               <div className="space-y-1">
                                 <PersonalInfoRow label="Business Name" value={selectedCompany?.name || user.businessName || 'Not set'} />
-                                <PersonalInfoRow label="Razón Social" value={user.legalName || 'Not set'} />
+                                <PersonalInfoRow label="Legal Name" value={user.legalName || 'Not set'} />
                                 <PersonalInfoRow label="Business ID" value={user.businessRegistrationId || 'Not set'} />
                                 <PersonalInfoRow label="Industry" value={user.industry || 'Not set'} />
                                 <PersonalInfoRow label="KYB Level" value={user.kybLevel !== undefined ? `Level ${user.kybLevel}` : 'Not set'} />
