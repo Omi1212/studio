@@ -11,7 +11,7 @@ import {
 import SidebarNav from '@/components/dashboard/sidebar-nav';
 import HeaderDynamic from '@/components/dashboard/header-dynamic';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Building, Settings } from 'lucide-react';
+import { ArrowLeft, Building, Settings, Edit } from 'lucide-react';
 import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -109,6 +109,13 @@ export default function GeneralSettingsPage() {
                                 <PersonalInfoRow label="KYB Level" value={user.kybLevel !== undefined ? `Level ${user.kybLevel}` : 'Not set'} />
                                 <PersonalInfoRow label="Business Address" value={user.address || 'Not set'} />
                               </div>
+                               <div className="mt-4 flex justify-end">
+                                    <Button variant="outline" size="sm" asChild>
+                                        <Link href="#">
+                                            <Edit className="mr-2 h-4 w-4"/>Edit
+                                        </Link>
+                                    </Button>
+                                </div>
                           </AccordionContent>
                       </Card>
                   </AccordionItem>

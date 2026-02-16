@@ -13,7 +13,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ShieldCheck, User as UserIcon, Phone, Building, Settings } from 'lucide-react';
+import { ShieldCheck, User as UserIcon, Phone, Building, Settings, Edit } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { countries } from '@/lib/countries';
 import IdentityVerification from '@/components/profile/identity-verification';
@@ -21,6 +21,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import Link from 'next/link';
 
 
 function InfoRow({ icon: Icon, label, value }: { icon: React.ElementType, label: string, value: string | undefined }) {
@@ -154,6 +155,7 @@ export default function ProfilePage() {
                             <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
                         </Avatar>
                         <CardTitle className="text-2xl pt-2">{user.name}</CardTitle>
+                        <CardDescription>User Level {user.kycLevel || 0}</CardDescription>
                         <div className="pt-1">
                             <Badge variant="outline" className={currentStatusBadge.className}>
                                 <ShieldCheck className="mr-2 h-4 w-4" />
@@ -244,10 +246,18 @@ export default function ProfilePage() {
 
               {(user.role === 'agent' || user.role === 'superadmin' || user.role === 'issuer') && (
                 <Card>
-                    <CardHeader>
-                        <CardTitle>Business Information</CardTitle>
+                    <CardHeader className="flex flex-row items-center justify-between">
+                        <div className="space-y-1.5">
+                            <CardTitle>Business Information</CardTitle>
+                            <CardDescription>Manage your business details.</CardDescription>
+                        </div>
+                        <Button variant="outline" size="sm" asChild>
+                           <Link href="#">
+                             <Edit className="mr-2 h-4 w-4"/>Edit
+                           </Link>
+                        </Button>
                     </CardHeader>
-                    <CardContent className="space-y-1">
+                    <CardContent className="space-y-1 p-6">
                         <PersonalInfoRow label="Business Name" value={user.businessName || 'Not set'} />
                         <PersonalInfoRow label="Registered Business Name" value={user.legalName || 'Not set'} />
                         <PersonalInfoRow label="Business ID" value={user.businessRegistrationId || 'Not set'} />
