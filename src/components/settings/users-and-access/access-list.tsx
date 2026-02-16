@@ -36,6 +36,7 @@ export default function AccessList() {
     setLoading(true);
     const fetchUsers = async () => {
         try {
+            // NOTE: The API doesn't support pagination for this filter, so we'll do it client side for the demo
             const response = await fetch(`/api/users?perPage=100`);
             const data = await response.json();
             const teamMembers = data.data.filter((u: User) => u.role === 'superadmin' || u.role === 'agent' || u.role === 'issuer');
