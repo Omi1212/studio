@@ -10,7 +10,7 @@ import {
 import SidebarNav from '@/components/dashboard/sidebar-nav';
 import HeaderDynamic from '@/components/dashboard/header-dynamic';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Building, Settings, Edit } from 'lucide-react';
+import { ArrowLeft, Building, Settings, Edit, Copy } from 'lucide-react';
 import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -20,6 +20,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table';
+import { useToast } from '@/hooks/use-toast';
 
 
 function getKycBadge(status?: User['kycStatus']) {
@@ -39,6 +40,7 @@ export default function GeneralSettingsPage() {
   const [user, setUser] = useState<User | null>(null);
   const [selectedCompany, setSelectedCompany] = useState<{ id: string; name: string } | null>(null);
   const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
 
   useEffect(() => {
     setLoading(true);
@@ -71,6 +73,16 @@ export default function GeneralSettingsPage() {
         setLoading(false);
     }
   }, []);
+  
+  const handleCopy = (text: string, fieldName: string) => {
+    if (!text) return;
+    navigator.clipboard.writeText(text);
+    toast({
+      title: 'Copied to clipboard!',
+      description: `${fieldName} has been copied.`,
+    });
+  };
+
 
   if (loading) {
     return (
@@ -146,7 +158,16 @@ export default function GeneralSettingsPage() {
                                     </TableRow>
                                     <TableRow>
                                         <TableCell className="font-medium text-muted-foreground">Business ID</TableCell>
-                                        <TableCell className="text-right">{user.businessRegistrationId || 'Not set'}</TableCell>
+                                        <TableCell className="text-right">
+                                            <div className="flex items-center justify-end gap-1">
+                                                <span>{user.businessRegistrationId || 'Not set'}</span>
+                                                {user.businessRegistrationId && (
+                                                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleCopy(user.businessRegistrationId!, 'Business ID')}>
+                                                        <Copy className="h-4 w-4" />
+                                                    </Button>
+                                                )}
+                                            </div>
+                                        </TableCell>
                                     </TableRow>
                                     <TableRow>
                                         <TableCell className="font-medium text-muted-foreground">Industry</TableCell>
