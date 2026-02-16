@@ -153,10 +153,12 @@ export default function AccessList() {
                             <TableCell>{user.email}</TableCell>
                             <TableCell>{getRoleBadge(user.role)}</TableCell>
                             <TableCell className="text-right">
-                                <Button variant="ghost" size="sm" className="text-primary hover:text-primary">
-                                    <Edit className="mr-2 h-4 w-4" />
-                                    Edit
-                                </Button>
+                                {user.role !== 'superadmin' && (
+                                    <Button variant="ghost" size="sm" className="text-primary hover:text-primary">
+                                        <Edit className="mr-2 h-4 w-4" />
+                                        Edit
+                                    </Button>
+                                )}
                             </TableCell>
                         </TableRow>
                     ))}
