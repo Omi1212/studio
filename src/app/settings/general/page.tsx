@@ -18,6 +18,35 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
+
+
+function getKycBadge(status?: User['kycStatus']) {
+  switch (status) {
+    case 'verified':
+      return <Badge variant="outline" className="text-green-400 border-green-400">Verified</Badge>;
+    case 'pending':
+      return <Badge variant="outline" className="text-yellow-400 border-yellow-400">Pending</Badge>;
+    case 'rejected':
+       return <Badge variant="destructive">Rejected</Badge>;
+    default:
+      return <Badge variant="secondary">Unknown</Badge>;
+  }
+}
+
+function getKybBadge(status?: User['kybStatus']) {
+  switch (status) {
+    case 'verified':
+      return <Badge variant="outline" className="text-green-400 border-green-400">Verified</Badge>;
+    case 'pending':
+      return <Badge variant="outline" className="text-yellow-400 border-yellow-400">Pending</Badge>;
+    case 'rejected':
+       return <Badge variant="destructive">Rejected</Badge>;
+    default:
+      return <Badge variant="secondary">Unknown</Badge>;
+  }
+}
 
 function PersonalInfoRow({ label, value, actionLabel, onActionClick }: { label: string; value: React.ReactNode; actionLabel?: string; onActionClick?: () => void; }) {
     return (
@@ -38,8 +67,10 @@ function PersonalInfoRow({ label, value, actionLabel, onActionClick }: { label: 
 export default function GeneralSettingsPage() {
   const [user, setUser] = useState<User | null>(null);
   const [selectedCompany, setSelectedCompany] = useState<{ id: string; name: string } | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    setLoading(true);
     const storedUser = localStorage.getItem('currentUser');
     if (storedUser) {
       const parsedUser: User = JSON.parse(storedUser);
@@ -64,9 +95,40 @@ export default function GeneralSettingsPage() {
                   });
               }
             }
-        });
+        }).finally(() => setLoading(false));
+    } else {
+        setLoading(false);
     }
   }, []);
+
+  if (loading) {
+    return (
+        <SidebarProvider>
+        <Sidebar className="border-r">
+          <SidebarNav />
+        </Sidebar>
+        <SidebarInset>
+          <div className="flex flex-col min-h-dvh">
+            <HeaderDynamic />
+            <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-8 bg-background">
+                 <div className="flex items-center gap-4">
+                    <Skeleton className="h-9 w-9" />
+                    <Skeleton className="h-9 w-48" />
+                </div>
+                <div className="max-w-4xl mx-auto">
+                    <Skeleton className="h-64 w-full" />
+                </div>
+            </main>
+          </div>
+        </SidebarInset>
+      </SidebarProvider>
+    )
+  }
+
+  if (!user) {
+      return null;
+  }
+
 
   return (
     <SidebarProvider>
@@ -106,7 +168,8 @@ export default function GeneralSettingsPage() {
                                 <PersonalInfoRow label="Legal Name" value={user.legalName || 'Not set'} />
                                 <PersonalInfoRow label="Business ID" value={user.businessRegistrationId || 'Not set'} />
                                 <PersonalInfoRow label="Industry" value={user.industry || 'Not set'} />
-                                <PersonalInfoRow label="KYB Level" value={user.kybLevel !== undefined ? `Level ${user.kybLevel}` : 'Not set'} />
+                                <PersonalInfoRow label="KYC Verification" value={getKycBadge(user.kycStatus)} />
+                                <PersonalInfoRow label="KYB Status" value={getKybBadge(user.kybStatus)} />
                                 <PersonalInfoRow label="Business Address" value={user.address || 'Not set'} />
                               </div>
                                <div className="mt-4 flex justify-end">

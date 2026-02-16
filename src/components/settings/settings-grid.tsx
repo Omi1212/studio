@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -19,7 +20,7 @@ const allSettingsItems = [
   {
     icon: Settings,
     title: 'General',
-    description: 'Manage your language, currency, and theme settings.',
+    description: 'Manage your business information.',
     href: '/settings/general',
   },
   {
