@@ -5,9 +5,15 @@ import type { User } from '@/lib/types';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
+import { Plus, MoreVertical } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 // Mock user data to simulate a team
 const mockTeamMembers: Partial<User>[] = [
@@ -108,7 +114,18 @@ export default function AccessList() {
                                     <RoleBadge role={member.displayRole} isOwner={member.displayRole === 'Owner'} />
                                 </TableCell>
                                 <TableCell className="text-right">
-                                    {/* No actions for anyone in this demo */}
+                                    {member.displayRole !== 'Owner' && (
+                                        <DropdownMenu>
+                                            <DropdownMenuTrigger asChild>
+                                                <Button variant="ghost" size="icon" className="h-8 w-8">
+                                                    <MoreVertical className="h-4 w-4" />
+                                                </Button>
+                                            </DropdownMenuTrigger>
+                                            <DropdownMenuContent align="end">
+                                                <DropdownMenuItem>Edit</DropdownMenuItem>
+                                            </DropdownMenuContent>
+                                        </DropdownMenu>
+                                    )}
                                 </TableCell>
                             </TableRow>
                         ))
