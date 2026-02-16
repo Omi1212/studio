@@ -19,7 +19,7 @@ function getRoleBadge(role: User['role']) {
       return <Badge variant="outline" className="text-primary border-primary bg-primary/10">OWNER</Badge>;
     case 'agent':
     case 'issuer':
-      return <Badge variant="outline" className="text-primary/90 border-primary/20 bg-primary/10">ADMIN</Badge>;
+      return <Badge variant="outline" className="text-blue-400 border-blue-400 bg-blue-500/10">ADMIN</Badge>;
     default:
       return <Badge variant="secondary">{role.toUpperCase()}</Badge>;
   }
@@ -36,7 +36,6 @@ export default function AccessList() {
     setLoading(true);
     const fetchUsers = async () => {
         try {
-            // NOTE: The API doesn't support pagination for this filter, so we'll do it client side for the demo
             const response = await fetch(`/api/users?perPage=100`);
             const data = await response.json();
             const teamMembers = data.data.filter((u: User) => u.role === 'agent' || u.role === 'issuer');
@@ -155,7 +154,7 @@ export default function AccessList() {
                             <TableCell>{getRoleBadge(user.role)}</TableCell>
                             <TableCell className="text-right">
                                 {user.role !== 'superadmin' && (
-                                    <Button variant="ghost" size="sm" className="text-primary hover:text-primary">
+                                    <Button variant="ghost" size="sm" className="text-blue-400 hover:text-blue-300">
                                         <Edit className="mr-2 h-4 w-4" />
                                         Edit
                                     </Button>

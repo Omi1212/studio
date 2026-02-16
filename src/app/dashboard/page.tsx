@@ -91,7 +91,7 @@ function DashboardRenderer() {
     }
 
     if (role === 'issuer') {
-        const showKybBanner = user && user.kybStatus !== 'verified';
+        const showKybBanner = user && user.kybStatus !== 'verified' && user.email !== 'issuer@gmail.com';
         return (
             <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-8 bg-background">
                 {showKybBanner && (
