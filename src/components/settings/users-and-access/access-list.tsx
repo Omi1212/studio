@@ -5,15 +5,9 @@ import type { User } from '@/lib/types';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Plus, MoreVertical } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 
 // Mock user data to simulate a team
 const mockTeamMembers: Partial<User>[] = [
@@ -33,8 +27,10 @@ const mockTeamMembers: Partial<User>[] = [
 
 function RoleBadge({ role, isOwner }: { role: string, isOwner?: boolean }) {
     const roleText = isOwner ? 'OWNER' : role.toUpperCase();
+    let badgeClass = "text-primary border-primary bg-primary/10";
+    
     return (
-        <Badge variant="outline" className="text-primary border-primary bg-primary/10">
+        <Badge variant="outline" className={badgeClass}>
             {roleText}
         </Badge>
     );
@@ -115,16 +111,9 @@ export default function AccessList() {
                                 </TableCell>
                                 <TableCell className="text-right">
                                     {member.displayRole !== 'Owner' && (
-                                        <DropdownMenu>
-                                            <DropdownMenuTrigger asChild>
-                                                <Button variant="ghost" size="icon" className="h-8 w-8">
-                                                    <MoreVertical className="h-4 w-4" />
-                                                </Button>
-                                            </DropdownMenuTrigger>
-                                            <DropdownMenuContent align="end">
-                                                <DropdownMenuItem>Edit</DropdownMenuItem>
-                                            </DropdownMenuContent>
-                                        </DropdownMenu>
+                                        <Button variant="outline" size="sm">
+                                            Edit
+                                        </Button>
                                     )}
                                 </TableCell>
                             </TableRow>
