@@ -39,7 +39,7 @@ export default function AccessList() {
             // NOTE: The API doesn't support pagination for this filter, so we'll do it client side for the demo
             const response = await fetch(`/api/users?perPage=100`);
             const data = await response.json();
-            const teamMembers = data.data.filter((u: User) => u.role === 'superadmin' || u.role === 'agent' || u.role === 'issuer');
+            const teamMembers = data.data.filter((u: User) => u.role === 'agent' || u.role === 'issuer');
             setUsers(teamMembers);
             setTotalUsers(teamMembers.length);
         } catch (error) {
@@ -130,7 +130,7 @@ export default function AccessList() {
                 <TabsTrigger value="users">Users</TabsTrigger>
                 <TabsTrigger value="invitations">Invitations</TabsTrigger>
             </TabsList>
-            <Button>
+            <Button className="bg-primary hover:bg-primary/90">
                 <Plus className="mr-2 h-4 w-4" />
                 Invite users
             </Button>
