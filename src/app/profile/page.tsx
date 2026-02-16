@@ -184,65 +184,65 @@ export default function ProfilePage() {
                 </Card>
               </div>
               
-              <Accordion type="single" collapsible defaultValue="user-preferences" className="w-full">
-                {(user.role === 'agent' || user.role === 'superadmin' || user.role === 'issuer') && (
-                  <AccordionItem value="user-preferences" className="border-b-0">
-                      <Card>
-                          <AccordionTrigger className="p-6 hover:no-underline text-left">
-                              <div className="flex items-center gap-4">
-                                  <Settings className="h-6 w-6" />
-                                  <div className="space-y-1 text-left">
-                                      <h3 className="text-lg font-semibold leading-none tracking-tight">User Preferences</h3>
-                                      <p className="text-sm text-muted-foreground">Manage your language, currency, and theme settings.</p>
-                                  </div>
-                              </div>
-                          </AccordionTrigger>
-                          <AccordionContent className="p-6 pt-0">
-                              <div className="space-y-6">
-                                  <div className="flex items-center justify-between">
-                                      <Label>Theme</Label>
-                                      <Tabs defaultValue="dark" className="w-auto">
-                                          <TabsList className="h-auto">
-                                              <TabsTrigger value="light" className="px-6 py-2">Light</TabsTrigger>
-                                              <TabsTrigger value="dark" className="px-6 py-2">Dark</TabsTrigger>
-                                              <TabsTrigger value="system" className="px-6 py-2">System</TabsTrigger>
-                                          </TabsList>
-                                      </Tabs>
-                                  </div>
-                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                      <div className="space-y-2">
-                                          <Label htmlFor="language">Language</Label>
-                                          <Select defaultValue="en">
-                                              <SelectTrigger id="language">
-                                                  <SelectValue placeholder="Select language" />
-                                              </SelectTrigger>
-                                              <SelectContent>
-                                                  <SelectItem value="en">English</SelectItem>
-                                                  <SelectItem value="es">Español</SelectItem>
-                                                  <SelectItem value="fr">Français</SelectItem>
-                                              </SelectContent>
-                                          </Select>
-                                      </div>
-                                      <div className="space-y-2">
-                                          <Label htmlFor="currency">Currency</Label>
-                                          <Select defaultValue="usd">
-                                              <SelectTrigger id="currency">
-                                                  <SelectValue placeholder="Select currency" />
-                                              </SelectTrigger>
-                                              <SelectContent>
-                                                  <SelectItem value="usd">USD - US Dollar</SelectItem>
-                                                  <SelectItem value="eur">EUR - Euro</SelectItem>
-                                                  <SelectItem value="btc">BTC - Bitcoin</SelectItem>
-                                              </SelectContent>
-                                          </Select>
-                                      </div>
-                                  </div>
-                              </div>
-                          </AccordionContent>
-                      </Card>
-                  </AccordionItem>
-                )}
-              </Accordion>
+              {(user.role === 'issuer' || user.role === 'agent' || user.role === 'superadmin') && (
+                <Accordion type="single" collapsible defaultValue="user-preferences" className="w-full">
+                    <AccordionItem value="user-preferences" className="border-b-0">
+                        <Card>
+                            <AccordionTrigger className="p-6 hover:no-underline text-left">
+                                <div className="flex items-center gap-4">
+                                    <Settings className="h-6 w-6" />
+                                    <div className="space-y-1 text-left">
+                                        <h3 className="text-lg font-semibold leading-none tracking-tight">User Preferences</h3>
+                                        <p className="text-sm text-muted-foreground">Manage your language, currency, and theme settings.</p>
+                                    </div>
+                                </div>
+                            </AccordionTrigger>
+                            <AccordionContent className="p-6 pt-0">
+                                <div className="space-y-6">
+                                    <div className="flex items-center justify-between">
+                                        <Label>Theme</Label>
+                                        <Tabs defaultValue="dark" className="w-auto">
+                                            <TabsList className="h-auto">
+                                                <TabsTrigger value="light" className="px-6 py-2">Light</TabsTrigger>
+                                                <TabsTrigger value="dark" className="px-6 py-2">Dark</TabsTrigger>
+                                                <TabsTrigger value="system" className="px-6 py-2">System</TabsTrigger>
+                                            </TabsList>
+                                        </Tabs>
+                                    </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div className="space-y-2">
+                                            <Label htmlFor="language">Language</Label>
+                                            <Select defaultValue="en">
+                                                <SelectTrigger id="language">
+                                                    <SelectValue placeholder="Select language" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="en">English</SelectItem>
+                                                    <SelectItem value="es">Español</SelectItem>
+                                                    <SelectItem value="fr">Français</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label htmlFor="currency">Currency</Label>
+                                            <Select defaultValue="usd">
+                                                <SelectTrigger id="currency">
+                                                    <SelectValue placeholder="Select currency" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="usd">USD - US Dollar</SelectItem>
+                                                    <SelectItem value="eur">EUR - Euro</SelectItem>
+                                                    <SelectItem value="btc">BTC - Bitcoin</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </AccordionContent>
+                        </Card>
+                    </AccordionItem>
+                </Accordion>
+              )}
 
               {(user.role === 'agent' || user.role === 'superadmin' || user.role === 'issuer') && (
                 <Card>
@@ -252,14 +252,14 @@ export default function ProfilePage() {
                             <CardDescription>Manage your business details.</CardDescription>
                         </div>
                         <Button variant="outline" size="sm" asChild>
-                           <Link href="#">
+                           <Link href="/settings/business/edit">
                              <Edit className="mr-2 h-4 w-4"/>Edit
                            </Link>
                         </Button>
                     </CardHeader>
                     <CardContent className="space-y-1 p-6">
                         <PersonalInfoRow label="Business Name" value={user.businessName || 'Not set'} />
-                        <PersonalInfoRow label="Registered Business Name" value={user.legalName || 'Not set'} />
+                        <PersonalInfoRow label="Razón Social" value={user.legalName || 'Not set'} />
                         <PersonalInfoRow label="Business ID" value={user.businessRegistrationId || 'Not set'} />
                         <PersonalInfoRow label="Industry" value={user.industry || 'Not set'} />
                         <PersonalInfoRow label="KYB Level" value={user.kybLevel !== undefined ? `Level ${user.kybLevel}` : 'Not set'} />
