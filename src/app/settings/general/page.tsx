@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -184,7 +185,7 @@ export default function GeneralSettingsPage() {
                                 </TableBody>
                             </Table>
                                <div className="mt-4 flex justify-end">
-                                    <Button variant="outline" size="sm" asChild>
+                                    <Button size="sm" asChild>
                                         <Link href="/settings/business/edit">
                                             <Edit className="mr-2 h-4 w-4"/>Edit
                                         </Link>
