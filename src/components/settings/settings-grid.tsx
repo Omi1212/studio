@@ -1,4 +1,3 @@
-
 'use client';
 
 import {
@@ -11,6 +10,7 @@ import {
   FileText,
   Briefcase,
   Settings,
+  Users,
 } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import Link from 'next/link';
@@ -22,6 +22,12 @@ const allSettingsItems = [
     title: 'General',
     description: 'Manage your business information.',
     href: '/settings/general',
+  },
+  {
+    icon: Users,
+    title: 'Users & Access',
+    description: 'Define roles and permissions for your team.',
+    href: '/settings/users-and-access',
   },
   {
     icon: ShieldCheck,
@@ -40,12 +46,6 @@ const allSettingsItems = [
     title: 'Third Party Integrations',
     description: 'Connect and manage third-party applications.',
     href: '/settings/integrations',
-  },
-  {
-    icon: KeyRound,
-    title: 'Security & Access',
-    description: 'Manage your password, 2FA, and session history.',
-    href: '/settings/security',
   },
   {
     icon: Bell,
