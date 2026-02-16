@@ -57,13 +57,16 @@ export default function EditBusinessPage() {
       const parsedUser: User = JSON.parse(storedUser);
       fetch(`/api/users/${parsedUser.id}`)
         .then(res => {
-          if (!res.ok) throw new Error('User not found');
+          if (!res.ok) {
+            console.warn('User not found in API, using localStorage fallback.');
+            return parsedUser;
+          }
           return res.json();
         })
         .then(data => setUser(data))
         .catch(err => {
-          console.error(err);
-          setUser(null);
+          console.error('Failed to fetch user, using localStorage fallback.', err);
+          setUser(parsedUser);
         })
         .finally(() => setLoading(false));
     } else {
@@ -262,7 +265,7 @@ export default function EditBusinessPage() {
                         <Button variant="outline" asChild>
                             <Link href="/settings/general">Cancel</Link>
                         </Button>
-                        <Button type="submit">Save Changes</Button>
+                        <Button type="submit" className="bg-primary hover:bg-primary/90">Save Changes</Button>
                     </CardFooter>
                 </form>
             </Card>
