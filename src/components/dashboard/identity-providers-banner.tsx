@@ -13,7 +13,7 @@ export default function IdentityProvidersBanner() {
                 <div className='flex-1'>
                     <AlertTitle className="font-bold text-blue-200">Link your Identity Providers</AlertTitle>
                     <AlertDescription>
-                        Link your identity providers to enable verification for your users.
+                        Link your identity providers to enable verification for your users and access all platform features.
                     </AlertDescription>
                 </div>
                  <div className="flex gap-2 mt-4 sm:mt-0 sm:ml-4 flex-shrink-0">
