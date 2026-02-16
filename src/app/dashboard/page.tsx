@@ -12,6 +12,7 @@ import type { TokenDetails, User } from '@/lib/types';
 import TokenDetailsView from '@/components/workspace/token-details-view';
 import InvestorDashboard from './investor-dashboard';
 import KybBanner from '@/components/dashboard/kyb-banner';
+import IdentityProvidersBanner from '@/components/dashboard/identity-providers-banner';
 import VolumeCards from '@/components/dashboard/volume-cards';
 import TransactionsList from '@/components/dashboard/transactions-list';
 import PaymentSummaryDynamic from '@/components/dashboard/payment-summary-dynamic';
@@ -93,7 +94,12 @@ function DashboardRenderer() {
         const showKybBanner = user && user.kybStatus !== 'verified';
         return (
             <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-8 bg-background">
-                {showKybBanner && <KybBanner />}
+                {showKybBanner && (
+                  <>
+                    <KybBanner />
+                    <IdentityProvidersBanner />
+                  </>
+                )}
                 {selectedToken ? (
                      <TokenDetailsView token={selectedToken} view="dashboard" userRole="issuer" />
                 ) : (

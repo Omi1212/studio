@@ -5,20 +5,20 @@ import { Button } from '@/components/ui/button';
 import { AlertTriangle } from 'lucide-react';
 import Link from 'next/link';
 
-export default function KybBanner() {
+export default function IdentityProvidersBanner() {
     return (
-        <Alert className="bg-yellow-500/10 border-yellow-500/50 text-yellow-300 [&>svg]:text-yellow-400">
+        <Alert className="bg-blue-500/10 border-blue-500/50 text-blue-300 [&>svg]:text-blue-400">
             <AlertTriangle className="h-4 w-4" />
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                 <div className='flex-1'>
-                    <AlertTitle className="font-bold text-yellow-200">Complete Your Business Verification</AlertTitle>
+                    <AlertTitle className="font-bold text-blue-200">Link your Identity Providers</AlertTitle>
                     <AlertDescription>
-                        Finish your KYB (Know Your Business) verification to access all platform features.
+                        Link your identity providers to enable verification for your users.
                     </AlertDescription>
                 </div>
                  <div className="flex gap-2 mt-4 sm:mt-0 sm:ml-4 flex-shrink-0">
-                    <Button asChild className="bg-yellow-400 text-yellow-950 hover:bg-yellow-300">
-                        <Link href="/profile">Complete KYB</Link>
+                    <Button variant="outline" asChild className="border-blue-400/50 text-blue-300 hover:bg-blue-400/20 hover:text-blue-200">
+                        <Link href="/settings/compliance">Link Providers</Link>
                     </Button>
                 </div>
             </div>
