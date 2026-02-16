@@ -8,28 +8,35 @@ import SidebarNav from '@/components/dashboard/sidebar-nav';
 import HeaderDynamic from '@/components/dashboard/header-dynamic';
 import DefaultDashboard from './default/page';
 import { useEffect, useState } from 'react';
-import type { TokenDetails } from '@/lib/types';
+import type { TokenDetails, User } from '@/lib/types';
 import TokenDetailsView from '@/components/workspace/token-details-view';
 import InvestorDashboard from './investor-dashboard';
-
-
-function TokenDashboard({ token }: { token: TokenDetails }) {
-  return (
-    <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-8 bg-background">
-        <TokenDetailsView token={token} view="dashboard" />
-    </main>
-  );
-}
+import KybBanner from '@/components/dashboard/kyb-banner';
+import VolumeCards from '@/components/dashboard/volume-cards';
+import TransactionsList from '@/components/dashboard/transactions-list';
+import PaymentSummaryDynamic from '@/components/dashboard/payment-summary-dynamic';
+import CryptocurrenciesList from '@/components/dashboard/cryptocurrencies-list';
 
 
 function DashboardRenderer() {
     const [role, setRole] = useState<string | null>(null);
+    const [user, setUser] = useState<User | null>(null);
     const [selectedToken, setSelectedToken] = useState<TokenDetails | null>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const userRole = localStorage.getItem('userRole');
         setRole(userRole);
+        
+        const storedUser = localStorage.getItem('currentUser');
+        if (storedUser) {
+            const parsedUser: User = JSON.parse(storedUser);
+            setUser(parsedUser); // Set immediately for faster UI response
+            fetch(`/api/users/${parsedUser.id}`)
+                .then(res => res.ok ? res.json() : parsedUser)
+                .then(dbUser => setUser(dbUser))
+                .catch(() => {});
+        }
 
         const handleTokenChange = async () => {
             if (userRole === 'issuer' || userRole === 'agent') {
@@ -75,15 +82,45 @@ function DashboardRenderer() {
     }, [role]);
 
     if (loading) {
-        return <div className="flex-1 p-4 sm:p-6 lg:p-8">Loading...</div>; // Or a skeleton loader
+        return <div className="flex-1 p-4 sm:p-6 lg:p-8">Loading...</div>;
     }
-
+    
     if (role === 'investor') {
         return <InvestorDashboard />;
     }
 
-    if ((role === 'agent' || role === 'issuer') && selectedToken) {
-        return <TokenDashboard token={selectedToken} />;
+    if (role === 'issuer') {
+        const showKybBanner = user && user.kybStatus !== 'verified';
+        return (
+            <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-8 bg-background">
+                {showKybBanner && <KybBanner />}
+                {selectedToken ? (
+                     <TokenDetailsView token={selectedToken} view="dashboard" userRole="issuer" />
+                ) : (
+                    <>
+                        <h1 className="text-3xl font-headline font-semibold">Dashboard</h1>
+                        <VolumeCards />
+                        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+                            <PaymentSummaryDynamic className="lg:col-span-3" />
+                            <CryptocurrenciesList className="lg:col-span-2" />
+                        </div>
+                        <TransactionsList limit={7} />
+                    </>
+                )}
+            </main>
+        );
+    }
+    
+    if (role === 'agent') {
+        if (selectedToken) {
+            return (
+                <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-8 bg-background">
+                    <TokenDetailsView token={selectedToken} view="dashboard" userRole="agent" />
+                </main>
+            );
+        } else {
+             return <DefaultDashboard />;
+        }
     }
 
     return <DefaultDashboard />;
