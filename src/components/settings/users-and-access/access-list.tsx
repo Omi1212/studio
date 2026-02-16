@@ -10,6 +10,12 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Link from 'next/link';
 
+type Invitation = {
+  id: number;
+  email: string;
+  role: 'admin' | 'collaborator';
+};
+
 // Mock user data to simulate a team
 const mockTeamMembers: Partial<User>[] = [
     {
@@ -40,11 +46,15 @@ function RoleBadge({ role, isOwner }: { role: string, isOwner?: boolean }) {
 export default function AccessList() {
   const [user, setUser] = useState<User | null>(null);
   const [team, setTeam] = useState<(Partial<User> & { displayRole: string })[]>([]);
+  const [pendingInvitations, setPendingInvitations] = useState<Invitation[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     setLoading(true);
     const storedUser = localStorage.getItem('currentUser');
+    const storedInvitations = JSON.parse(localStorage.getItem('pendingInvitations') || '[]');
+    setPendingInvitations(storedInvitations);
+
     if (storedUser) {
         const parsedUser = JSON.parse(storedUser);
         setUser(parsedUser);
@@ -134,9 +144,40 @@ export default function AccessList() {
         </TabsContent>
         <TabsContent value="invitations">
             <Card>
-                <CardContent className="p-6 text-center text-muted-foreground">
-                    No pending invitations.
-                </CardContent>
+                {pendingInvitations.length > 0 ? (
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Email</TableHead>
+                                <TableHead>Role</TableHead>
+                                <TableHead>Status</TableHead>
+                                <TableHead className="text-right">Actions</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {pendingInvitations.map((invitation) => (
+                                <TableRow key={invitation.id}>
+                                    <TableCell className="font-medium">{invitation.email}</TableCell>
+                                    <TableCell>
+                                        <RoleBadge role={invitation.role} />
+                                    </TableCell>
+                                    <TableCell>
+                                        <Badge variant="outline" className="text-yellow-400 border-yellow-400">Pending</Badge>
+                                    </TableCell>
+                                    <TableCell className="text-right">
+                                        <Button variant="outline" size="sm">
+                                            Resend
+                                        </Button>
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                ) : (
+                    <CardContent className="p-6 text-center text-muted-foreground">
+                        No pending invitations.
+                    </CardContent>
+                )}
             </Card>
         </TabsContent>
     </Tabs>

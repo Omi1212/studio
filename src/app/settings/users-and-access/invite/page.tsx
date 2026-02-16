@@ -54,6 +54,10 @@ export default function InviteUsersPage() {
 
   const handleSendInvitations = () => {
     // In a real app, you would send the invitations to your backend here.
+    const existingInvitations = JSON.parse(localStorage.getItem('pendingInvitations') || '[]');
+    const newInvitations = invitations.filter(inv => inv.email); // Only save invitations with an email
+    localStorage.setItem('pendingInvitations', JSON.stringify([...existingInvitations, ...newInvitations]));
+
     toast({
       title: 'Invitations Sent!',
       description: 'Your team members have been invited.',
