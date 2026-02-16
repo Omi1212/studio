@@ -1,11 +1,6 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-
-const companiesData = [
-  { id: 'bstratus-securities', name: 'Bstratus Securities' },
-  { id: 'neobank-sa-de-cv', name: 'NeoBank SA de CV' },
-  { id: 'tradfi-bank-sa', name: 'TradFi Bank SA' },
-];
+import { companiesData } from './data';
 
 const querySchema = z.object({
     page: z.coerce.number().int().min(1).default(1),

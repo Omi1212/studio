@@ -91,6 +91,9 @@ export default function BusinessInfoPage() {
         
         localStorage.setItem('currentUser', JSON.stringify(updatedUserFromApi));
         
+        const newCompanyId = data.businessName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+        localStorage.setItem('selectedCompanyId', newCompanyId);
+
         toast({
           title: 'Business Info Saved!',
         });

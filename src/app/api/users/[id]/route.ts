@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { usersData } from '../data';
 import { z } from 'zod';
+import { companiesData } from '../../companies/data';
 
 const patchSchema = z.object({
   name: z.string().min(1, { message: "Name is required" }).optional(),
@@ -50,6 +51,15 @@ export async function PATCH(
 
     const body = await request.json();
     const validatedData = patchSchema.parse(body);
+
+    if (validatedData.businessName && !companiesData.some(c => c.name === validatedData.businessName)) {
+        const newCompany = {
+            id: validatedData.businessName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
+            name: validatedData.businessName,
+        };
+        companiesData.push(newCompany);
+    }
+
     usersData[userIndex] = { ...usersData[userIndex], ...validatedData };
 
     return NextResponse.json(usersData[userIndex]);
