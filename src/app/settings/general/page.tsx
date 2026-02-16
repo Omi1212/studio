@@ -19,6 +19,7 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table';
 
 
 function getKycBadge(status?: User['kycStatus']) {
@@ -32,22 +33,6 @@ function getKycBadge(status?: User['kycStatus']) {
     default:
       return <Badge variant="secondary">Unknown</Badge>;
   }
-}
-
-function PersonalInfoRow({ label, value, actionLabel, onActionClick }: { label: string; value: React.ReactNode; actionLabel?: string; onActionClick?: () => void; }) {
-    return (
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between py-2">
-            <p className="text-sm text-muted-foreground mb-1 sm:mb-0">{label}</p>
-            <div className="flex items-center gap-4">
-                {actionLabel && (
-                    <Button variant="link" className="text-sm p-0 h-auto text-primary hover:underline" onClick={onActionClick}>
-                        {actionLabel}
-                    </Button>
-                )}
-                <div className="text-sm font-medium text-right break-all">{value}</div>
-            </div>
-        </div>
-    );
 }
 
 export default function GeneralSettingsPage() {
@@ -149,14 +134,34 @@ export default function GeneralSettingsPage() {
                               </div>
                           </AccordionTrigger>
                           <AccordionContent className="p-6 pt-0">
-                              <div className="space-y-1">
-                                <PersonalInfoRow label="Business Name" value={selectedCompany?.name || user.businessName || 'Not set'} />
-                                <PersonalInfoRow label="Legal Name" value={user.legalName || 'Not set'} />
-                                <PersonalInfoRow label="Business ID" value={user.businessRegistrationId || 'Not set'} />
-                                <PersonalInfoRow label="Industry" value={user.industry || 'Not set'} />
-                                <PersonalInfoRow label="KYC Verification" value={getKycBadge(user.kycStatus)} />
-                                <PersonalInfoRow label="Business Address" value={user.address || 'Not set'} />
-                              </div>
+                            <Table>
+                                <TableBody>
+                                    <TableRow>
+                                        <TableCell className="font-medium text-muted-foreground">Business Name</TableCell>
+                                        <TableCell className="text-right">{selectedCompany?.name || user.businessName || 'Not set'}</TableCell>
+                                    </TableRow>
+                                    <TableRow>
+                                        <TableCell className="font-medium text-muted-foreground">Legal Name</TableCell>
+                                        <TableCell className="text-right">{user.legalName || 'Not set'}</TableCell>
+                                    </TableRow>
+                                    <TableRow>
+                                        <TableCell className="font-medium text-muted-foreground">Business ID</TableCell>
+                                        <TableCell className="text-right">{user.businessRegistrationId || 'Not set'}</TableCell>
+                                    </TableRow>
+                                    <TableRow>
+                                        <TableCell className="font-medium text-muted-foreground">Industry</TableCell>
+                                        <TableCell className="text-right">{user.industry || 'Not set'}</TableCell>
+                                    </TableRow>
+                                    <TableRow>
+                                        <TableCell className="font-medium text-muted-foreground">KYC Verification</TableCell>
+                                        <TableCell className="text-right">{getKycBadge(user.kycStatus)}</TableCell>
+                                    </TableRow>
+                                    <TableRow>
+                                        <TableCell className="font-medium text-muted-foreground">Business Address</TableCell>
+                                        <TableCell className="text-right">{user.address || 'Not set'}</TableCell>
+                                    </TableRow>
+                                </TableBody>
+                            </Table>
                                <div className="mt-4 flex justify-end">
                                     <Button variant="outline" size="sm" asChild>
                                         <Link href="/settings/business/edit">
