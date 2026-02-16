@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -23,19 +22,6 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 
 function getKycBadge(status?: User['kycStatus']) {
-  switch (status) {
-    case 'verified':
-      return <Badge variant="outline" className="text-green-400 border-green-400">Verified</Badge>;
-    case 'pending':
-      return <Badge variant="outline" className="text-yellow-400 border-yellow-400">Pending</Badge>;
-    case 'rejected':
-       return <Badge variant="destructive">Rejected</Badge>;
-    default:
-      return <Badge variant="secondary">Unknown</Badge>;
-  }
-}
-
-function getKybBadge(status?: User['kybStatus']) {
   switch (status) {
     case 'verified':
       return <Badge variant="outline" className="text-green-400 border-green-400">Verified</Badge>;
@@ -158,7 +144,7 @@ export default function GeneralSettingsPage() {
                                   <Building className="h-6 w-6" />
                                   <div className="space-y-1 text-left">
                                       <h3 className="text-lg font-semibold leading-none tracking-tight">Business Information</h3>
-                                      <p className="text-sm text-muted-foreground">Manage your business details.</p>
+                                      <p className="text-sm text-muted-foreground">Manage your business information.</p>
                                   </div>
                               </div>
                           </AccordionTrigger>
@@ -169,7 +155,6 @@ export default function GeneralSettingsPage() {
                                 <PersonalInfoRow label="Business ID" value={user.businessRegistrationId || 'Not set'} />
                                 <PersonalInfoRow label="Industry" value={user.industry || 'Not set'} />
                                 <PersonalInfoRow label="KYC Verification" value={getKycBadge(user.kycStatus)} />
-                                <PersonalInfoRow label="KYB Status" value={getKybBadge(user.kybStatus)} />
                                 <PersonalInfoRow label="Business Address" value={user.address || 'Not set'} />
                               </div>
                                <div className="mt-4 flex justify-end">
