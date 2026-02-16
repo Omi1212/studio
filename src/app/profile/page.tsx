@@ -13,7 +13,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ShieldCheck, User as UserIcon, Phone, Building, Settings, Edit } from 'lucide-react';
+import { ShieldCheck, User as UserIcon, Phone, Building, Settings, Edit, KeyRound, Shield, Monitor } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { countries } from '@/lib/countries';
 import IdentityVerification from '@/components/profile/identity-verification';
@@ -184,9 +184,9 @@ export default function ProfilePage() {
                 </Card>
               </div>
               
-              {(user.role === 'issuer' || user.role === 'agent' || user.role === 'superadmin') && (
-                <Accordion type="single" collapsible defaultValue="user-preferences" className="w-full">
-                    <AccordionItem value="user-preferences" className="border-b-0">
+              {isBusinessRole && (
+                <Accordion type="single" collapsible className="w-full space-y-6">
+                    <AccordionItem value="user-preferences">
                         <Card>
                             <AccordionTrigger className="p-6 hover:no-underline text-left">
                                 <div className="flex items-center gap-4">
@@ -238,6 +238,51 @@ export default function ProfilePage() {
                                         </div>
                                     </div>
                                 </div>
+                            </AccordionContent>
+                        </Card>
+                    </AccordionItem>
+                    <AccordionItem value="change-password">
+                        <Card>
+                            <AccordionTrigger className="p-6 hover:no-underline text-left">
+                                <div className="flex items-center gap-4">
+                                    <KeyRound className="h-6 w-6" />
+                                    <div className="space-y-1 text-left">
+                                        <h3 className="text-lg font-semibold leading-none tracking-tight">Change Password</h3>
+                                        <p className="text-sm text-muted-foreground">For your security, we recommend choosing a password that you don't use for any other online account.</p>
+                                    </div>
+                                </div>
+                            </AccordionTrigger>
+                            <AccordionContent className="p-6 pt-0">
+                            </AccordionContent>
+                        </Card>
+                    </AccordionItem>
+                    <AccordionItem value="2fa">
+                        <Card>
+                            <AccordionTrigger className="p-6 hover:no-underline text-left">
+                                <div className="flex items-center gap-4">
+                                    <Shield className="h-6 w-6" />
+                                    <div className="space-y-1 text-left">
+                                        <h3 className="text-lg font-semibold leading-none tracking-tight">Two-Factor Authentication</h3>
+                                        <p className="text-sm text-muted-foreground">Add an extra layer of security to your account by enabling two-factor authentication.</p>
+                                    </div>
+                                </div>
+                            </AccordionTrigger>
+                            <AccordionContent className="p-6 pt-0">
+                            </AccordionContent>
+                        </Card>
+                    </AccordionItem>
+                    <AccordionItem value="devices-sessions" className="border-b-0">
+                        <Card>
+                            <AccordionTrigger className="p-6 hover:no-underline text-left">
+                                <div className="flex items-center gap-4">
+                                    <Monitor className="h-6 w-6" />
+                                    <div className="space-y-1 text-left">
+                                        <h3 className="text-lg font-semibold leading-none tracking-tight">Devices &amp; Sessions</h3>
+                                        <p className="text-sm text-muted-foreground">This is a list of devices that have logged into your account. Revoke any sessions that you do not recognize.</p>
+                                    </div>
+                                </div>
+                            </AccordionTrigger>
+                            <AccordionContent className="p-6 pt-0">
                             </AccordionContent>
                         </Card>
                     </AccordionItem>
