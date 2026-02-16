@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -262,13 +263,15 @@ export default function ProfilePage() {
                                             <Label htmlFor="current-password">Current Password</Label>
                                             <Input id="current-password" type="password" />
                                         </div>
-                                        <div className="space-y-2">
-                                            <Label htmlFor="new-password">New Password</Label>
-                                            <Input id="new-password" type="password" />
-                                        </div>
-                                        <div className="space-y-2">
-                                            <Label htmlFor="confirm-password">Confirm New Password</Label>
-                                            <Input id="confirm-password" type="password" />
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div className="space-y-2">
+                                                <Label htmlFor="new-password">New Password</Label>
+                                                <Input id="new-password" type="password" />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label htmlFor="confirm-password">Confirm New Password</Label>
+                                                <Input id="confirm-password" type="password" />
+                                            </div>
                                         </div>
                                     </div>
                                     <div className="mt-6 flex justify-end">
@@ -359,3 +362,4 @@ export default function ProfilePage() {
     </SidebarProvider>
   );
 }
+
