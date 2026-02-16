@@ -11,9 +11,9 @@ export default function IdentityProvidersBanner() {
             <AlertTriangle className="h-4 w-4" />
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                 <div className='flex-1'>
-                    <AlertTitle className="font-bold text-blue-200">Link your Identity Providers</AlertTitle>
+                    <AlertTitle className="font-bold text-blue-200">Link your Compliance Providers</AlertTitle>
                     <AlertDescription>
-                        Link your identity providers to enable verification for your users and access all platform features.
+                        Link your compliance providers to enable verification for your users and access all platform features.
                     </AlertDescription>
                 </div>
                  <div className="flex gap-2 mt-4 sm:mt-0 sm:ml-4 flex-shrink-0">
