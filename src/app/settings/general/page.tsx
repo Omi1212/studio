@@ -1,5 +1,7 @@
 'use client';
 
+import { useEffect, useState } from 'react';
+import type { User } from '@/lib/types';
 import {
   Sidebar,
   SidebarInset,
@@ -8,15 +10,40 @@ import {
 import SidebarNav from '@/components/dashboard/sidebar-nav';
 import HeaderDynamic from '@/components/dashboard/header-dynamic';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Settings } from 'lucide-react';
+import { ArrowLeft, Building, Settings } from 'lucide-react';
 import Link from 'next/link';
-import { Card } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
+function PersonalInfoRow({ label, value, actionLabel, onActionClick }: { label: string; value: React.ReactNode; actionLabel?: string; onActionClick?: () => void; }) {
+    return (
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between py-2">
+            <p className="text-sm text-muted-foreground mb-1 sm:mb-0">{label}</p>
+            <div className="flex items-center gap-4">
+                {actionLabel && (
+                    <Button variant="link" className="text-sm p-0 h-auto text-primary hover:underline" onClick={onActionClick}>
+                        {actionLabel}
+                    </Button>
+                )}
+                <div className="text-sm font-medium text-right break-all">{value}</div>
+            </div>
+        </div>
+    );
+}
+
 export default function GeneralSettingsPage() {
+  const [user, setUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem('currentUser');
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+  }, []);
+
   return (
     <SidebarProvider>
       <Sidebar className="border-r">
@@ -36,7 +63,30 @@ export default function GeneralSettingsPage() {
             </div>
             
             <div className="max-w-4xl mx-auto">
-              <Accordion type="single" collapsible defaultValue="user-preferences" className="w-full">
+              <Accordion type="single" collapsible defaultValue={user?.role === 'issuer' ? 'business-info' : 'user-preferences'} className="w-full">
+                {user?.role === 'issuer' ? (
+                  <AccordionItem value="business-info" className="border-b-0">
+                      <Card>
+                          <AccordionTrigger className="p-6 hover:no-underline text-left">
+                              <div className="flex items-center gap-4">
+                                  <Building className="h-6 w-6" />
+                                  <div className="space-y-1 text-left">
+                                      <h3 className="text-lg font-semibold leading-none tracking-tight">Business Information</h3>
+                                      <p className="text-sm text-muted-foreground">Manage your business details.</p>
+                                  </div>
+                              </div>
+                          </AccordionTrigger>
+                          <AccordionContent className="p-6 pt-0">
+                              <div className="space-y-1">
+                                <PersonalInfoRow label="Business Name" value={user.businessName || 'Not set'} />
+                                <PersonalInfoRow label="Business Legal Name" value={'Emisores de Activos Digitales, S.A. de C.V.'} />
+                                <PersonalInfoRow label="Business Registration ID" value={'NRC: 12345-6'} />
+                                <PersonalInfoRow label="Business Address" value={'Colonia San Benito, San Salvador'} />
+                              </div>
+                          </AccordionContent>
+                      </Card>
+                  </AccordionItem>
+                ) : (
                   <AccordionItem value="user-preferences" className="border-b-0">
                       <Card>
                           <AccordionTrigger className="p-6 hover:no-underline text-left">
@@ -92,6 +142,7 @@ export default function GeneralSettingsPage() {
                           </AccordionContent>
                       </Card>
                   </AccordionItem>
+                )}
               </Accordion>
             </div>
           </main>
