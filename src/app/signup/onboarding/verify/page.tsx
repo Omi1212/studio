@@ -101,7 +101,11 @@ export default function VerifyAccountPage() {
             description: "Please complete your profile.",
         });
 
-        router.push('/signup/onboarding/personal-info');
+        if (user?.role === 'issuer') {
+            router.push('/signup/onboarding/business-info');
+        } else {
+            router.push('/signup/onboarding/details');
+        }
         setIsSubmitting(false);
     };
 

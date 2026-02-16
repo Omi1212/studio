@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation';
 
 export default function OnboardingRootPage() {
-  redirect('/signup/onboarding/verify');
+  redirect('/signup/onboarding/personal-info');
 }
