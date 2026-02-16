@@ -42,20 +42,29 @@ export default function GeneralSettingsPage() {
   useEffect(() => {
     const storedUser = localStorage.getItem('currentUser');
     if (storedUser) {
-      const parsedUser = JSON.parse(storedUser);
-      setUser(parsedUser);
+      const parsedUser: User = JSON.parse(storedUser);
+      
+       fetch(`/api/users/${parsedUser.id}`)
+        .then(res => {
+            if (res.ok) return res.json();
+            return parsedUser; // Fallback to local
+        })
+        .then((apiUser: User) => {
+            const mergedUser = { ...apiUser, ...parsedUser };
+            setUser(mergedUser);
 
-      if (parsedUser.role === 'issuer') {
-        const storedCompanyId = localStorage.getItem('selectedCompanyId');
-        if (storedCompanyId) {
-          fetch('/api/companies')
-            .then(res => res.json())
-            .then(companiesResponse => {
-              const company = (companiesResponse.data || []).find((c: any) => c.id === storedCompanyId);
-              setSelectedCompany(company || null);
-            });
-        }
-      }
+             if (mergedUser.role === 'issuer') {
+              const storedCompanyId = localStorage.getItem('selectedCompanyId');
+              if (storedCompanyId) {
+                fetch('/api/companies')
+                  .then(res => res.json())
+                  .then(companiesResponse => {
+                    const company = (companiesResponse.data || []).find((c: any) => c.id === storedCompanyId);
+                    setSelectedCompany(company || null);
+                  });
+              }
+            }
+        });
     }
   }, []);
 
@@ -94,9 +103,11 @@ export default function GeneralSettingsPage() {
                           <AccordionContent className="p-6 pt-0">
                               <div className="space-y-1">
                                 <PersonalInfoRow label="Business Name" value={selectedCompany?.name || user.businessName || 'Not set'} />
-                                <PersonalInfoRow label="Business Legal Name" value={'Emisores de Activos Digitales, S.A. de C.V.'} />
-                                <PersonalInfoRow label="Business Registration ID" value={'NRC: 12345-6'} />
-                                <PersonalInfoRow label="Business Address" value={'Colonia San Benito, San Salvador'} />
+                                <PersonalInfoRow label="Registered Business Name" value={user.legalName || 'Not set'} />
+                                <PersonalInfoRow label="Business Registration ID" value={user.businessRegistrationId || 'Not set'} />
+                                <PersonalInfoRow label="Industry" value={user.industry || 'Not set'} />
+                                <PersonalInfoRow label="KYB Level" value={user.kybLevel !== undefined ? `Level ${user.kybLevel}` : 'Not set'} />
+                                <PersonalInfoRow label="Business Address" value={user.address || 'Not set'} />
                               </div>
                           </AccordionContent>
                       </Card>

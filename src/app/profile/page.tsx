@@ -61,54 +61,20 @@ export default function ProfilePage() {
     if (storedUser) {
         const parsedUser: User = JSON.parse(storedUser);
 
-        const applyDefaultData = (user: User): User => {
-            let finalUser = { ...user };
-            
-            const investorDefaults = {
-                country: 'El Salvador',
-                city: 'San Salvador',
-                legalName: finalUser.name,
-                dob: '1990-01-01',
-                idDoc: 'DUI: 01234567-8',
-                address: '123 Calle Principal, San Salvador',
-                phone: '+503 7890-1234'
-            };
-
-            const issuerDefaults = {
-                 country: 'El Salvador',
-                city: 'San Salvador',
-                legalName: "Peter Bartholomew Jones",
-                dob: '2001-09-12',
-                idDoc: 'ID Card, 06**********38',
-                address: 'San Salvador Centro, El Salvador',
-                phone: '+503 2222-3333',
-                businessName: 'Emisores de Activos Digitales, S.A. de C.V.'
-            }
-
-            const defaults = finalUser.role === 'issuer' ? issuerDefaults : investorDefaults;
-
-            Object.keys(defaults).forEach(key => {
-                const k = key as keyof typeof defaults;
-                // @ts-ignore
-                if (!finalUser[k]) {
-                    // @ts-ignore
-                    finalUser[k] = defaults[k];
-                }
-            });
-
-            return finalUser;
-        };
-        
-        fetch(`/api/users?perPage=999`)
-            .then(res => res.json())
-            .then((allUsers: {data: User[]}) => {
-                const apiUser = allUsers.data.find(u => u.id === parsedUser.id);
-                // Merge localStorage data over API data, then apply defaults
-                const mergedUser = apiUser ? { ...apiUser, ...parsedUser } : parsedUser;
-                setUser(applyDefaultData(mergedUser));
+        fetch(`/api/users/${parsedUser.id}`)
+            .then(res => {
+                if (res.ok) return res.json();
+                // If fetching fails, use the stored user as a fallback.
+                return parsedUser;
+            })
+            .then((apiUser: User) => {
+                // Merge localStorage data over API data to preserve any unsaved changes during session
+                const mergedUser = { ...apiUser, ...parsedUser };
+                setUser(mergedUser);
             })
             .catch(() => {
-                setUser(applyDefaultData(parsedUser));
+                // On error, still use the stored user
+                setUser(parsedUser);
             })
             .finally(() => setLoading(false));
     } else {
@@ -188,9 +154,6 @@ export default function ProfilePage() {
                             <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
                         </Avatar>
                         <CardTitle className="text-2xl pt-2">{user.name}</CardTitle>
-                        {isBusinessRole && user.role !== 'issuer' && (
-                           <CardDescription>Business Level {user.kybLevel || 0}</CardDescription>
-                        )}
                         <div className="pt-1">
                             <Badge variant="outline" className={currentStatusBadge.className}>
                                 <ShieldCheck className="mr-2 h-4 w-4" />
@@ -218,67 +181,67 @@ export default function ProfilePage() {
                     </CardContent>
                 </Card>
               </div>
-
-               {user.role === 'issuer' && (
-                <Accordion type="single" collapsible defaultValue="user-preferences" className="w-full">
-                    <AccordionItem value="user-preferences" className="border-b-0">
-                        <Card>
-                            <AccordionTrigger className="p-6 hover:no-underline text-left">
-                                <div className="flex items-center gap-4">
-                                    <Settings className="h-6 w-6" />
-                                    <div className="space-y-1 text-left">
-                                        <h3 className="text-lg font-semibold leading-none tracking-tight">User Preferences</h3>
-                                        <p className="text-sm text-muted-foreground">Manage your language, currency, and theme settings.</p>
-                                    </div>
-                                </div>
-                            </AccordionTrigger>
-                            <AccordionContent className="p-6 pt-0">
-                                <div className="space-y-6">
-                                    <div className="flex items-center justify-between">
-                                        <Label>Theme</Label>
-                                        <Tabs defaultValue="dark" className="w-auto">
-                                            <TabsList className="h-auto">
-                                                <TabsTrigger value="light" className="px-6 py-2">Light</TabsTrigger>
-                                                <TabsTrigger value="dark" className="px-6 py-2">Dark</TabsTrigger>
-                                                <TabsTrigger value="system" className="px-6 py-2">System</TabsTrigger>
-                                            </TabsList>
-                                        </Tabs>
-                                    </div>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        <div className="space-y-2">
-                                            <Label htmlFor="language">Language</Label>
-                                            <Select defaultValue="en">
-                                                <SelectTrigger id="language">
-                                                    <SelectValue placeholder="Select language" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    <SelectItem value="en">English</SelectItem>
-                                                    <SelectItem value="es">Español</SelectItem>
-                                                    <SelectItem value="fr">Français</SelectItem>
-                                                </SelectContent>
-                                            </Select>
-                                        </div>
-                                        <div className="space-y-2">
-                                            <Label htmlFor="currency">Currency</Label>
-                                            <Select defaultValue="usd">
-                                                <SelectTrigger id="currency">
-                                                    <SelectValue placeholder="Select currency" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    <SelectItem value="usd">USD - US Dollar</SelectItem>
-                                                    <SelectItem value="eur">EUR - Euro</SelectItem>
-                                                    <SelectItem value="btc">BTC - Bitcoin</SelectItem>
-                                                </SelectContent>
-                                            </Select>
-                                        </div>
-                                    </div>
-                                </div>
-                            </AccordionContent>
-                        </Card>
-                    </AccordionItem>
-                </Accordion>
-              )}
               
+              <Accordion type="single" collapsible defaultValue="user-preferences" className="w-full">
+                {isBusinessRole ? (
+                  <AccordionItem value="user-preferences" className="border-b-0">
+                      <Card>
+                          <AccordionTrigger className="p-6 hover:no-underline text-left">
+                              <div className="flex items-center gap-4">
+                                  <Settings className="h-6 w-6" />
+                                  <div className="space-y-1 text-left">
+                                      <h3 className="text-lg font-semibold leading-none tracking-tight">User Preferences</h3>
+                                      <p className="text-sm text-muted-foreground">Manage your language, currency, and theme settings.</p>
+                                  </div>
+                              </div>
+                          </AccordionTrigger>
+                          <AccordionContent className="p-6 pt-0">
+                              <div className="space-y-6">
+                                  <div className="flex items-center justify-between">
+                                      <Label>Theme</Label>
+                                      <Tabs defaultValue="dark" className="w-auto">
+                                          <TabsList className="h-auto">
+                                              <TabsTrigger value="light" className="px-6 py-2">Light</TabsTrigger>
+                                              <TabsTrigger value="dark" className="px-6 py-2">Dark</TabsTrigger>
+                                              <TabsTrigger value="system" className="px-6 py-2">System</TabsTrigger>
+                                          </TabsList>
+                                      </Tabs>
+                                  </div>
+                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                      <div className="space-y-2">
+                                          <Label htmlFor="language">Language</Label>
+                                          <Select defaultValue="en">
+                                              <SelectTrigger id="language">
+                                                  <SelectValue placeholder="Select language" />
+                                              </SelectTrigger>
+                                              <SelectContent>
+                                                  <SelectItem value="en">English</SelectItem>
+                                                  <SelectItem value="es">Español</SelectItem>
+                                                  <SelectItem value="fr">Français</SelectItem>
+                                              </SelectContent>
+                                          </Select>
+                                      </div>
+                                      <div className="space-y-2">
+                                          <Label htmlFor="currency">Currency</Label>
+                                          <Select defaultValue="usd">
+                                              <SelectTrigger id="currency">
+                                                  <SelectValue placeholder="Select currency" />
+                                              </SelectTrigger>
+                                              <SelectContent>
+                                                  <SelectItem value="usd">USD - US Dollar</SelectItem>
+                                                  <SelectItem value="eur">EUR - Euro</SelectItem>
+                                                  <SelectItem value="btc">BTC - Bitcoin</SelectItem>
+                                              </SelectContent>
+                                          </Select>
+                                      </div>
+                                  </div>
+                              </div>
+                          </AccordionContent>
+                      </Card>
+                  </AccordionItem>
+                ) : null}
+              </Accordion>
+
               {(user.role === 'agent' || user.role === 'superadmin') && (
                 <Card>
                     <CardHeader>
@@ -286,9 +249,11 @@ export default function ProfilePage() {
                     </CardHeader>
                     <CardContent className="space-y-1">
                         <PersonalInfoRow label="Business Name" value={user.businessName || 'Not set'} />
-                        <PersonalInfoRow label="Business Legal Name" value={'Emisores de Activos Digitales, S.A. de C.V.'} />
-                        <PersonalInfoRow label="Business Registration ID" value={'NRC: 12345-6'} />
-                        <PersonalInfoRow label="Business Address" value={'Colonia San Benito, San Salvador'} />
+                        <PersonalInfoRow label="Registered Business Name" value={user.legalName || 'Not set'} />
+                        <PersonalInfoRow label="Business Registration ID" value={user.businessRegistrationId || 'Not set'} />
+                        <PersonalInfoRow label="Industry" value={user.industry || 'Not set'} />
+                        <PersonalInfoRow label="KYB Level" value={user.kybLevel !== undefined ? `Level ${user.kybLevel}` : 'Not set'} />
+                        <PersonalInfoRow label="Business Address" value={user.address || 'Not set'} />
                     </CardContent>
                 </Card>
               )}

@@ -18,7 +18,12 @@ const initialData: User[] = [
         status: 'active',
         phone: '+1 555-0101',
         kycLevel: 3,
-        kybLevel: 1,
+        kybLevel: 2,
+        businessName: 'Global Agents Co.',
+        legalName: 'Global Agents Company LLC',
+        businessRegistrationId: 'GA-12345',
+        industry: 'Consulting',
+        address: '123 Agent Avenue, Suite 100, Financial District',
     },
     {
         id: 'user-002',
@@ -31,7 +36,12 @@ const initialData: User[] = [
         status: 'active',
         phone: '+1 555-0102',
         kycLevel: 1,
-        kybLevel: 0,
+        kybLevel: 1,
+        businessName: 'Emisores de Activos Digitales',
+        legalName: 'Emisores de Activos Digitales, S.A. de C.V.',
+        businessRegistrationId: 'NRC: 12345-6',
+        industry: 'FinTech',
+        address: 'Colonia San Benito, San Salvador, El Salvador'
     },
     {
         id: 'user-003',
@@ -45,7 +55,6 @@ const initialData: User[] = [
         kycLevel: 2,
         country: 'El Salvador',
         legalName: 'Peter Bartholomew Jones',
-        dob: '2001-09-12',
         idDoc: 'ID Card, 06**********38',
         address: 'San Salvador Centro, El Salvador',
     },
@@ -61,6 +70,11 @@ const initialData: User[] = [
         phone: '+1 555-0104',
         kycLevel: 0,
         kybLevel: 0,
+        businessName: 'Poppins & Co. Associates',
+        legalName: 'Poppins & Co. Associates Ltd.',
+        businessRegistrationId: 'PC-98765',
+        industry: 'Financial Services',
+        address: '17 Cherry Tree Lane, London'
     },
      {
         id: 'user-005',
@@ -74,6 +88,11 @@ const initialData: User[] = [
         phone: '+1 555-0105',
         kycLevel: 4,
         kybLevel: 4,
+        businessName: 'BlockStratus Platform',
+        legalName: 'BlockStratus Inc.',
+        businessRegistrationId: 'BS-ADMIN-001',
+        industry: 'Technology',
+        address: '1 Infinite Loop, Cupertino, CA'
     }
 ];
 

@@ -79,6 +79,7 @@ export type User = {
   address?: string;
   city?: string;
   businessName?: string;
+  businessRegistrationId?: string;
   industry?: string;
   joinedDate?: string;
   totalInvested?: number;
