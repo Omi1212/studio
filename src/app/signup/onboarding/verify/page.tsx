@@ -98,10 +98,10 @@ export default function VerifyAccountPage() {
         
         toast({
             title: "Account Verified!",
-            description: "You are all set. Welcome!",
+            description: "Please complete your profile.",
         });
 
-        router.push('/dashboard');
+        router.push('/signup/onboarding/personal-info');
         setIsSubmitting(false);
     };
 
