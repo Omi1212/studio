@@ -22,6 +22,9 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Link from 'next/link';
+import { Input } from '@/components/ui/input';
+import { Switch } from '@/components/ui/switch';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 
 function InfoRow({ icon: Icon, label, value }: { icon: React.ElementType, label: string, value: string | undefined }) {
@@ -253,6 +256,25 @@ export default function ProfilePage() {
                                 </div>
                             </AccordionTrigger>
                             <AccordionContent className="p-6 pt-0">
+                                <form>
+                                    <div className="space-y-4 max-w-md">
+                                        <div className="space-y-2">
+                                            <Label htmlFor="current-password">Current Password</Label>
+                                            <Input id="current-password" type="password" />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label htmlFor="new-password">New Password</Label>
+                                            <Input id="new-password" type="password" />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label htmlFor="confirm-password">Confirm New Password</Label>
+                                            <Input id="confirm-password" type="password" />
+                                        </div>
+                                    </div>
+                                    <div className="mt-6 flex justify-end">
+                                        <Button>Update Password</Button>
+                                    </div>
+                                </form>
                             </AccordionContent>
                         </Card>
                     </AccordionItem>
@@ -268,6 +290,13 @@ export default function ProfilePage() {
                                 </div>
                             </AccordionTrigger>
                             <AccordionContent className="p-6 pt-0">
+                                <div className="flex items-center justify-between rounded-lg border p-4">
+                                    <div className="space-y-0.5">
+                                        <Label htmlFor="2fa-switch" className="text-base font-medium">Enable Two-Factor Authentication</Label>
+                                        <p className="text-sm text-muted-foreground">Secure your account with an extra layer of protection.</p>
+                                    </div>
+                                    <Switch id="2fa-switch" />
+                                </div>
                             </AccordionContent>
                         </Card>
                     </AccordionItem>
@@ -283,6 +312,39 @@ export default function ProfilePage() {
                                 </div>
                             </AccordionTrigger>
                             <AccordionContent className="p-6 pt-0">
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead>Device</TableHead>
+                                            <TableHead>Location</TableHead>
+                                            <TableHead>Last Login</TableHead>
+                                            <TableHead className="text-right">Action</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        <TableRow>
+                                            <TableCell>
+                                                <div className="font-medium">Chrome on macOS</div>
+                                                <div className="text-sm text-muted-foreground">Current session</div>
+                                            </TableCell>
+                                            <TableCell>San Salvador, ES</TableCell>
+                                            <TableCell>2 minutes ago</TableCell>
+                                            <TableCell className="text-right">
+                                                <Button variant="link" className="p-0 h-auto text-primary" disabled>Current</Button>
+                                            </TableCell>
+                                        </TableRow>
+                                        <TableRow>
+                                            <TableCell>
+                                                <div className="font-medium">iPhone 15 Pro</div>
+                                            </TableCell>
+                                            <TableCell>New York, US</TableCell>
+                                            <TableCell>July 28, 2024</TableCell>
+                                            <TableCell className="text-right">
+                                                <Button variant="outline">Revoke</Button>
+                                            </TableCell>
+                                        </TableRow>
+                                    </TableBody>
+                                </Table>
                             </AccordionContent>
                         </Card>
                     </AccordionItem>
