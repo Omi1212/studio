@@ -26,18 +26,12 @@ const mockTeamMembers: Partial<User>[] = [
 ];
 
 function RoleBadge({ role, isOwner }: { role: string, isOwner?: boolean }) {
-    if (isOwner) {
-        return <Badge variant="outline" className="text-primary border-primary bg-primary/10">OWNER</Badge>;
-    }
-    
-    switch (role.toUpperCase()) {
-        case 'ADMIN':
-            return <Badge variant="outline" className="text-orange-400 border-orange-400">ADMIN</Badge>;
-        case 'COLLABORATOR':
-            return <Badge variant="secondary">COLLABORATOR</Badge>;
-        default:
-            return <Badge variant="secondary">{role.toUpperCase()}</Badge>;
-    }
+    const roleText = isOwner ? 'OWNER' : role.toUpperCase();
+    return (
+        <Badge variant="outline" className="text-primary border-primary bg-primary/10">
+            {roleText}
+        </Badge>
+    );
 }
 
 export default function AccessList() {
