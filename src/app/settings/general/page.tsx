@@ -11,7 +11,7 @@ import {
 import SidebarNav from '@/components/dashboard/sidebar-nav';
 import HeaderDynamic from '@/components/dashboard/header-dynamic';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Building, Settings, Edit, Copy } from 'lucide-react';
+import { ArrowLeft, Building, Settings, Edit, Copy, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -22,6 +22,7 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
+import BusinessVerification from '@/components/settings/business-verification';
 
 
 function getKycBadge(status?: User['kycStatus']) {
@@ -133,7 +134,7 @@ export default function GeneralSettingsPage() {
             </div>
             
             <div className="max-w-4xl mx-auto">
-              <Accordion type="single" collapsible defaultValue="business-info" className="w-full">
+              <Accordion type="single" collapsible defaultValue="business-info" className="w-full space-y-6">
                 {(user?.role === 'issuer' || user?.role === 'agent' || user?.role === 'superadmin') && (
                   <AccordionItem value="business-info" className="border-b-0">
                       <Card>
@@ -195,6 +196,24 @@ export default function GeneralSettingsPage() {
                       </Card>
                   </AccordionItem>
                 )}
+                 {(user?.role === 'issuer' || user?.role === 'agent' || user?.role === 'superadmin') && (
+                    <AccordionItem value="kyb-verification" className="border-b-0">
+                        <Card>
+                             <AccordionTrigger className="p-6 hover:no-underline text-left">
+                                <div className="flex items-center gap-4">
+                                    <ShieldCheck className="h-6 w-6" />
+                                    <div className="space-y-1 text-left">
+                                        <h3 className="text-lg font-semibold leading-none tracking-tight">Business Verification (KYB)</h3>
+                                        <p className="text-sm text-muted-foreground">Complete business verification to access all platform features.</p>
+                                    </div>
+                                </div>
+                            </AccordionTrigger>
+                            <AccordionContent className="p-6 pt-0">
+                                <BusinessVerification kybLevel={user.kybLevel || 0} />
+                            </AccordionContent>
+                        </Card>
+                    </AccordionItem>
+                 )}
                 {user?.role === 'investor' && (
                   <AccordionItem value="user-preferences" className="border-b-0">
                       <Card>
