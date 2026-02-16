@@ -244,30 +244,6 @@ export default function ProfilePage() {
                 </Accordion>
               )}
 
-              {(user.role === 'agent' || user.role === 'superadmin' || user.role === 'issuer') && (
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between">
-                        <div className="space-y-1.5">
-                            <CardTitle>Business Information</CardTitle>
-                            <CardDescription>Manage your business details.</CardDescription>
-                        </div>
-                        <Button variant="outline" size="sm" asChild>
-                           <Link href="/settings/business/edit">
-                             <Edit className="mr-2 h-4 w-4"/>Edit
-                           </Link>
-                        </Button>
-                    </CardHeader>
-                    <CardContent className="space-y-1 p-6">
-                        <PersonalInfoRow label="Business Name" value={user.businessName || 'Not set'} />
-                        <PersonalInfoRow label="Legal Name" value={user.legalName || 'Not set'} />
-                        <PersonalInfoRow label="Business ID" value={user.businessRegistrationId || 'Not set'} />
-                        <PersonalInfoRow label="Industry" value={user.industry || 'Not set'} />
-                        <PersonalInfoRow label="KYB Level" value={user.kybLevel !== undefined ? `Level ${user.kybLevel}` : 'Not set'} />
-                        <PersonalInfoRow label="Business Address" value={user.address || 'Not set'} />
-                    </CardContent>
-                </Card>
-              )}
-
               {user.role === 'investor' && <IdentityVerification kycLevel={user.kycLevel || 0} />}
             </div>
           </main>
