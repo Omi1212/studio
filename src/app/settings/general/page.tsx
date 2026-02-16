@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -36,11 +37,25 @@ function PersonalInfoRow({ label, value, actionLabel, onActionClick }: { label: 
 
 export default function GeneralSettingsPage() {
   const [user, setUser] = useState<User | null>(null);
+  const [selectedCompany, setSelectedCompany] = useState<{ id: string; name: string } | null>(null);
 
   useEffect(() => {
     const storedUser = localStorage.getItem('currentUser');
     if (storedUser) {
-      setUser(JSON.parse(storedUser));
+      const parsedUser = JSON.parse(storedUser);
+      setUser(parsedUser);
+
+      if (parsedUser.role === 'issuer') {
+        const storedCompanyId = localStorage.getItem('selectedCompanyId');
+        if (storedCompanyId) {
+          fetch('/api/companies')
+            .then(res => res.json())
+            .then(companiesResponse => {
+              const company = (companiesResponse.data || []).find((c: any) => c.id === storedCompanyId);
+              setSelectedCompany(company || null);
+            });
+        }
+      }
     }
   }, []);
 
@@ -78,7 +93,7 @@ export default function GeneralSettingsPage() {
                           </AccordionTrigger>
                           <AccordionContent className="p-6 pt-0">
                               <div className="space-y-1">
-                                <PersonalInfoRow label="Business Name" value={user.businessName || 'Not set'} />
+                                <PersonalInfoRow label="Business Name" value={selectedCompany?.name || user.businessName || 'Not set'} />
                                 <PersonalInfoRow label="Business Legal Name" value={'Emisores de Activos Digitales, S.A. de C.V.'} />
                                 <PersonalInfoRow label="Business Registration ID" value={'NRC: 12345-6'} />
                                 <PersonalInfoRow label="Business Address" value={'Colonia San Benito, San Salvador'} />
