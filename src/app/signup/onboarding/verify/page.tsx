@@ -89,11 +89,7 @@ export default function VerifyAccountPage() {
             description: "Please complete your profile.",
         });
 
-        if (user?.role === 'issuer') {
-            router.push('/signup/onboarding/business-details');
-        } else {
-            router.push('/signup/onboarding/details');
-        }
+        router.push('/signup/onboarding/personal-info');
         setIsSubmitting(false);
     };
 

@@ -135,7 +135,11 @@ export default function PersonalInfoPage() {
           title: 'Information Saved!',
         });
 
-        router.push('/signup/onboarding/verify');
+        if (user.role === 'issuer') {
+            router.push('/signup/onboarding/business-details');
+        } else {
+            router.push('/signup/onboarding/details');
+        }
 
     } catch (error: any) {
         toast({
