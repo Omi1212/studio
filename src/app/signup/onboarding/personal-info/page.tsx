@@ -25,12 +25,23 @@ const industries = [
   { value: 'other', label: 'Other' },
 ];
 
+const employeeRanges = [
+    { value: '1-10', label: '1-10' },
+    { value: '11-50', label: '11-50' },
+    { value: '51-200', label: '51-200' },
+    { value: '201-500', label: '201-500' },
+    { value: '501-1000', label: '501-1000' },
+    { value: '1000+', label: '1000+' },
+];
+
 const formSchema = z.object({
   name: z.string().min(1, 'Full name is required'),
   phone: z.string().min(1, 'Phone number is required'),
   phoneCountryCode: z.string().min(1, "Country code is required"),
   businessName: z.string().optional(),
   industry: z.string().optional(),
+  website: z.string().url({ message: "Please enter a valid URL." }).optional().or(z.literal('')),
+  employeeRange: z.string().optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -50,6 +61,8 @@ export default function PersonalInfoPage() {
       phoneCountryCode: 'US', // Default to US
       businessName: '',
       industry: '',
+      website: '',
+      employeeRange: '',
     },
   });
 
@@ -76,6 +89,8 @@ export default function PersonalInfoPage() {
         phoneCountryCode: countryCode,
         businessName: parsedUser.businessName || '',
         industry: parsedUser.industry || '',
+        website: parsedUser.website || '',
+        employeeRange: parsedUser.employeeRange || '',
       });
     } else {
         router.push('/signup');
@@ -110,6 +125,8 @@ export default function PersonalInfoPage() {
         if (user.role === 'issuer') {
             updatedUserData.businessName = data.businessName;
             updatedUserData.industry = data.industry;
+            updatedUserData.website = data.website;
+            updatedUserData.employeeRange = data.employeeRange;
 
             if (data.businessName) {
                 const newCompanyId = data.businessName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
@@ -264,6 +281,43 @@ export default function PersonalInfoPage() {
                                             {industries.map(industry => (
                                                 <SelectItem key={industry.value} value={industry.value}>
                                                     {industry.label}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                    <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                             <FormField
+                                control={form.control}
+                                name="website"
+                                render={({ field }) => (
+                                    <FormItem>
+                                    <FormLabel>Company Website</FormLabel>
+                                    <FormControl>
+                                        <Input placeholder="e.g. https://awesomeinc.com" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="employeeRange"
+                                render={({ field }) => (
+                                    <FormItem>
+                                    <FormLabel>Number of Employees</FormLabel>
+                                    <Select onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
+                                        <FormControl>
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Select a range" />
+                                            </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                            {employeeRanges.map(range => (
+                                                <SelectItem key={range.value} value={range.value}>
+                                                    {range.label}
                                                 </SelectItem>
                                             ))}
                                         </SelectContent>

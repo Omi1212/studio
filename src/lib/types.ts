@@ -81,6 +81,8 @@ export type User = {
   businessName?: string;
   businessRegistrationId?: string;
   industry?: string;
+  website?: string;
+  employeeRange?: string;
   joinedDate?: string;
   totalInvested?: number;
   isFrozen?: boolean;

@@ -26,6 +26,8 @@ const patchSchema = z.object({
   industry: z.string().optional(),
   language: z.string().optional(),
   currency: z.string().optional(),
+  website: z.string().optional(),
+  employeeRange: z.string().optional(),
 }).partial();
 
 export async function GET(
