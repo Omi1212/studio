@@ -242,42 +242,76 @@ export default function SidebarNav() {
         </div>
       )}
 
-      {isClient && userRole !== 'superadmin' && userRole !== 'investor' && selectedToken && (
+      {isClient && (userRole === 'issuer' || userRole === 'agent') && (
         <div className="px-3 pb-3">
-          <DropdownMenu>
+          {allTokens.length > 0 && selectedToken ? (
+            <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="w-full h-auto justify-between items-center p-2 text-left bg-sidebar-accent border-sidebar-border hover:bg-sidebar-accent/80">
-                      <div className="flex items-center gap-3">
-                          <TokenIcon token={selectedToken} className="h-8 w-8" />
-                          <div className="flex-1 flex flex-col gap-0.5 leading-none">
-                            <span className="font-medium text-sm">{selectedToken.tokenName}</span>
-                            <div className="flex items-center gap-2">
-                               <span className="text-primary font-semibold text-xs">{selectedToken.tokenTicker}</span>
-                               <span className="text-xs text-muted-foreground">({networkMap[selectedToken.network as string] || selectedToken.network})</span>
-                            </div>
-                          </div>
+                <Button
+                  variant="outline"
+                  className="w-full h-auto justify-between items-center p-2 text-left bg-sidebar-accent border-sidebar-border hover:bg-sidebar-accent/80"
+                >
+                  <div className="flex items-center gap-3">
+                    <TokenIcon token={selectedToken} className="h-8 w-8" />
+                    <div className="flex-1 flex flex-col gap-0.5 leading-none">
+                      <span className="font-medium text-sm">
+                        {selectedToken.tokenName}
+                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-primary font-semibold text-xs">
+                          {selectedToken.tokenTicker}
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          (
+                          {networkMap[selectedToken.network as string] ||
+                            selectedToken.network}
+                          )
+                        </span>
                       </div>
-                      <ChevronsUpDown className="h-4 w-4 text-muted-foreground" />
-                  </Button>
+                    </div>
+                  </div>
+                  <ChevronsUpDown className="h-4 w-4 text-muted-foreground" />
+                </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-[--radix-dropdown-menu-trigger-width]">
-                  {allTokens.map((token) => (
-                      <DropdownMenuItem key={token.id} onSelect={() => handleTokenSelect(token)} className="p-2">
-                        <div className="flex items-center gap-3 w-full">
-                          <TokenIcon token={token} className="h-8 w-8" />
-                          <div className="flex-1 flex flex-col gap-0.5 leading-none">
-                            <span className="font-medium text-sm">{token.tokenName}</span>
-                            <div className="flex items-center gap-2">
-                               <span className="text-primary font-semibold text-xs">{token.tokenTicker}</span>
-                               <span className="text-xs text-muted-foreground">({networkMap[token.network as string] || token.network})</span>
-                            </div>
-                          </div>
-                          {selectedToken.id === token.id && <Check className="h-4 w-4" />}
+                {allTokens.map((token) => (
+                  <DropdownMenuItem
+                    key={token.id}
+                    onSelect={() => handleTokenSelect(token)}
+                    className="p-2"
+                  >
+                    <div className="flex items-center gap-3 w-full">
+                      <TokenIcon token={token} className="h-8 w-8" />
+                      <div className="flex-1 flex flex-col gap-0.5 leading-none">
+                        <span className="font-medium text-sm">
+                          {token.tokenName}
+                        </span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-primary font-semibold text-xs">
+                            {token.tokenTicker}
+                          </span>
+                          <span className="text-xs text-muted-foreground">
+                            (
+                            {networkMap[token.network as string] ||
+                              token.network}
+                            )
+                          </span>
                         </div>
-                      </DropdownMenuItem>
-                  ))}
+                      </div>
+                      {selectedToken.id === token.id && (
+                        <Check className="h-4 w-4" />
+                      )}
+                    </div>
+                  </DropdownMenuItem>
+                ))}
               </DropdownMenuContent>
-          </DropdownMenu>
+            </DropdownMenu>
+          ) : (
+            <div className="border border-sidebar-border rounded-md p-2 text-center text-sm text-sidebar-foreground/70 bg-sidebar-accent flex items-center justify-center gap-2">
+              <Briefcase className="h-4 w-4" />
+              <span>No Assets</span>
+            </div>
+          )}
         </div>
       )}
 
