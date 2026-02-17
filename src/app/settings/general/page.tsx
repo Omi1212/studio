@@ -176,6 +176,20 @@ export default function GeneralSettingsPage() {
                                         <TableCell className="text-right">{user.industry || 'Not set'}</TableCell>
                                     </TableRow>
                                     <TableRow>
+                                        <TableCell className="font-medium text-muted-foreground">Website</TableCell>
+                                        <TableCell className="text-right">
+                                            {user.website ? (
+                                                <a href={user.website} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                                                    {user.website}
+                                                </a>
+                                            ) : 'Not set'}
+                                        </TableCell>
+                                    </TableRow>
+                                    <TableRow>
+                                        <TableCell className="font-medium text-muted-foreground">Employee Range</TableCell>
+                                        <TableCell className="text-right">{user.employeeRange || 'Not set'}</TableCell>
+                                    </TableRow>
+                                    <TableRow>
                                         <TableCell className="font-medium text-muted-foreground">KYC Verification</TableCell>
                                         <TableCell className="text-right">{getKycBadge(user.kycStatus)}</TableCell>
                                     </TableRow>

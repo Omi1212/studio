@@ -31,6 +31,15 @@ const industries = [
   { value: 'other', label: 'Other' },
 ];
 
+const employeeRanges = [
+    { value: '1-10', label: '1-10' },
+    { value: '11-50', label: '11-50' },
+    { value: '51-200', label: '51-200' },
+    { value: '201-500', label: '201-500' },
+    { value: '501-1000', label: '501-1000' },
+    { value: '1000+', label: '1000+' },
+];
+
 const languages = [
   { value: 'en', label: 'English' },
   { value: 'es', label: 'Español' },
@@ -91,6 +100,8 @@ export default function EditBusinessPage() {
       country: formData.get('country') as string,
       currency: formData.get('currency') as string,
       language: formData.get('language') as string,
+      website: formData.get('website') as string,
+      employeeRange: formData.get('employeeRange') as string,
     };
     
     try {
@@ -213,6 +224,28 @@ export default function EditBusinessPage() {
                             </Select>
                         </div>
                         
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="space-y-2">
+                                <Label htmlFor="website">Company Website</Label>
+                                <Input id="website" name="website" defaultValue={user.website} placeholder="https://example.com" />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="employeeRange">Number of Employees</Label>
+                                <Select name="employeeRange" defaultValue={user.employeeRange}>
+                                    <SelectTrigger id="employeeRange">
+                                        <SelectValue placeholder="Select a range" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {employeeRanges.map(range => (
+                                            <SelectItem key={range.value} value={range.value}>
+                                                {range.label}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                         </div>
+
                          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                             <div className="space-y-2">
                                 <Label htmlFor="country">Country of Residence</Label>
