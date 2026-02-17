@@ -116,17 +116,25 @@ export default function SidebarNav() {
       fetch('/api/companies').then(res => res.json()),
       fetch('/api/issuers?perPage=999').then(res => res.json())
     ]).then(([tokensResponse, companiesResponse, issuersResponse]) => {
-        const companiesData = companiesResponse.data || [];
+        const allCompanies = companiesResponse.data || [];
         const issuers: Issuer[] = issuersResponse.data || [];
-        setCompanies(companiesData);
+        
+        let userCompanies = allCompanies;
+        if (role !== 'investor' && currentUser?.businessName) {
+            userCompanies = allCompanies.filter((c: any) => c.name === currentUser.businessName);
+        }
+        setCompanies(userCompanies);
         
         if (role === 'investor' || role === 'issuer') {
-            if (companiesData.length > 0) {
+            if (userCompanies.length > 0) {
               const storedCompanyId = localStorage.getItem('selectedCompanyId');
-              const foundCompany = storedCompanyId ? companiesData.find((c: any) => c.id === storedCompanyId) : undefined;
-              setSelectedCompany(foundCompany || companiesData[0]);
-              if (!foundCompany) {
-                localStorage.setItem('selectedCompanyId', companiesData[0].id);
+              const foundCompany = storedCompanyId ? userCompanies.find((c: any) => c.id === storedCompanyId) : undefined;
+              
+              if (foundCompany) {
+                setSelectedCompany(foundCompany);
+              } else {
+                setSelectedCompany(userCompanies[0]);
+                localStorage.setItem('selectedCompanyId', userCompanies[0].id);
               }
             }
         }
