@@ -13,7 +13,7 @@ import Link from 'next/link';
 type Invitation = {
   id: number;
   email: string;
-  role: 'admin' | 'collaborator';
+  role: string;
 };
 
 // Mock user data to simulate a team
@@ -33,7 +33,31 @@ const mockTeamMembers: Partial<User>[] = [
 ];
 
 function RoleBadge({ role, isOwner }: { role: string, isOwner?: boolean }) {
-    const roleText = isOwner ? 'OWNER' : role.toUpperCase();
+    let roleText: string;
+    if (isOwner) {
+        roleText = 'OWNER';
+    } else {
+        switch(role.toLowerCase()) {
+            case 'admin':
+                roleText = 'Admin';
+                break;
+            case 'operations':
+                roleText = 'Operations';
+                break;
+            case 'sales':
+                roleText = 'Sales';
+                break;
+            case 'support':
+                roleText = 'Technical Support';
+                break;
+            case 'collaborator': // for old data
+                 roleText = 'Collaborator';
+                 break;
+            default:
+                roleText = role.charAt(0).toUpperCase() + role.slice(1);
+        }
+    }
+
     let badgeClass = "text-primary border-primary bg-primary/10";
     
     return (
@@ -62,7 +86,7 @@ export default function AccessList() {
         const fullTeam = [
             { ...parsedUser, displayRole: 'Owner' },
             { ...mockTeamMembers[0], displayRole: 'Admin' },
-            { ...mockTeamMembers[1], displayRole: 'Collaborator' },
+            { ...mockTeamMembers[1], displayRole: 'Sales' },
         ];
         setTeam(fullTeam);
 
@@ -70,7 +94,7 @@ export default function AccessList() {
         // Fallback for when no user is logged in
         const fullTeam = [
             { ...mockTeamMembers[0], displayRole: 'Admin' },
-            { ...mockTeamMembers[1], displayRole: 'Collaborator' },
+            { ...mockTeamMembers[1], displayRole: 'Sales' },
         ];
          setTeam(fullTeam);
     }

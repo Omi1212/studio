@@ -21,9 +21,9 @@ import { ArrowLeft } from 'lucide-react';
 export default function InviteUserPage() {
   const router = useRouter();
   const { toast } = useToast();
-  const [invitation, setInvitation] = useState<{ email: string; role: 'admin' | 'collaborator' }>({
+  const [invitation, setInvitation] = useState<{ email: string; role: string }>({
     email: '',
-    role: 'collaborator',
+    role: 'sales',
   });
 
   const handleInvitationChange = (field: 'email' | 'role', value: string) => {
@@ -98,8 +98,10 @@ export default function InviteUserPage() {
                                     <SelectValue placeholder="Select a role" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="collaborator">Collaborator</SelectItem>
                                     <SelectItem value="admin">Admin</SelectItem>
+                                    <SelectItem value="operations">Operations</SelectItem>
+                                    <SelectItem value="sales">Sales</SelectItem>
+                                    <SelectItem value="support">Technical Support</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
