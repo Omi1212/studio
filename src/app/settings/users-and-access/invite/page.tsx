@@ -23,7 +23,7 @@ export default function InviteUserPage() {
   const { toast } = useToast();
   const [invitation, setInvitation] = useState<{ email: string; role: string }>({
     email: '',
-    role: 'sales',
+    role: '',
   });
 
   const handleInvitationChange = (field: 'email' | 'role', value: string) => {
@@ -36,6 +36,14 @@ export default function InviteUserPage() {
         variant: 'destructive',
         title: 'Email is required',
         description: 'Please enter an email address to send an invitation.',
+      });
+      return;
+    }
+    if (!invitation.role) {
+      toast({
+        variant: 'destructive',
+        title: 'Role is required',
+        description: 'Please select a role for the user.',
       });
       return;
     }
