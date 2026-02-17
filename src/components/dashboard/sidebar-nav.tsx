@@ -37,7 +37,7 @@ import {
 import { Button } from '../ui/button';
 import TokenIcon from '../ui/token-icon';
 import { cn } from '@/lib/utils';
-import type { TokenDetails, User } from '@/lib/types';
+import type { TokenDetails, User, Issuer } from '@/lib/types';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../ui/collapsible';
 import Image from 'next/image';
 
@@ -113,9 +113,11 @@ export default function SidebarNav() {
 
     Promise.all([
       fetch('/api/tokens?perPage=999').then(res => res.json()),
-      fetch('/api/companies').then(res => res.json())
-    ]).then(([tokensResponse, companiesResponse]) => {
+      fetch('/api/companies').then(res => res.json()),
+      fetch('/api/issuers?perPage=999').then(res => res.json())
+    ]).then(([tokensResponse, companiesResponse, issuersResponse]) => {
         const companiesData = companiesResponse.data || [];
+        const issuers: Issuer[] = issuersResponse.data || [];
         setCompanies(companiesData);
         
         if (role === 'investor' || role === 'issuer') {
@@ -139,6 +141,14 @@ export default function SidebarNav() {
         if (role === 'agent' && currentUser) {
             // NOTE: assignments are not persisted in this demo
             // For demo, we'll just show all tokens. In a real app, you'd filter by assignment.
+        } else if (role === 'issuer' && currentUser) {
+            const currentIssuer = issuers.find(i => i.email === currentUser.email);
+            if (currentIssuer) {
+                combinedTokens = combinedTokens.filter(t => t.issuerId === currentIssuer.id);
+            } else {
+                // This is a new issuer (or one not in the mock data), they have no tokens yet.
+                combinedTokens = [];
+            }
         }
 
         setAllTokens(combinedTokens);

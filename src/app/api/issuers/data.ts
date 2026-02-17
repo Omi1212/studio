@@ -17,9 +17,9 @@ const initialData: Issuer[] = [
     },
     {
         id: 'iss-002',
-        name: 'TokenForge',
-        email: 'support@tokenforge.io',
-        walletAddress: 'spark1q...iss2tf',
+        name: 'Emisores de Activos Digitales',
+        email: 'issuer@gmail.com',
+        walletAddress: 'spark1q...user02',
         issuedTokens: 12,
         pendingTokens: 0,
         status: 'active',
