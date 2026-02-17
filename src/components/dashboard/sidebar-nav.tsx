@@ -216,7 +216,8 @@ export default function SidebarNav() {
     <>
       <SidebarHeader className="p-4">
         <div className="w-full h-auto relative" style={{ aspectRatio: '170/41' }}>
-          <Image src="https://i.wpfc.ml/35/8gtsxa.png" alt="BlockStratus Logo" fill style={{objectFit: 'contain'}} sizes="14rem" />
+          <Image src="https://i.ibb.co/dsx2xgVc/image-69.png" alt="BlockStratus Logo" fill style={{objectFit: 'contain'}} sizes="14rem" className="block dark:hidden" />
+          <Image src="https://i.wpfc.ml/35/8gtsxa.png" alt="BlockStratus Logo" fill style={{objectFit: 'contain'}} sizes="14rem" className="hidden dark:block" />
         </div>
       </SidebarHeader>
       
