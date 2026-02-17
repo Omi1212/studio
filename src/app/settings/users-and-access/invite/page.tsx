@@ -10,57 +10,43 @@ import {
 import SidebarNav from '@/components/dashboard/sidebar-nav';
 import HeaderDynamic from '@/components/dashboard/header-dynamic';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
-import { ArrowLeft, Plus, Trash2 } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 
-type Invitation = {
-  id: number;
-  email: string;
-  role: 'admin' | 'collaborator';
-};
-
-export default function InviteUsersPage() {
+export default function InviteUserPage() {
   const router = useRouter();
   const { toast } = useToast();
-  const [invitations, setInvitations] = useState<Invitation[]>([
-    { id: 1, email: '', role: 'collaborator' },
-  ]);
+  const [invitation, setInvitation] = useState<{ email: string; role: 'admin' | 'collaborator' }>({
+    email: '',
+    role: 'collaborator',
+  });
 
-  const handleAddInvitation = () => {
-    setInvitations([
-      ...invitations,
-      { id: Date.now(), email: '', role: 'collaborator' },
-    ]);
+  const handleInvitationChange = (field: 'email' | 'role', value: string) => {
+    setInvitation(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleRemoveInvitation = (id: number) => {
-    if (invitations.length > 1) {
-      setInvitations(invitations.filter((inv) => inv.id !== id));
+  const handleSendInvitation = () => {
+    if (!invitation.email) {
+      toast({
+        variant: 'destructive',
+        title: 'Email is required',
+        description: 'Please enter an email address to send an invitation.',
+      });
+      return;
     }
-  };
-
-  const handleInvitationChange = (id: number, field: 'email' | 'role', value: string) => {
-    setInvitations(
-      invitations.map((inv) =>
-        inv.id === id ? { ...inv, [field]: value } : inv
-      )
-    );
-  };
-
-  const handleSendInvitations = () => {
-    // In a real app, you would send the invitations to your backend here.
+    // In a real app, you would send the invitation to your backend here.
     const existingInvitations = JSON.parse(localStorage.getItem('pendingInvitations') || '[]');
-    const newInvitations = invitations.filter(inv => inv.email); // Only save invitations with an email
-    localStorage.setItem('pendingInvitations', JSON.stringify([...existingInvitations, ...newInvitations]));
+    const newInvitation = { ...invitation, id: Date.now() };
+    localStorage.setItem('pendingInvitations', JSON.stringify([...existingInvitations, newInvitation]));
 
     toast({
-      title: 'Invitations Sent!',
-      description: 'Your team members have been invited.',
+      title: 'Invitation Sent!',
+      description: 'Your team member has been invited.',
     });
     router.push('/settings/users-and-access');
   };
@@ -79,7 +65,7 @@ export default function InviteUsersPage() {
                     <Link href="/settings/users-and-access"><ArrowLeft /></Link>
                 </Button>
                 <h1 className="text-3xl font-headline font-semibold">
-                    Invite Users
+                    Invite User
                 </h1>
             </div>
 
@@ -88,63 +74,42 @@ export default function InviteUsersPage() {
                     The user will receive an email invitation with a link to accept and join.
                 </p>
 
-                <div className="space-y-6">
-                    {invitations.map((invitation, index) => (
-                        <Card key={invitation.id}>
-                            <CardHeader className="flex flex-row items-center justify-between">
-                                <CardTitle className="text-lg">Invitation {index + 1}</CardTitle>
-                                {invitations.length > 1 && (
-                                    <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="text-destructive hover:text-destructive"
-                                    onClick={() => handleRemoveInvitation(invitation.id)}
-                                    >
-                                        <Trash2 className="h-4 w-4" />
-                                    </Button>
-                                )}
-                            </CardHeader>
-                            <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                    <Label htmlFor={`email-${invitation.id}`}>Email</Label>
-                                    <Input
-                                        id={`email-${invitation.id}`}
-                                        type="email"
-                                        placeholder="name@example.com"
-                                        value={invitation.email}
-                                        onChange={(e) => handleInvitationChange(invitation.id, 'email', e.target.value)}
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor={`role-${invitation.id}`}>Role</Label>
-                                    <Select
-                                        value={invitation.role}
-                                        onValueChange={(value) => handleInvitationChange(invitation.id, 'role', value)}
-                                    >
-                                        <SelectTrigger id={`role-${invitation.id}`}>
-                                            <SelectValue placeholder="Select a role" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="collaborator">Collaborator</SelectItem>
-                                            <SelectItem value="admin">Admin</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    ))}
-                </div>
+                <Card>
+                    <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-6">
+                        <div className="space-y-2">
+                            <Label htmlFor="email">Email</Label>
+                            <Input
+                                id="email"
+                                type="email"
+                                placeholder="name@example.com"
+                                value={invitation.email}
+                                onChange={(e) => handleInvitationChange('email', e.target.value)}
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="role">Role</Label>
+                            <Select
+                                value={invitation.role}
+                                onValueChange={(value) => handleInvitationChange('role', value)}
+                            >
+                                <SelectTrigger id="role">
+                                    <SelectValue placeholder="Select a role" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="collaborator">Collaborator</SelectItem>
+                                    <SelectItem value="admin">Admin</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </CardContent>
+                </Card>
 
-                <div className="mt-8 flex items-center justify-between">
-                    <Button variant="outline" onClick={handleAddInvitation}>
-                        <Plus className="mr-2 h-4 w-4" />
-                        Add New
-                    </Button>
+                <div className="mt-8 flex items-center justify-end">
                     <div className="flex items-center gap-2">
                         <Button variant="outline" asChild>
                             <Link href="/settings/users-and-access">Cancel</Link>
                         </Button>
-                        <Button onClick={handleSendInvitations}>Invite</Button>
+                        <Button onClick={handleSendInvitation}>Send Invitation</Button>
                     </div>
                 </div>
             </div>
