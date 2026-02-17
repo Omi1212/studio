@@ -90,7 +90,7 @@ export default function VerifyAccountPage() {
         });
 
         if (user?.role === 'issuer') {
-            router.push('/signup/onboarding/business-info');
+            router.push('/signup/onboarding/business-details');
         } else {
             router.push('/signup/onboarding/details');
         }

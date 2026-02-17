@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Loader2 } from 'lucide-react';
@@ -15,13 +15,25 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { countryCallingCodes } from '@/lib/country-calling-codes';
 
-const personalInfoSchema = z.object({
+const industries = [
+  { value: 'banking', label: 'Banking' },
+  { value: 'fintech', label: 'FinTech' },
+  { value: 'real_estate', label: 'Real Estate' },
+  { value: 'venture_capital', label: 'Venture Capital' },
+  { value: 'asset_management', label: 'Asset Management' },
+  { value: 'government', label: 'Government' },
+  { value: 'other', label: 'Other' },
+];
+
+const formSchema = z.object({
   name: z.string().min(1, 'Full name is required'),
   phone: z.string().min(1, 'Phone number is required'),
   phoneCountryCode: z.string().min(1, "Country code is required"),
+  businessName: z.string().optional(),
+  industry: z.string().optional(),
 });
 
-type PersonalInfoFormValues = z.infer<typeof personalInfoSchema>;
+type FormValues = z.infer<typeof formSchema>;
 
 export default function PersonalInfoPage() {
   const [user, setUser] = useState<User | null>(null);
@@ -30,12 +42,14 @@ export default function PersonalInfoPage() {
   const router = useRouter();
   const { toast } = useToast();
 
-  const form = useForm<PersonalInfoFormValues>({
-    resolver: zodResolver(personalInfoSchema),
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
     defaultValues: {
       name: '',
       phone: '',
       phoneCountryCode: 'US', // Default to US
+      businessName: '',
+      industry: '',
     },
   });
 
@@ -60,6 +74,8 @@ export default function PersonalInfoPage() {
         name: parsedUser.name || '',
         phone: phoneNumber,
         phoneCountryCode: countryCode,
+        businessName: parsedUser.businessName || '',
+        industry: parsedUser.industry || '',
       });
     } else {
         router.push('/signup');
@@ -67,18 +83,39 @@ export default function PersonalInfoPage() {
     setLoading(false);
   }, [form, router]);
   
-  const handleContinue = async (data: PersonalInfoFormValues) => {
+  const handleContinue = async (data: FormValues) => {
     if (!user) return;
+
+    if (user.role === 'issuer' && (!data.businessName || !data.industry)) {
+        if (!data.businessName) {
+            form.setError('businessName', { type: 'manual', message: 'Company name is required' });
+        }
+        if (!data.industry) {
+            form.setError('industry', { type: 'manual', message: 'Industry is required' });
+        }
+        return;
+    }
+
     setIsSubmitting(true);
 
     try {
         const countryCodeData = countryCallingCodes.find(c => c.code === data.phoneCountryCode);
         const fullPhoneNumber = `${countryCodeData?.dial_code || ''}${data.phone}`;
 
-        const updatedUserData = {
+        const updatedUserData: Partial<User> = {
             name: data.name,
             phone: fullPhoneNumber,
         };
+
+        if (user.role === 'issuer') {
+            updatedUserData.businessName = data.businessName;
+            updatedUserData.industry = data.industry;
+
+            if (data.businessName) {
+                const newCompanyId = data.businessName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+                localStorage.setItem('selectedCompanyId', newCompanyId);
+            }
+        }
 
         const response = await fetch(`/api/users/${user.id}`, {
             method: 'PATCH',
@@ -92,11 +129,10 @@ export default function PersonalInfoPage() {
 
         const updatedUserFromApi = await response.json();
         
-        // Update currentUser in localStorage with the latest data from the API
         localStorage.setItem('currentUser', JSON.stringify(updatedUserFromApi));
         
         toast({
-          title: 'Personal Info Saved!',
+          title: 'Information Saved!',
         });
 
         router.push('/signup/onboarding/verify');
@@ -186,19 +222,66 @@ export default function PersonalInfoPage() {
                             </div>
                         </div>
                     </CardContent>
-                    <CardFooter>
-                        <Button type="submit" className="w-full" disabled={isSubmitting}>
-                            {isSubmitting ? (
-                            <>
-                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                Saving...
-                            </>
-                            ) : (
-                            'Continue'
-                            )}
-                        </Button>
-                    </CardFooter>
                 </Card>
+
+                {user.role === 'issuer' && (
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Business Information</CardTitle>
+                            <CardDescription>This information may be required for KYB purposes.</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <FormField
+                                control={form.control}
+                                name="businessName"
+                                render={({ field }) => (
+                                    <FormItem>
+                                    <FormLabel>Company Name</FormLabel>
+                                    <FormControl>
+                                        <Input placeholder="e.g. Awesome Inc." {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="industry"
+                                render={({ field }) => (
+                                    <FormItem>
+                                    <FormLabel>Industry</FormLabel>
+                                    <Select onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
+                                        <FormControl>
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Select an industry" />
+                                            </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                            {industries.map(industry => (
+                                                <SelectItem key={industry.value} value={industry.value}>
+                                                    {industry.label}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                    <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        </CardContent>
+                    </Card>
+                )}
+
+                <Button type="submit" className="w-full" disabled={isSubmitting}>
+                    {isSubmitting ? (
+                    <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Saving...
+                    </>
+                    ) : (
+                    'Continue'
+                    )}
+                </Button>
             </form>
         </Form>
       </div>
