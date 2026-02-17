@@ -44,6 +44,7 @@ export default function TransferList({ searchQuery, typeFilter }: { searchQuery:
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedToken, setSelectedToken] = useState<TokenDetails | null>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
+  const [tokenCheckComplete, setTokenCheckComplete] = useState(false);
 
 
   useEffect(() => {
@@ -68,6 +69,7 @@ export default function TransferList({ searchQuery, typeFilter }: { searchQuery:
         } else {
             setSelectedToken(null);
         }
+        setTokenCheckComplete(true);
     };
 
     handleTokenChange();
@@ -80,6 +82,10 @@ export default function TransferList({ searchQuery, typeFilter }: { searchQuery:
   }, []);
 
   useEffect(() => {
+    if (!tokenCheckComplete) {
+        return;
+    }
+      
     const fetchTransfers = async () => {
       setLoading(true);
       const params = new URLSearchParams({
@@ -115,7 +121,7 @@ export default function TransferList({ searchQuery, typeFilter }: { searchQuery:
       }
     };
     fetchTransfers();
-  }, [currentPage, searchQuery, typeFilter, selectedToken, userRole]);
+  }, [currentPage, searchQuery, typeFilter, selectedToken, userRole, tokenCheckComplete]);
 
 
   const totalPages = Math.ceil(totalTransfers / ITEMS_PER_PAGE);

@@ -130,6 +130,7 @@ export default function OrderList() {
   const [selectedToken, setSelectedToken] = useState<TokenDetails | null>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [tokenCheckComplete, setTokenCheckComplete] = useState(false);
 
   useEffect(() => {
     const role = localStorage.getItem('userRole');
@@ -145,6 +146,8 @@ export default function OrderList() {
   }, []);
 
   useEffect(() => {
+    if (tokens.length === 0 && tokenCheckComplete) return;
+
     const handleTokenChange = () => {
         const storedTokenId = localStorage.getItem('selectedTokenId');
         if (storedTokenId && tokens.length > 0) {
@@ -153,6 +156,7 @@ export default function OrderList() {
         } else {
             setSelectedToken(null);
         }
+        setTokenCheckComplete(true);
     };
 
     handleTokenChange();
@@ -161,9 +165,12 @@ export default function OrderList() {
      return () => {
         window.removeEventListener('tokenChanged', handleTokenChange);
     };
-  }, [tokens]);
+  }, [tokens, tokenCheckComplete]);
 
   useEffect(() => {
+    if (!tokenCheckComplete) {
+        return;
+    }
     setLoading(true);
     const params = new URLSearchParams({
       page: currentPage.toString(),
@@ -201,7 +208,7 @@ export default function OrderList() {
         }
     };
     fetchOrders();
-  }, [currentPage, searchQuery, statusFilter, selectedToken, userRole]);
+  }, [currentPage, searchQuery, statusFilter, selectedToken, userRole, tokenCheckComplete]);
   
   const totalPages = Math.ceil(totalOrders / ITEMS_PER_PAGE);
 

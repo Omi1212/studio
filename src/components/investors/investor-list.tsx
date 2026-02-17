@@ -168,6 +168,7 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
   const [allTokens, setAllTokens] = useState<TokenDetails[]>([]);
   const [selectedToken, setSelectedToken] = useState<TokenDetails | null>(null);
   const [dialogInvestor, setDialogInvestor] = useState<Investor | null>(null);
+  const [tokenCheckComplete, setTokenCheckComplete] = useState(false);
 
   useEffect(() => {
     fetch('/api/tokens').then(res => res.json()).then(tokensData => {
@@ -176,6 +177,8 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
   }, []);
 
   useEffect(() => {
+    if (allTokens.length === 0 && tokenCheckComplete) return;
+
     const handleTokenChange = () => {
       if (allTokens.length > 0) {
         const storedTokenId = localStorage.getItem('selectedTokenId');
@@ -186,6 +189,7 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
             setSelectedToken(null);
         }
       }
+      setTokenCheckComplete(true);
     };
 
     handleTokenChange();
@@ -194,9 +198,13 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
     return () => {
         window.removeEventListener('tokenChanged', handleTokenChange);
     };
-  }, [allTokens]);
+  }, [allTokens, tokenCheckComplete]);
 
   useEffect(() => {
+    if (!tokenCheckComplete) {
+        return;
+    }
+      
     if (!selectedToken) {
         setInvestors([]);
         setTotalInvestors(0);
@@ -232,7 +240,7 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
     };
     
     fetchInvestors();
-  }, [currentPage, searchQuery, statusFilter, selectedToken]);
+  }, [currentPage, searchQuery, statusFilter, selectedToken, tokenCheckComplete]);
   
   const totalPages = Math.ceil(totalInvestors / ITEMS_PER_PAGE);
 
