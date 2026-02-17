@@ -17,6 +17,9 @@ import VolumeCards from '@/components/dashboard/volume-cards';
 import TransactionsList from '@/components/dashboard/transactions-list';
 import PaymentSummaryDynamic from '@/components/dashboard/payment-summary-dynamic';
 import CryptocurrenciesList from '@/components/dashboard/cryptocurrencies-list';
+import { Rocket } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import Link from 'next/link';
 
 
 function DashboardRenderer() {
@@ -100,7 +103,16 @@ function DashboardRenderer() {
                     <IdentityProvidersBanner />
                   </>
                 )}
-                {selectedToken ? (
+                {showKybBanner ? (
+                    <div className="border-dashed border-2 border-muted-foreground/50 rounded-lg h-96 flex flex-col items-center justify-center text-center p-4">
+                        <Rocket className="h-16 w-16 text-muted-foreground mb-4" />
+                        <h2 className="text-xl font-semibold mb-2">No Issued Assets</h2>
+                        <p className="text-muted-foreground mb-4">Launch your first token to see your workspace.</p>
+                        <Button asChild>
+                          <Link href="/issue-token">Go to Launchpad</Link>
+                        </Button>
+                    </div>
+                ) : selectedToken ? (
                      <TokenDetailsView token={selectedToken} view="dashboard" userRole="issuer" />
                 ) : (
                     <>
