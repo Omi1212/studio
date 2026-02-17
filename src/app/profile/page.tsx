@@ -26,6 +26,7 @@ import Link from 'next/link';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { useTheme } from 'next-themes';
 
 
 function InfoRow({ icon: Icon, label, value }: { icon: React.ElementType, label: string, value: string | undefined }) {
@@ -60,6 +61,7 @@ function PersonalInfoRow({ label, value, actionLabel, onActionClick }: { label: 
 export default function ProfilePage() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const { theme, setTheme } = useTheme();
 
   useEffect(() => {
     const storedUser = localStorage.getItem('currentUser');
@@ -205,7 +207,7 @@ export default function ProfilePage() {
                                 <div className="space-y-6">
                                     <div className="flex items-center justify-between">
                                         <Label>Theme</Label>
-                                        <Tabs defaultValue="dark" className="w-auto">
+                                        <Tabs value={theme} onValueChange={setTheme} className="w-auto">
                                             <TabsList className="h-auto">
                                                 <TabsTrigger value="light" className="px-6 py-2">Light</TabsTrigger>
                                                 <TabsTrigger value="dark" className="px-6 py-2">Dark</TabsTrigger>
@@ -362,4 +364,3 @@ export default function ProfilePage() {
     </SidebarProvider>
   );
 }
-
