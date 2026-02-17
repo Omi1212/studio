@@ -10,7 +10,7 @@ import {
 import SidebarNav from '@/components/dashboard/sidebar-nav';
 import HeaderDynamic from '@/components/dashboard/header-dynamic';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -70,12 +70,14 @@ export default function InviteUserPage() {
             </div>
 
             <div className="max-w-4xl mx-auto">
-                 <p className="text-muted-foreground mb-8">
-                    The user will receive an email invitation with a link to accept and join.
-                </p>
-
                 <Card>
-                    <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-6">
+                    <CardHeader>
+                        <CardTitle>Send an Invitation</CardTitle>
+                        <CardDescription>
+                            The user will receive an email invitation with a link to accept and join.
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
                             <Label htmlFor="email">Email</Label>
                             <Input
@@ -102,16 +104,13 @@ export default function InviteUserPage() {
                             </Select>
                         </div>
                     </CardContent>
-                </Card>
-
-                <div className="mt-8 flex items-center justify-end">
-                    <div className="flex items-center gap-2">
+                    <CardFooter className="flex justify-end gap-2">
                         <Button variant="outline" asChild>
                             <Link href="/settings/users-and-access">Cancel</Link>
                         </Button>
                         <Button onClick={handleSendInvitation}>Send Invitation</Button>
-                    </div>
-                </div>
+                    </CardFooter>
+                </Card>
             </div>
           </main>
         </div>
