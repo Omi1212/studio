@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -170,6 +171,10 @@ export default function GeneralSettingsPage() {
                                                 )}
                                             </div>
                                         </TableCell>
+                                    </TableRow>
+                                    <TableRow>
+                                        <TableCell className="font-medium text-muted-foreground">Organization</TableCell>
+                                        <TableCell className="text-right">BlockStratus S.A. de C.V.</TableCell>
                                     </TableRow>
                                     <TableRow>
                                         <TableCell className="font-medium text-muted-foreground">Industry</TableCell>
