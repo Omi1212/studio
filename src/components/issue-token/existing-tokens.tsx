@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import type { TokenDetails } from '@/lib/types';
+import type { TokenDetails, User, Issuer } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/card';
 import TokenIcon from '../ui/token-icon';
 import { Badge } from '../ui/badge';
@@ -144,27 +144,66 @@ export default function ExistingTokens({ view, setView }: { view: ViewMode, setV
 
   useEffect(() => {
     setLoading(true);
-    const params = new URLSearchParams({
-        page: currentPage.toString(),
-        perPage: ITEMS_PER_PAGE.toString(),
-    });
-    fetch(`/api/tokens?${params.toString()}`)
-        .then(res => res.json())
-        .then((tokensResponse) => {
-            const mappedTokens = tokensResponse.data.map((t: any) => ({
-            ...t,
-            decimals: t.decimals ?? 0,
-            isFreezable: t.isFreezable ?? false,
-            publicKey: t.publicKey ?? `02f...${t.id.slice(-10)}`,
-            tokenName: t.tokenName || 'Untitled Token',
-            tokenTicker: t.tokenTicker || '---',
-            network: t.network || 'unknown',
-            maxSupply: t.maxSupply || 0,
+
+    const fetchIssuerAndTokens = async () => {
+        const userStr = localStorage.getItem('currentUser');
+        if (!userStr) {
+            setLoading(false);
+            return;
+        }
+        const currentUser: User = JSON.parse(userStr);
+
+        if (currentUser.role !== 'issuer') {
+            setTokens([]);
+            setTotalTokens(0);
+            setLoading(false);
+            return;
+        }
+
+        try {
+            const issuersRes = await fetch('/api/issuers?perPage=999');
+            if (!issuersRes.ok) throw new Error("Failed to fetch issuers");
+            const issuersData = await issuersRes.json();
+            const currentIssuer = (issuersData.data || []).find((i: Issuer) => i.email === currentUser.email);
+            
+            if (!currentIssuer) {
+                setTokens([]);
+                setTotalTokens(0);
+                return;
+            }
+
+            const params = new URLSearchParams({
+                page: currentPage.toString(),
+                perPage: ITEMS_PER_PAGE.toString(),
+                issuerId: currentIssuer.id
+            });
+            const tokensResponse = await fetch(`/api/tokens?${params.toString()}`);
+            if (!tokensResponse.ok) throw new Error("Failed to fetch tokens");
+            const tokensData = await tokensResponse.json();
+            
+            const mappedTokens = (tokensData.data || []).map((t: any) => ({
+                ...t,
+                decimals: t.decimals ?? 0,
+                isFreezable: t.isFreezable ?? false,
+                publicKey: t.publicKey ?? `02f...${t.id.slice(-10)}`,
+                tokenName: t.tokenName || 'Untitled Token',
+                tokenTicker: t.tokenTicker || '---',
+                network: t.network || 'unknown',
+                maxSupply: t.maxSupply || 0,
             }));
             setTokens(mappedTokens);
-            setTotalTokens(tokensResponse.meta.total);
-        })
-        .finally(() => setLoading(false));
+            setTotalTokens(tokensData.meta.total);
+
+        } catch (error) {
+            console.error("Failed to fetch data:", error);
+            setTokens([]);
+            setTotalTokens(0);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    fetchIssuerAndTokens();
   }, [currentPage]);
   
   const totalPages = Math.ceil(totalTokens / ITEMS_PER_PAGE);
