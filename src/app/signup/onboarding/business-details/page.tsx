@@ -45,7 +45,7 @@ export default function BusinessDetailsPage() {
    const form = useForm<BusinessDetailsFormValues>({
     resolver: zodResolver(businessDetailsSchema),
     defaultValues: {
-      country: 'SV',
+      country: '',
       language: 'es',
       currency: 'usd',
     },
@@ -62,7 +62,7 @@ export default function BusinessDetailsPage() {
       }
       setUser(parsedUser);
       
-      const countryValue = countries.find(c => c.label === parsedUser.country)?.value || parsedUser.country || 'SV';
+      const countryValue = parsedUser.countryOfJurisdiction || '';
 
       form.reset({
         country: countryValue,
@@ -141,7 +141,7 @@ export default function BusinessDetailsPage() {
                             name="country"
                             render={({ field }) => (
                                 <FormItem>
-                                <FormLabel>Country Of Residence</FormLabel>
+                                <FormLabel>Country of Operation</FormLabel>
                                 <Select onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
                                     <FormControl>
                                         <SelectTrigger>
