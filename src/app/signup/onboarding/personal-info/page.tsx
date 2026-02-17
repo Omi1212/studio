@@ -14,6 +14,7 @@ import type { User } from '@/lib/types';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { countryCallingCodes } from '@/lib/country-calling-codes';
+import { countries } from '@/lib/countries';
 
 const industries = [
   { value: 'banking', label: 'Banking' },
@@ -42,6 +43,7 @@ const formSchema = z.object({
   industry: z.string().optional(),
   website: z.string().url({ message: "Please enter a valid URL." }).optional().or(z.literal('')),
   employeeRange: z.string().optional(),
+  countryOfJurisdiction: z.string().optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -63,6 +65,7 @@ export default function PersonalInfoPage() {
       industry: '',
       website: '',
       employeeRange: '',
+      countryOfJurisdiction: '',
     },
   });
 
@@ -91,6 +94,7 @@ export default function PersonalInfoPage() {
         industry: parsedUser.industry || '',
         website: parsedUser.website || '',
         employeeRange: parsedUser.employeeRange || '',
+        countryOfJurisdiction: parsedUser.countryOfJurisdiction || '',
       });
     } else {
         router.push('/signup');
@@ -101,12 +105,15 @@ export default function PersonalInfoPage() {
   const handleContinue = async (data: FormValues) => {
     if (!user) return;
 
-    if (user.role === 'issuer' && (!data.businessName || !data.industry)) {
+    if (user.role === 'issuer' && (!data.businessName || !data.industry || !data.countryOfJurisdiction)) {
         if (!data.businessName) {
             form.setError('businessName', { type: 'manual', message: 'Company name is required' });
         }
         if (!data.industry) {
             form.setError('industry', { type: 'manual', message: 'Industry is required' });
+        }
+        if (!data.countryOfJurisdiction) {
+            form.setError('countryOfJurisdiction', { type: 'manual', message: 'Country of Jurisdiction is required' });
         }
         return;
     }
@@ -127,6 +134,7 @@ export default function PersonalInfoPage() {
             updatedUserData.industry = data.industry;
             updatedUserData.website = data.website;
             updatedUserData.employeeRange = data.employeeRange;
+            updatedUserData.countryOfJurisdiction = data.countryOfJurisdiction;
 
             if (data.businessName) {
                 const newCompanyId = data.businessName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
@@ -261,6 +269,30 @@ export default function PersonalInfoPage() {
                                     <FormControl>
                                         <Input placeholder="e.g. Awesome Inc." {...field} />
                                     </FormControl>
+                                    <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="countryOfJurisdiction"
+                                render={({ field }) => (
+                                    <FormItem>
+                                    <FormLabel>Country of Jurisdiction</FormLabel>
+                                    <Select onValueChange={field.onChange} value={field.value}>
+                                        <FormControl>
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Select a country" />
+                                            </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                            {countries.map(country => (
+                                                <SelectItem key={country.value} value={country.value}>
+                                                    {country.label}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
                                     <FormMessage />
                                     </FormItem>
                                 )}

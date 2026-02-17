@@ -71,6 +71,7 @@ export type User = {
   kybLevel?: number;
   kytLevel?: number;
   country?: string;
+  countryOfJurisdiction?: string;
   language?: string;
   currency?: string;
   legalName?: string;

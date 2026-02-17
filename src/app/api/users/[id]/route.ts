@@ -17,6 +17,7 @@ const patchSchema = z.object({
   kybLevel: z.number().int().optional(),
   kytLevel: z.number().int().optional(),
   country: z.string().optional(),
+  countryOfJurisdiction: z.string().optional(),
   legalName: z.string().optional(),
   dob: z.string().optional(),
   idDoc: z.string().optional(),
