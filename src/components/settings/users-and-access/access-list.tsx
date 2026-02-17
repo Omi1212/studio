@@ -17,18 +17,34 @@ type Invitation = {
 };
 
 // Mock user data to simulate a team
-const mockTeamMembers: Partial<User>[] = [
+const mockTeamMembers: (Partial<User> & { displayRole: string })[] = [
     {
         id: 'team-member-1',
-        name: 'John Doe',
-        email: 'john.d@example.com',
+        name: 'Admin User',
+        email: 'admin.user@example.com',
         role: 'agent',
+        displayRole: 'Admin'
     },
     {
         id: 'team-member-2',
-        name: 'Samantha Green',
-        email: 'samantha.g@example.com',
+        name: 'Operations User',
+        email: 'operations.user@example.com',
         role: 'agent',
+        displayRole: 'Operations'
+    },
+    {
+        id: 'team-member-3',
+        name: 'Sales User',
+        email: 'sales.user@example.com',
+        role: 'agent',
+        displayRole: 'Sales'
+    },
+    {
+        id: 'team-member-4',
+        name: 'Support User',
+        email: 'support.user@example.com',
+        role: 'agent',
+        displayRole: 'Technical Support'
     }
 ];
 
@@ -48,6 +64,9 @@ function RoleBadge({ role, isOwner }: { role: string, isOwner?: boolean }) {
                 roleText = 'Sales';
                 break;
             case 'support':
+                roleText = 'Technical Support';
+                break;
+            case 'technical support':
                 roleText = 'Technical Support';
                 break;
             case 'collaborator': // for old data
@@ -85,16 +104,14 @@ export default function AccessList() {
         
         const fullTeam = [
             { ...parsedUser, displayRole: 'Owner' },
-            { ...mockTeamMembers[0], displayRole: 'Admin' },
-            { ...mockTeamMembers[1], displayRole: 'Sales' },
+            ...mockTeamMembers,
         ];
         setTeam(fullTeam);
 
     } else {
         // Fallback for when no user is logged in
         const fullTeam = [
-            { ...mockTeamMembers[0], displayRole: 'Admin' },
-            { ...mockTeamMembers[1], displayRole: 'Sales' },
+            ...mockTeamMembers
         ];
          setTeam(fullTeam);
     }
