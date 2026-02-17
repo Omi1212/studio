@@ -7,17 +7,17 @@ import Link from 'next/link';
 
 export default function IdentityProvidersBanner() {
     return (
-        <Alert className="bg-blue-500/10 border-blue-500/50 text-blue-300 [&>svg]:text-blue-400">
+        <Alert variant="primary">
             <AlertTriangle className="h-4 w-4" />
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                 <div className='flex-1'>
-                    <AlertTitle className="font-bold text-blue-200">Link your Compliance Providers</AlertTitle>
+                    <AlertTitle>Link your Compliance Providers</AlertTitle>
                     <AlertDescription>
                         Link your compliance providers to enable verification for your users and access all platform features.
                     </AlertDescription>
                 </div>
                  <div className="flex gap-2 mt-4 sm:mt-0 sm:ml-4 flex-shrink-0">
-                    <Button variant="outline" asChild className="border-blue-400/50 text-blue-300 hover:bg-blue-400/20 hover:text-blue-200">
+                    <Button variant="outline" asChild className="border-primary/30 bg-primary/10 text-primary hover:bg-primary/20">
                         <Link href="/settings/compliance">Link Providers</Link>
                     </Button>
                 </div>
