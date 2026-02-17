@@ -294,7 +294,7 @@ export default function OrderList() {
   const noOrdersMessage = () => {
       if ((userRole === 'issuer' || userRole === 'agent') && !selectedToken) {
           return {
-              title: "No Token Selected",
+              title: "No token selected or found",
               description: "Please select a token from the sidebar to view its orders."
           }
       }

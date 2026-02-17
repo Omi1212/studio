@@ -288,9 +288,9 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
         </div>
         <div className="border-dashed border-2 border-muted-foreground/50 rounded-lg h-96 flex flex-col items-center justify-center text-center p-4">
             <UserPlus className="h-16 w-16 text-muted-foreground mb-4" />
-            <h2 className="text-xl font-semibold mb-2">No Token Selected</h2>
+            <h2 className="text-xl font-semibold mb-2">No token selected or found</h2>
             <p className="text-muted-foreground mb-4">
-                Please select a token from the sidebar to view its investors.
+                Please select a token from the sidebar to view investors.
             </p>
         </div>
       </div>

@@ -137,7 +137,7 @@ export default function TransferList({ searchQuery, typeFilter }: { searchQuery:
       const noTransfersMessage = () => {
           if ((userRole === 'issuer' || userRole === 'agent') && !selectedToken) {
               return {
-                  title: "No Token Selected",
+                  title: "No token selected or found",
                   description: "Please select a token from the sidebar to view its transfers."
               }
           }

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import type { ViewMode, User } from '@/lib/types';
+import type { ViewMode, User, TokenDetails } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/card';
 import { Avatar, AvatarFallback } from '../ui/avatar';
 import { Badge } from '../ui/badge';
@@ -111,8 +111,48 @@ export default function RequestList({ view, setView }: { view: ViewMode, setView
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('pending');
   const [currentPage, setCurrentPage] = useState(1);
+  const [selectedToken, setSelectedToken] = useState<TokenDetails | null>(null);
+  const [userRole, setUserRole] = useState<string | null>(null);
 
   useEffect(() => {
+    const role = localStorage.getItem('userRole');
+    setUserRole(role);
+    
+    const handleTokenChange = async () => {
+        const storedTokenId = localStorage.getItem('selectedTokenId');
+        if (storedTokenId) {
+            try {
+                const response = await fetch(`/api/tokens/${storedTokenId}`);
+                if (response.ok) {
+                    setSelectedToken(await response.json());
+                } else {
+                    setSelectedToken(null);
+                }
+            } catch (error) {
+                console.error("Failed to fetch selected token:", error);
+                setSelectedToken(null);
+            }
+        } else {
+            setSelectedToken(null);
+        }
+    };
+
+    handleTokenChange();
+    window.addEventListener('tokenChanged', handleTokenChange);
+
+    return () => {
+        window.removeEventListener('tokenChanged', handleTokenChange);
+    };
+  }, []);
+
+  useEffect(() => {
+    if ((userRole === 'issuer' || userRole === 'agent') && !selectedToken) {
+        setRequests([]);
+        setTotalRequests(0);
+        setLoading(false);
+        return;
+    }
+
     setLoading(true);
     const params = new URLSearchParams({
         page: currentPage.toString(),
@@ -139,7 +179,7 @@ export default function RequestList({ view, setView }: { view: ViewMode, setView
         }
     };
     fetchRequests();
-  }, [currentPage, searchQuery, statusFilter]);
+  }, [currentPage, searchQuery, statusFilter, userRole, selectedToken]);
 
   const totalPages = Math.ceil(totalRequests / ITEMS_PER_PAGE);
 
@@ -158,6 +198,21 @@ export default function RequestList({ view, setView }: { view: ViewMode, setView
     );
   }
   
+  if ((userRole === 'issuer' || userRole === 'agent') && !selectedToken) {
+    return (
+      <div className="space-y-4">
+        <div className="flex justify-between items-center">
+            <h1 className="text-3xl font-headline font-semibold">Whitelisting Requests</h1>
+        </div>
+        <div className="border-dashed border-2 border-muted-foreground/50 rounded-lg h-96 flex flex-col items-center justify-center text-center p-4">
+            <FilePenLine className="h-16 w-16 text-muted-foreground mb-4" />
+            <h2 className="text-xl font-semibold mb-2">No token selected or found</h2>
+            <p className="text-muted-foreground mb-4">Please select a token from the sidebar to view whitelisting requests.</p>
+        </div>
+      </div>
+    );
+  }
+
   const renderPagination = () => {
     if (totalPages <= 1) return null;
     return (
