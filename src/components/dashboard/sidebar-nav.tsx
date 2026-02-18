@@ -118,32 +118,32 @@ export default function SidebarNav() {
     Promise.all([
       fetch(`/api/users/${currentUser.id}`).then(res => res.ok ? res.json() : currentUser),
       fetch('/api/tokens?perPage=999').then(res => res.json()),
-      fetch('/api/companies?perPage=999').then(res => res.json()),
-      fetch('/api/issuers?perPage=999').then(res => res.json())
-    ]).then(([freshUser, tokensResponse, companiesResponse, issuersResponse]) => {
+      fetch('/api/companies?perPage=999').then(res => res.json())
+    ]).then(([freshUser, tokensResponse, companiesResponse]) => {
         currentUser = freshUser;
         if (!currentUser) return; // Guard clause
 
         const allCompanies = companiesResponse.data || [];
-        
-        const userCompanies: { id: string; name: string }[] = freshUser?.companyId
-            ? allCompanies.filter((c: any) => c.id === freshUser.companyId)
-            : [];
-        setCompanies(userCompanies);
-        
+        setCompanies(allCompanies);
+
         if (freshUser.role === 'investor' || freshUser.role === 'issuer') {
-            if (userCompanies.length > 0) {
-              const storedCompanyId = localStorage.getItem('selectedCompanyId');
-              const foundCompany = storedCompanyId ? userCompanies.find((c: any) => c.id === storedCompanyId) : undefined;
-              
-              if (foundCompany) {
-                setSelectedCompany(foundCompany);
-              } else {
-                setSelectedCompany(userCompanies[0]);
-                localStorage.setItem('selectedCompanyId', userCompanies[0].id);
-              }
+            const storedCompanyId = localStorage.getItem('selectedCompanyId');
+            let companyToSelect = storedCompanyId
+                ? allCompanies.find((c: any) => c.id === storedCompanyId)
+                : undefined;
+
+            if (!companyToSelect) {
+                companyToSelect = freshUser.companyId
+                    ? allCompanies.find((c: any) => c.id === freshUser.companyId)
+                    : undefined;
+            }
+
+            if (companyToSelect) {
+                setSelectedCompany(companyToSelect);
+                localStorage.setItem('selectedCompanyId', companyToSelect.id);
             } else {
                 setSelectedCompany(null);
+                localStorage.removeItem('selectedCompanyId');
             }
         }
         
