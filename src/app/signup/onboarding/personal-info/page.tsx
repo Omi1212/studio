@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import type { User } from '@/lib/types';
+import type { User, Company } from '@/lib/types';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { countryCallingCodes } from '@/lib/country-calling-codes';
@@ -130,16 +130,28 @@ export default function PersonalInfoPage() {
         };
 
         if (user.role === 'issuer') {
-            updatedUserData.businessName = data.businessName;
-            updatedUserData.industry = data.industry;
-            updatedUserData.website = data.website;
-            updatedUserData.employeeRange = data.employeeRange;
-            updatedUserData.countryOfJurisdiction = data.countryOfJurisdiction;
+            const newCompanyData = {
+                name: data.businessName,
+                industry: data.industry,
+                website: data.website,
+                employeeRange: data.employeeRange,
+                countryOfJurisdiction: data.countryOfJurisdiction,
+            };
 
-            if (data.businessName) {
-                const newCompanyId = data.businessName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-                localStorage.setItem('selectedCompanyId', newCompanyId);
+            const companyResponse = await fetch('/api/companies', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(newCompanyData),
+            });
+
+            if (!companyResponse.ok) {
+                throw new Error('Failed to create your company profile.');
             }
+            
+            const newCompany: Company = await companyResponse.json();
+
+            updatedUserData.companyId = newCompany.id;
+            localStorage.setItem('selectedCompanyId', newCompany.id);
         }
 
         const response = await fetch(`/api/users/${user.id}`, {
@@ -149,7 +161,7 @@ export default function PersonalInfoPage() {
         });
 
         if (!response.ok) {
-            throw new Error('Failed to update personal information.');
+            throw new Error('Failed to update your personal information.');
         }
 
         const updatedUserFromApi = await response.json();
