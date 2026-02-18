@@ -37,8 +37,8 @@ const allSettingsItems = [
   },
   {
     icon: CreditCard,
-    title: 'Payment Methods',
-    description: 'Add and manage your linked bank accounts and cards.',
+    title: 'Withdrawal Methods',
+    description: 'Add and manage your bank accounts and crypto addresses for withdrawals.',
     href: '/settings/payment-methods',
   },
   {
@@ -99,7 +99,7 @@ export default function SettingsGrid() {
 
   const investorSettings = [
     'General',
-    'Security & Access',
+    'Withdrawal Methods',
     'Notifications & Alerts',
     'Data Management',
   ];
