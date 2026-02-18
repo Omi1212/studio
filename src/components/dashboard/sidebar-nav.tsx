@@ -113,7 +113,7 @@ export default function SidebarNav() {
 
     Promise.all([
       fetch('/api/tokens?perPage=999').then(res => res.json()),
-      fetch('/api/companies').then(res => res.json()),
+      fetch('/api/companies?perPage=999').then(res => res.json()),
       fetch('/api/issuers?perPage=999').then(res => res.json())
     ]).then(([tokensResponse, companiesResponse, issuersResponse]) => {
         const allCompanies = companiesResponse.data || [];
