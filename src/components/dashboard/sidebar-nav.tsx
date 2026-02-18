@@ -108,23 +108,30 @@ export default function SidebarNav() {
     // This ensures the code runs only on the client, preventing hydration errors.
     setIsClient(true);
     const role = localStorage.getItem('userRole');
-    const currentUser: User | null = JSON.parse(localStorage.getItem('currentUser') || 'null');
+    let currentUser: User | null = JSON.parse(localStorage.getItem('currentUser') || 'null');
     setUserRole(role);
 
+    if (!currentUser) {
+        return;
+    }
+
     Promise.all([
+      fetch(`/api/users/${currentUser.id}`).then(res => res.ok ? res.json() : currentUser),
       fetch('/api/tokens?perPage=999').then(res => res.json()),
       fetch('/api/companies?perPage=999').then(res => res.json()),
       fetch('/api/issuers?perPage=999').then(res => res.json())
-    ]).then(([tokensResponse, companiesResponse, issuersResponse]) => {
+    ]).then(([freshUser, tokensResponse, companiesResponse, issuersResponse]) => {
+        currentUser = freshUser;
+        if (!currentUser) return; // Guard clause
+
         const allCompanies = companiesResponse.data || [];
-        const issuers: Issuer[] = issuersResponse.data || [];
         
-        const userCompanies: { id: string; name: string }[] = currentUser?.companyId
-            ? allCompanies.filter((c: any) => c.id === currentUser.companyId)
+        const userCompanies: { id: string; name: string }[] = freshUser?.companyId
+            ? allCompanies.filter((c: any) => c.id === freshUser.companyId)
             : [];
         setCompanies(userCompanies);
         
-        if (role === 'investor' || role === 'issuer') {
+        if (freshUser.role === 'investor' || freshUser.role === 'issuer') {
             if (userCompanies.length > 0) {
               const storedCompanyId = localStorage.getItem('selectedCompanyId');
               const foundCompany = storedCompanyId ? userCompanies.find((c: any) => c.id === storedCompanyId) : undefined;
@@ -138,25 +145,12 @@ export default function SidebarNav() {
             }
         }
         
-        let combinedTokens: TokenDetails[] = (tokensResponse.data || []).map((t: any) => ({
+        const combinedTokens: TokenDetails[] = (tokensResponse.data || []).map((t: any) => ({
           ...t,
           decimals: t.decimals ?? 0,
           isFreezable: t.isFreezable ?? false,
           publicKey: t.publicKey ?? `02f...${t.id.slice(-10)}`,
         }));
-
-        if (role === 'agent' && currentUser) {
-            // NOTE: assignments are not persisted in this demo
-            // For demo, we'll just show all tokens. In a real app, you'd filter by assignment.
-        } else if (role === 'issuer' && currentUser) {
-            const currentIssuer = issuers.find(i => i.email === currentUser.email);
-            if (currentIssuer) {
-                combinedTokens = combinedTokens.filter(t => t.issuerId === currentIssuer.id);
-            } else {
-                // This is a new issuer (or one not in the mock data), they have no tokens yet.
-                combinedTokens = [];
-            }
-        }
 
         setAllTokens(combinedTokens);
 
