@@ -11,8 +11,8 @@ const initialData: Issuer[] = [
         name: 'Prime Issuance',
         email: 'contact@primeissuance.com',
         walletAddress: 'spark1q...iss1pr',
-        issuedTokens: 5,
-        pendingTokens: 2,
+        issuedTokens: 0,
+        pendingTokens: 0,
         status: 'active',
     },
     {
@@ -20,8 +20,8 @@ const initialData: Issuer[] = [
         name: 'Emisores de Activos Digitales',
         email: 'issuer@gmail.com',
         walletAddress: 'spark1q...user02',
-        issuedTokens: 12,
-        pendingTokens: 0,
+        issuedTokens: 3,
+        pendingTokens: 1,
         status: 'active',
     },
     {
@@ -29,8 +29,8 @@ const initialData: Issuer[] = [
         name: 'Digital Assets Inc.',
         email: 'admin@digitalassets.com',
         walletAddress: 'spark1q...iss3da',
-        issuedTokens: 2,
-        pendingTokens: 1,
+        issuedTokens: 0,
+        pendingTokens: 0,
         status: 'inactive',
     },
 ];
