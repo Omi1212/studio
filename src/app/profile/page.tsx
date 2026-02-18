@@ -211,7 +211,7 @@ export default function ProfilePage() {
   }
 
   const isBusinessRole = user.role === 'issuer' || user.role === 'agent' || user.role === 'superadmin';
-  const currentVerificationStatus = isBusinessRole ? user.kybStatus : user.kycStatus;
+  const currentVerificationStatus = user.kycStatus;
   // @ts-ignore
   const currentStatusBadge = verificationStatusMap[currentVerificationStatus || 'pending'];
 
@@ -255,7 +255,7 @@ export default function ProfilePage() {
                         <div className="pt-1">
                             <Badge variant="outline" className={currentStatusBadge.className}>
                                 <ShieldCheck className="mr-2 h-4 w-4" />
-                                {isBusinessRole ? 'KYB' : 'KYC'} Status: {currentStatusBadge.text}
+                                KYC Status: {currentStatusBadge.text}
                             </Badge>
                         </div>
                     </CardHeader>
