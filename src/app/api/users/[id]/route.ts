@@ -9,28 +9,20 @@ const patchSchema = z.object({
   walletAddress: z.string().min(1, { message: "Wallet address is required" }).optional(),
   role: z.enum(['investor', 'issuer', 'agent', 'superadmin']).optional(),
   kycStatus: z.enum(['verified', 'pending', 'rejected']).optional(),
-  kybStatus: z.enum(['verified', 'pending', 'rejected']).optional(),
   kytStatus: z.enum(['verified', 'pending', 'rejected']).optional(),
   status: z.enum(['active', 'inactive']).optional(),
   phone: z.string().optional(),
   kycLevel: z.number().int().optional(),
-  kybLevel: z.number().int().optional(),
   kytLevel: z.number().int().optional(),
   country: z.string().optional(),
-  countryOfJurisdiction: z.string().optional(),
   legalName: z.string().optional(),
   dob: z.string().optional(),
   idDoc: z.string().optional(),
   address: z.string().optional(),
   city: z.string().optional(),
-  businessName: z.string().optional(),
-  businessLegalName: z.string().optional(),
-  businessAddress: z.string().optional(),
-  industry: z.string().optional(),
+  companyId: z.string().optional(),
   language: z.string().optional(),
   currency: z.string().optional(),
-  website: z.string().optional(),
-  employeeRange: z.string().optional(),
 }).partial();
 
 export async function GET(
@@ -56,14 +48,6 @@ export async function PATCH(
 
     const body = await request.json();
     const validatedData = patchSchema.parse(body);
-
-    if (validatedData.businessName && !companiesData.some(c => c.name === validatedData.businessName)) {
-        const newCompany = {
-            id: validatedData.businessName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
-            name: validatedData.businessName,
-        };
-        companiesData.push(newCompany);
-    }
 
     usersData[userIndex] = { ...usersData[userIndex], ...validatedData };
 

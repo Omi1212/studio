@@ -46,6 +46,21 @@ export type Transfer = {
     date: string;
 }
 
+export interface Company {
+  id: string;
+  name: string;
+  legalName?: string;
+  address?: string;
+  registrationId?: string;
+  countryOfJurisdiction?: string;
+  industry?: string;
+  website?: string;
+  employeeRange?: string;
+  kybLevel?: number;
+  kybStatus?: 'verified' | 'pending' | 'rejected';
+}
+
+
 export type Issuer = {
   id: string;
   name: string;
@@ -63,15 +78,12 @@ export type User = {
   role: 'investor' | 'issuer' | 'agent' | 'superadmin';
   walletAddress: string;
   kycStatus: 'verified' | 'pending' | 'rejected';
-  kybStatus?: 'verified' | 'pending' | 'rejected';
   kytStatus?: 'verified' | 'pending' | 'rejected';
   status: 'active' | 'inactive';
   phone?: string;
   kycLevel?: number;
-  kybLevel?: number;
   kytLevel?: number;
   country?: string;
-  countryOfJurisdiction?: string;
   language?: string;
   currency?: string;
   legalName?: string;
@@ -79,13 +91,7 @@ export type User = {
   idDoc?: string;
   address?: string;
   city?: string;
-  businessName?: string;
-  businessLegalName?: string;
-  businessRegistrationId?: string;
-  businessAddress?: string;
-  industry?: string;
-  website?: string;
-  employeeRange?: string;
+  companyId?: string;
   joinedDate?: string;
   totalInvested?: number;
   isFrozen?: boolean;
