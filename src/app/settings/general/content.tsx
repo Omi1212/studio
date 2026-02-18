@@ -49,7 +49,7 @@ export default function GeneralSettingsContent() {
             return parsedUser; // Fallback to local
         })
         .then((apiUser: User) => {
-            const mergedUser = { ...apiUser, ...parsedUser };
+            const mergedUser = { ...parsedUser, ...apiUser };
             setUser(mergedUser);
 
              if (mergedUser.role === 'issuer') {

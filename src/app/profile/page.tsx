@@ -166,7 +166,7 @@ export default function ProfilePage() {
             })
             .then((apiUser: User) => {
                 // Merge localStorage data over API data to preserve any unsaved changes during session
-                const mergedUser = { ...apiUser, ...parsedUser };
+                const mergedUser = { ...parsedUser, ...apiUser };
                 setUser(mergedUser);
             })
             .catch(() => {
