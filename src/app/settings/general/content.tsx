@@ -148,10 +148,6 @@ export default function GeneralSettingsContent() {
                                   </TableCell>
                               </TableRow>
                               <TableRow>
-                                  <TableCell className="font-medium text-muted-foreground">Organization</TableCell>
-                                  <TableCell className="text-right">BlockStratus S.A. de C.V.</TableCell>
-                              </TableRow>
-                              <TableRow>
                                   <TableCell className="font-medium text-muted-foreground">Industry</TableCell>
                                   <TableCell className="text-right">{user.industry || 'Not set'}</TableCell>
                               </TableRow>
@@ -176,6 +172,10 @@ export default function GeneralSettingsContent() {
                               <TableRow>
                                   <TableCell className="font-medium text-muted-foreground">Business Address</TableCell>
                                   <TableCell className="text-right">{user.address || 'Not set'}</TableCell>
+                              </TableRow>
+                              <TableRow>
+                                  <TableCell className="font-medium text-muted-foreground">Organization</TableCell>
+                                  <TableCell className="text-right">BlockStratus S.A. de C.V.</TableCell>
                               </TableRow>
                           </TableBody>
                       </Table>
