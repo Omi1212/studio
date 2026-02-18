@@ -16,6 +16,8 @@ import { Input } from '../ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { cn } from '@/lib/utils';
 import TokenIcon from '../ui/token-icon';
+import KybBanner from '@/components/dashboard/kyb-banner';
+import IdentityProvidersBanner from '@/components/dashboard/identity-providers-banner';
 
 const ITEMS_PER_PAGE = 10;
 
@@ -260,6 +262,25 @@ export default function OrderList() {
       <div className="space-y-4">
         <h1 className="text-3xl font-headline font-semibold">Orders</h1>
         <Card className="h-64 animate-pulse bg-muted/50"></Card>
+      </div>
+    );
+  }
+
+  if ((userRole === 'issuer' || userRole === 'agent') && !selectedToken && tokenCheckComplete) {
+    return (
+      <div className="space-y-4">
+        <div className="flex justify-between items-center">
+          <h1 className="text-3xl font-headline font-semibold">Orders</h1>
+        </div>
+        <div className="space-y-8">
+            <KybBanner />
+            <IdentityProvidersBanner />
+        </div>
+        <div className="border-dashed border-2 border-muted-foreground/50 rounded-lg h-96 flex flex-col items-center justify-center text-center p-4 mt-8">
+          <ShoppingBag className="h-16 w-16 text-muted-foreground mb-4" />
+          <h2 className="text-xl font-semibold mb-2">No token selected</h2>
+          <p className="text-muted-foreground mb-4">Please select a token from the sidebar to view orders.</p>
+        </div>
       </div>
     );
   }

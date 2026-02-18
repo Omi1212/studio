@@ -13,6 +13,8 @@ import Link from 'next/link';
 import { useToast } from '@/hooks/use-toast';
 import { Input } from '../ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import KybBanner from '@/components/dashboard/kyb-banner';
+import IdentityProvidersBanner from '@/components/dashboard/identity-providers-banner';
 
 type WhitelistRequest = User;
 
@@ -204,7 +206,11 @@ export default function RequestList({ view, setView }: { view: ViewMode, setView
         <div className="flex justify-between items-center">
             <h1 className="text-3xl font-headline font-semibold">Whitelisting Requests</h1>
         </div>
-        <div className="border-dashed border-2 border-muted-foreground/50 rounded-lg h-96 flex flex-col items-center justify-center text-center p-4">
+        <div className="space-y-8">
+            <KybBanner />
+            <IdentityProvidersBanner />
+        </div>
+        <div className="border-dashed border-2 border-muted-foreground/50 rounded-lg h-96 flex flex-col items-center justify-center text-center p-4 mt-8">
             <FilePenLine className="h-16 w-16 text-muted-foreground mb-4" />
             <h2 className="text-xl font-semibold mb-2">No token selected or found</h2>
             <p className="text-muted-foreground mb-4">Please select a token from the sidebar to view whitelisting requests.</p>

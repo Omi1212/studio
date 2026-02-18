@@ -11,6 +11,8 @@ import { Rocket, LayoutGrid, List } from 'lucide-react';
 import Link from 'next/link';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
 import type { ViewMode } from '@/app/issue-token/page';
+import KybBanner from '@/components/dashboard/kyb-banner';
+import IdentityProvidersBanner from '@/components/dashboard/identity-providers-banner';
 
 const ITEMS_PER_PAGE = 6;
 
@@ -262,13 +264,17 @@ export default function ExistingTokens({ view, setView }: { view: ViewMode, setV
   
   if (tokens.length === 0) {
       return (
-        <div className="border-dashed border-2 border-muted-foreground/50 rounded-lg h-96 flex flex-col items-center justify-center text-center p-4">
-            <Rocket className="h-16 w-16 text-muted-foreground mb-4" />
-            <h2 className="text-xl font-semibold mb-2">No tokens found</h2>
-            <p className="text-muted-foreground mb-4">Get started by launching your first token.</p>
-            <Button asChild>
-                <Link href="/issue-token/new">Create New Token</Link>
-            </Button>
+        <div className="space-y-8">
+          <KybBanner />
+          <IdentityProvidersBanner />
+          <div className="border-dashed border-2 border-muted-foreground/50 rounded-lg h-96 flex flex-col items-center justify-center text-center p-4">
+              <Rocket className="h-16 w-16 text-muted-foreground mb-4" />
+              <h2 className="text-xl font-semibold mb-2">No tokens found</h2>
+              <p className="text-muted-foreground mb-4">Get started by launching your first token.</p>
+              <Button asChild>
+                  <Link href="/issue-token/new">Create New Token</Link>
+              </Button>
+          </div>
         </div>
       );
   }

@@ -26,6 +26,8 @@ import { useToast } from '@/hooks/use-toast';
 import { Input } from '../ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import TokenIcon from '../ui/token-icon';
+import KybBanner from '@/components/dashboard/kyb-banner';
+import IdentityProvidersBanner from '@/components/dashboard/identity-providers-banner';
 
 
 type Investor = User;
@@ -294,7 +296,11 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
         <div className="flex justify-between items-center">
           <h1 className="text-3xl font-headline font-semibold">Investors</h1>
         </div>
-        <div className="border-dashed border-2 border-muted-foreground/50 rounded-lg h-96 flex flex-col items-center justify-center text-center p-4">
+        <div className="space-y-8">
+          <KybBanner />
+          <IdentityProvidersBanner />
+        </div>
+        <div className="border-dashed border-2 border-muted-foreground/50 rounded-lg h-96 flex flex-col items-center justify-center text-center p-4 mt-8">
             <UserPlus className="h-16 w-16 text-muted-foreground mb-4" />
             <h2 className="text-xl font-semibold mb-2">No token selected or found</h2>
             <p className="text-muted-foreground mb-4">
