@@ -38,10 +38,14 @@ const initialData: User[] = [
         kycLevel: 1,
         kybLevel: 1,
         businessName: 'Emisores de Activos Digitales',
-        legalName: 'Emisores de Activos Digitales, S.A. de C.V.',
+        legalName: 'Jane Elizabeth Smith',
         businessRegistrationId: 'NRC: 12345-6',
         industry: 'FinTech',
-        address: 'Colonia San Benito, San Salvador, El Salvador'
+        country: 'El Salvador',
+        city: 'San Salvador',
+        dob: '1985-11-05',
+        idDoc: 'DUI: 01234567-8',
+        address: 'Residencial Las Flores, #123, San Salvador'
     },
     {
         id: 'user-003',
