@@ -119,10 +119,9 @@ export default function SidebarNav() {
         const allCompanies = companiesResponse.data || [];
         const issuers: Issuer[] = issuersResponse.data || [];
         
-        let userCompanies = allCompanies;
-        if (role !== 'investor' && currentUser?.businessName) {
-            userCompanies = allCompanies.filter((c: any) => c.name === currentUser.businessName);
-        }
+        const userCompanies: { id: string; name: string }[] = currentUser?.companyId
+            ? allCompanies.filter((c: any) => c.id === currentUser.companyId)
+            : [];
         setCompanies(userCompanies);
         
         if (role === 'investor' || role === 'issuer') {
