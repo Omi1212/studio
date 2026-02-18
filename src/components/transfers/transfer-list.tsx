@@ -175,7 +175,6 @@ export default function TransferList() {
         <div className="space-y-8">
           <KybBanner />
           <IdentityProvidersBanner />
-          {filterControls}
           <div className="border-dashed border-2 border-muted-foreground/50 rounded-lg h-96 flex flex-col items-center justify-center text-center p-4">
             <ArrowRightLeft className="h-16 w-16 text-muted-foreground mb-4" />
             <h2 className="text-xl font-semibold mb-2">No token selected</h2>
