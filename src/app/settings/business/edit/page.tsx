@@ -16,7 +16,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
-import type { User } from '@/lib/types';
+import type { User, Company } from '@/lib/types';
 import { countries } from '@/lib/countries';
 import { countryCallingCodes } from '@/lib/country-calling-codes';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -58,6 +58,7 @@ export default function EditBusinessPage() {
   const router = useRouter();
   const { toast } = useToast();
   const [user, setUser] = useState<User | null>(null);
+  const [company, setCompany] = useState<Company | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -65,19 +66,25 @@ export default function EditBusinessPage() {
     if (storedUser) {
       const parsedUser: User = JSON.parse(storedUser);
       fetch(`/api/users/${parsedUser.id}`)
-        .then(res => {
-          if (!res.ok) {
-            console.warn('User not found in API, using localStorage fallback.');
-            return parsedUser;
+        .then(res => res.ok ? res.json() : parsedUser)
+        .then(data => {
+          setUser(data);
+          if (data.companyId) {
+            fetch(`/api/companies/${data.companyId}`)
+              .then(res => res.ok ? res.json() : null)
+              .then(companyData => {
+                setCompany(companyData);
+              })
+              .finally(() => setLoading(false));
+          } else {
+            setLoading(false);
           }
-          return res.json();
         })
-        .then(data => setUser(data))
         .catch(err => {
-          console.error('Failed to fetch user, using localStorage fallback.', err);
+          console.error('Failed to fetch user or company', err);
           setUser(parsedUser);
-        })
-        .finally(() => setLoading(false));
+          setLoading(false);
+        });
     } else {
         setLoading(false);
         router.push('/login');
@@ -93,40 +100,52 @@ export default function EditBusinessPage() {
     const fullPhoneNumber = `${phoneCountryCodeData?.dial_code || ''}${formData.get('phone')}`;
 
     const updatedUserData = {
-      businessName: formData.get('businessName') as string,
-      businessLegalName: formData.get('businessLegalName') as string,
-      businessAddress: formData.get('businessAddress') as string,
       phone: fullPhoneNumber,
-      industry: formData.get('industry') as string,
-      country: formData.get('country') as string,
       currency: formData.get('currency') as string,
       language: formData.get('language') as string,
-      website: formData.get('website') as string,
-      employeeRange: formData.get('employeeRange') as string,
     };
     
+    const updatedCompanyData = {
+        name: formData.get('businessName') as string,
+        legalName: formData.get('businessLegalName') as string,
+        address: formData.get('businessAddress') as string,
+        industry: formData.get('industry') as string,
+        countryOfJurisdiction: formData.get('country') as string,
+        website: formData.get('website') as string,
+        employeeRange: formData.get('employeeRange') as string,
+    }
+
     try {
-        const response = await fetch(`/api/users/${user.id}`, {
+        const userUpdatePromise = fetch(`/api/users/${user.id}`, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(updatedUserData),
         });
-        if (!response.ok) throw new Error('Failed to update business details');
 
-        const updatedUser = await response.json();
+        const companyUpdatePromise = user.companyId ? fetch(`/api/companies/${user.companyId}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(updatedCompanyData),
+        }) : Promise.resolve(new Response(null, { status: 404 }));
 
-        // Update user in local storage
+        const [userResponse, companyResponse] = await Promise.all([userUpdatePromise, companyUpdatePromise]);
+
+        if (!userResponse.ok) throw new Error('Failed to update user details');
+        if (user.companyId && !companyResponse.ok) throw new Error('Failed to update business details');
+        
+        const updatedUser = await userResponse.json();
+
         const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
         localStorage.setItem('currentUser', JSON.stringify({ ...currentUser, ...updatedUser }));
 
         toast({
-          title: 'Business Information Updated',
-          description: `Your business details have been saved.`,
+          title: 'Information Updated',
+          description: `Your details have been saved.`,
         });
         router.push(`/settings/general`);
     } catch (error) {
         console.error(error);
-        toast({ variant: 'destructive', title: 'Error', description: 'Could not update business details.' });
+        toast({ variant: 'destructive', title: 'Error', description: 'Could not update details.' });
     }
   };
 
@@ -182,17 +201,17 @@ export default function EditBusinessPage() {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                           <div className="space-y-2">
                               <Label htmlFor="businessName">Business Name</Label>
-                              <Input id="businessName" name="businessName" defaultValue={user.businessName} />
+                              <Input id="businessName" name="businessName" defaultValue={company?.name} />
                           </div>
                           <div className="space-y-2">
                               <Label htmlFor="businessLegalName">Legal Name</Label>
-                              <Input id="businessLegalName" name="businessLegalName" defaultValue={user.businessLegalName} />
+                              <Input id="businessLegalName" name="businessLegalName" defaultValue={company?.legalName} />
                           </div>
                         </div>
 
                          <div className="space-y-2">
                             <Label htmlFor="businessAddress">Business Address</Label>
-                            <Input id="businessAddress" name="businessAddress" defaultValue={user.businessAddress} />
+                            <Input id="businessAddress" name="businessAddress" defaultValue={company?.address} />
                         </div>
 
                         <div className="space-y-2">
@@ -216,7 +235,7 @@ export default function EditBusinessPage() {
                         
                         <div className="space-y-2">
                             <Label htmlFor="industry">Industry</Label>
-                            <Select name="industry" defaultValue={user.industry}>
+                            <Select name="industry" defaultValue={company?.industry}>
                                 <SelectTrigger id="industry">
                                     <SelectValue placeholder="Select an industry" />
                                 </SelectTrigger>
@@ -233,11 +252,11 @@ export default function EditBusinessPage() {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div className="space-y-2">
                                 <Label htmlFor="website">Company Website</Label>
-                                <Input id="website" name="website" defaultValue={user.website} placeholder="https://example.com" />
+                                <Input id="website" name="website" defaultValue={company?.website} placeholder="https://example.com" />
                             </div>
                             <div className="space-y-2">
                                 <Label htmlFor="employeeRange">Number of Employees</Label>
-                                <Select name="employeeRange" defaultValue={user.employeeRange}>
+                                <Select name="employeeRange" defaultValue={company?.employeeRange}>
                                     <SelectTrigger id="employeeRange">
                                         <SelectValue placeholder="Select a range" />
                                     </SelectTrigger>
@@ -254,8 +273,8 @@ export default function EditBusinessPage() {
 
                          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                             <div className="space-y-2">
-                                <Label htmlFor="country">Country of Residence</Label>
-                                <Select name="country" defaultValue={user.country}>
+                                <Label htmlFor="country">Country of Jurisdiction</Label>
+                                <Select name="country" defaultValue={company?.countryOfJurisdiction}>
                                     <SelectTrigger id="country">
                                         <SelectValue placeholder="Select a country" />
                                     </SelectTrigger>

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import type { User } from '@/lib/types';
+import type { User, Company } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Building, Copy, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
@@ -15,7 +15,7 @@ import { useToast } from '@/hooks/use-toast';
 import BusinessVerification from '@/components/settings/business-verification';
 
 
-function getKycBadge(status?: User['kycStatus']) {
+function getKybBadge(status?: Company['kybStatus']) {
   switch (status) {
     case 'verified':
       return <Badge variant="outline" className="text-green-400 border-green-400">Verified</Badge>;
@@ -30,7 +30,7 @@ function getKycBadge(status?: User['kycStatus']) {
 
 export default function GeneralSettingsContent() {
   const [user, setUser] = useState<User | null>(null);
-  const [selectedCompany, setSelectedCompany] = useState<{ id: string; name: string } | null>(null);
+  const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
   const searchParams = useSearchParams();
@@ -49,21 +49,20 @@ export default function GeneralSettingsContent() {
             return parsedUser; // Fallback to local
         })
         .then((apiUser: User) => {
-            const mergedUser = { ...apiUser, ...parsedUser };
-            setUser(mergedUser);
-
-             if (mergedUser.role === 'issuer') {
-              const storedCompanyId = localStorage.getItem('selectedCompanyId');
-              if (storedCompanyId) {
-                fetch('/api/companies')
-                  .then(res => res.json())
-                  .then(companiesResponse => {
-                    const company = (companiesResponse.data || []).find((c: any) => c.id === storedCompanyId);
-                    setSelectedCompany(company || null);
-                  });
-              }
+            setUser(apiUser);
+            if (apiUser.companyId) {
+              fetch(`/api/companies/${apiUser.companyId}`)
+                .then(res => res.ok ? res.json() : null)
+                .then(company => {
+                  if (company) {
+                    setSelectedCompany(company);
+                  }
+                })
+                .finally(() => setLoading(false));
+            } else {
+              setLoading(false);
             }
-        }).finally(() => setLoading(false));
+        }).catch(() => setLoading(false));
     } else {
         setLoading(false);
     }
@@ -128,19 +127,19 @@ export default function GeneralSettingsContent() {
                           <TableBody>
                               <TableRow>
                                   <TableCell className="font-medium text-muted-foreground">Business Name</TableCell>
-                                  <TableCell className="text-right">{selectedCompany?.name || user.businessName || 'Not set'}</TableCell>
+                                  <TableCell className="text-right">{selectedCompany?.name || 'Not set'}</TableCell>
                               </TableRow>
                               <TableRow>
                                   <TableCell className="font-medium text-muted-foreground">Legal Name</TableCell>
-                                  <TableCell className="text-right">{user.businessLegalName || 'Not set'}</TableCell>
+                                  <TableCell className="text-right">{selectedCompany?.legalName || 'Not set'}</TableCell>
                               </TableRow>
                               <TableRow>
                                   <TableCell className="font-medium text-muted-foreground">Business ID</TableCell>
                                   <TableCell className="text-right">
                                       <div className="flex items-center justify-end gap-1">
-                                          <span>{user.businessRegistrationId || 'Not set'}</span>
-                                          {user.businessRegistrationId && (
-                                              <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleCopy(user.businessRegistrationId!, 'Business ID')}>
+                                          <span>{selectedCompany?.registrationId || 'Not set'}</span>
+                                          {selectedCompany?.registrationId && (
+                                              <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleCopy(selectedCompany!.registrationId!, 'Business ID')}>
                                                   <Copy className="h-4 w-4" />
                                               </Button>
                                           )}
@@ -149,29 +148,29 @@ export default function GeneralSettingsContent() {
                               </TableRow>
                               <TableRow>
                                   <TableCell className="font-medium text-muted-foreground">Industry</TableCell>
-                                  <TableCell className="text-right">{user.industry || 'Not set'}</TableCell>
+                                  <TableCell className="text-right">{selectedCompany?.industry || 'Not set'}</TableCell>
                               </TableRow>
                               <TableRow>
                                   <TableCell className="font-medium text-muted-foreground">Website</TableCell>
                                   <TableCell className="text-right">
-                                      {user.website ? (
-                                          <a href={user.website} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
-                                              {user.website}
+                                      {selectedCompany?.website ? (
+                                          <a href={selectedCompany.website} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                                              {selectedCompany.website}
                                           </a>
                                       ) : 'Not set'}
                                   </TableCell>
                               </TableRow>
                               <TableRow>
                                   <TableCell className="font-medium text-muted-foreground">Employee Range</TableCell>
-                                  <TableCell className="text-right">{user.employeeRange || 'Not set'}</TableCell>
+                                  <TableCell className="text-right">{selectedCompany?.employeeRange || 'Not set'}</TableCell>
                               </TableRow>
                               <TableRow>
-                                  <TableCell className="font-medium text-muted-foreground">KYC Verification</TableCell>
-                                  <TableCell className="text-right">{getKycBadge(user.kycStatus)}</TableCell>
+                                  <TableCell className="font-medium text-muted-foreground">KYB Status</TableCell>
+                                  <TableCell className="text-right">{getKybBadge(selectedCompany?.kybStatus)}</TableCell>
                               </TableRow>
                               <TableRow>
                                   <TableCell className="font-medium text-muted-foreground">Business Address</TableCell>
-                                  <TableCell className="text-right">{user.businessAddress || 'Not set'}</TableCell>
+                                  <TableCell className="text-right">{selectedCompany?.address || 'Not set'}</TableCell>
                               </TableRow>
                               <TableRow>
                                   <TableCell className="font-medium text-muted-foreground">Organization</TableCell>
@@ -203,7 +202,7 @@ export default function GeneralSettingsContent() {
                           </div>
                       </AccordionTrigger>
                       <AccordionContent className="p-6 pt-0">
-                          <BusinessVerification kybLevel={user.kybLevel || 0} />
+                          <BusinessVerification kybLevel={selectedCompany?.kybLevel || 0} />
                       </AccordionContent>
                   </Card>
               </AccordionItem>
