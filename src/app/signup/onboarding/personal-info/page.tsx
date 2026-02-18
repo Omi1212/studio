@@ -259,105 +259,109 @@ export default function PersonalInfoPage() {
                             <CardTitle>Business Information</CardTitle>
                             <CardDescription>This information may be required for KYB purposes.</CardDescription>
                         </CardHeader>
-                        <CardContent className="space-y-4">
-                            <FormField
-                                control={form.control}
-                                name="businessName"
-                                render={({ field }) => (
-                                    <FormItem>
-                                    <FormLabel>Company Name</FormLabel>
-                                    <FormControl>
-                                        <Input placeholder="e.g. Awesome Inc." {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                            <FormField
-                                control={form.control}
-                                name="countryOfJurisdiction"
-                                render={({ field }) => (
-                                    <FormItem>
-                                    <FormLabel>Country of Jurisdiction</FormLabel>
-                                    <Select onValueChange={field.onChange} value={field.value}>
+                        <CardContent className="pt-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <FormField
+                                    control={form.control}
+                                    name="businessName"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                        <FormLabel>Company Name</FormLabel>
                                         <FormControl>
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Select a country" />
-                                            </SelectTrigger>
+                                            <Input placeholder="e.g. Awesome Inc." {...field} />
                                         </FormControl>
-                                        <SelectContent>
-                                            {countries.map(country => (
-                                                <SelectItem key={country.value} value={country.value}>
-                                                    {country.label}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                    <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                            <FormField
-                                control={form.control}
-                                name="industry"
-                                render={({ field }) => (
-                                    <FormItem>
-                                    <FormLabel>Industry</FormLabel>
-                                    <Select onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
-                                        <FormControl>
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Select an industry" />
-                                            </SelectTrigger>
-                                        </FormControl>
-                                        <SelectContent>
-                                            {industries.map(industry => (
-                                                <SelectItem key={industry.value} value={industry.value}>
-                                                    {industry.label}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                    <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                             <FormField
-                                control={form.control}
-                                name="website"
-                                render={({ field }) => (
-                                    <FormItem>
-                                    <FormLabel>Company Website</FormLabel>
-                                    <FormControl>
-                                        <Input placeholder="e.g. https://awesomeinc.com" {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                            <FormField
-                                control={form.control}
-                                name="employeeRange"
-                                render={({ field }) => (
-                                    <FormItem>
-                                    <FormLabel>Number of Employees</FormLabel>
-                                    <Select onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
-                                        <FormControl>
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Select a range" />
-                                            </SelectTrigger>
-                                        </FormControl>
-                                        <SelectContent>
-                                            {employeeRanges.map(range => (
-                                                <SelectItem key={range.value} value={range.value}>
-                                                    {range.label}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                    <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
+                                        <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name="countryOfJurisdiction"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                        <FormLabel>Country of Jurisdiction</FormLabel>
+                                        <Select onValueChange={field.onChange} value={field.value}>
+                                            <FormControl>
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="Select a country" />
+                                                </SelectTrigger>
+                                            </FormControl>
+                                            <SelectContent>
+                                                {countries.map(country => (
+                                                    <SelectItem key={country.value} value={country.value}>
+                                                        {country.label}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                        <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name="industry"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                        <FormLabel>Industry</FormLabel>
+                                        <Select onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
+                                            <FormControl>
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="Select an industry" />
+                                                </SelectTrigger>
+                                            </FormControl>
+                                            <SelectContent>
+                                                {industries.map(industry => (
+                                                    <SelectItem key={industry.value} value={industry.value}>
+                                                        {industry.label}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                        <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name="employeeRange"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                        <FormLabel>Number of Employees</FormLabel>
+                                        <Select onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
+                                            <FormControl>
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="Select a range" />
+                                                </SelectTrigger>
+                                            </FormControl>
+                                            <SelectContent>
+                                                {employeeRanges.map(range => (
+                                                    <SelectItem key={range.value} value={range.value}>
+                                                        {range.label}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                        <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <div className="md:col-span-2">
+                                     <FormField
+                                        control={form.control}
+                                        name="website"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                            <FormLabel>Company Website</FormLabel>
+                                            <FormControl>
+                                                <Input placeholder="e.g. https://awesomeinc.com" {...field} />
+                                            </FormControl>
+                                            <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                </div>
+                            </div>
                         </CardContent>
                     </Card>
                 )}
