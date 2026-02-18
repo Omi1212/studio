@@ -29,19 +29,16 @@ function TokenCard({ token, onAction, subscriptionStatus }: { token: TokenDetail
   };
 
   const getActionButton = () => {
-    switch (subscriptionStatus) {
-      case 'none':
-        return <Button variant="outline" className="w-full" onClick={() => onAction(token)}>Subscribe</Button>;
-      case 'pending':
-        return <Button className="w-full text-yellow-400 border-yellow-400" variant="outline" disabled>Pending</Button>;
-      case 'approved':
-         return (
+    if (subscriptionStatus === 'approved') {
+        return (
             <DialogTrigger asChild>
                 <Button className="w-full bg-green-600 hover:bg-green-700" onClick={() => onAction(token)}>Invest</Button>
             </DialogTrigger>
         )
-      default:
-        return null;
+    } else if (subscriptionStatus === 'pending') {
+        return <Button className="w-full text-yellow-400 border-yellow-400" variant="outline" disabled>Pending</Button>;
+    } else {
+        return <Button variant="outline" className="w-full" onClick={() => onAction(token)}>Subscribe</Button>;
     }
   }
 
@@ -84,19 +81,16 @@ function TokenTableRow({ token, onAction, subscriptionStatus }: { token: TokenDe
     };
     
     const getActionButton = () => {
-        switch (subscriptionStatus) {
-            case 'none':
-                return <Button variant="outline" size="sm" onClick={() => onAction(token)}>Subscribe</Button>;
-            case 'pending':
-                return <Button size="sm" variant="outline" className="text-yellow-400 border-yellow-400" disabled>Pending</Button>;
-            case 'approved':
-                return (
-                    <DialogTrigger asChild>
-                        <Button size="sm" className="bg-green-600 hover:bg-green-700" onClick={() => onAction(token)}>Invest</Button>
-                    </DialogTrigger>
-                );
-            default:
-                return null;
+        if (subscriptionStatus === 'approved') {
+            return (
+                <DialogTrigger asChild>
+                    <Button size="sm" className="bg-green-600 hover:bg-green-700" onClick={() => onAction(token)}>Invest</Button>
+                </DialogTrigger>
+            );
+        } else if (subscriptionStatus === 'pending') {
+            return <Button size="sm" variant="outline" className="text-yellow-400 border-yellow-400" disabled>Pending</Button>;
+        } else {
+            return <Button variant="outline" size="sm" onClick={() => onAction(token)}>Subscribe</Button>;
         }
     }
 
