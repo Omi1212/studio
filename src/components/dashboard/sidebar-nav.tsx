@@ -142,6 +142,8 @@ export default function SidebarNav() {
                 setSelectedCompany(userCompanies[0]);
                 localStorage.setItem('selectedCompanyId', userCompanies[0].id);
               }
+            } else {
+                setSelectedCompany(null);
             }
         }
         
@@ -222,18 +224,26 @@ export default function SidebarNav() {
         </div>
       </SidebarHeader>
       
-      {isClient && (userRole === 'investor' || userRole === 'issuer') && selectedCompany && (
+      {isClient && (userRole === 'investor' || userRole === 'issuer') && (
         <div className="px-3 pb-3">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
                 variant="outline"
                 className="w-full justify-between items-center p-2 text-left border-sidebar-border bg-sidebar hover:bg-sidebar-accent"
+                disabled={!companies || companies.length === 0}
               >
-                <div className="flex items-center gap-3">
-                    <Building className="h-5 w-5" />
-                    <span className="font-medium text-sm">{selectedCompany.name}</span>
-                </div>
+                {selectedCompany ? (
+                  <div className="flex items-center gap-3">
+                      <Building className="h-5 w-5" />
+                      <span className="font-medium text-sm">{selectedCompany.name}</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-3">
+                      <Building className="h-5 w-5" />
+                      <span className="font-medium text-sm text-sidebar-foreground/70">No Company</span>
+                  </div>
+                )}
                 <MoreVertical className="h-4 w-4 text-muted-foreground" />
               </Button>
             </DropdownMenuTrigger>
@@ -245,7 +255,7 @@ export default function SidebarNav() {
                 >
                   <div className="flex items-center justify-between w-full">
                     <span>{company.name}</span>
-                    {selectedCompany.id === company.id && <Check className="h-4 w-4" />}
+                    {selectedCompany?.id === company.id && <Check className="h-4 w-4" />}
                   </div>
                 </DropdownMenuItem>
               ))}
