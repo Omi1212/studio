@@ -1,14 +1,6 @@
 'use client';
 
 import {
-  SidebarHeader,
-  SidebarContent,
-  SidebarMenu,
-  SidebarMenuItem,
-  SidebarMenuButton,
-  SidebarFooter,
-} from '@/components/ui/sidebar';
-import {
   LayoutDashboard,
   ArrowRightLeft,
   Users,
@@ -40,6 +32,14 @@ import { cn } from '@/lib/utils';
 import type { TokenDetails, User, Issuer } from '@/lib/types';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../ui/collapsible';
 import Image from 'next/image';
+import {
+  SidebarHeader,
+  SidebarContent,
+  SidebarMenu,
+  SidebarMenuItem,
+  SidebarMenuButton,
+  SidebarFooter,
+} from '@/components/ui/sidebar';
 
 
 const superAdminMenu = [
@@ -105,7 +105,6 @@ export default function SidebarNav() {
 
 
   useEffect(() => {
-    // This ensures the code runs only on the client, preventing hydration errors.
     setIsClient(true);
     const role = localStorage.getItem('userRole');
     let currentUser: User | null = JSON.parse(localStorage.getItem('currentUser') || 'null');
@@ -115,67 +114,62 @@ export default function SidebarNav() {
         return;
     }
 
-    Promise.all([
-      fetch(`/api/users/${currentUser.id}`).then(res => res.ok ? res.json() : currentUser),
-      fetch('/api/tokens?perPage=999').then(res => res.json()),
-      fetch('/api/companies?perPage=999').then(res => res.json())
-    ]).then(([freshUser, tokensResponse, companiesResponse]) => {
-        currentUser = freshUser;
-        if (!currentUser) return; // Guard clause
+    const fetchData = async () => {
+        try {
+            const userRes = await fetch(`/api/users/${currentUser!.id}`);
+            const freshUser = userRes.ok ? await userRes.json() : currentUser;
+            currentUser = freshUser; // Update currentUser with fresh data
 
-        const allCompanies = companiesResponse.data || [];
-        setCompanies(allCompanies);
-
-        if (freshUser.role === 'investor' || freshUser.role === 'issuer') {
-            const storedCompanyId = localStorage.getItem('selectedCompanyId');
-            let companyToSelect = storedCompanyId
-                ? allCompanies.find((c: any) => c.id === storedCompanyId)
-                : undefined;
-
-            if (!companyToSelect) {
-                companyToSelect = freshUser.companyId
-                    ? allCompanies.find((c: any) => c.id === freshUser.companyId)
-                    : undefined;
-            }
-
-            if (companyToSelect) {
-                setSelectedCompany(companyToSelect);
-                localStorage.setItem('selectedCompanyId', companyToSelect.id);
+            if (freshUser && freshUser.companyId) {
+                const companyRes = await fetch(`/api/companies/${freshUser.companyId}`);
+                if (companyRes.ok) {
+                    const companyData = await companyRes.json();
+                    setCompanies([companyData]); // Set an array with just the user's company
+                    setSelectedCompany(companyData);
+                    localStorage.setItem('selectedCompanyId', companyData.id);
+                }
             } else {
+                setCompanies([]);
                 setSelectedCompany(null);
                 localStorage.removeItem('selectedCompanyId');
             }
-        }
-        
-        const combinedTokens: TokenDetails[] = (tokensResponse.data || []).map((t: any) => ({
-          ...t,
-          decimals: t.decimals ?? 0,
-          isFreezable: t.isFreezable ?? false,
-          publicKey: t.publicKey ?? `02f...${t.id.slice(-10)}`,
-        }));
+            
+            const tokensResponse = await fetch('/api/tokens?perPage=999');
+            const tokensData = await tokensResponse.json();
+            const combinedTokens: TokenDetails[] = (tokensData.data || []).map((t: any) => ({
+                ...t,
+                decimals: t.decimals ?? 0,
+                isFreezable: t.isFreezable ?? false,
+                publicKey: t.publicKey ?? `02f...${t.id.slice(-10)}`,
+            }));
+            setAllTokens(combinedTokens);
 
-        setAllTokens(combinedTokens);
-
-        const storedTokenId = localStorage.getItem('selectedTokenId');
-        if (storedTokenId) {
-            const foundToken = combinedTokens.find(t => t.id === storedTokenId);
-            if (foundToken) {
-              setSelectedToken(foundToken);
+            const storedTokenId = localStorage.getItem('selectedTokenId');
+            if (storedTokenId) {
+                const foundToken = combinedTokens.find(t => t.id === storedTokenId);
+                if (foundToken) {
+                    setSelectedToken(foundToken);
+                } else if (combinedTokens.length > 0) {
+                    const firstToken = combinedTokens[0];
+                    setSelectedToken(firstToken);
+                    localStorage.setItem('selectedTokenId', firstToken.id);
+                } else {
+                    setSelectedToken(null);
+                    localStorage.removeItem('selectedTokenId');
+                }
             } else if (combinedTokens.length > 0) {
-              const firstToken = combinedTokens[0];
-              setSelectedToken(firstToken);
-              localStorage.setItem('selectedTokenId', firstToken.id);
-            } else {
-              setSelectedToken(null);
-              localStorage.removeItem('selectedTokenId');
+                const firstToken = combinedTokens[0];
+                setSelectedToken(firstToken);
+                localStorage.setItem('selectedTokenId', firstToken.id);
             }
-        } else if (combinedTokens.length > 0) {
-          const firstToken = combinedTokens[0];
-          setSelectedToken(firstToken);
-          localStorage.setItem('selectedTokenId', firstToken.id);
+
+        } catch (error) {
+            console.error('Error fetching sidebar data:', error);
         }
-    });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    };
+
+    fetchData();
+
   }, []);
 
   const handleTokenSelect = (token: TokenDetails) => {
@@ -193,7 +187,6 @@ export default function SidebarNav() {
   let menuItems: any[] = [];
 
   if (!isClient) {
-    // Render nothing or a skeleton loader on the server/initial client render.
     return null;
   }
 
