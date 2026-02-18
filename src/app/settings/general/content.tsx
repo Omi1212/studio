@@ -41,31 +41,29 @@ export default function GeneralSettingsContent() {
     setLoading(true);
     const storedUser = localStorage.getItem('currentUser');
     if (storedUser) {
-      const parsedUser: User = JSON.parse(storedUser);
-      
-       fetch(`/api/users/${parsedUser.id}`)
-        .then(res => {
-            if (res.ok) return res.json();
-            return parsedUser; // Fallback to local
-        })
-        .then((apiUser: User) => {
-            setUser(apiUser);
-            if (apiUser.companyId) {
-              fetch(`/api/companies/${apiUser.companyId}`)
-                .then(res => res.ok ? res.json() : null)
-                .then(company => {
-                  if (company) {
-                    setSelectedCompany(company);
-                  }
-                })
-                .finally(() => setLoading(false));
-            } else {
-              setLoading(false);
-            }
-        }).catch(() => setLoading(false));
-    } else {
-        setLoading(false);
+      setUser(JSON.parse(storedUser));
     }
+
+    const handleCompanyChange = () => {
+      const selectedCompanyId = localStorage.getItem('selectedCompanyId');
+      if (selectedCompanyId) {
+        fetch(`/api/companies/${selectedCompanyId}`)
+          .then(res => res.ok ? res.json() : null)
+          .then(setSelectedCompany)
+          .finally(() => setLoading(false));
+      } else {
+        setSelectedCompany(null);
+        setLoading(false);
+      }
+    };
+
+    handleCompanyChange(); // Initial load
+
+    window.addEventListener('companyChanged', handleCompanyChange);
+
+    return () => {
+      window.removeEventListener('companyChanged', handleCompanyChange);
+    };
   }, []);
   
   const handleCopy = (text: string, fieldName: string) => {
