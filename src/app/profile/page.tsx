@@ -13,7 +13,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ShieldCheck, User as UserIcon, Phone, Building, Settings, Edit, KeyRound, Shield, Monitor } from 'lucide-react';
+import { ShieldCheck, User as UserIcon, Phone, Building, Settings, Edit, KeyRound, Shield, Monitor, CheckCircle2 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { countries } from '@/lib/countries';
 import IdentityVerification from '@/components/profile/identity-verification';
@@ -55,6 +55,97 @@ function PersonalInfoRow({ label, value, actionLabel, onActionClick }: { label: 
         </div>
     );
 }
+
+// --- Copied from identity-verification.tsx ---
+interface VerificationStepProps {
+  level: number;
+  title: string;
+  description: string;
+  isCompleted: boolean;
+  isCurrent: boolean;
+}
+
+function VerificationStep({ level, title, description, isCompleted, isCurrent }: VerificationStepProps) {
+  return (
+    <div className="flex items-start gap-4">
+      <div className="flex flex-col items-center">
+        <div className={`flex items-center justify-center h-8 w-8 rounded-full ${isCompleted ? 'bg-green-500 text-white' : isCurrent ? 'border-2 border-primary text-primary' : 'bg-muted text-muted-foreground'}`}>
+          {isCompleted ? <CheckCircle2 className="h-5 w-5" /> : <span className={isCurrent ? 'font-bold':''}>{level}</span>}
+        </div>
+      </div>
+      <div className="pt-1">
+        <h4 className="font-semibold">{title}</h4>
+        <p className="text-sm text-muted-foreground">{description}</p>
+      </div>
+    </div>
+  );
+}
+
+function VerificationCallToAction({ kycLevel }: { kycLevel: number }) {
+  const levelsInfo = [
+    // kycLevel 0
+    { 
+      title: "Continue to User Level 1", 
+      description: "To get started, please verify your email and phone number.", 
+      requirements: [], 
+      buttonText: "Verify Identity" 
+    },
+    // kycLevel 1
+    { 
+      title: "Continue to User Level 2", 
+      description: "Provide your basic personal information to increase your account limits.", 
+      requirements: ["Full Name", "Date of Birth", "Country of Residence"], 
+      buttonText: "Verify Identity" 
+    },
+    // kycLevel 2
+    { 
+      title: "Continue to User Level 3", 
+      description: "To unlock higher limits and more features, please complete the next verification step.\n\nYou will need to provide:", 
+      requirements: ["Passport or National ID", "Liveness Check"], 
+      buttonText: "Verify Identity" 
+    },
+    // kycLevel 3
+    { 
+      title: "Continue to User Level 4", 
+      description: "Submit a proof of address to complete your verification and unlock all platform features.", 
+      requirements: ["Utility bill or Bank statement"], 
+      buttonText: "Verify Identity" 
+    },
+  ];
+
+  if (kycLevel >= 4) {
+    return (
+      <div className="bg-card-foreground/5 dark:bg-card-foreground/10 rounded-lg p-6 flex flex-col items-center justify-center text-center h-full">
+        <CheckCircle2 className="h-12 w-12 text-green-500 mb-4" />
+        <h4 className="font-semibold text-lg">Fully Verified</h4>
+        <p className="text-sm text-muted-foreground mt-1">You have completed all verification steps.</p>
+      </div>
+    );
+  }
+
+  const nextStepInfo = levelsInfo[kycLevel];
+
+  return (
+    <div className="bg-card-foreground/5 dark:bg-card-foreground/10 rounded-lg p-6 h-full flex flex-col text-center">
+      <h4 className="font-semibold text-lg">{nextStepInfo.title}</h4>
+      <p className="text-sm text-muted-foreground mt-2 whitespace-pre-line flex-1">{nextStepInfo.description}</p>
+      {nextStepInfo.requirements.length > 0 && (
+        <ul className="list-disc pl-5 text-sm text-muted-foreground space-y-1 my-4 max-w-max mx-auto text-left">
+          {nextStepInfo.requirements.map(req => <li key={req}>{req}</li>)}
+        </ul>
+      )}
+      <Button className="w-full mt-auto">{nextStepInfo.buttonText}</Button>
+    </div>
+  );
+}
+
+const kycSteps = [
+    { level: 1, title: "User Level 1", description: "Email and phone number verified." },
+    { level: 2, title: "User Level 2", description: "Basic personal information provided." },
+    { level: 3, title: "User Level 3", description: "Official ID document submitted." },
+    { level: 4, title: "User Level 4", description: "Proof of address verified." },
+];
+// --- End Copy ---
 
 
 export default function ProfilePage() {
@@ -190,7 +281,7 @@ export default function ProfilePage() {
                 </Card>
               </div>
               
-              {isBusinessRole && (
+              {isBusinessRole ? (
                 <Accordion type="single" collapsible className="w-full space-y-6">
                     <AccordionItem value="user-preferences">
                         <Card>
@@ -242,6 +333,38 @@ export default function ProfilePage() {
                                                 </SelectContent>
                                             </Select>
                                         </div>
+                                    </div>
+                                </div>
+                            </AccordionContent>
+                        </Card>
+                    </AccordionItem>
+                    <AccordionItem value="kyc-verification">
+                        <Card>
+                            <AccordionTrigger className="p-6 hover:no-underline text-left">
+                                <div className="flex items-center gap-4">
+                                    <ShieldCheck className="h-6 w-6" />
+                                    <div className="space-y-1 text-left">
+                                        <h3 className="text-lg font-semibold leading-none tracking-tight">Identity Verification (KYC)</h3>
+                                        <p className="text-sm text-muted-foreground">Complete your personal identity verification.</p>
+                                    </div>
+                                </div>
+                            </AccordionTrigger>
+                            <AccordionContent className="p-6 pt-0">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+                                    <div className="pt-1 space-y-8">
+                                        {kycSteps.map((step) => (
+                                        <VerificationStep
+                                            key={step.level}
+                                            level={step.level}
+                                            title={step.title}
+                                            description={step.description}
+                                            isCompleted={(user.kycLevel || 0) >= step.level}
+                                            isCurrent={(user.kycLevel || 0) + 1 === step.level}
+                                        />
+                                        ))}
+                                    </div>
+                                    <div>
+                                        <VerificationCallToAction kycLevel={user.kycLevel || 0} />
                                     </div>
                                 </div>
                             </AccordionContent>
@@ -354,9 +477,10 @@ export default function ProfilePage() {
                         </Card>
                     </AccordionItem>
                 </Accordion>
+              ) : (
+                 <IdentityVerification kycLevel={user.kycLevel || 0} />
               )}
 
-              <IdentityVerification kycLevel={user.kycLevel || 0} />
             </div>
           </main>
         </div>
