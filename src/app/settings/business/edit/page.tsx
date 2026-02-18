@@ -94,7 +94,8 @@ export default function EditBusinessPage() {
 
     const updatedUserData = {
       businessName: formData.get('businessName') as string,
-      legalName: formData.get('legalName') as string,
+      businessLegalName: formData.get('businessLegalName') as string,
+      businessAddress: formData.get('businessAddress') as string,
       phone: fullPhoneNumber,
       industry: formData.get('industry') as string,
       country: formData.get('country') as string,
@@ -184,9 +185,14 @@ export default function EditBusinessPage() {
                               <Input id="businessName" name="businessName" defaultValue={user.businessName} />
                           </div>
                           <div className="space-y-2">
-                              <Label htmlFor="legalName">Legal Name</Label>
-                              <Input id="legalName" name="legalName" defaultValue={user.legalName} />
+                              <Label htmlFor="businessLegalName">Legal Name</Label>
+                              <Input id="businessLegalName" name="businessLegalName" defaultValue={user.businessLegalName} />
                           </div>
+                        </div>
+
+                         <div className="space-y-2">
+                            <Label htmlFor="businessAddress">Business Address</Label>
+                            <Input id="businessAddress" name="businessAddress" defaultValue={user.businessAddress} />
                         </div>
 
                         <div className="space-y-2">

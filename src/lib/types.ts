@@ -80,7 +80,9 @@ export type User = {
   address?: string;
   city?: string;
   businessName?: string;
+  businessLegalName?: string;
   businessRegistrationId?: string;
+  businessAddress?: string;
   industry?: string;
   website?: string;
   employeeRange?: string;

@@ -49,7 +49,7 @@ export default function GeneralSettingsContent() {
             return parsedUser; // Fallback to local
         })
         .then((apiUser: User) => {
-            const mergedUser = { ...parsedUser, ...apiUser };
+            const mergedUser = { ...apiUser, ...parsedUser };
             setUser(mergedUser);
 
              if (mergedUser.role === 'issuer') {
@@ -132,7 +132,7 @@ export default function GeneralSettingsContent() {
                               </TableRow>
                               <TableRow>
                                   <TableCell className="font-medium text-muted-foreground">Legal Name</TableCell>
-                                  <TableCell className="text-right">{user.legalName || 'Not set'}</TableCell>
+                                  <TableCell className="text-right">{user.businessLegalName || 'Not set'}</TableCell>
                               </TableRow>
                               <TableRow>
                                   <TableCell className="font-medium text-muted-foreground">Business ID</TableCell>
@@ -171,7 +171,7 @@ export default function GeneralSettingsContent() {
                               </TableRow>
                               <TableRow>
                                   <TableCell className="font-medium text-muted-foreground">Business Address</TableCell>
-                                  <TableCell className="text-right">{user.address || 'Not set'}</TableCell>
+                                  <TableCell className="text-right">{user.businessAddress || 'Not set'}</TableCell>
                               </TableRow>
                               <TableRow>
                                   <TableCell className="font-medium text-muted-foreground">Organization</TableCell>
