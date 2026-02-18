@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -176,7 +177,7 @@ export default function PaymentMethodsPage() {
                     <Link href="/settings"><ArrowLeft /></Link>
                 </Button>
                 <h1 className="text-3xl font-headline font-semibold">
-                    Payment Methods
+                    Withdrawal Methods
                 </h1>
             </div>
             
@@ -189,7 +190,7 @@ export default function PaymentMethodsPage() {
                             <Banknote className="h-6 w-6" />
                             <div className="space-y-1">
                                 <h3 className="text-lg font-semibold leading-none tracking-tight">Bank Accounts</h3>
-                                <p className="text-sm text-muted-foreground">Manage your linked bank accounts for payouts.</p>
+                                <p className="text-sm text-muted-foreground">Manage bank accounts for fiat currency withdrawals.</p>
                             </div>
                         </div>
                     </AccordionTrigger>
@@ -254,7 +255,7 @@ export default function PaymentMethodsPage() {
                               </DialogTrigger>
                               <DialogContent>
                                 <DialogHeader>
-                                  <DialogTitle>Add New Bank Account</DialogTitle>
+                                  <DialogTitle>Add Bank Account</DialogTitle>
                                 </DialogHeader>
                                 <div className="grid gap-4 py-4">
                                   <div className="space-y-2">
@@ -308,7 +309,7 @@ export default function PaymentMethodsPage() {
                             <Bitcoin className="h-6 w-6" />
                             <div className="space-y-1">
                                 <h3 className="text-lg font-semibold leading-none tracking-tight">Bitcoin</h3>
-                                <p className="text-sm text-muted-foreground">Configure your Bitcoin addresses for receiving payments.</p>
+                                <p className="text-sm text-muted-foreground">Manage addresses for withdrawing Bitcoin.</p>
                             </div>
                         </div>
                     </AccordionTrigger>
@@ -370,7 +371,7 @@ export default function PaymentMethodsPage() {
                             <Dialog open={dialogOpen === 'btc'} onOpenChange={(open) => setDialogOpen(open ? 'btc' : null)}>
                                 <DialogTrigger asChild><Button><Plus className="mr-2 h-4 w-4" /> Add Bitcoin Address</Button></DialogTrigger>
                                 <DialogContent>
-                                    <DialogHeader><DialogTitle>Add Bitcoin Address</DialogTitle></DialogHeader>
+                                    <DialogHeader><DialogTitle>Add Bitcoin Withdrawal Address</DialogTitle></DialogHeader>
                                     <div className="grid gap-4 py-4">
                                         <div className="space-y-2">
                                             <Label htmlFor="btc-alias">Alias</Label>
@@ -409,7 +410,7 @@ export default function PaymentMethodsPage() {
                             <SparkIcon />
                             <div className="space-y-1">
                                 <h3 className="text-lg font-semibold leading-none tracking-tight">Bitcoin Spark</h3>
-                                <p className="text-sm text-muted-foreground">Manage your Spark addresses.</p>
+                                <p className="text-sm text-muted-foreground">Manage your addresses for withdrawing via Spark.</p>
                             </div>
                         </div>
                     </AccordionTrigger>
@@ -469,7 +470,7 @@ export default function PaymentMethodsPage() {
                             <Dialog open={dialogOpen === 'spark'} onOpenChange={(open) => setDialogOpen(open ? 'spark' : null)}>
                                 <DialogTrigger asChild><Button><Plus className="mr-2 h-4 w-4" /> Add Spark Address</Button></DialogTrigger>
                                 <DialogContent>
-                                    <DialogHeader><DialogTitle>Add Spark Address</DialogTitle></DialogHeader>
+                                    <DialogHeader><DialogTitle>Add Spark Withdrawal Address</DialogTitle></DialogHeader>
                                     <div className="grid gap-4 py-4">
                                         <div className="space-y-2">
                                             <Label htmlFor="spark-alias">Alias</Label>
@@ -498,7 +499,7 @@ export default function PaymentMethodsPage() {
                                 <DollarSign className="h-6 w-6" />
                                 <div className="space-y-1">
                                     <h3 className="text-lg font-semibold leading-none tracking-tight">Stablecoins</h3>
-                                    <p className="text-sm text-muted-foreground">Manage your stablecoin addresses and payout preferences.</p>
+                                    <p className="text-sm text-muted-foreground">Manage your addresses for withdrawing stablecoins.</p>
                                 </div>
                             </div>
                         </AccordionTrigger>
@@ -558,7 +559,7 @@ export default function PaymentMethodsPage() {
                                 <Dialog open={dialogOpen === 'stablecoin'} onOpenChange={(open) => setDialogOpen(open ? 'stablecoin' : null)}>
                                     <DialogTrigger asChild><Button><Plus className="mr-2 h-4 w-4" /> Add Stablecoin Address</Button></DialogTrigger>
                                     <DialogContent>
-                                        <DialogHeader><DialogTitle>Add Stablecoin Address</DialogTitle></DialogHeader>
+                                        <DialogHeader><DialogTitle>Add Stablecoin Withdrawal Address</DialogTitle></DialogHeader>
                                         <div className="grid gap-4 py-4">
                                             <div className="space-y-2">
                                                 <Label htmlFor="sc-alias">Alias</Label>
