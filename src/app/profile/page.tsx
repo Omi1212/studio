@@ -1,4 +1,3 @@
-
 'use client';
 
 import {
@@ -183,6 +182,7 @@ export default function ProfilePage() {
                         <PersonalInfoRow label="Country of Residence" value={countryDisplay || 'Not set'} actionLabel="Change" />
                         <PersonalInfoRow label="City" value={user.city || 'Not set'} />
                         <PersonalInfoRow label="Legal Name" value={user.legalName || 'Not set'} />
+                        <PersonalInfoRow label="Date of Birth" value={user.dob || 'Not set'} />
                         <PersonalInfoRow label="Identification Documents" value={user.idDoc || 'Not set'} />
                         <PersonalInfoRow label="Address" value={user.address || 'Not set'} />
                         <PersonalInfoRow label="Email Address" value={maskEmail(user.email)} />
@@ -356,7 +356,7 @@ export default function ProfilePage() {
                 </Accordion>
               )}
 
-              {user.role === 'investor' && <IdentityVerification kycLevel={user.kycLevel || 0} />}
+              <IdentityVerification kycLevel={user.kycLevel || 0} />
             </div>
           </main>
         </div>
