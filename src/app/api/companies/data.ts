@@ -10,8 +10,12 @@ declare global {
 
 const initialData: Company[] = [
   { id: 'bstratus-securities', name: 'Bstratus Securities' },
+  { id: 'emisores-de-activos-digitales', name: 'Emisores de Activos Digitales' },
   { id: 'neobank-sa-de-cv', name: 'NeoBank SA de CV' },
   { id: 'tradfi-bank-sa', name: 'TradFi Bank SA' },
+  { id: 'global-agents-co', name: 'Global Agents Co.' },
+  { id: 'poppins-co-associates', name: 'Poppins & Co. Associates' },
+  { id: 'blockstratus-platform', name: 'BlockStratus Platform' },
 ];
 
 // To prevent the data from being lost on hot-reloads in development
