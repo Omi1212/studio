@@ -53,6 +53,9 @@ const initialData: Company[] = [
     industry: 'Technology',
     kybStatus: 'verified',
     kybLevel: 4,
+    website: 'https://blockstratus.com',
+    employeeRange: '501-1000',
+    countryOfJurisdiction: 'US',
   },
 ];
 
