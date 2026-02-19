@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import type { ViewMode, User, TokenDetails } from '@/lib/types';
+import type { ViewMode, User, TokenDetails, SubscriptionStatus } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/card';
 import { Avatar, AvatarFallback } from '../ui/avatar';
 import { Badge } from '../ui/badge';
@@ -10,19 +10,21 @@ import { Button } from '../ui/button';
 import { LayoutGrid, List, Search, FilePenLine } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
 import Link from 'next/link';
-import { useToast } from '@/hooks/use-toast';
 import { Input } from '../ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import KybBanner from '@/components/dashboard/kyb-banner';
 import IdentityProvidersBanner from '@/components/dashboard/identity-providers-banner';
 
-type WhitelistRequest = User;
+type WhitelistRequest = User & {
+  requestStatus: SubscriptionStatus;
+  tokenId: string;
+};
 
 const ITEMS_PER_PAGE = 10;
 
 function getStatusBadge(request: WhitelistRequest) {
-  switch (request.kycStatus) {
-    case 'verified':
+  switch (request.requestStatus) {
+    case 'approved':
       return <Badge variant="outline" className="text-green-400 border-green-400">Accepted</Badge>;
     case 'pending':
       return <Badge variant="outline" className="text-yellow-400 border-yellow-400">Pending</Badge>;
@@ -67,7 +69,7 @@ function RequestCard({ request }: { request: WhitelistRequest }) {
       </CardContent>
       <CardFooter>
           <Button variant="outline" className="w-full" asChild>
-            <Link href={`/whitelisting-requests/${request.id}`}>View</Link>
+            <Link href={`/whitelisting-requests/${request.id}?tokenId=${request.tokenId}`}>View</Link>
           </Button>
       </CardFooter>
     </Card>
@@ -77,7 +79,7 @@ function RequestCard({ request }: { request: WhitelistRequest }) {
 function RequestTableRow({ request }: { request: WhitelistRequest }) {
   const router = useRouter();
   return (
-    <TableRow onClick={() => router.push(`/whitelisting-requests/${request.id}`)} className="cursor-pointer">
+    <TableRow onClick={() => router.push(`/whitelisting-requests/${request.id}?tokenId=${request.tokenId}`)} className="cursor-pointer">
       <TableCell>
         <div className="flex items-center gap-3">
           <Avatar className="h-8 w-8">
@@ -98,7 +100,7 @@ function RequestTableRow({ request }: { request: WhitelistRequest }) {
        <TableCell className="hidden sm:table-cell">{getStatusBadge(request)}</TableCell>
       <TableCell className="text-right">
         <Button asChild variant="outline" size="sm" onClick={(e) => e.stopPropagation()}>
-            <Link href={`/whitelisting-requests/${request.id}`}>View</Link>
+            <Link href={`/whitelisting-requests/${request.id}?tokenId=${request.tokenId}`}>View</Link>
         </Button>
       </TableCell>
     </TableRow>
@@ -107,8 +109,6 @@ function RequestTableRow({ request }: { request: WhitelistRequest }) {
 
 
 export default function RequestList({ view, setView }: { view: ViewMode, setView: (mode: ViewMode) => void }) {
-  const [requests, setRequests] = useState<WhitelistRequest[]>([]);
-  const [totalRequests, setTotalRequests] = useState(0);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('pending');
@@ -116,10 +116,26 @@ export default function RequestList({ view, setView }: { view: ViewMode, setView
   const [selectedToken, setSelectedToken] = useState<TokenDetails | null>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
 
+  const [allInvestors, setAllInvestors] = useState<User[]>([]);
+  const [allSubscriptions, setAllSubscriptions] = useState<Record<string, Record<string, SubscriptionStatus>>>({});
+  const [tokenCheckComplete, setTokenCheckComplete] = useState(false);
+
   useEffect(() => {
     const role = localStorage.getItem('userRole');
     setUserRole(role);
-    
+
+    const initialFetch = async () => {
+      setLoading(true);
+      await Promise.all([
+          fetch('/api/investors?perPage=999').then(res => res.json()),
+          fetch('/api/investors/subscriptions').then(res => res.json())
+      ]).then(([usersResponse, subscriptionsResponse]) => {
+          setAllInvestors(usersResponse.data || []);
+          setAllSubscriptions(subscriptionsResponse || {});
+      }).catch(console.error);
+    }
+    initialFetch();
+
     const handleTokenChange = async () => {
         const storedTokenId = localStorage.getItem('selectedTokenId');
         if (storedTokenId) {
@@ -137,6 +153,8 @@ export default function RequestList({ view, setView }: { view: ViewMode, setView
         } else {
             setSelectedToken(null);
         }
+        setTokenCheckComplete(true);
+        setLoading(false);
     };
 
     handleTokenChange();
@@ -147,43 +165,52 @@ export default function RequestList({ view, setView }: { view: ViewMode, setView
     };
   }, []);
 
-  useEffect(() => {
-    if ((userRole === 'issuer' || userRole === 'agent') && !selectedToken) {
-        setRequests([]);
-        setTotalRequests(0);
-        setLoading(false);
-        return;
+  const pendingRequests = useMemo(() => {
+    if ((userRole !== 'issuer' && userRole !== 'agent') || !selectedToken) {
+        return [];
     }
 
-    setLoading(true);
-    const params = new URLSearchParams({
-        page: currentPage.toString(),
-        perPage: ITEMS_PER_PAGE.toString(),
+    const requests: WhitelistRequest[] = [];
+    
+    Object.entries(allSubscriptions).forEach(([investorId, tokenSubs]) => {
+        Object.entries(tokenSubs).forEach(([tokenId, status]) => {
+            if (tokenId === selectedToken.id) {
+                const investor = allInvestors.find(inv => inv.id === investorId);
+                if (investor) {
+                    requests.push({ ...investor, requestStatus: status, tokenId });
+                }
+            }
+        });
     });
+
+    let filtered = requests;
     if (statusFilter !== 'all') {
-        const kycStatus = statusFilter === 'accepted' ? 'verified' : statusFilter;
-        params.append('kycStatus', kycStatus);
+        const filterMap: Record<string, SubscriptionStatus> = { accepted: 'approved', pending: 'pending', rejected: 'rejected' };
+        const mappedStatus = filterMap[statusFilter];
+        if (mappedStatus) {
+            filtered = filtered.filter(req => req.requestStatus === mappedStatus);
+        }
     }
+
     if (searchQuery) {
-        params.append('query', searchQuery);
+        const lowerQuery = searchQuery.toLowerCase();
+        filtered = filtered.filter(req => 
+            req.name.toLowerCase().includes(lowerQuery) ||
+            req.email.toLowerCase().includes(lowerQuery) ||
+            req.walletAddress.toLowerCase().includes(lowerQuery)
+        );
     }
     
-    const fetchRequests = async () => {
-        try {
-            const response = await fetch(`/api/investors?${params.toString()}`);
-            const data = await response.json();
-            setRequests(data.data);
-            setTotalRequests(data.meta.total);
-        } catch (error) {
-            console.error("Failed to fetch requests:", error);
-        } finally {
-            setLoading(false);
-        }
-    };
-    fetchRequests();
-  }, [currentPage, searchQuery, statusFilter, userRole, selectedToken]);
+    return filtered;
 
-  const totalPages = Math.ceil(totalRequests / ITEMS_PER_PAGE);
+  }, [selectedToken, allSubscriptions, allInvestors, statusFilter, searchQuery, userRole]);
+
+  const paginatedRequests = useMemo(() => {
+      const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+      return pendingRequests.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  }, [pendingRequests, currentPage]);
+  
+  const totalPages = Math.ceil(pendingRequests.length / ITEMS_PER_PAGE);
 
   const handlePageChange = (page: number) => {
     if (page >= 1 && page <= totalPages) {
@@ -200,7 +227,7 @@ export default function RequestList({ view, setView }: { view: ViewMode, setView
     );
   }
   
-  if ((userRole === 'issuer' || userRole === 'agent') && !selectedToken) {
+  if ((userRole === 'issuer' || userRole === 'agent') && !selectedToken && tokenCheckComplete) {
     return (
       <div className="space-y-4">
         <div className="flex justify-between items-center">
@@ -299,18 +326,18 @@ export default function RequestList({ view, setView }: { view: ViewMode, setView
         </div>
       </div>
 
-       {requests.length === 0 ? (
+       {paginatedRequests.length === 0 ? (
         <div className="border-dashed border-2 border-muted-foreground/50 rounded-lg h-96 flex flex-col items-center justify-center text-center p-4">
             <FilePenLine className="h-16 w-16 text-muted-foreground mb-4" />
             <h2 className="text-xl font-semibold mb-2">No Requests Found</h2>
             <p className="text-muted-foreground mb-4">
-                {searchQuery || statusFilter !== 'all' ? "Try adjusting your search or filter." : "There are no new whitelisting requests at this time."}
+                {searchQuery || statusFilter !== 'all' ? "Try adjusting your search or filter." : `There are no ${statusFilter} whitelisting requests at this time.`}
             </p>
         </div>
       ) : view === 'card' ? (
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {requests.map(request => (
+            {paginatedRequests.map(request => (
               <RequestCard key={request.id} request={request} />
             ))}
           </div>
@@ -329,7 +356,7 @@ export default function RequestList({ view, setView }: { view: ViewMode, setView
               </TableRow>
             </TableHeader>
             <TableBody>
-              {requests.map(request => (
+              {paginatedRequests.map(request => (
                   <RequestTableRow key={request.id} request={request} />
               ))}
             </TableBody>

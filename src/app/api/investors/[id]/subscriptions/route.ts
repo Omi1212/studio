@@ -1,4 +1,3 @@
-
 import { NextResponse } from 'next/server';
 import { subscriptionsData } from '../../subscriptions/data';
 import type { SubscriptionStatus } from '@/lib/types';
@@ -6,7 +5,7 @@ import { z } from 'zod';
 
 const subscriptionSchema = z.object({
   tokenId: z.string(),
-  status: z.enum(['none', 'pending', 'approved'])
+  status: z.enum(['none', 'pending', 'approved', 'rejected'])
 });
 
 export async function GET(
