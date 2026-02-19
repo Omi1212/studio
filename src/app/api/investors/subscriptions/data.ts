@@ -5,11 +5,7 @@ declare global {
   var __subscriptionsData__: Record<string, Record<string, SubscriptionStatus>> | undefined;
 }
 
-const initialData: Record<string, Record<string, SubscriptionStatus>> = {
-    'inv-001': { // Hardcoded investor ID for demo
-        'example-1': 'approved',
-    }
-};
+const initialData: Record<string, Record<string, SubscriptionStatus>> = {};
 
 // To prevent the data from being lost on hot-reloads in development
 if (process.env.NODE_ENV !== 'production' && !global.__subscriptionsData__) {
