@@ -46,8 +46,8 @@ export default function MyHoldings() {
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {holdings.map(holding => (
-                            <TableRow key={holding.assetId}>
+                        {holdings.map((holding, index) => (
+                            <TableRow key={`${holding.assetId}-${index}`}>
                                 <TableCell>
                                     <div className="flex items-center gap-3">
                                         <AssetIcon asset={holding} className="h-8 w-8" />
