@@ -47,7 +47,7 @@ export default function RecentActivity() {
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {transactions.map(tx => (
+                        {transactions.filter(tx => tx.asset).map(tx => (
                             <TableRow key={tx.id}>
                                 <TableCell>
                                     <div className="flex items-center gap-3">
