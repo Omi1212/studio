@@ -36,7 +36,7 @@ export default function IssueTokenPage() {
                     <Button asChild>
                         <Link href="/issue-token/new">
                             <Plus className="mr-2 h-4 w-4" />
-                            Create New Token
+                            Create New Asset
                         </Link>
                     </Button>
                 </div>

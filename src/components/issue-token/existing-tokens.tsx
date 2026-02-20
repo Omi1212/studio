@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -103,7 +104,7 @@ function TokenTable({ tokens }: { tokens: TokenDetails[] }) {
             <Table>
                 <TableHeader>
                     <TableRow>
-                        <TableHead className="w-[40%]">Token</TableHead>
+                        <TableHead className="w-[40%]">Asset</TableHead>
                         <TableHead>Network</TableHead>
                         <TableHead>Max Supply</TableHead>
                         <TableHead>Status</TableHead>
@@ -248,7 +249,7 @@ export default function ExistingTokens({ view, setView }: { view: ViewMode, setV
   if (loading) {
     return (
         <div className="mb-12">
-            <h2 className="text-2xl font-headline font-semibold mb-4">Your Tokens</h2>
+            <h2 className="text-2xl font-headline font-semibold mb-4">Your Assets</h2>
              {view === 'card' ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     <Card className="h-64 animate-pulse bg-muted/50"></Card>
@@ -269,10 +270,10 @@ export default function ExistingTokens({ view, setView }: { view: ViewMode, setV
           <IdentityProvidersBanner />
           <div className="border-dashed border-2 border-muted-foreground/50 rounded-lg h-96 flex flex-col items-center justify-center text-center p-4">
               <Rocket className="h-16 w-16 text-muted-foreground mb-4" />
-              <h2 className="text-xl font-semibold mb-2">No tokens found</h2>
-              <p className="text-muted-foreground mb-4">Get started by launching your first token.</p>
+              <h2 className="text-xl font-semibold mb-2">No assets found</h2>
+              <p className="text-muted-foreground mb-4">Get started by launching your first asset.</p>
               <Button asChild>
-                  <Link href="/issue-token/new">Create New Token</Link>
+                  <Link href="/issue-token/new">Create New Asset</Link>
               </Button>
           </div>
         </div>
@@ -282,7 +283,7 @@ export default function ExistingTokens({ view, setView }: { view: ViewMode, setV
   return (
     <div className="mb-12">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl font-headline font-semibold">Your Tokens</h2>
+        <h2 className="text-2xl font-headline font-semibold">Your Assets</h2>
         <div className="hidden sm:flex items-center gap-1 bg-muted p-1 rounded-lg">
               <Button 
                 variant={view === 'card' ? 'secondary' : 'ghost'} 
