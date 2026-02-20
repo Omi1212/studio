@@ -3,7 +3,7 @@
 import dynamic from 'next/dynamic';
 import { Skeleton } from '@/components/ui/skeleton';
 
-const TokensList = dynamic(
+const AssetsList = dynamic(
   () => import('@/components/my-tokens/tokens-list'),
   {
     ssr: false,
@@ -11,6 +11,6 @@ const TokensList = dynamic(
   }
 );
 
-export default function TokensListDynamic() {
-  return <TokensList />;
+export default function AssetsListDynamic() {
+  return <AssetsList />;
 }

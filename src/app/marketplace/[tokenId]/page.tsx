@@ -9,12 +9,12 @@ import {
 } from '@/components/ui/sidebar';
 import SidebarNav from '@/components/dashboard/sidebar-nav';
 import HeaderDynamic from '@/components/dashboard/header-dynamic';
-import type { TokenDetails, SubscriptionStatus } from '@/lib/types';
+import type { AssetDetails, SubscriptionStatus } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Globe, FileText } from 'lucide-react';
 import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
-import TokenIcon from '@/components/ui/token-icon';
+import AssetIcon from '@/components/ui/asset-icon';
 import {
   ChartContainer,
   ChartTooltip,
@@ -43,8 +43,8 @@ function InfoRow({ label, value, valueClassName }: { label: string; value: React
   );
 }
 
-function TokenOfferingPage({ params }: { params: { tokenId: string } }) {
-  const [token, setToken] = useState<TokenDetails | null>(null);
+function AssetOfferingPage({ params }: { params: { tokenId: string } }) {
+  const [asset, setAsset] = useState<AssetDetails | null>(null);
   const [priceHistory, setPriceHistory] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [subscriptionStatus, setSubscriptionStatus] = useState<SubscriptionStatus>('none');
@@ -66,29 +66,29 @@ function TokenOfferingPage({ params }: { params: { tokenId: string } }) {
   };
 
   useEffect(() => {
-    const { tokenId } = params;
+    const { tokenId: assetId } = params;
     setLoading(true);
     
     Promise.all([
-      fetch(`/api/tokens/${tokenId}`).then(res => res.ok ? res.json() : null),
-      fetch('/api/token-price-history').then(res => res.ok ? res.json() : { data: [] }),
+      fetch(`/api/assets/${assetId}`).then(res => res.ok ? res.json() : null),
+      fetch('/api/asset-price-history').then(res => res.ok ? res.json() : { data: [] }),
       fetch('/api/investors/inv-001/subscriptions').then(res => res.ok ? res.json() : {}),
-    ]).then(([tokenData, priceHistoryData, subscriptionsData]) => {
-      if (tokenData) {
-        setToken({
-          ...tokenData,
-          decimals: tokenData.decimals ?? 0,
-          isFreezable: tokenData.isFreezable ?? false,
-          publicKey: tokenData.publicKey ?? `02f...${tokenData.id.slice(-10)}`,
+    ]).then(([assetData, priceHistoryData, subscriptionsData]) => {
+      if (assetData) {
+        setAsset({
+          ...assetData,
+          decimals: assetData.decimals ?? 0,
+          isFreezable: assetData.isFreezable ?? false,
+          publicKey: assetData.publicKey ?? `02f...${assetData.id.slice(-10)}`,
         });
         
         // Load subscription status from API
-        setSubscriptionStatus(subscriptionsData[tokenId] || 'none');
+        setSubscriptionStatus(subscriptionsData[assetId] || 'none');
       }
       setPriceHistory(priceHistoryData.data || []);
     }).catch(err => {
       console.error("Failed to fetch page data:", err);
-      setToken(null);
+      setAsset(null);
     }).finally(() => {
       setLoading(false);
     });
@@ -97,7 +97,7 @@ function TokenOfferingPage({ params }: { params: { tokenId: string } }) {
 
   
   const handleSubscribe = async () => {
-    if (!token) return;
+    if (!asset) return;
 
     setSubscriptionStatus('pending');
 
@@ -105,11 +105,11 @@ function TokenOfferingPage({ params }: { params: { tokenId: string } }) {
         const response = await fetch('/api/investors/inv-001/subscriptions', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ tokenId: token.id, status: 'pending' }),
+            body: JSON.stringify({ assetId: asset.id, status: 'pending' }),
         });
         if (!response.ok) throw new Error('Failed to update subscription');
 
-        toast({ title: 'Whitelisting Request Sent!', description: "Your request to be whitelisted for this token is now pending approval." });
+        toast({ title: 'Whitelisting Request Sent!', description: "Your request to be whitelisted for this asset is now pending approval." });
     } catch (error) {
         console.error(error);
         toast({ variant: 'destructive', title: 'Error', description: 'Could not send request.' });
@@ -121,22 +121,22 @@ function TokenOfferingPage({ params }: { params: { tokenId: string } }) {
   if (loading) {
     return (
         <div className="flex-1 p-4 sm:p-6 lg:p-8 flex items-center justify-center">
-            <p>Loading token details...</p>
+            <p>Loading asset details...</p>
         </div>
     );
   }
 
-  if (!token) {
+  if (!asset) {
     notFound();
   }
 
   const offeringData = {
     marketCap: 174700028.571,
     circulating: 1455833.571,
-    price: token.price || 0.12, // Use token price or default
+    price: asset.price || 0.12, // Use asset price or default
   };
 
-  const explorer = networkExplorerMap[token.network] || { name: 'Explorer', url: '#'};
+  const explorer = networkExplorerMap[asset.network] || { name: 'Explorer', url: '#'};
 
 
   return (
@@ -153,7 +153,7 @@ function TokenOfferingPage({ params }: { params: { tokenId: string } }) {
                     <Link href="/marketplace"><ArrowLeft /></Link>
                 </Button>
                 <h1 className="text-3xl font-headline font-semibold">
-                    {token.tokenName} Offering
+                    {asset.assetName} Offering
                 </h1>
             </div>
             
@@ -161,18 +161,18 @@ function TokenOfferingPage({ params }: { params: { tokenId: string } }) {
                 <Card className="lg:col-span-1">
                     <CardHeader>
                         <div className="flex items-center gap-4">
-                            <TokenIcon token={token} className="h-12 w-12" />
+                            <AssetIcon asset={asset} className="h-12 w-12" />
                             <div>
-                                <CardTitle>{token.tokenName}</CardTitle>
-                                <CardDescription className="text-primary font-bold">{token.tokenTicker}</CardDescription>
+                                <CardTitle>{asset.assetName}</CardTitle>
+                                <CardDescription className="text-primary font-bold">{asset.assetTicker}</CardDescription>
                             </div>
                         </div>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                        <InfoRow label="Network" value={networkMap[token.network] || token.network} />
+                        <InfoRow label="Network" value={networkMap[asset.network] || asset.network} />
                         <InfoRow label="Market Cap" value={`${offeringData.marketCap.toLocaleString('en-US', {maximumFractionDigits: 3})} USDT`} valueClassName="font-mono" />
-                        <InfoRow label="Circulating" value={`${offeringData.circulating.toLocaleString('en-US', {maximumFractionDigits: 3})} ${token.tokenTicker}`} valueClassName="font-mono" />
-                        <InfoRow label="Max. Supply" value={`${token.maxSupply.toLocaleString('en-US')} ${token.tokenTicker}`} valueClassName="font-mono" />
+                        <InfoRow label="Circulating" value={`${offeringData.circulating.toLocaleString('en-US', {maximumFractionDigits: 3})} ${asset.assetTicker}`} valueClassName="font-mono" />
+                        <InfoRow label="Max. Supply" value={`${asset.maxSupply.toLocaleString('en-US')} ${asset.assetTicker}`} valueClassName="font-mono" />
                     </CardContent>
                     <CardFooter className="flex-col items-stretch space-y-2">
                         <Button variant="outline" className="w-full" asChild>
@@ -183,16 +183,16 @@ function TokenOfferingPage({ params }: { params: { tokenId: string } }) {
                         </Button>
                         <Button variant="secondary" className="w-full">
                             <FileText className="mr-2 h-4 w-4" />
-                            View Token Documents
+                            View Asset Documents
                         </Button>
                     </CardFooter>
                 </Card>
 
                  <Card>
                   <CardHeader>
-                      <CardTitle>Invest in {token.tokenName}</CardTitle>
+                      <CardTitle>Invest in {asset.assetName}</CardTitle>
                       <CardDescription>
-                          To invest in this token, you must first be subscribed to the offering.
+                          To invest in this asset, you must first be subscribed to the offering.
                           Once your subscription is approved, you can place an order.
                       </CardDescription>
                   </CardHeader>
@@ -222,11 +222,11 @@ function TokenOfferingPage({ params }: { params: { tokenId: string } }) {
                             </DialogTrigger>
                             <DialogContent className='sm:max-w-lg'>
                                 <PlaceOrder
-                                    token={token}
+                                    asset={asset}
                                     price={offeringData.price}
                                     isSubscribed={true}
                                     onOrderPlaced={() => setIsModalOpen(false)}
-                                    tokenName={token.tokenName}
+                                    assetName={asset.assetName}
                                 />
                             </DialogContent>
                         </Dialog>
@@ -247,7 +247,7 @@ function TokenOfferingPage({ params }: { params: { tokenId: string } }) {
             <Card>
                 <CardHeader>
                     <CardTitle>Price History</CardTitle>
-                    <CardDescription>Price of {token.tokenTicker} over time.</CardDescription>
+                    <CardDescription>Price of {asset.assetTicker} over time.</CardDescription>
                 </CardHeader>
                 <CardContent className="flex-1">
                       <ChartContainer config={chartConfig} className="h-[250px] w-full">
@@ -299,7 +299,7 @@ function TokenOfferingPage({ params }: { params: { tokenId: string } }) {
 }
 
 
-export default function TokenDetailsUsePage({ params }: { params: Promise<{ tokenId: string }> }) {
+export default function AssetDetailsUsePage({ params }: { params: Promise<{ tokenId: string }> }) {
   const resolvedParams = use(params);
-  return <TokenOfferingPage params={resolvedParams} />;
+  return <AssetOfferingPage params={resolvedParams} />;
 }

@@ -2,14 +2,14 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import type { TokenDetails } from '@/lib/types';
+import type { AssetDetails } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/card';
-import TokenIcon from '../ui/token-icon';
+import AssetIcon from '../ui/asset-icon';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
 import { Rocket } from 'lucide-react';
 
-function getStatusBadge(status: TokenDetails['status']) {
+function getStatusBadge(status: AssetDetails['status']) {
   switch (status) {
     case 'active':
       return <Badge variant="outline" className="text-green-400 border-green-400">Active</Badge>;
@@ -31,15 +31,15 @@ const networkMap: { [key: string]: string } = {
     taproot: 'Taproot Assets',
 };
 
-function TokenCard({ token }: { token: TokenDetails }) {
+function AssetCard({ asset }: { asset: AssetDetails }) {
   const router = useRouter();
   
   const handleView = () => {
-    if (token.status === 'draft') {
-        router.push(`/issue-token/new?draft_id=${token.id}`);
+    if (asset.status === 'draft') {
+        router.push(`/issue-asset/new?draft_id=${asset.id}`);
     } else {
-        localStorage.setItem('selectedTokenId', token.id);
-        window.dispatchEvent(new Event('tokenChanged'));
+        localStorage.setItem('selectedAssetId', asset.id);
+        window.dispatchEvent(new Event('assetChanged'));
         router.push('/workspace');
     }
   };
@@ -48,48 +48,48 @@ function TokenCard({ token }: { token: TokenDetails }) {
     <Card>
       <CardHeader>
         <div className="flex items-center gap-4">
-          <TokenIcon token={token} className="h-10 w-10" />
+          <AssetIcon asset={asset} className="h-10 w-10" />
           <div>
-            <CardTitle className="text-lg">{token.tokenName}</CardTitle>
-            <CardDescription className="text-primary font-bold">{token.tokenTicker}</CardDescription>
+            <CardTitle className="text-lg">{asset.assetName}</CardTitle>
+            <CardDescription className="text-primary font-bold">{asset.assetTicker}</CardDescription>
           </div>
         </div>
       </CardHeader>
       <CardContent>
         <div className="flex justify-between text-sm">
             <span className="text-muted-foreground">Status</span>
-            {getStatusBadge(token.status)}
+            {getStatusBadge(asset.status)}
         </div>
         <div className="flex justify-between text-sm mt-2">
             <span className="text-muted-foreground">Network</span>
-            <span className="font-medium">{networkMap[token.network] || token.network}</span>
+            <span className="font-medium">{networkMap[asset.network] || asset.network}</span>
         </div>
          <div className="flex justify-between text-sm mt-2">
             <span className="text-muted-foreground">Max Supply</span>
-            <span className="font-medium font-mono">{token.maxSupply ? token.maxSupply.toLocaleString() : '--'}</span>
+            <span className="font-medium font-mono">{asset.maxSupply ? asset.maxSupply.toLocaleString() : '--'}</span>
         </div>
       </CardContent>
       <CardFooter>
         <Button variant="outline" className="w-full" onClick={handleView}>
-          {token.status === 'draft' ? 'Continue' : 'View'}
+          {asset.status === 'draft' ? 'Continue' : 'View'}
         </Button>
       </CardFooter>
     </Card>
   );
 }
 
-export default function IssuerTokens({ issuerId }: { issuerId: string }) {
-  const [issuerTokens, setIssuerTokens] = useState<TokenDetails[]>([]);
+export default function IssuerAssets({ issuerId }: { issuerId: string }) {
+  const [issuerAssets, setIssuerAssets] = useState<AssetDetails[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     setLoading(true);
-    fetch('/api/tokens?perPage=999')
+    fetch('/api/assets?perPage=999')
       .then(res => res.json())
-      .then((tokensResponse) => {
-        const allTokens = tokensResponse.data || [];
-        const filteredTokens = allTokens.filter((token: TokenDetails) => token.issuerId === issuerId);
-        setIssuerTokens(filteredTokens);
+      .then((assetsResponse) => {
+        const allAssets = assetsResponse.data || [];
+        const filteredAssets = allAssets.filter((asset: AssetDetails) => asset.issuerId === issuerId);
+        setIssuerAssets(filteredAssets);
       })
       .catch(console.error)
       .finally(() => setLoading(false));
@@ -103,17 +103,17 @@ export default function IssuerTokens({ issuerId }: { issuerId: string }) {
   
   return (
     <div>
-        <h2 className="text-xl font-semibold mb-4">Issued Tokens</h2>
-        {issuerTokens.length === 0 ? (
+        <h2 className="text-xl font-semibold mb-4">Issued Assets</h2>
+        {issuerAssets.length === 0 ? (
             <div className="border-dashed border-2 border-muted-foreground/50 rounded-lg h-48 flex flex-col items-center justify-center text-center p-4">
                 <Rocket className="h-12 w-12 text-muted-foreground mb-4" />
-                <h3 className="text-lg font-semibold mb-2">No Tokens Issued</h3>
-                <p className="text-muted-foreground">This issuer has not launched any tokens yet.</p>
+                <h3 className="text-lg font-semibold mb-2">No Assets Issued</h3>
+                <p className="text-muted-foreground">This issuer has not launched any assets yet.</p>
             </div>
         ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {issuerTokens.map(token => (
-                    <TokenCard key={token.id} token={token} />
+                {issuerAssets.map(asset => (
+                    <AssetCard key={asset.id} asset={asset} />
                 ))}
             </div>
         )}

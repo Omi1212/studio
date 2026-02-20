@@ -15,22 +15,22 @@ import {
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
 import { useToast } from '@/hooks/use-toast';
-import type { TokenDetails } from '@/lib/types';
+import type { AssetDetails } from '@/lib/types';
 
-interface PortfolioToken {
+interface PortfolioAsset {
     id: string;
     name: string;
     ticker: string;
     price: number;
     balance: number;
-    tokenId: string;
+    assetId: string;
     publicKey: string;
     maxSupply: number;
     decimals: number;
     network: string;
 }
 
-function TokenRow({ token }: { token: PortfolioToken }) {
+function AssetRow({ asset }: { asset: PortfolioAsset }) {
   const [isOpen, setIsOpen] = React.useState(false);
   const { toast } = useToast();
 
@@ -53,20 +53,20 @@ function TokenRow({ token }: { token: PortfolioToken }) {
         <div className="hidden md:flex items-center p-4">
             <div className="flex items-center gap-4 w-[35%]">
               <Avatar>
-                <AvatarFallback>{token.ticker.charAt(0)}</AvatarFallback>
+                <AvatarFallback>{asset.ticker.charAt(0)}</AvatarFallback>
               </Avatar>
               <div>
-                <p className="font-medium">{token.ticker}</p>
-                <p className="text-sm text-muted-foreground">{token.name}</p>
+                <p className="font-medium">{asset.ticker}</p>
+                <p className="text-sm text-muted-foreground">{asset.name}</p>
               </div>
             </div>
             <div className="w-[20%] text-right font-mono">
-              ${token.price.toFixed(4)}
+              ${asset.price.toFixed(4)}
             </div>
             <div className="w-[25%] text-right">
-              <p className="font-medium font-mono">{token.balance.toLocaleString()}</p>
+              <p className="font-medium font-mono">{asset.balance.toLocaleString()}</p>
               <p className="text-sm text-muted-foreground font-mono">
-                ${(token.balance * token.price).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                ${(asset.balance * asset.price).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </p>
             </div>
             <div className="w-[20%] flex items-center justify-end gap-2 px-6">
@@ -87,11 +87,11 @@ function TokenRow({ token }: { token: PortfolioToken }) {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
                 <Avatar>
-                  <AvatarFallback>{token.ticker.charAt(0)}</AvatarFallback>
+                  <AvatarFallback>{asset.ticker.charAt(0)}</AvatarFallback>
                 </Avatar>
                 <div>
-                  <p className="font-medium">{token.ticker}</p>
-                  <p className="text-sm text-muted-foreground">{token.name}</p>
+                  <p className="font-medium">{asset.ticker}</p>
+                  <p className="text-sm text-muted-foreground">{asset.name}</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
@@ -109,12 +109,12 @@ function TokenRow({ token }: { token: PortfolioToken }) {
             <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
                     <p className="text-muted-foreground">Price</p>
-                    <p className="font-mono">${token.price.toFixed(4)}</p>
+                    <p className="font-mono">${asset.price.toFixed(4)}</p>
                 </div>
                 <div className="text-right">
                     <p className="text-muted-foreground">Balance</p>
-                    <p className="font-mono">{token.balance.toLocaleString()}</p>
-                    <p className="font-mono text-muted-foreground">${(token.balance * token.price).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                    <p className="font-mono">{asset.balance.toLocaleString()}</p>
+                    <p className="font-mono text-muted-foreground">${(asset.balance * asset.price).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                 </div>
             </div>
           </div>
@@ -122,22 +122,22 @@ function TokenRow({ token }: { token: PortfolioToken }) {
         <CollapsibleContent className="p-6 pt-0 md:pt-6 bg-muted/20">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 text-sm">
             <InfoRow 
-              label="Token ID" 
-              value={token.tokenId}
-              onCopy={() => copyToClipboard(token.tokenId, 'Token ID')}
+              label="Asset ID" 
+              value={asset.assetId}
+              onCopy={() => copyToClipboard(asset.assetId, 'Asset ID')}
             />
             <InfoRow 
-              label="Token Public Key" 
-              value={token.publicKey}
-              onCopy={() => copyToClipboard(token.publicKey, 'Token Public Key')}
+              label="Asset Public Key" 
+              value={asset.publicKey}
+              onCopy={() => copyToClipboard(asset.publicKey, 'Asset Public Key')}
             />
             <div className="space-y-1">
               <p className="text-muted-foreground">Max Supply</p>
-              <p className="font-medium font-mono">{token.maxSupply.toLocaleString()}</p>
+              <p className="font-medium font-mono">{asset.maxSupply.toLocaleString()}</p>
             </div>
             <div className="space-y-1">
               <p className="text-muted-foreground">Decimals</p>
-              <p className="font-medium font-mono">{token.decimals}</p>
+              <p className="font-medium font-mono">{asset.decimals}</p>
             </div>
           </div>
         </CollapsibleContent>
@@ -169,33 +169,33 @@ function InfoRow({ label, value, onCopy }: { label: string; value: string, onCop
 }
 
 
-export default function TokensList() {
-    const [portfolioTokens, setPortfolioTokens] = React.useState<PortfolioToken[]>([]);
+export default function AssetsList() {
+    const [portfolioAssets, setPortfolioAssets] = React.useState<PortfolioAsset[]>([]);
 
     React.useEffect(() => {
         Promise.all([
             fetch('/api/investors/inv-001').then(res => res.json()),
-            fetch('/api/tokens?perPage=999').then(res => res.json())
-        ]).then(([investor, tokensResponse]: [any, any]) => {
+            fetch('/api/assets?perPage=999').then(res => res.json())
+        ]).then(([investor, assetsResponse]: [any, any]) => {
             if (!investor) return;
 
-            const allTokens = tokensResponse.tokens || [];
-            const pTokens = investor.holdings.map((holding: any) => {
-                const tokenDetail = allTokens.find((t: TokenDetails) => t.id === holding.tokenId);
+            const allAssets = assetsResponse.data || [];
+            const pAssets = investor.holdings.map((holding: any) => {
+                const assetDetail = allAssets.find((t: AssetDetails) => t.id === holding.assetId);
                 return {
-                    id: holding.tokenId,
-                    name: holding.tokenName,
-                    ticker: holding.tokenTicker,
+                    id: holding.assetId,
+                    name: holding.assetName,
+                    ticker: holding.assetTicker,
                     price: holding.value,
                     balance: holding.amount,
-                    tokenId: holding.tokenId,
-                    publicKey: `03a...${holding.tokenId.slice(-10)}`, // fake public key
-                    maxSupply: tokenDetail?.maxSupply || 0,
-                    decimals: tokenDetail?.decimals || 0,
-                    network: tokenDetail?.network || 'spark',
+                    assetId: holding.assetId,
+                    publicKey: `03a...${holding.assetId.slice(-10)}`, // fake public key
+                    maxSupply: assetDetail?.maxSupply || 0,
+                    decimals: assetDetail?.decimals || 0,
+                    network: assetDetail?.network || 'spark',
                 };
             });
-            setPortfolioTokens(pTokens);
+            setPortfolioAssets(pAssets);
         }).catch(console.error);
 
     }, []);
@@ -210,8 +210,8 @@ export default function TokensList() {
             <div className="w-[20%] px-4 py-3 font-medium text-muted-foreground text-sm text-center">Actions</div>
         </div>
         <div>
-          {portfolioTokens.map((token) => (
-            <TokenRow key={token.id} token={token} />
+          {portfolioAssets.map((asset) => (
+            <AssetRow key={asset.id} asset={asset} />
           ))}
         </div>
       </CardContent>

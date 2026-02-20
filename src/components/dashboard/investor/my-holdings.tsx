@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import TokenIcon from '@/components/ui/token-icon';
+import AssetIcon from '@/components/ui/asset-icon';
 import Link from 'next/link';
 
 export default function MyHoldings() {
@@ -29,10 +29,10 @@ export default function MyHoldings() {
             <CardHeader className="flex flex-row items-center justify-between">
                 <div>
                     <CardTitle>My Holdings</CardTitle>
-                    <CardDescription>Your current token investments.</CardDescription>
+                    <CardDescription>Your current asset investments.</CardDescription>
                 </div>
                 <Button asChild variant="outline" size="sm">
-                    <Link href="/my-tokens">View All</Link>
+                    <Link href="/my-assets">View All</Link>
                 </Button>
             </CardHeader>
             <CardContent className="p-0">
@@ -47,13 +47,13 @@ export default function MyHoldings() {
                     </TableHeader>
                     <TableBody>
                         {holdings.map(holding => (
-                            <TableRow key={holding.tokenId}>
+                            <TableRow key={holding.assetId}>
                                 <TableCell>
                                     <div className="flex items-center gap-3">
-                                        <TokenIcon token={holding} className="h-8 w-8" />
+                                        <AssetIcon asset={holding} className="h-8 w-8" />
                                         <div>
-                                            <p className="font-medium">{holding.tokenTicker}</p>
-                                            <p className="text-sm text-muted-foreground">{holding.tokenName}</p>
+                                            <p className="font-medium">{holding.assetTicker}</p>
+                                            <p className="text-sm text-muted-foreground">{holding.assetName}</p>
                                         </div>
                                     </div>
                                 </TableCell>

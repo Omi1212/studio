@@ -55,7 +55,7 @@ export default function RecentActivity() {
                                             {tx.type === 'Buy' ? <ArrowDownLeft className="h-4 w-4" /> : <ArrowUpRight className="h-4 w-4" />}
                                         </div>
                                         <div>
-                                            <p className="font-medium">{tx.type} {tx.token.tokenTicker}</p>
+                                            <p className="font-medium">{tx.type} {tx.asset.assetTicker}</p>
                                             <p className="text-sm text-muted-foreground">Order #{tx.id.slice(0,6)}</p>
                                         </div>
                                     </div>

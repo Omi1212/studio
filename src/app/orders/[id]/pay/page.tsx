@@ -14,9 +14,9 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft, CheckCircle2, Landmark } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import Link from 'next/link';
-import type { Order, TokenDetails } from '@/lib/types';
+import type { Order, AssetDetails } from '@/lib/types';
 import { Separator } from '@/components/ui/separator';
-import TokenIcon from '@/components/ui/token-icon';
+import AssetIcon from '@/components/ui/asset-icon';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import PaymentMethods from '@/components/orders/payment-methods';
 
@@ -43,7 +43,7 @@ const UsdtIcon = () => (
 export default function PayOrderPage() {
   const params = useParams();
   const [order, setOrder] = useState<Order | null>(null);
-  const [token, setToken] = useState<TokenDetails | null>(null);
+  const [asset, setAsset] = useState<AssetDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -61,17 +61,17 @@ export default function PayOrderPage() {
             const orderData: Order = await orderRes.json();
             setOrder(orderData);
 
-            const tokenRes = await fetch(`/api/tokens/${orderData.tokenId}`);
-            if (!tokenRes.ok) {
-                throw new Error('Token for order not found');
+            const assetRes = await fetch(`/api/assets/${orderData.assetId}`);
+            if (!assetRes.ok) {
+                throw new Error('Asset for order not found');
             }
-            const tokenData: TokenDetails = await tokenRes.json();
-            setToken(tokenData);
+            const assetData: AssetDetails = await assetRes.json();
+            setAsset(assetData);
 
         } catch (err) {
             console.error(err);
             setOrder(null);
-            setToken(null);
+            setAsset(null);
         } finally {
             setLoading(false);
         }
@@ -88,7 +88,7 @@ export default function PayOrderPage() {
     );
   }
 
-  if (!order || !token) {
+  if (!order || !asset) {
     notFound();
   }
 
@@ -132,7 +132,7 @@ export default function PayOrderPage() {
                                     <Button size="lg">Proceed to Payment</Button>
                                 </DialogTrigger>
                                 <DialogContent className="sm:max-w-4xl">
-                                   <PaymentMethods order={order} token={token} onPaymentConfirmed={() => setIsModalOpen(false)} />
+                                   <PaymentMethods order={order} asset={asset} onPaymentConfirmed={() => setIsModalOpen(false)} />
                                 </DialogContent>
                             </Dialog>
                             <p className="text-sm text-muted-foreground mt-6">Once the payment is completed, you must wait for the order to be reviewed.</p>
@@ -143,10 +143,10 @@ export default function PayOrderPage() {
                             <CardTitle>Order Summary</CardTitle>
                         </CardHeader>
                         <CardContent className="flex items-center gap-4">
-                           <TokenIcon token={token} className="w-16 h-16"/>
+                           <AssetIcon asset={asset} className="w-16 h-16"/>
                            <div>
-                                <h3 className="font-semibold text-lg">{order.amount.toLocaleString()} {token.tokenTicker}</h3>
-                                <p className="text-muted-foreground">{token.tokenName}</p>
+                                <h3 className="font-semibold text-lg">{order.amount.toLocaleString()} {asset.assetTicker}</h3>
+                                <p className="text-muted-foreground">{asset.assetName}</p>
                            </div>
                         </CardContent>
                     </Card>

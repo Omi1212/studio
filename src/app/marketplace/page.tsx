@@ -8,7 +8,7 @@ import {
 } from '@/components/ui/sidebar';
 import SidebarNav from '@/components/dashboard/sidebar-nav';
 import HeaderDynamic from '@/components/dashboard/header-dynamic';
-import TokenList from '@/components/marketplace/token-list';
+import AssetList from '@/components/marketplace/token-list';
 
 
 export default function MarketplacePage() {
@@ -29,7 +29,7 @@ export default function MarketplacePage() {
                     Marketplace
                     </h1>
                 </div>
-                <TokenList />
+                <AssetList />
               </div>
             </div>
           </main>

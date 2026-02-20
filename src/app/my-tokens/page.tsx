@@ -7,14 +7,14 @@ import SidebarNav from '@/components/dashboard/sidebar-nav';
 import type { Metadata } from 'next';
 import HeaderDynamic from '@/components/dashboard/header-dynamic';
 import PortfolioValue from '@/components/my-tokens/portfolio-value';
-import TokensListDynamic from '@/components/my-tokens/tokens-list-dynamic';
+import AssetsListDynamic from '@/components/my-tokens/tokens-list-dynamic';
 
 export const metadata: Metadata = {
   title: 'Portfolio - SATS Dashboard',
-  description: 'View and manage your tokens.',
+  description: 'View and manage your assets.',
 };
 
-export default function MyTokensPage() {
+export default function MyAssetsPage() {
   return (
     <SidebarProvider>
       <Sidebar className="border-r">
@@ -27,7 +27,7 @@ export default function MyTokensPage() {
             <h1 className="text-3xl font-headline font-semibold">Portfolio</h1>
             <div className="space-y-8">
               <PortfolioValue />
-              <TokensListDynamic />
+              <AssetsListDynamic />
             </div>
           </main>
         </div>
