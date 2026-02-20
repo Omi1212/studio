@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import type { ViewMode, TokenDetails, User } from '@/lib/types';
+import type { ViewMode, AssetDetails, User } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/card';
 import { Avatar, AvatarFallback } from '../ui/avatar';
 import { Badge } from '../ui/badge';
@@ -25,7 +25,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { Input } from '../ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
-import TokenIcon from '../ui/token-icon';
+import AssetIcon from '../ui/asset-icon';
 import KybBanner from '@/components/dashboard/kyb-banner';
 import IdentityProvidersBanner from '@/components/dashboard/identity-providers-banner';
 
@@ -101,7 +101,7 @@ function InvestorCard({ investor, onToggleFreeze }: { investor: Investor, onTogg
   );
 }
 
-function InvestorTableRow({ investor, selectedToken, onToggleFreeze }: { investor: Investor, selectedToken: TokenDetails | null, onToggleFreeze: () => void }) {
+function InvestorTableRow({ investor, selectedAsset, onToggleFreeze }: { investor: Investor, selectedAsset: AssetDetails | null, onToggleFreeze: () => void }) {
   const router = useRouter();
 
   return (
@@ -121,10 +121,10 @@ function InvestorTableRow({ investor, selectedToken, onToggleFreeze }: { investo
         </div>
       </TableCell>
       <TableCell className="hidden sm:table-cell">
-        {selectedToken && (
+        {selectedAsset && (
              <div className="flex items-center gap-2">
-                <TokenIcon token={selectedToken} className="h-6 w-6" />
-                <span className="font-medium text-primary">{selectedToken.tokenTicker}</span>
+                <AssetIcon asset={selectedAsset} className="h-6 w-6" />
+                <span className="font-medium text-primary">{selectedAsset.assetTicker}</span>
             </div>
         )}
       </TableCell>
@@ -167,47 +167,47 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
-  const [allTokens, setAllTokens] = useState<TokenDetails[]>([]);
-  const [selectedToken, setSelectedToken] = useState<TokenDetails | null>(null);
+  const [allAssets, setAllAssets] = useState<AssetDetails[]>([]);
+  const [selectedAsset, setSelectedAsset] = useState<AssetDetails | null>(null);
   const [dialogInvestor, setDialogInvestor] = useState<Investor | null>(null);
-  const [tokenCheckComplete, setTokenCheckComplete] = useState(false);
+  const [assetCheckComplete, setAssetCheckComplete] = useState(false);
 
   useEffect(() => {
-    fetch('/api/tokens').then(res => res.json()).then(tokensData => {
-        setAllTokens(tokensData.data);
+    fetch('/api/assets').then(res => res.json()).then(assetsData => {
+        setAllAssets(assetsData.data);
     }).catch(console.error);
   }, []);
 
   useEffect(() => {
-    if (allTokens.length === 0 && tokenCheckComplete) return;
+    if (allAssets.length === 0 && assetCheckComplete) return;
 
-    const handleTokenChange = () => {
-      if (allTokens.length > 0) {
-        const storedTokenId = localStorage.getItem('selectedTokenId');
-        if (storedTokenId) {
-            const foundToken = allTokens.find(t => t.id === storedTokenId);
-            setSelectedToken(foundToken || null);
+    const handleAssetChange = () => {
+      if (allAssets.length > 0) {
+        const storedAssetId = localStorage.getItem('selectedAssetId');
+        if (storedAssetId) {
+            const foundAsset = allAssets.find(t => t.id === storedAssetId);
+            setSelectedAsset(foundAsset || null);
         } else {
-            setSelectedToken(null);
+            setSelectedAsset(null);
         }
       }
-      setTokenCheckComplete(true);
+      setAssetCheckComplete(true);
     };
 
-    handleTokenChange();
-    window.addEventListener('tokenChanged', handleTokenChange);
+    handleAssetChange();
+    window.addEventListener('assetChanged', handleAssetChange);
     
     return () => {
-        window.removeEventListener('tokenChanged', handleTokenChange);
+        window.removeEventListener('assetChanged', handleAssetChange);
     };
-  }, [allTokens, tokenCheckComplete]);
+  }, [allAssets, assetCheckComplete]);
 
   useEffect(() => {
-    if (!tokenCheckComplete) {
+    if (!assetCheckComplete) {
         return;
     }
       
-    if (!selectedToken) {
+    if (!selectedAsset) {
         setInvestors([]);
         setTotalInvestors(0);
         setLoading(false);
@@ -218,7 +218,7 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
     const params = new URLSearchParams({
         page: currentPage.toString(),
         perPage: ITEMS_PER_PAGE.toString(),
-        tokenId: selectedToken.id,
+        assetId: selectedAsset.id,
         onlyVerified: 'true'
     });
     if (statusFilter !== 'all') {
@@ -242,7 +242,7 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
     };
     
     fetchInvestors();
-  }, [currentPage, searchQuery, statusFilter, selectedToken, tokenCheckComplete]);
+  }, [currentPage, searchQuery, statusFilter, selectedAsset, assetCheckComplete]);
   
   const totalPages = Math.ceil(totalInvestors / ITEMS_PER_PAGE);
 
@@ -290,7 +290,7 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
     );
   }
 
-  if (!selectedToken) {
+  if (!selectedAsset) {
      return (
       <div className="space-y-4">
         <div className="flex justify-between items-center">
@@ -302,9 +302,9 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
         </div>
         <div className="border-dashed border-2 border-muted-foreground/50 rounded-lg h-96 flex flex-col items-center justify-center text-center p-4 mt-8">
             <UserPlus className="h-16 w-16 text-muted-foreground mb-4" />
-            <h2 className="text-xl font-semibold mb-2">No token selected or found</h2>
+            <h2 className="text-xl font-semibold mb-2">No asset selected or found</h2>
             <p className="text-muted-foreground mb-4">
-                Please select a token from the sidebar to view investors.
+                Please select an asset from the sidebar to view investors.
             </p>
         </div>
       </div>
@@ -339,12 +339,14 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
       </div>
     );
   }
+  
+  const pageTitle = `Investors ${selectedAsset ? `for ${selectedAsset.assetTicker}` : ''}`;
 
   return (
     <AlertDialog onOpenChange={() => setDialogInvestor(null)}>
       <div className="space-y-4">
         <div className="flex justify-between items-center">
-          <h1 className="text-3xl font-headline font-semibold">Investors {selectedToken && `for ${selectedToken.tokenTicker}`}</h1>
+          <h1 className="text-3xl font-headline font-semibold">{pageTitle}</h1>
         </div>
 
         <div className="space-y-4">
@@ -400,7 +402,7 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
               <UserPlus className="h-16 w-16 text-muted-foreground mb-4" />
               <h2 className="text-xl font-semibold mb-2">No investors found</h2>
               <p className="text-muted-foreground mb-4">
-                  {searchQuery || statusFilter !== 'all' ? "Try adjusting your search or filter." : `There are no whitelisted investors for ${selectedToken?.tokenTicker}.`}
+                  {searchQuery || statusFilter !== 'all' ? "Try adjusting your search or filter." : `There are no whitelisted investors for ${selectedAsset?.assetTicker}.`}
               </p>
           </div>
         ) : view === 'card' ? (
@@ -422,7 +424,7 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
               <TableHeader>
                 <TableRow>
                   <TableHead>Investor</TableHead>
-                  <TableHead className="hidden sm:table-cell">Token</TableHead>
+                  <TableHead className="hidden sm:table-cell">Asset</TableHead>
                   <TableHead className="hidden md:table-cell">Total Invested</TableHead>
                   <TableHead className="hidden lg:table-cell">Wallet</TableHead>
                   <TableHead className="hidden sm:table-cell">Status</TableHead>
@@ -434,7 +436,7 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
                     <InvestorTableRow 
                         key={investor.id} 
                         investor={investor} 
-                        selectedToken={selectedToken} 
+                        selectedAsset={selectedAsset} 
                         onToggleFreeze={() => setDialogInvestor(investor)} 
                     />
                 ))}
@@ -459,3 +461,5 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
     </AlertDialog>
   )
 }
+
+    
