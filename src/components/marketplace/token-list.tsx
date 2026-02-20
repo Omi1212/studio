@@ -209,7 +209,7 @@ export default function TokenList() {
   if (loading) {
     return (
         <div className="mb-12">
-            <h2 className="text-2xl font-headline font-semibold mb-4">Available Tokens</h2>
+            <h2 className="text-2xl font-headline font-semibold mb-4">Available Assets</h2>
              {view === 'card' ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     <Card className="h-64 animate-pulse bg-muted/50"></Card>
@@ -227,8 +227,8 @@ export default function TokenList() {
       return (
         <div className="border-dashed border-2 border-muted-foreground/50 rounded-lg h-96 flex flex-col items-center justify-center text-center p-4">
             <ShoppingBag className="h-16 w-16 text-muted-foreground mb-4" />
-            <h2 className="text-xl font-semibold mb-2">No tokens available</h2>
-            <p className="text-muted-foreground mb-4">There are no active token offerings in the marketplace at this time.</p>
+            <h2 className="text-xl font-semibold mb-2">No assets available</h2>
+            <p className="text-muted-foreground mb-4">There are no active asset offerings in the marketplace at this time.</p>
         </div>
       );
   }
@@ -237,7 +237,7 @@ export default function TokenList() {
     <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
         <div className="mb-12 space-y-4">
         <div className="flex justify-between items-center mb-4">
-            <h2 className="text-2xl font-headline font-semibold">Available Tokens</h2>
+            <h2 className="text-2xl font-headline font-semibold">Available Assets</h2>
         </div>
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
                 <div className="relative w-full sm:w-auto flex-grow sm:flex-grow-0">
@@ -284,7 +284,7 @@ export default function TokenList() {
         {filteredTokens.length === 0 ? (
             <div className="border-dashed border-2 border-muted-foreground/50 rounded-lg h-96 flex flex-col items-center justify-center text-center p-4">
                 <ShoppingBag className="h-16 w-16 text-muted-foreground mb-4" />
-                <h2 className="text-xl font-semibold mb-2">No tokens match your search</h2>
+                <h2 className="text-xl font-semibold mb-2">No assets match your search</h2>
                 <p className="text-muted-foreground mb-4">Try adjusting your search or filters to find what you&apos;re looking for.</p>
             </div>
         ) : view === 'card' ? (
@@ -303,7 +303,7 @@ export default function TokenList() {
                     <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead className="w-[30%]">Token</TableHead>
+                                <TableHead className="w-[30%]">Asset</TableHead>
                                 <TableHead>Network</TableHead>
                                 <TableHead>Max Supply</TableHead>
                                 <TableHead className="text-right w-[25%]">Action</TableHead>
