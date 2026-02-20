@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useForm } from 'react-hook-form';
@@ -19,7 +18,7 @@ import {
 } from '@/components/ui/card';
 import { useState, Ref } from 'react';
 import { Loader2 } from 'lucide-react';
-import type { TokenFormValues } from './issue-token-form';
+import type { AssetFormValues } from './issue-asset-form';
 import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
 import { cn } from '@/lib/utils';
 import { Separator } from '../ui/separator';
@@ -31,9 +30,9 @@ const step4Schema = z.object({
 type Step4FormValues = z.infer<typeof step4Schema>;
 
 interface Step4NetworkProps {
-  onNext: (data: Partial<TokenFormValues>) => void;
+  onNext: (data: Partial<AssetFormValues>) => void;
   onBack: () => void;
-  defaultValues?: Partial<TokenFormValues>;
+  defaultValues?: Partial<AssetFormValues>;
   formRef: Ref<HTMLFormElement>;
 }
 
