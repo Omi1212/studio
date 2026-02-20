@@ -1,6 +1,6 @@
-import type { TokenFormValues } from "@/components/issue-token/issue-token-form";
+import type { AssetFormValues } from "@/components/issue-asset/issue-asset-form";
 
-export interface TokenDetails extends TokenFormValues {
+export interface AssetDetails extends AssetFormValues {
   id: string;
   publicKey: string;
   status: 'pending' | 'active' | 'frozen' | 'draft';
@@ -26,8 +26,8 @@ export type Order = {
   id: string;
   investorId: string;
   investorName: string;
-  tokenId: string;
-  tokenTicker: string;
+  assetId: string;
+  assetTicker: string;
   type: 'Buy' | 'Sell';
   amount: number;
   price: number;
@@ -42,7 +42,7 @@ export type Transfer = {
     from: string;
     to: string;
     amount: number;
-    tokenTicker: string;
+    assetTicker: string;
     date: string;
 }
 
@@ -66,8 +66,8 @@ export type Issuer = {
   name: string;
   email: string;
   walletAddress: string;
-  issuedTokens: number;
-  pendingTokens: number;
+  issuedAssets: number;
+  pendingAssets: number;
   status: 'active' | 'inactive';
 };
 

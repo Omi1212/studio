@@ -30,7 +30,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import Link from 'next/link';
 import type { Issuer } from '@/lib/types';
-import IssuerTokens from '@/components/issuer-management/issuer-tokens';
+import IssuerAssets from '@/components/issuer-management/issuer-assets';
 
 function getStatusBadge(status: Issuer['status']) {
   switch (status) {
@@ -179,12 +179,12 @@ export default function IssuerDetailsPage() {
                 <CardContent className="space-y-4">
                     <InfoRow label="Email" value={issuer.email} />
                     <InfoRow label="Wallet Address" value={<span className="font-mono">{issuer.walletAddress}</span>} />
-                    <InfoRow label="Issued Tokens" value={<span className="font-mono">{issuer.issuedTokens}</span>} />
-                    <InfoRow label="Pending Tokens" value={<span className="font-mono">{issuer.pendingTokens}</span>} />
+                    <InfoRow label="Issued Assets" value={<span className="font-mono">{issuer.issuedAssets}</span>} />
+                    <InfoRow label="Pending Assets" value={<span className="font-mono">{issuer.pendingAssets}</span>} />
                 </CardContent>
             </Card>
 
-            <IssuerTokens issuerId={issuer.id} />
+            <IssuerAssets issuerId={issuer.id} />
 
             </div>
           </main>

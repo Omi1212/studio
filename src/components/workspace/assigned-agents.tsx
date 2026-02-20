@@ -9,10 +9,10 @@ import { ClipboardList } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 interface AssignedAgentsProps {
-    tokenId: string;
+    assetId: string;
 }
 
-export default function AssignedAgents({ tokenId }: AssignedAgentsProps) {
+export default function AssignedAgents({ assetId }: AssignedAgentsProps) {
     const [assignedAgents, setAssignedAgents] = useState<User[]>([]);
     const [loading, setLoading] = useState(true);
     const router = useRouter();
@@ -25,20 +25,20 @@ export default function AssignedAgents({ tokenId }: AssignedAgentsProps) {
         ]).then(([usersResponse, allAssignments]: [{ data: User[] }, Record<string, string[]>]) => {
                 const allAgents = usersResponse.data;
 
-                const agentIdsForToken: string[] = [];
+                const agentIdsForAsset: string[] = [];
                 for (const agentId in allAssignments) {
-                    if (allAssignments[agentId].includes(tokenId)) {
-                        agentIdsForToken.push(agentId);
+                    if (allAssignments[agentId].includes(assetId)) {
+                        agentIdsForAsset.push(agentId);
                     }
                 }
                 
-                const agents = allAgents.filter(agent => agentIdsForToken.includes(agent.id));
+                const agents = allAgents.filter(agent => agentIdsForAsset.includes(agent.id));
                 setAssignedAgents(agents);
             })
             .catch(console.error)
             .finally(() => setLoading(false));
 
-    }, [tokenId]);
+    }, [assetId]);
 
     if (loading) {
         return <Card className="h-48 animate-pulse bg-muted/50"></Card>;
@@ -83,7 +83,7 @@ export default function AssignedAgents({ tokenId }: AssignedAgentsProps) {
                     <div className="text-center text-muted-foreground py-8 flex flex-col items-center justify-center">
                          <ClipboardList className="h-12 w-12 text-muted-foreground mb-4" />
                         <p className="font-medium">No Agents Assigned</p>
-                        <p className="text-sm">This token has not been assigned to any agent.</p>
+                        <p className="text-sm">This asset has not been assigned to any agent.</p>
                     </div>
                 )}
             </CardContent>

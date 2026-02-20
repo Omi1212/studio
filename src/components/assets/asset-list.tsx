@@ -1,10 +1,11 @@
+
 'use client';
 
 import { useEffect, useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import type { TokenDetails, ViewMode, Issuer } from '@/lib/types';
+import type { AssetDetails, ViewMode, Issuer } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/card';
-import TokenIcon from '../ui/token-icon';
+import AssetIcon from '../ui/asset-icon';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
 import { Rocket, LayoutGrid, List, Search } from 'lucide-react';
@@ -15,7 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 
 const ITEMS_PER_PAGE = 6;
 
-function getStatusBadge(status: TokenDetails['status']) {
+function getStatusBadge(status: AssetDetails['status']) {
   switch (status) {
     case 'active':
       return <Badge variant="outline" className="text-green-400 border-green-400">Active</Badge>;
@@ -37,16 +38,16 @@ const networkMap: { [key: string]: string } = {
     taproot: 'Taproot Assets',
 };
 
-function TokenCard({ token, issuer }: { token: TokenDetails, issuer?: Issuer }) {
+function AssetCard({ asset, issuer }: { asset: AssetDetails, issuer?: Issuer }) {
   const router = useRouter();
   
   const handleView = () => {
-    if (token.status === 'draft') {
-        router.push(`/issue-token/new?draft_id=${token.id}`);
+    if (asset.status === 'draft') {
+        router.push(`/issue-asset/new?draft_id=${asset.id}`);
     } else {
-        localStorage.setItem('selectedTokenId', token.id);
-        window.dispatchEvent(new Event('tokenChanged'));
-        router.push(`/workspace/${token.id}`);
+        localStorage.setItem('selectedAssetId', asset.id);
+        window.dispatchEvent(new Event('assetChanged'));
+        router.push(`/workspace/${asset.id}`);
     }
   };
 
@@ -54,21 +55,21 @@ function TokenCard({ token, issuer }: { token: TokenDetails, issuer?: Issuer }) 
     <Card>
       <CardHeader>
         <div className="flex items-center gap-4">
-          <TokenIcon token={token} className="h-10 w-10" />
+          <AssetIcon asset={asset} className="h-10 w-10" />
           <div>
-            <CardTitle className="text-lg">{token.tokenName}</CardTitle>
-            <CardDescription className="text-primary font-bold">{token.tokenTicker}</CardDescription>
+            <CardTitle className="text-lg">{asset.assetName}</CardTitle>
+            <CardDescription className="text-primary font-bold">{asset.assetTicker}</CardDescription>
           </div>
         </div>
       </CardHeader>
       <CardContent>
         <div className="flex justify-between text-sm">
             <span className="text-muted-foreground">Status</span>
-            {getStatusBadge(token.status)}
+            {getStatusBadge(asset.status)}
         </div>
         <div className="flex justify-between text-sm mt-2">
             <span className="text-muted-foreground">Network</span>
-            <span className="font-medium">{networkMap[token.network] || token.network}</span>
+            <span className="font-medium">{networkMap[asset.network] || asset.network}</span>
         </div>
          <div className="flex justify-between text-sm mt-2">
             <span className="text-muted-foreground">Issuer</span>
@@ -77,23 +78,23 @@ function TokenCard({ token, issuer }: { token: TokenDetails, issuer?: Issuer }) 
       </CardContent>
       <CardFooter>
         <Button variant="outline" className="w-full" onClick={handleView}>
-          {token.status === 'draft' ? 'Continue' : 'View'}
+          {asset.status === 'draft' ? 'Continue' : 'View'}
         </Button>
       </CardFooter>
     </Card>
   );
 }
 
-function TokenTable({ tokens, issuers }: { tokens: TokenDetails[], issuers: Issuer[] }) {
+function AssetTable({ assets, issuers }: { assets: AssetDetails[], issuers: Issuer[] }) {
     const router = useRouter();
 
-    const handleView = (token: TokenDetails) => {
-        if (token.status === 'draft') {
-            router.push(`/issue-token/new?draft_id=${token.id}`);
+    const handleView = (asset: AssetDetails) => {
+        if (asset.status === 'draft') {
+            router.push(`/issue-asset/new?draft_id=${asset.id}`);
         } else {
-            localStorage.setItem('selectedTokenId', token.id);
-            window.dispatchEvent(new Event('tokenChanged'));
-            router.push(`/workspace/${token.id}`);
+            localStorage.setItem('selectedAssetId', asset.id);
+            window.dispatchEvent(new Event('assetChanged'));
+            router.push(`/workspace/${asset.id}`);
         }
     };
     
@@ -102,7 +103,7 @@ function TokenTable({ tokens, issuers }: { tokens: TokenDetails[], issuers: Issu
             <Table>
                 <TableHeader>
                     <TableRow>
-                        <TableHead className="w-[30%]">Token</TableHead>
+                        <TableHead className="w-[30%]">Asset</TableHead>
                         <TableHead>Issuer</TableHead>
                         <TableHead>Network</TableHead>
                         <TableHead>Status</TableHead>
@@ -110,25 +111,25 @@ function TokenTable({ tokens, issuers }: { tokens: TokenDetails[], issuers: Issu
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {tokens.map(token => {
-                        const issuer = issuers.find(i => i.id === token.issuerId);
+                    {assets.map(asset => {
+                        const issuer = issuers.find(i => i.id === asset.issuerId);
                         return (
-                        <TableRow key={token.id} onClick={() => handleView(token)} className="cursor-pointer">
+                        <TableRow key={asset.id} onClick={() => handleView(asset)} className="cursor-pointer">
                             <TableCell>
                                 <div className="flex items-center gap-3">
-                                    <TokenIcon token={token} className="h-8 w-8" />
+                                    <AssetIcon asset={asset} className="h-8 w-8" />
                                     <div>
-                                        <p className="font-medium">{token.tokenName}</p>
-                                        <p className="text-sm text-primary">{token.tokenTicker}</p>
+                                        <p className="font-medium">{asset.assetName}</p>
+                                        <p className="text-sm text-primary">{asset.assetTicker}</p>
                                     </div>
                                 </div>
                             </TableCell>
                             <TableCell>{issuer?.name || 'N/A'}</TableCell>
-                            <TableCell>{networkMap[token.network] || token.network}</TableCell>
-                            <TableCell>{getStatusBadge(token.status)}</TableCell>
+                            <TableCell>{networkMap[asset.network] || asset.network}</TableCell>
+                            <TableCell>{getStatusBadge(asset.status)}</TableCell>
                             <TableCell className="text-right">
                                 <Button variant="outline" size="sm">
-                                    {token.status === 'draft' ? 'Continue' : 'View'}
+                                    {asset.status === 'draft' ? 'Continue' : 'View'}
                                 </Button>
                             </TableCell>
                         </TableRow>
@@ -140,8 +141,8 @@ function TokenTable({ tokens, issuers }: { tokens: TokenDetails[], issuers: Issu
 }
 
 export default function AssetList() {
-  const [tokens, setTokens] = useState<TokenDetails[]>([]);
-  const [totalTokens, setTotalTokens] = useState(0);
+  const [assets, setAssets] = useState<AssetDetails[]>([]);
+  const [totalAssets, setTotalAssets] = useState(0);
   const [issuers, setIssuers] = useState<Issuer[]>([]);
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState<ViewMode>('card');
@@ -163,26 +164,26 @@ export default function AssetList() {
     }
 
     Promise.all([
-      fetch(`/api/tokens?${params.toString()}`).then(res => res.json()),
+      fetch(`/api/assets?${params.toString()}`).then(res => res.json()),
       fetch('/api/issuers').then(res => res.json()) // Fetch all issuers to map names
-    ]).then(([tokensResponse, issuersResponse]) => {
-      const combinedTokens: TokenDetails[] = tokensResponse.data.map((t: TokenDetails) => ({
+    ]).then(([assetsResponse, issuersResponse]) => {
+      const combinedAssets: AssetDetails[] = assetsResponse.data.map((t: AssetDetails) => ({
         ...t,
         decimals: t.decimals ?? 0,
         isFreezable: t.isFreezable ?? false,
         publicKey: t.publicKey ?? `02f...${t.id.slice(-10)}`,
-        tokenName: t.tokenName || 'Untitled Token',
-        tokenTicker: t.tokenTicker || '---',
+        assetName: t.assetName || 'Untitled Asset',
+        assetTicker: t.assetTicker || '---',
         network: t.network || 'unknown',
         maxSupply: t.maxSupply || 0,
       }));
-      setTokens(combinedTokens);
-      setTotalTokens(tokensResponse.meta.total);
+      setAssets(combinedAssets);
+      setTotalAssets(assetsResponse.meta.total);
       setIssuers(issuersResponse.data || []);
     }).catch(console.error).finally(() => setLoading(false));
   }, [searchQuery, statusFilter, currentPage]);
 
-  const totalPages = Math.ceil(totalTokens / ITEMS_PER_PAGE);
+  const totalPages = Math.ceil(totalAssets / ITEMS_PER_PAGE);
 
   const handlePageChange = (page: number) => {
     if (page >= 1 && page <= totalPages) {
@@ -223,7 +224,7 @@ export default function AssetList() {
     return (
         <div className="space-y-4">
             <div className="flex justify-between items-center">
-                <h1 className="text-3xl font-headline font-semibold">Tokens</h1>
+                <h1 className="text-3xl font-headline font-semibold">Assets</h1>
             </div>
              {view === 'card' ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -238,14 +239,14 @@ export default function AssetList() {
     );
   }
   
-  if (tokens.length === 0 && !searchQuery && statusFilter === 'all') {
+  if (assets.length === 0 && !searchQuery && statusFilter === 'all') {
       return (
         <div className="border-dashed border-2 border-muted-foreground/50 rounded-lg h-96 flex flex-col items-center justify-center text-center p-4">
             <Rocket className="h-16 w-16 text-muted-foreground mb-4" />
             <h2 className="text-xl font-semibold mb-2">No assets found</h2>
-            <p className="text-muted-foreground mb-4">Get started by launching a token.</p>
+            <p className="text-muted-foreground mb-4">Get started by launching an asset.</p>
             <Button asChild>
-                <Link href="/issue-token">Go to Launchpad</Link>
+                <Link href="/issue-asset">Go to Launchpad</Link>
             </Button>
         </div>
       );
@@ -254,7 +255,7 @@ export default function AssetList() {
   return (
     <div className="space-y-4">
         <div className="flex justify-between items-center">
-            <h1 className="text-3xl font-headline font-semibold">Tokens</h1>
+            <h1 className="text-3xl font-headline font-semibold">Assets</h1>
         </div>
          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
             <div className="relative w-full sm:w-auto flex-grow sm:flex-grow-0">
@@ -300,7 +301,7 @@ export default function AssetList() {
             </div>
         </div>
 
-        {tokens.length === 0 ? (
+        {assets.length === 0 ? (
             <div className="border-dashed border-2 border-muted-foreground/50 rounded-lg h-96 flex flex-col items-center justify-center text-center p-4">
                 <Rocket className="h-16 w-16 text-muted-foreground mb-4" />
                 <h2 className="text-xl font-semibold mb-2">No assets match your search</h2>
@@ -309,16 +310,16 @@ export default function AssetList() {
         ) : view === 'card' ? (
             <>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {tokens.map(token => {
-                    const issuer = issuers.find(i => i.id === token.issuerId);
-                    return <TokenCard key={token.id} token={token} issuer={issuer} />
+                    {assets.map(asset => {
+                    const issuer = issuers.find(i => i.id === asset.issuerId);
+                    return <AssetCard key={asset.id} asset={asset} issuer={issuer} />
                     })}
                 </div>
                 {renderPagination()}
             </>
         ) : (
             <>
-                <TokenTable tokens={tokens} issuers={issuers} />
+                <AssetTable assets={assets} issuers={issuers} />
                 {renderPagination()}
             </>
         )}

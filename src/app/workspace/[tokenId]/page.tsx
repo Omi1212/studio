@@ -10,14 +10,14 @@ import {
 } from '@/components/ui/sidebar';
 import SidebarNav from '@/components/dashboard/sidebar-nav';
 import HeaderDynamic from '@/components/dashboard/header-dynamic';
-import TokenDetailsView from '@/components/workspace/token-details-view';
-import type { TokenDetails, User } from '@/lib/types';
+import AssetDetailsView from '@/components/workspace/token-details-view';
+import type { AssetDetails, User } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 
-function TokenDetailsComponent({ params }: { params: { tokenId: string } }) {
-  const [token, setToken] = useState<TokenDetails | null>(null);
+function AssetDetailsComponent({ params }: { params: { assetId: string } }) {
+  const [asset, setAsset] = useState<AssetDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [userRole, setUserRole] = useState<User['role'] | null>(null);
 
@@ -26,24 +26,24 @@ function TokenDetailsComponent({ params }: { params: { tokenId: string } }) {
     setUserRole(role);
     setLoading(true);
 
-    const { tokenId } = params;
+    const { assetId } = params;
     
-    fetch(`/api/tokens/${tokenId}`)
+    fetch(`/api/assets/${assetId}`)
       .then(res => {
         if(res.ok) return res.json();
-        throw new Error('Token not found');
+        throw new Error('Asset not found');
       })
-      .then((tokenData: TokenDetails) => {
-        setToken({
-          ...tokenData,
-          decimals: tokenData.decimals ?? 0,
-          isFreezable: tokenData.isFreezable ?? false,
-          publicKey: tokenData.publicKey ?? `02f...${tokenData.id.slice(-10)}`,
+      .then((assetData: AssetDetails) => {
+        setAsset({
+          ...assetData,
+          decimals: assetData.decimals ?? 0,
+          isFreezable: assetData.isFreezable ?? false,
+          publicKey: assetData.publicKey ?? `02f...${assetData.id.slice(-10)}`,
         });
       })
       .catch(err => {
         console.error(err);
-        setToken(null);
+        setAsset(null);
       })
       .finally(() => setLoading(false));
 
@@ -59,7 +59,7 @@ function TokenDetailsComponent({ params }: { params: { tokenId: string } }) {
           <div className="flex flex-col min-h-dvh">
             <HeaderDynamic />
             <main className="flex-1 p-4 sm:p-6 lg:p-8 flex items-center justify-center">
-              <p>Loading token details...</p>
+              <p>Loading asset details...</p>
             </main>
           </div>
         </SidebarInset>
@@ -67,7 +67,7 @@ function TokenDetailsComponent({ params }: { params: { tokenId: string } }) {
     );
   }
 
-  if (!token) {
+  if (!asset) {
     notFound();
   }
 
@@ -85,11 +85,11 @@ function TokenDetailsComponent({ params }: { params: { tokenId: string } }) {
                     <Link href="/workspace"><ArrowLeft /></Link>
                 </Button>
                 <h1 className="text-3xl font-headline font-semibold">
-                    Token Details
+                    Asset Details
                 </h1>
             </div>
             <div className="max-w-4xl mx-auto">
-             <TokenDetailsView token={token} view="workspace" userRole={userRole} />
+             <AssetDetailsView asset={asset} view="workspace" userRole={userRole} />
             </div>
           </main>
         </div>
@@ -98,7 +98,7 @@ function TokenDetailsComponent({ params }: { params: { tokenId: string } }) {
   );
 }
 
-export default function TokenDetailsPage({ params }: { params: Promise<{ tokenId: string }> }) {
+export default function AssetDetailsPage({ params }: { params: Promise<{ assetId: string }> }) {
   const resolvedParams = use(params);
-  return <TokenDetailsComponent params={resolvedParams} />;
+  return <AssetDetailsComponent params={resolvedParams} />;
 }

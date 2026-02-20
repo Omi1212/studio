@@ -28,8 +28,8 @@ export default function NewIssuerPage() {
       name: formData.get('name') as string,
       email: formData.get('email') as string,
       walletAddress: formData.get('walletAddress') as string,
-      issuedTokens: 0,
-      pendingTokens: 0,
+      issuedAssets: 0,
+      pendingAssets: 0,
       status: 'active' as const,
     };
     

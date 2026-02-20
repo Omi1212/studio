@@ -1,18 +1,18 @@
 
-import type { TokenDetails, User } from '@/lib/types';
-import { exampleTokens } from '../tokens/data';
+import type { AssetDetails, User } from '@/lib/types';
+import { exampleAssets } from '../assets/data';
 
 // Use a global variable in development to preserve data across HMR
 declare global {
   var __investorsData__: User[] | undefined;
 }
 
-const allTokens: Omit<TokenDetails, 'tokenIcon' | 'whitepaper' | 'legalTokenizationDoc' | 'tokenIssuanceLegalDoc' | 'publicKey'>[] = exampleTokens;
+const allAssets: Omit<AssetDetails, 'assetIcon' | 'whitepaper' | 'legalAssetizationDoc' | 'assetIssuanceLegalDoc' | 'publicKey'>[] = exampleAssets;
 
-const txToken1 = { ...allTokens.find(t => t.id === 'example-1')!, id: 'example-1' };
-const txToken2 = { ...allTokens.find(t => t.id === 'example-2')!, id: 'example-2' };
-const txToken3 = { ...allTokens.find(t => t.id === 'example-3')!, id: 'example-3' };
-const txToken4 = { ...allTokens.find(t => t.id === 'example-4')!, id: 'example-4' };
+const txAsset1 = { ...allAssets.find(t => t.id === 'example-1')!, id: 'example-1' };
+const txAsset2 = { ...allAssets.find(t => t.id === 'example-2')!, id: 'example-2' };
+const txAsset3 = { ...allAssets.find(t => t.id === 'example-3')!, id: 'example-3' };
+const txAsset4 = { ...allAssets.find(t => t.id === 'example-4')!, id: 'example-4' };
 
 
 const initialData: User[] = [
@@ -36,16 +36,16 @@ const initialData: User[] = [
         idDoc: 'Passport, ***1234',
         address: '123 Main St, New York, NY 10001',
         holdings: [
-            { tokenId: 'example-1', tokenName: 'Digital Dollar', tokenTicker: 'DUSD', amount: 25000, value: 1.00 },
-            { tokenId: 'example-2', tokenName: 'Gold Token', tokenTicker: 'GLDT', amount: 100, value: 75.50 },
+            { assetId: 'example-1', assetName: 'Digital Dollar', assetTicker: 'DUSD', amount: 25000, value: 1.00 },
+            { assetId: 'example-2', assetName: 'Gold Asset', assetTicker: 'GLDT', amount: 100, value: 75.50 },
         ],
         transactions: [
-            { id: 'tx-1-1', type: 'Buy' as const, token: txToken1, amount: 10000, price: 1.00, date: '2024-07-01' },
-            { id: 'tx-1-2', type: 'Buy' as const, token: txToken2, amount: 50, price: 70.20, date: '2024-07-05' },
-            { id: 'tx-1-3', type: 'Sell' as const, token: txToken1, amount: 2000, price: 1.01, date: '2024-07-15' },
-            { id: 'tx-1-4', type: 'Buy' as const, token: txToken4, amount: 500, price: 12.50, date: '2024-07-18' },
-            { id: 'tx-1-5', type: 'Buy' as const, token: txToken3, amount: 20, price: 240.00, date: '2024-07-20' },
-            { id: 'tx-1-6', type: 'Buy' as const, token: txToken1, amount: 15000, price: 1.00, date: '2024-07-22' },
+            { id: 'tx-1-1', type: 'Buy' as const, asset: txAsset1, amount: 10000, price: 1.00, date: '2024-07-01' },
+            { id: 'tx-1-2', type: 'Buy' as const, asset: txAsset2, amount: 50, price: 70.20, date: '2024-07-05' },
+            { id: 'tx-1-3', type: 'Sell' as const, asset: txAsset1, amount: 2000, price: 1.01, date: '2024-07-15' },
+            { id: 'tx-1-4', type: 'Buy' as const, asset: txAsset4, amount: 500, price: 12.50, date: '2024-07-18' },
+            { id: 'tx-1-5', type: 'Buy' as const, asset: txAsset3, amount: 20, price: 240.00, date: '2024-07-20' },
+            { id: 'tx-1-6', type: 'Buy' as const, asset: txAsset1, amount: 15000, price: 1.00, date: '2024-07-22' },
         ]
     },
     {
@@ -68,14 +68,14 @@ const initialData: User[] = [
         idDoc: 'Passport, ***5678',
         address: '456 Oak St, Toronto, ON M5H 2N2',
         holdings: [
-             { tokenId: 'example-1', tokenName: 'Digital Dollar', tokenTicker: 'DUSD', amount: 15000, value: 1.00 },
-             { tokenId: 'example-3', tokenName: 'Real Estate Share', tokenTicker: 'REIT', amount: 40, value: 250.00 },
+             { assetId: 'example-1', assetName: 'Digital Dollar', assetTicker: 'DUSD', amount: 15000, value: 1.00 },
+             { assetId: 'example-3', assetName: 'Real Estate Share', assetTicker: 'REIT', amount: 40, value: 250.00 },
         ],
         transactions: [
-            { id: 'tx-2-1', type: 'Buy' as const, token: txToken1, amount: 15000, price: 1.00, date: '2024-07-20' },
-            { id: 'tx-2-2', type: 'Sell' as const, token: txToken1, amount: 5000, price: 1.00, date: '2024-07-25' },
-            { id: 'tx-2-3', type: 'Buy' as const, token: txToken3, amount: 40, price: 250.00, date: '2024-07-28' },
-            { id: 'tx-2-4', type: 'Buy' as const, token: txToken2, amount: 100, price: 75.00, date: '2024-08-01' },
+            { id: 'tx-2-1', type: 'Buy' as const, asset: txAsset1, amount: 15000, price: 1.00, date: '2024-07-20' },
+            { id: 'tx-2-2', type: 'Sell' as const, asset: txAsset1, amount: 5000, price: 1.00, date: '2024-07-25' },
+            { id: 'tx-2-3', type: 'Buy' as const, asset: txAsset3, amount: 40, price: 250.00, date: '2024-07-28' },
+            { id: 'tx-2-4', type: 'Buy' as const, asset: txAsset2, amount: 100, price: 75.00, date: '2024-08-01' },
         ]
     },
     {
@@ -98,16 +98,16 @@ const initialData: User[] = [
         idDoc: 'Driver\'s License, ***9876',
         address: '789 Pine St, London, W1J 7NT',
         holdings: [
-            { tokenId: 'example-1', tokenName: 'Digital Dollar', tokenTicker: 'DUSD', amount: 50000, value: 1.00 },
-            { tokenId: 'example-4', tokenName: 'Carbon Credit', tokenTicker: 'CRBN', amount: 2000, value: 12.75 },
+            { assetId: 'example-1', assetName: 'Digital Dollar', assetTicker: 'DUSD', amount: 50000, value: 1.00 },
+            { assetId: 'example-4', assetName: 'Carbon Credit', assetTicker: 'CRBN', amount: 2000, value: 12.75 },
         ],
         transactions: [
-            { id: 'tx-3-1', type: 'Buy' as const, token: txToken4, amount: 1500, price: 10.50, date: '2024-06-20' },
-            { id: 'tx-3-2', type: 'Sell' as const, token: txToken4, amount: 300, price: 12.00, date: '2024-07-10' },
-            { id: 'tx-3-3', type: 'Buy' as const, token: txToken1, amount: 20000, price: 1.00, date: '2024-07-18' },
-            { id: 'tx-3-4', type: 'Buy' as const, token: txToken2, amount: 100, price: 72.00, date: '2024-07-21' },
-            { id: 'tx-3-5', type: 'Sell' as const, token: txToken1, amount: 5000, price: 1.02, date: '2024-07-25' },
-            { id: 'tx-3-6', type: 'Buy' as const, token: txToken3, amount: 10, price: 255.00, date: '2024-07-29' },
+            { id: 'tx-3-1', type: 'Buy' as const, asset: txAsset4, amount: 1500, price: 10.50, date: '2024-06-20' },
+            { id: 'tx-3-2', type: 'Sell' as const, asset: txAsset4, amount: 300, price: 12.00, date: '2024-07-10' },
+            { id: 'tx-3-3', type: 'Buy' as const, asset: txAsset1, amount: 20000, price: 1.00, date: '2024-07-18' },
+            { id: 'tx-3-4', type: 'Buy' as const, asset: txAsset2, amount: 100, price: 72.00, date: '2024-07-21' },
+            { id: 'tx-3-5', type: 'Sell' as const, asset: txAsset1, amount: 5000, price: 1.02, date: '2024-07-25' },
+            { id: 'tx-3-6', type: 'Buy' as const, asset: txAsset3, amount: 10, price: 255.00, date: '2024-07-29' },
         ]
     },
     {
@@ -130,12 +130,12 @@ const initialData: User[] = [
         idDoc: 'ID Card, ***5432',
         address: '101 Kurfürstendamm, Berlin, 10719',
         holdings: [
-             { tokenId: 'example-2', tokenName: 'Gold Token', tokenTicker: 'GLDT', amount: 50, value: 75.50 },
+             { assetId: 'example-2', assetName: 'Gold Asset', assetTicker: 'GLDT', amount: 50, value: 75.50 },
         ],
         transactions: [
-            { id: 'tx-4-1', type: 'Buy' as const, token: txToken2, amount: 100, price: 65.00, date: '2024-05-01' },
-            { id: 'tx-4-2', type: 'Sell' as const, token: txToken2, amount: 25, price: 78.00, date: '2024-07-22' },
-            { id: 'tx-4-3', type: 'Buy' as const, token: txToken1, amount: 1000, price: 1.00, date: '2024-07-25' },
+            { id: 'tx-4-1', type: 'Buy' as const, asset: txAsset2, amount: 100, price: 65.00, date: '2024-05-01' },
+            { id: 'tx-4-2', type: 'Sell' as const, asset: txAsset2, amount: 25, price: 78.00, date: '2024-07-22' },
+            { id: 'tx-4-3', type: 'Buy' as const, asset: txAsset1, amount: 1000, price: 1.00, date: '2024-07-25' },
         ]
     },
     {
@@ -236,8 +236,8 @@ const initialData: User[] = [
         address: '202 George St, Sydney, NSW 2000',
         holdings: [],
         transactions: [
-            { id: 'tx-9-1', type: 'Buy' as const, token: txToken1, amount: 75000, price: 1.00, date: '2024-01-20' },
-            { id: 'tx-9-2', type: 'Buy' as const, token: txToken2, amount: 200, price: 75.00, date: '2024-08-02' },
+            { id: 'tx-9-1', type: 'Buy' as const, asset: txAsset1, amount: 75000, price: 1.00, date: '2024-01-20' },
+            { id: 'tx-9-2', type: 'Buy' as const, asset: txAsset2, amount: 200, price: 75.00, date: '2024-08-02' },
         ]
     },
     {
@@ -261,9 +261,9 @@ const initialData: User[] = [
         address: '303 W Madison St, Chicago, IL 60606',
         holdings: [],
         transactions: [
-             { id: 'tx-10-1', type: 'Buy' as const, token: txToken2, amount: 1000, price: 70.00, date: '2024-04-10' },
-             { id: 'tx-10-2', type: 'Buy' as const, token: txToken3, amount: 50, price: 240.00, date: '2024-05-15' },
-             { id: 'tx-10-3', type: 'Buy' as const, token: txToken1, amount: 20000, price: 1.01, date: '2024-06-01' },
+             { id: 'tx-10-1', type: 'Buy' as const, asset: txAsset2, amount: 1000, price: 70.00, date: '2024-04-10' },
+             { id: 'tx-10-2', type: 'Buy' as const, asset: txAsset3, amount: 50, price: 240.00, date: '2024-05-15' },
+             { id: 'tx-10-3', type: 'Buy' as const, asset: txAsset1, amount: 20000, price: 1.01, date: '2024-06-01' },
         ]
     },
     {
@@ -293,8 +293,8 @@ const initialData: User[] = [
         isFrozen: false,
         holdings: [],
         transactions: [
-            { id: 'tx-12-1', type: 'Buy' as const, token: txToken1, amount: 20000, price: 1.00, date: '2024-08-01' },
-            { id: 'tx-12-2', type: 'Buy' as const, token: txToken3, amount: 60, price: 250.00, date: '2024-08-02' },
+            { id: 'tx-12-1', type: 'Buy' as const, asset: txAsset1, amount: 20000, price: 1.00, date: '2024-08-01' },
+            { id: 'tx-12-2', type: 'Buy' as const, asset: txAsset3, amount: 60, price: 250.00, date: '2024-08-02' },
         ]
     },
     {
@@ -310,8 +310,8 @@ const initialData: User[] = [
         isFrozen: false,
         holdings: [],
         transactions: [
-            { id: 'tx-13-1', type: 'Buy' as const, token: txToken2, amount: 1000, price: 75.25, date: '2024-08-02' },
-            { id: 'tx-13-2', type: 'Buy' as const, token: txToken3, amount: 100, price: 250.00, date: '2024-08-03' },
+            { id: 'tx-13-1', type: 'Buy' as const, asset: txAsset2, amount: 1000, price: 75.25, date: '2024-08-02' },
+            { id: 'tx-13-2', type: 'Buy' as const, asset: txAsset3, amount: 100, price: 250.00, date: '2024-08-03' },
         ]
     },
     {
@@ -327,7 +327,7 @@ const initialData: User[] = [
         isFrozen: false,
         holdings: [],
         transactions: [
-            { id: 'tx-14-1', type: 'Buy' as const, token: txToken3, amount: 50, price: 255.00, date: '2024-08-03' },
+            { id: 'tx-14-1', type: 'Buy' as const, asset: txAsset3, amount: 50, price: 255.00, date: '2024-08-03' },
         ]
     },
     {
@@ -343,7 +343,7 @@ const initialData: User[] = [
         isFrozen: false,
         holdings: [],
         transactions: [
-            { id: 'tx-15-1', type: 'Buy' as const, token: txToken1, amount: 25000, price: 1.00, date: '2024-08-04' },
+            { id: 'tx-15-1', type: 'Buy' as const, asset: txAsset1, amount: 25000, price: 1.00, date: '2024-08-04' },
         ]
     },
     {
@@ -359,7 +359,7 @@ const initialData: User[] = [
         isFrozen: false,
         holdings: [],
         transactions: [
-            { id: 'tx-16-1', type: 'Buy' as const, token: txToken2, amount: 200, price: 75.50, date: '2024-08-05' },
+            { id: 'tx-16-1', type: 'Buy' as const, asset: txAsset2, amount: 200, price: 75.50, date: '2024-08-05' },
         ]
     },
     {
@@ -375,8 +375,8 @@ const initialData: User[] = [
         isFrozen: false,
         holdings: [],
         transactions: [
-            { id: 'tx-17-1', type: 'Buy' as const, token: txToken1, amount: 10000, price: 1.00, date: '2024-08-06' },
-            { id: 'tx-17-2', type: 'Buy' as const, token: txToken2, amount: 100, price: 75.50, date: '2024-08-06' },
+            { id: 'tx-17-1', type: 'Buy' as const, asset: txAsset1, amount: 10000, price: 1.00, date: '2024-08-06' },
+            { id: 'tx-17-2', type: 'Buy' as const, asset: txAsset2, amount: 100, price: 75.50, date: '2024-08-06' },
         ]
     }
 ];

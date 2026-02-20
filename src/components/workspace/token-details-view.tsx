@@ -11,7 +11,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Copy, Globe, Coins, Flame, Snowflake, TrendingUp, BarChart, CircleDollarSign } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import type { TokenDetails, User } from '@/lib/types';
+import type { AssetDetails, User } from '@/lib/types';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Badge } from '../ui/badge';
 import { Separator } from '../ui/separator';
@@ -19,8 +19,8 @@ import { Progress } from '../ui/progress';
 import { useState, useEffect } from 'react';
 import AssignedAgents from './assigned-agents';
 
-interface TokenDetailsViewProps {
-  token: TokenDetails;
+interface AssetDetailsViewProps {
+  asset: AssetDetails;
   view?: 'dashboard' | 'workspace';
   userRole?: User['role'] | null;
 }
@@ -40,11 +40,11 @@ function KpiCard({ title, value, icon: Icon }: { title: string; value: string; i
 }
 
 
-export default function TokenDetailsView({
-  token,
+export default function AssetDetailsView({
+  asset,
   view = 'workspace',
   userRole,
-}: TokenDetailsViewProps) {
+}: AssetDetailsViewProps) {
   const { toast } = useToast();
   const [iconPreview, setIconPreview] = useState<string | null>(null);
 
@@ -55,20 +55,20 @@ export default function TokenDetailsView({
     taproot: { name: 'Taproot Explorer', url: 'https://mempool.space' },
   };
 
-  const explorer = networkExplorerMap[token.network] || { name: 'Explorer', url: '#'};
+  const explorer = networkExplorerMap[asset.network] || { name: 'Explorer', url: '#'};
 
 
   useEffect(() => {
-    if (token.tokenIcon && typeof token.tokenIcon !== 'string' && 'size' in token.tokenIcon) {
+    if (asset.assetIcon && typeof asset.assetIcon !== 'string' && 'size' in asset.assetIcon) {
       const reader = new FileReader();
       reader.onloadend = () => {
         setIconPreview(reader.result as string);
       }
-      reader.readAsDataURL(token.tokenIcon as File);
+      reader.readAsDataURL(asset.assetIcon as File);
     } else {
         setIconPreview(null);
     }
-  }, [token.tokenIcon]);
+  }, [asset.assetIcon]);
 
 
   const copyToClipboard = (text: string, fieldName: string) => {
@@ -80,7 +80,7 @@ export default function TokenDetailsView({
   };
 
   const getStatusBadge = () => {
-    switch (token.status) {
+    switch (asset.status) {
       case 'active':
         return <Badge variant="outline" className="text-green-400 border-green-400">Active</Badge>;
       case 'pending':
@@ -94,26 +94,26 @@ export default function TokenDetailsView({
   
   const renderConditionalContent = () => {
     if (userRole === 'superadmin') {
-      return <AssignedAgents tokenId={token.id} />;
+      return <AssignedAgents assetId={asset.id} />;
     }
 
     if (view === 'dashboard' || view === 'workspace') {
       return (
         <Card>
           <CardHeader>
-            <CardTitle>Token Actions</CardTitle>
-            <CardDescription>Perform actions on this token. (Available after approval)</CardDescription>
+            <CardTitle>Asset Actions</CardTitle>
+            <CardDescription>Perform actions on this asset. (Available after approval)</CardDescription>
           </CardHeader>
           <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Button variant="outline" disabled={token.status !== 'active'}>
+            <Button variant="outline" disabled={asset.status !== 'active'}>
               <Coins className="mr-2 h-4 w-4" />
-              Mint Tokens
+              Mint Assets
             </Button>
-            <Button variant="outline" disabled={token.status !== 'active'}>
+            <Button variant="outline" disabled={asset.status !== 'active'}>
               <Flame className="mr-2 h-4 w-4" />
-              Burn Tokens
+              Burn Assets
             </Button>
-            <Button variant="outline" disabled={token.status !== 'active'}>
+            <Button variant="outline" disabled={asset.status !== 'active'}>
               <Snowflake className="mr-2 h-4 w-4" />
               Freeze Address
             </Button>
@@ -142,14 +142,14 @@ export default function TokenDetailsView({
               <div className="flex items-center gap-4">
                  <Avatar className="h-12 w-12 text-xl font-bold">
                     {iconPreview ? (
-                      <AvatarImage src={iconPreview} alt={token.tokenName} />
+                      <AvatarImage src={iconPreview} alt={asset.assetName} />
                     ) : (
-                      <AvatarFallback>{token.tokenName.charAt(0)}</AvatarFallback>
+                      <AvatarFallback>{asset.assetName.charAt(0)}</AvatarFallback>
                     )}
                 </Avatar>
                 <div>
-                  <h2 className="text-xl font-bold">{token.tokenName}</h2>
-                  <p className="text-primary">{token.tokenTicker}</p>
+                  <h2 className="text-xl font-bold">{asset.assetName}</h2>
+                  <p className="text-primary">{asset.assetTicker}</p>
                 </div>
               </div>
               {getStatusBadge()}
@@ -157,14 +157,14 @@ export default function TokenDetailsView({
 
             <div className="space-y-4">
               <InfoRow 
-                label="Token Public Key" 
-                value={token.publicKey} 
-                onCopy={() => copyToClipboard(token.publicKey, 'Token Public Key')} 
+                label="Asset Public Key" 
+                value={asset.publicKey} 
+                onCopy={() => copyToClipboard(asset.publicKey, 'Asset Public Key')} 
               />
               <InfoRow 
-                label="Token ID" 
-                value={token.id} 
-                onCopy={() => copyToClipboard(token.id, 'Token ID')}
+                label="Asset ID" 
+                value={asset.id} 
+                onCopy={() => copyToClipboard(asset.id, 'Asset ID')}
               />
             </div>
             
@@ -173,11 +173,11 @@ export default function TokenDetailsView({
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
                 <div className="space-y-1">
                     <p className="text-muted-foreground">Decimals</p>
-                    <p className="font-medium">{token.decimals}</p>
+                    <p className="font-medium">{asset.decimals}</p>
                 </div>
                 <div className="space-y-1">
                     <p className="text-muted-foreground">Is Freezable</p>
-                    <p className="font-medium">{token.isFreezable ? 'Yes' : 'No'}</p>
+                    <p className="font-medium">{asset.isFreezable ? 'Yes' : 'No'}</p>
                 </div>
                 <div className="space-y-1">
                     <p className="text-muted-foreground">Holders</p>
@@ -195,11 +195,11 @@ export default function TokenDetailsView({
           <CardContent className="space-y-4">
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">Max Supply</span>
-              <span className="font-medium">{token.maxSupply.toLocaleString()}</span>
+              <span className="font-medium">{asset.maxSupply.toLocaleString()}</span>
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">Current Total Supply</span>
-              <span className="font-medium">0 / {token.maxSupply.toLocaleString()}</span>
+              <span className="font-medium">0 / {asset.maxSupply.toLocaleString()}</span>
             </div>
             <Progress value={0} />
              <div className="text-right text-sm text-muted-foreground">0%</div>

@@ -6,8 +6,8 @@ import { z } from 'zod';
 const orderPostSchema = z.object({
     investorId: z.string(),
     investorName: z.string(),
-    tokenId: z.string(),
-    tokenTicker: z.string(),
+    assetId: z.string(),
+    assetTicker: z.string(),
     type: z.enum(['Buy', 'Sell']),
     amount: z.number().positive(),
     price: z.number(),
@@ -20,7 +20,7 @@ const querySchema = z.object({
     perPage: z.coerce.number().int().min(1).max(1000).default(10),
     status: z.enum(['pending', 'completed', 'rejected', 'waiting payment', 'all']).optional(),
     query: z.string().optional(),
-    tokenId: z.string().optional(),
+    assetId: z.string().optional(),
     investorId: z.string().optional(),
 });
 
@@ -32,12 +32,12 @@ export async function GET(request: Request) {
       return NextResponse.json({ errors: validation.error.errors }, { status: 400 });
   }
 
-  const { page, perPage, status, query, tokenId, investorId } = validation.data;
+  const { page, perPage, status, query, assetId, investorId } = validation.data;
 
   let filteredOrders = ordersData;
 
-  if (tokenId) {
-    filteredOrders = filteredOrders.filter(order => order.tokenId === tokenId);
+  if (assetId) {
+    filteredOrders = filteredOrders.filter(order => order.assetId === assetId);
   }
 
   if (investorId) {
@@ -52,7 +52,7 @@ export async function GET(request: Request) {
     const lowercasedQuery = query.toLowerCase();
     filteredOrders = filteredOrders.filter(order =>
       order.investorName.toLowerCase().includes(lowercasedQuery) ||
-      order.tokenTicker.toLowerCase().includes(lowercasedQuery) ||
+      order.assetTicker.toLowerCase().includes(lowercasedQuery) ||
       order.id.toLowerCase().includes(lowercasedQuery)
     );
   }

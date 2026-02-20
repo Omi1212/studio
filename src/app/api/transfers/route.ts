@@ -7,7 +7,7 @@ const querySchema = z.object({
     perPage: z.coerce.number().int().min(1).max(1000).default(10),
     type: z.enum(['Transfer', 'Mint', 'Burn', 'all']).optional(),
     query: z.string().optional(),
-    tokenTicker: z.string().optional(),
+    assetTicker: z.string().optional(),
 });
 
 
@@ -19,12 +19,12 @@ export async function GET(request: Request) {
       return NextResponse.json({ errors: validation.error.errors }, { status: 400 });
   }
   
-  const { page, perPage, type, query, tokenTicker } = validation.data;
+  const { page, perPage, type, query, assetTicker } = validation.data;
 
   let filteredTransfers = transfersData;
 
-  if (tokenTicker) {
-      filteredTransfers = filteredTransfers.filter(t => t.tokenTicker === tokenTicker);
+  if (assetTicker) {
+      filteredTransfers = filteredTransfers.filter(t => t.assetTicker === assetTicker);
   }
 
   if (type && type !== 'all') {

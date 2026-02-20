@@ -30,9 +30,9 @@ import {
 } from "@/components/ui/alert-dialog"
 import Link from 'next/link';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import TokenIcon from '@/components/ui/token-icon';
+import AssetIcon from '@/components/ui/asset-icon';
 import { cn } from '@/lib/utils';
-import type { TokenDetails, User } from '@/lib/types';
+import type { AssetDetails, User } from '@/lib/types';
 import { countries } from '@/lib/countries';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -84,8 +84,8 @@ export default function InvestorDetailsPage() {
   const { toast } = useToast();
   const [investor, setInvestor] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [allTokens, setAllTokens] = useState<TokenDetails[]>([]);
-  const [selectedToken, setSelectedToken] = useState<TokenDetails | null>(null);
+  const [allAssets, setAllAssets] = useState<AssetDetails[]>([]);
+  const [selectedAsset, setSelectedAsset] = useState<AssetDetails | null>(null);
   const [filteredTransactions, setFilteredTransactions] = useState<User['transactions']>([]);
 
   useEffect(() => {
@@ -94,45 +94,45 @@ export default function InvestorDetailsPage() {
 
     Promise.all([
         fetch(`/api/investors/${id}`).then(res => res.ok ? res.json() : null),
-        fetch(`/api/tokens?perPage=999`).then(res => res.ok ? res.json() : { data: [] })
-    ]).then(([investorData, tokensResponse]) => {
+        fetch(`/api/assets?perPage=999`).then(res => res.ok ? res.json() : { data: [] })
+    ]).then(([investorData, assetsResponse]) => {
         setInvestor(investorData);
-        setAllTokens(tokensResponse.data || []);
+        setAllAssets(assetsResponse.data || []);
         setLoading(false);
     }).catch(err => {
         console.error(err);
         setLoading(false);
     });
 
-    const handleTokenChange = () => {
-        const storedTokenId = localStorage.getItem('selectedTokenId');
-        if (storedTokenId && allTokens.length > 0) {
-            const foundToken = allTokens.find(t => t.id === storedTokenId);
-            setSelectedToken(foundToken || null);
+    const handleAssetChange = () => {
+        const storedAssetId = localStorage.getItem('selectedAssetId');
+        if (storedAssetId && allAssets.length > 0) {
+            const foundAsset = allAssets.find(t => t.id === storedAssetId);
+            setSelectedAsset(foundAsset || null);
         } else {
-            setSelectedToken(null);
+            setSelectedAsset(null);
         }
     };
 
-    handleTokenChange();
-    window.addEventListener('tokenChanged', handleTokenChange);
+    handleAssetChange();
+    window.addEventListener('assetChanged', handleAssetChange);
 
     return () => {
-        window.removeEventListener('tokenChanged', handleTokenChange);
+        window.removeEventListener('assetChanged', handleAssetChange);
     };
 
-  }, [params, allTokens]);
+  }, [params, allAssets]);
 
   useEffect(() => {
-    if (selectedToken && investor?.transactions) {
-      const filtered = investor.transactions.filter(tx => tx.token.id === selectedToken.id);
+    if (selectedAsset && investor?.transactions) {
+      const filtered = investor.transactions.filter(tx => tx.asset.id === selectedAsset.id);
       setFilteredTransactions(filtered);
     } else if (investor?.transactions) {
       setFilteredTransactions(investor.transactions);
     } else {
       setFilteredTransactions([]);
     }
-  }, [investor, selectedToken]);
+  }, [investor, selectedAsset]);
 
 
   const handleToggleFreeze = async () => {
@@ -312,7 +312,7 @@ export default function InvestorDetailsPage() {
                 <Card>
                     <CardHeader>
                         <CardTitle>
-                            Transaction History {selectedToken && `for ${selectedToken.tokenTicker}`}
+                            Transaction History {selectedAsset && `for ${selectedAsset.assetTicker}`}
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
@@ -321,7 +321,7 @@ export default function InvestorDetailsPage() {
                             <TableHeader>
                                 <TableRow>
                                     <TableHead>Transaction</TableHead>
-                                    <TableHead>Token</TableHead>
+                                    <TableHead>Asset</TableHead>
                                     <TableHead className="hidden sm:table-cell">Date</TableHead>
                                     <TableHead className="text-right">Amount</TableHead>
                                     <TableHead className="text-right hidden md:table-cell">Total</TableHead>
@@ -345,8 +345,8 @@ export default function InvestorDetailsPage() {
                                         </TableCell>
                                         <TableCell>
                                             <div className="flex items-center gap-2">
-                                                <TokenIcon token={tx.token} className="h-6 w-6" />
-                                                <span className="font-medium text-primary">{tx.token.tokenTicker}</span>
+                                                <AssetIcon asset={tx.asset} className="h-6 w-6" />
+                                                <span className="font-medium text-primary">{tx.asset.assetTicker}</span>
                                             </div>
                                         </TableCell>
                                         <TableCell className="hidden sm:table-cell text-muted-foreground">
@@ -364,7 +364,7 @@ export default function InvestorDetailsPage() {
                         </Table>
                         ) : (
                             <div className="text-center text-muted-foreground py-8">
-                                This investor has no transaction history for the selected token.
+                                This investor has no transaction history for the selected asset.
                             </div>
                         )}
                     </CardContent>
@@ -376,6 +376,3 @@ export default function InvestorDetailsPage() {
     </SidebarProvider>
   );
 }
-
-
-

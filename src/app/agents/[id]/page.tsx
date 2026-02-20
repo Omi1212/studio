@@ -29,7 +29,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import Link from 'next/link';
 import type { User } from '@/lib/types';
-import AgentTokens from '@/components/agents/agent-tokens';
+import AgentAssets from '@/components/agents/agent-assets';
 
 function getStatusBadge(status: User['status']) {
   switch (status) {
@@ -185,7 +185,7 @@ export default function AgentDetailsPage() {
                     <InfoRow label="Wallet Address" value={<span className="font-mono">{agent.walletAddress}</span>} />
                 </CardContent>
             </Card>
-            <AgentTokens agent={agent} />
+            <AgentAssets agent={agent} />
             </div>
           </main>
         </div>

@@ -22,7 +22,7 @@ const querySchema = z.object({
     status: z.enum(['frozen', 'whitelisted', 'all']).optional(),
     kycStatus: z.enum(['verified', 'pending', 'rejected']).optional(),
     query: z.string().optional(),
-    tokenId: z.string().optional(),
+    assetId: z.string().optional(),
     onlyVerified: z.string().optional(),
 });
 
@@ -35,7 +35,7 @@ export async function GET(request: Request) {
       return NextResponse.json({ errors: validation.error.errors }, { status: 400 });
   }
 
-  const { page, perPage, status, kycStatus, query, tokenId, onlyVerified } = validation.data;
+  const { page, perPage, status, kycStatus, query, assetId, onlyVerified } = validation.data;
 
   let filteredInvestors: User[] = investorsData;
 
@@ -43,9 +43,9 @@ export async function GET(request: Request) {
     filteredInvestors = filteredInvestors.filter(investor => investor.kycStatus === 'verified');
   }
   
-  if (tokenId) {
+  if (assetId) {
     filteredInvestors = filteredInvestors.filter(investor => 
-        investor.transactions?.some(tx => tx.token.id === tokenId)
+        investor.transactions?.some(tx => tx.asset.id === assetId)
     );
   }
 

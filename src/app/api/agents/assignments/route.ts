@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
-import { agentTokenAssignments } from './data';
+import { agentAssetAssignments } from './data';
 
 export async function GET() {
-  return NextResponse.json(agentTokenAssignments);
+  return NextResponse.json(agentAssetAssignments);
 }
