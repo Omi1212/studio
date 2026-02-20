@@ -1,3 +1,4 @@
+
 import { NextResponse } from 'next/server';
 import { investorsData } from './data';
 import type { User } from '@/lib/types';
@@ -45,7 +46,7 @@ export async function GET(request: Request) {
   
   if (assetId) {
     filteredInvestors = filteredInvestors.filter(investor => 
-        investor.transactions?.some(tx => tx.asset.id === assetId)
+        investor.transactions?.some(tx => tx && tx.asset && tx.asset.id === assetId)
     );
   }
 

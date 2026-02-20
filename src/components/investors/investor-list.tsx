@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
@@ -231,6 +232,9 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
     const fetchInvestors = async () => {
         try {
             const response = await fetch(`/api/investors?${params.toString()}`);
+            if (!response.ok) {
+              throw new Error(`HTTP error! status: ${response.status}`);
+            }
             const data = await response.json();
             setInvestors(data.data);
             setTotalInvestors(data.meta.total);
@@ -461,5 +465,3 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
     </AlertDialog>
   )
 }
-
-    
