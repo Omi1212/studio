@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import type { Order, TokenDetails } from '@/lib/types';
+import type { Order, AssetDetails } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
@@ -12,14 +12,14 @@ import { Checkbox } from '../ui/checkbox';
 import { DialogHeader, DialogTitle } from '../ui/dialog';
 
 interface PlaceOrderProps {
-    token: TokenDetails;
+    asset: AssetDetails;
     price: number;
     isSubscribed: boolean;
     onOrderPlaced?: () => void;
-    tokenName: string;
+    assetName: string;
 }
 
-export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced, tokenName }: PlaceOrderProps) {
+export default function PlaceOrder({ asset, price, isSubscribed, onOrderPlaced, assetName }: PlaceOrderProps) {
     const { toast } = useToast();
     const router = useRouter();
 
@@ -45,15 +45,15 @@ export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced, 
     };
 
     const handlePlaceOrder = async () => {
-        const tokenAmount = parseFloat(quantity);
-         if (!tokenAmount || tokenAmount <= 0 || !prospectusConfirmed || !orderInfoConfirmed) {
+        const assetAmount = parseFloat(quantity);
+         if (!assetAmount || assetAmount <= 0 || !prospectusConfirmed || !orderInfoConfirmed) {
             return;
         }
-        if (tokenAmount < minLimit || tokenAmount > maxLimit) {
+        if (assetAmount < minLimit || assetAmount > maxLimit) {
             toast({
                 variant: "destructive",
                 title: "Invalid Quantity",
-                description: `Quantity must be between ${minLimit} and ${maxLimit} ${token.tokenTicker}.`,
+                description: `Quantity must be between ${minLimit} and ${maxLimit} ${asset.assetTicker}.`,
             });
             return;
         }
@@ -61,8 +61,8 @@ export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced, 
         const newOrderData = {
             investorId: 'inv-001', // Hardcoded for demo
             investorName: 'Alice Johnson', // Hardcoded for demo
-            tokenId: token.id,
-            tokenTicker: token.tokenTicker,
+            assetId: asset.id,
+            assetTicker: asset.assetTicker,
             type: 'Buy' as const,
             amount: parseFloat(quantity),
             price: price,
@@ -110,7 +110,7 @@ export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced, 
     return (
         <>
             <DialogHeader className="text-center pb-4">
-                <DialogTitle>Invest in {tokenName}</DialogTitle>
+                <DialogTitle>Invest in {assetName}</DialogTitle>
             </DialogHeader>
 
             <div className="space-y-6">
@@ -126,12 +126,12 @@ export default function PlaceOrder({ token, price, isSubscribed, onOrderPlaced, 
                             className="pr-20"
                         />
                         <span className="absolute inset-y-0 right-4 flex items-center text-muted-foreground font-semibold">
-                            {token.tokenTicker}
+                            {asset.assetTicker}
                         </span>
                     </div>
                      <div className="text-xs text-muted-foreground flex justify-between px-1">
                         <span>Price: ${price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD</span>
-                        <span>Min: {minLimit} {token.tokenTicker} / Max: {maxLimit} {token.tokenTicker}</span>
+                        <span>Min: {minLimit} {asset.assetTicker} / Max: {maxLimit} {asset.assetTicker}</span>
                     </div>
                 </div>
 

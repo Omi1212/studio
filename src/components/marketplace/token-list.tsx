@@ -2,9 +2,9 @@
 
 import { useEffect, useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import type { TokenDetails, ViewMode, SubscriptionStatus } from '@/lib/types';
+import type { AssetDetails, ViewMode, SubscriptionStatus } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/card';
-import TokenIcon from '../ui/token-icon';
+import AssetIcon from '../ui/asset-icon';
 import { Button } from '../ui/button';
 import { ShoppingBag, LayoutGrid, List, Search } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
@@ -21,24 +21,24 @@ const networkMap: { [key: string]: string } = {
     taproot: 'Taproot Assets',
 };
 
-function TokenCard({ token, onAction, subscriptionStatus }: { token: TokenDetails, onAction: (token: TokenDetails) => void, subscriptionStatus: SubscriptionStatus }) {
+function AssetCard({ asset, onAction, subscriptionStatus }: { asset: AssetDetails, onAction: (asset: AssetDetails) => void, subscriptionStatus: SubscriptionStatus }) {
   const router = useRouter();
 
   const handleView = () => {
-    router.push(`/marketplace/${token.id}`);
+    router.push(`/marketplace/${asset.id}`);
   };
 
   const getActionButton = () => {
     if (subscriptionStatus === 'approved') {
         return (
             <DialogTrigger asChild>
-                <Button className="w-full bg-green-600 hover:bg-green-700" onClick={() => onAction(token)}>Invest</Button>
+                <Button className="w-full bg-green-600 hover:bg-green-700" onClick={() => onAction(asset)}>Invest</Button>
             </DialogTrigger>
         )
     } else if (subscriptionStatus === 'pending') {
         return <Button className="w-full text-yellow-400 border-yellow-400" variant="outline" disabled>Pending</Button>;
     } else {
-        return <Button variant="outline" className="w-full" onClick={() => onAction(token)}>Subscribe</Button>;
+        return <Button variant="outline" className="w-full" onClick={() => onAction(asset)}>Subscribe</Button>;
     }
   }
 
@@ -46,21 +46,21 @@ function TokenCard({ token, onAction, subscriptionStatus }: { token: TokenDetail
     <Card>
       <CardHeader>
         <div className="flex items-center gap-4">
-          <TokenIcon token={token} className="h-10 w-10" />
+          <AssetIcon asset={asset} className="h-10 w-10" />
           <div>
-            <CardTitle className="text-lg">{token.tokenName}</CardTitle>
-            <CardDescription className="text-primary font-bold">{token.tokenTicker}</CardDescription>
+            <CardTitle className="text-lg">{asset.assetName}</CardTitle>
+            <CardDescription className="text-primary font-bold">{asset.assetTicker}</CardDescription>
           </div>
         </div>
       </CardHeader>
       <CardContent>
         <div className="flex justify-between text-sm mt-2">
             <span className="text-muted-foreground">Network</span>
-            <span className="font-medium">{networkMap[token.network] || token.network}</span>
+            <span className="font-medium">{networkMap[asset.network] || asset.network}</span>
         </div>
          <div className="flex justify-between text-sm mt-2">
             <span className="text-muted-foreground">Max Supply</span>
-            <span className="font-medium font-mono">{token.maxSupply ? token.maxSupply.toLocaleString() : '--'}</span>
+            <span className="font-medium font-mono">{asset.maxSupply ? asset.maxSupply.toLocaleString() : '--'}</span>
         </div>
       </CardContent>
       <CardFooter className="gap-2">
@@ -73,24 +73,24 @@ function TokenCard({ token, onAction, subscriptionStatus }: { token: TokenDetail
   );
 }
 
-function TokenTableRow({ token, onAction, subscriptionStatus }: { token: TokenDetails, onAction: (token: TokenDetails) => void, subscriptionStatus: SubscriptionStatus }) {
+function AssetTableRow({ asset, onAction, subscriptionStatus }: { asset: AssetDetails, onAction: (asset: AssetDetails) => void, subscriptionStatus: SubscriptionStatus }) {
     const router = useRouter();
 
     const handleView = () => {
-      router.push(`/marketplace/${token.id}`);
+      router.push(`/marketplace/${asset.id}`);
     };
     
     const getActionButton = () => {
         if (subscriptionStatus === 'approved') {
             return (
                 <DialogTrigger asChild>
-                    <Button size="sm" className="bg-green-600 hover:bg-green-700" onClick={() => onAction(token)}>Invest</Button>
+                    <Button size="sm" className="bg-green-600 hover:bg-green-700" onClick={() => onAction(asset)}>Invest</Button>
                 </DialogTrigger>
             );
         } else if (subscriptionStatus === 'pending') {
             return <Button size="sm" variant="outline" className="text-yellow-400 border-yellow-400" disabled>Pending</Button>;
         } else {
-            return <Button variant="outline" size="sm" onClick={() => onAction(token)}>Subscribe</Button>;
+            return <Button variant="outline" size="sm" onClick={() => onAction(asset)}>Subscribe</Button>;
         }
     }
 
@@ -98,15 +98,15 @@ function TokenTableRow({ token, onAction, subscriptionStatus }: { token: TokenDe
         <TableRow onClick={handleView} className="cursor-pointer">
             <TableCell>
                 <div className="flex items-center gap-3">
-                    <TokenIcon token={token} className="h-8 w-8" />
+                    <AssetIcon asset={asset} className="h-8 w-8" />
                     <div>
-                        <p className="font-medium">{token.tokenName}</p>
-                        <p className="text-sm text-primary">{token.tokenTicker}</p>
+                        <p className="font-medium">{asset.assetName}</p>
+                        <p className="text-sm text-primary">{asset.assetTicker}</p>
                     </div>
                 </div>
             </TableCell>
-            <TableCell>{networkMap[token.network] || token.network}</TableCell>
-            <TableCell className="font-mono">{token.maxSupply ? token.maxSupply.toLocaleString() : '--'}</TableCell>
+            <TableCell>{networkMap[asset.network] || asset.network}</TableCell>
+            <TableCell className="font-mono">{asset.maxSupply ? asset.maxSupply.toLocaleString() : '--'}</TableCell>
             <TableCell className="text-right space-x-2" onClick={(e) => e.stopPropagation()}>
                 <Button variant="outline" size="sm" onClick={handleView}>
                     View
@@ -117,73 +117,73 @@ function TokenTableRow({ token, onAction, subscriptionStatus }: { token: TokenDe
     )
 }
 
-export default function TokenList() {
-  const [allTokens, setAllTokens] = useState<TokenDetails[]>([]);
+export default function AssetList() {
+  const [allAssets, setAllAssets] = useState<AssetDetails[]>([]);
   const [loading, setLoading] = useState(true);
   const [subscriptions, setSubscriptions] = useState<Record<string, SubscriptionStatus>>({});
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [view, setView] = useState<ViewMode>('card');
-  const [selectedToken, setSelectedToken] = useState<TokenDetails | null>(null);
+  const [selectedAsset, setSelectedAsset] = useState<AssetDetails | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     setLoading(true);
     Promise.all([
-      fetch('/api/tokens?perPage=999').then(res => res.json()),
+      fetch('/api/assets?perPage=999').then(res => res.json()),
       fetch('/api/investors/inv-001/subscriptions').then(res => res.ok ? res.json() : {})
-    ]).then(([tokensResponse, subscriptionsData]: [any, Record<string, SubscriptionStatus>]) => {
-      const activeTokens = (tokensResponse.data || [])
-        .filter((t: TokenDetails) => t.status === 'active')
-        .map((t: TokenDetails) => ({
+    ]).then(([assetsResponse, subscriptionsData]: [any, Record<string, SubscriptionStatus>]) => {
+      const activeAssets = (assetsResponse.data || [])
+        .filter((t: AssetDetails) => t.status === 'active')
+        .map((t: AssetDetails) => ({
           ...t,
           decimals: t.decimals ?? 0,
           isFreezable: t.isFreezable ?? false,
           publicKey: t.publicKey ?? `02f...${t.id.slice(-10)}`,
-          tokenName: t.tokenName || 'Untitled Token',
-          tokenTicker: t.tokenTicker || '---',
+          assetName: t.assetName || 'Untitled Asset',
+          assetTicker: t.assetTicker || '---',
           network: t.network || 'unknown',
           maxSupply: t.maxSupply || 0,
           price: t.price || 0,
         }));
-      setAllTokens(activeTokens);
+      setAllAssets(activeAssets);
       setSubscriptions(subscriptionsData);
     }).catch(console.error)
     .finally(() => setLoading(false));
 
   }, []);
 
-  const filteredTokens = useMemo(() => {
-    let filtered = [...allTokens];
+  const filteredAssets = useMemo(() => {
+    let filtered = [...allAssets];
     
     if (filterStatus !== 'all') {
-      filtered = filtered.filter(token => (subscriptions[token.id] || 'none') === filterStatus);
+      filtered = filtered.filter(asset => (subscriptions[asset.id] || 'none') === filterStatus);
     }
     
     if (searchQuery) {
       const lowercasedQuery = searchQuery.toLowerCase();
-      filtered = filtered.filter(token => 
-        token.tokenName.toLowerCase().includes(lowercasedQuery) ||
-        token.tokenTicker.toLowerCase().includes(lowercasedQuery)
+      filtered = filtered.filter(asset => 
+        asset.assetName.toLowerCase().includes(lowercasedQuery) ||
+        asset.assetTicker.toLowerCase().includes(lowercasedQuery)
       );
     }
 
     return filtered;
-  }, [allTokens, searchQuery, filterStatus, subscriptions]);
+  }, [allAssets, searchQuery, filterStatus, subscriptions]);
   
-  const handleSubscriptionAction = async (token: TokenDetails) => {
-    const currentStatus = subscriptions[token.id] || 'none';
+  const handleSubscriptionAction = async (asset: AssetDetails) => {
+    const currentStatus = subscriptions[asset.id] || 'none';
     
     if (currentStatus === 'none') {
-        const newSubscriptions = { ...subscriptions, [token.id]: 'pending' as SubscriptionStatus };
+        const newSubscriptions = { ...subscriptions, [asset.id]: 'pending' as SubscriptionStatus };
         setSubscriptions(newSubscriptions);
         
         try {
             const response = await fetch('/api/investors/inv-001/subscriptions', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ tokenId: token.id, status: 'pending' }),
+                body: JSON.stringify({ assetId: asset.id, status: 'pending' }),
             });
             if (!response.ok) throw new Error('Failed to update subscription');
     
@@ -193,14 +193,14 @@ export default function TokenList() {
             toast({ variant: 'destructive', title: 'Error', description: 'Could not send request.' });
             // Revert state on error
             const revertedSubscriptions = { ...subscriptions };
-            if (revertedSubscriptions[token.id]) {
-                delete revertedSubscriptions[token.id];
+            if (revertedSubscriptions[asset.id]) {
+                delete revertedSubscriptions[asset.id];
             }
             setSubscriptions(revertedSubscriptions);
         }
 
     } else if (currentStatus === 'approved') {
-        setSelectedToken(token);
+        setSelectedAsset(asset);
         setIsModalOpen(true);
     }
   };
@@ -223,7 +223,7 @@ export default function TokenList() {
     );
   }
   
-  if (allTokens.length === 0) {
+  if (allAssets.length === 0) {
       return (
         <div className="border-dashed border-2 border-muted-foreground/50 rounded-lg h-96 flex flex-col items-center justify-center text-center p-4">
             <ShoppingBag className="h-16 w-16 text-muted-foreground mb-4" />
@@ -281,7 +281,7 @@ export default function TokenList() {
                 </Button>
             </div>
             </div>
-        {filteredTokens.length === 0 ? (
+        {filteredAssets.length === 0 ? (
             <div className="border-dashed border-2 border-muted-foreground/50 rounded-lg h-96 flex flex-col items-center justify-center text-center p-4">
                 <ShoppingBag className="h-16 w-16 text-muted-foreground mb-4" />
                 <h2 className="text-xl font-semibold mb-2">No assets match your search</h2>
@@ -289,12 +289,12 @@ export default function TokenList() {
             </div>
         ) : view === 'card' ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {filteredTokens.map(token => (
-                        <TokenCard 
-                            key={token.id} 
-                            token={token} 
+                    {filteredAssets.map(asset => (
+                        <AssetCard 
+                            key={asset.id} 
+                            asset={asset} 
                             onAction={handleSubscriptionAction}
-                            subscriptionStatus={subscriptions[token.id] || 'none'}
+                            subscriptionStatus={subscriptions[asset.id] || 'none'}
                         />
                     ))}
                 </div>
@@ -310,12 +310,12 @@ export default function TokenList() {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {filteredTokens.map(token => (
-                            <TokenTableRow 
-                                    key={token.id} 
-                                    token={token} 
+                            {filteredAssets.map(asset => (
+                            <AssetTableRow 
+                                    key={asset.id} 
+                                    asset={asset} 
                                     onAction={handleSubscriptionAction}
-                                    subscriptionStatus={subscriptions[token.id] || 'none'}
+                                    subscriptionStatus={subscriptions[asset.id] || 'none'}
                                 />
                             ))}
                         </TableBody>
@@ -323,14 +323,14 @@ export default function TokenList() {
                 </Card>
             )}
         </div>
-         {selectedToken && (
+         {selectedAsset && (
             <DialogContent className='sm:max-w-lg'>
                 <PlaceOrder 
-                    token={selectedToken} 
-                    price={selectedToken.price || 0} 
+                    asset={selectedAsset} 
+                    price={selectedAsset.price || 0} 
                     isSubscribed={true}
                     onOrderPlaced={() => setIsModalOpen(false)}
-                    tokenName={selectedToken.tokenName}
+                    assetName={selectedAsset.assetName}
                 />
             </DialogContent>
         )}
