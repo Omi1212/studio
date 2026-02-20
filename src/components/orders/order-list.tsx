@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import type { Order, TokenDetails, User } from '@/lib/types';
+import type { Order, AssetDetails, User } from '@/lib/types';
 import { Card } from '../ui/card';
 import { Avatar, AvatarFallback } from '../ui/avatar';
 import { Badge } from '../ui/badge';
@@ -15,7 +15,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Input } from '../ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { cn } from '@/lib/utils';
-import TokenIcon from '../ui/token-icon';
+import AssetIcon from '../ui/asset-icon';
 import KybBanner from '@/components/dashboard/kyb-banner';
 import IdentityProvidersBanner from '@/components/dashboard/identity-providers-banner';
 
@@ -36,9 +36,9 @@ function getStatusBadge(status: Order['status']) {
   }
 }
 
-function OrderTableRow({ order, tokens, investors, onApprove, onReject, userRole }: { order: Order, tokens: TokenDetails[], investors: User[], onApprove: (id: string) => void, onReject: (id: string) => void, userRole: string | null }) {
+function OrderTableRow({ order, assets, investors, onApprove, onReject, userRole }: { order: Order, assets: AssetDetails[], investors: User[], onApprove: (id: string) => void, onReject: (id: string) => void, userRole: string | null }) {
   const router = useRouter();
-  const token = tokens.find(t => t.id === order.tokenId);
+  const asset = assets.find(t => t.id === order.assetId);
   const investor = investors.find(i => i.id === order.investorId);
   const total = order.amount * order.price;
 
@@ -76,10 +76,10 @@ function OrderTableRow({ order, tokens, investors, onApprove, onReject, userRole
             </div>
       </TableCell>
       <TableCell className="hidden lg:table-cell">
-        {token && (
+        {asset && (
             <div className="flex items-center gap-2">
-                <TokenIcon token={token} className="h-6 w-6" />
-                <span className="font-medium text-primary">{token.tokenTicker}</span>
+                <AssetIcon asset={asset} className="h-6 w-6" />
+                <span className="font-medium text-primary">{asset.assetTicker}</span>
             </div>
         )}
       </TableCell>
@@ -123,54 +123,54 @@ function OrderTableRow({ order, tokens, investors, onApprove, onReject, userRole
 export default function OrderList() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [totalOrders, setTotalOrders] = useState(0);
-  const [tokens, setTokens] = useState<TokenDetails[]>([]);
+  const [assets, setAssets] = useState<AssetDetails[]>([]);
   const [investors, setInvestors] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
-  const [selectedToken, setSelectedToken] = useState<TokenDetails | null>(null);
+  const [selectedAsset, setSelectedAsset] = useState<AssetDetails | null>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [tokenCheckComplete, setTokenCheckComplete] = useState(false);
+  const [assetCheckComplete, setAssetCheckComplete] = useState(false);
 
   useEffect(() => {
     const role = localStorage.getItem('userRole');
     setUserRole(role);
     
     Promise.all([
-      fetch('/api/tokens').then(res => res.json()),
+      fetch('/api/assets').then(res => res.json()),
       fetch('/api/investors').then(res => res.json())
-    ]).then(([tokensData, investorsData]) => {
-      setTokens(tokensData.data || []);
+    ]).then(([assetsData, investorsData]) => {
+      setAssets(assetsData.data || []);
       setInvestors(investorsData.data || []);
     }).catch(console.error);
   }, []);
 
   useEffect(() => {
-    if (tokens.length === 0 && tokenCheckComplete) return;
+    if (assets.length === 0 && assetCheckComplete) return;
 
-    const handleTokenChange = () => {
-        const storedTokenId = localStorage.getItem('selectedTokenId');
-        if (storedTokenId && tokens.length > 0) {
-            const foundToken = tokens.find(t => t.id === storedTokenId);
-            setSelectedToken(foundToken || null);
+    const handleAssetChange = () => {
+        const storedAssetId = localStorage.getItem('selectedAssetId');
+        if (storedAssetId && assets.length > 0) {
+            const foundAsset = assets.find(t => t.id === storedAssetId);
+            setSelectedAsset(foundAsset || null);
         } else {
-            setSelectedToken(null);
+            setSelectedAsset(null);
         }
-        setTokenCheckComplete(true);
+        setAssetCheckComplete(true);
     };
 
-    handleTokenChange();
-    window.addEventListener('tokenChanged', handleTokenChange);
+    handleAssetChange();
+    window.addEventListener('assetChanged', handleAssetChange);
 
      return () => {
-        window.removeEventListener('tokenChanged', handleTokenChange);
+        window.removeEventListener('assetChanged', handleAssetChange);
     };
-  }, [tokens, tokenCheckComplete]);
+  }, [assets, assetCheckComplete]);
 
   useEffect(() => {
-    if (!tokenCheckComplete) {
+    if (!assetCheckComplete) {
         return;
     }
     setLoading(true);
@@ -181,9 +181,9 @@ export default function OrderList() {
 
     if (userRole === 'investor') {
         params.append('investorId', 'inv-001'); // Hardcoded for demo
-    } else if ((userRole === 'issuer' || userRole === 'agent') && selectedToken) {
-        params.append('tokenId', selectedToken.id);
-    } else if ((userRole === 'issuer' || userRole === 'agent') && !selectedToken) {
+    } else if ((userRole === 'issuer' || userRole === 'agent') && selectedAsset) {
+        params.append('assetId', selectedAsset.id);
+    } else if ((userRole === 'issuer' || userRole === 'agent') && !selectedAsset) {
         setOrders([]);
         setTotalOrders(0);
         setLoading(false);
@@ -210,7 +210,7 @@ export default function OrderList() {
         }
     };
     fetchOrders();
-  }, [currentPage, searchQuery, statusFilter, selectedToken, userRole, tokenCheckComplete]);
+  }, [currentPage, searchQuery, statusFilter, selectedAsset, userRole, assetCheckComplete]);
   
   const totalPages = Math.ceil(totalOrders / ITEMS_PER_PAGE);
 
@@ -266,7 +266,7 @@ export default function OrderList() {
     );
   }
 
-  if ((userRole === 'issuer' || userRole === 'agent') && !selectedToken && tokenCheckComplete) {
+  if ((userRole === 'issuer' || userRole === 'agent') && !selectedAsset && assetCheckComplete) {
     return (
       <div className="space-y-4">
         <div className="flex justify-between items-center">
@@ -278,8 +278,8 @@ export default function OrderList() {
         </div>
         <div className="border-dashed border-2 border-muted-foreground/50 rounded-lg h-96 flex flex-col items-center justify-center text-center p-4 mt-8">
           <ShoppingBag className="h-16 w-16 text-muted-foreground mb-4" />
-          <h2 className="text-xl font-semibold mb-2">No token selected</h2>
-          <p className="text-muted-foreground mb-4">Please select a token from the sidebar to view orders.</p>
+          <h2 className="text-xl font-semibold mb-2">No asset selected</h2>
+          <p className="text-muted-foreground mb-4">Please select an asset from the sidebar to view orders.</p>
         </div>
       </div>
     );
@@ -316,14 +316,14 @@ export default function OrderList() {
 
   const pageTitle = userRole === 'investor' 
     ? "My Orders" 
-    : `Orders ${selectedToken ? `for ${selectedToken.tokenTicker}` : ''}`;
+    : `Orders ${selectedAsset ? `for ${selectedAsset.assetTicker}` : ''}`;
 
 
   const noOrdersMessage = () => {
-      if ((userRole === 'issuer' || userRole === 'agent') && !selectedToken) {
+      if ((userRole === 'issuer' || userRole === 'agent') && !selectedAsset) {
           return {
-              title: "No token selected or found",
-              description: "Please select a token from the sidebar to view its orders."
+              title: "No asset selected or found",
+              description: "Please select an asset from the sidebar to view its orders."
           }
       }
       if (searchQuery || statusFilter !== 'all') {
@@ -340,7 +340,7 @@ export default function OrderList() {
       }
       return {
           title: "No Orders Found",
-          description: `There are no orders for ${selectedToken?.tokenTicker} at this time.`
+          description: `There are no orders for ${selectedAsset?.assetTicker} at this time.`
       }
   }
 
@@ -391,7 +391,7 @@ export default function OrderList() {
               <TableRow>
                 <TableHead>Investor</TableHead>
                 <TableHead>Order</TableHead>
-                <TableHead className="hidden lg:table-cell">Token</TableHead>
+                <TableHead className="hidden lg:table-cell">Asset</TableHead>
                 <TableHead className="hidden sm:table-cell text-right">Amount</TableHead>
                 <TableHead className="hidden md:table-cell text-right">Total</TableHead>
                 <TableHead className="hidden sm:table-cell">Status</TableHead>
@@ -400,7 +400,7 @@ export default function OrderList() {
             </TableHeader>
             <TableBody>
               {orders.map(order => (
-                  <OrderTableRow key={order.id} order={order} tokens={tokens} investors={investors} onApprove={handleApprove} onReject={handleReject} userRole={userRole} />
+                  <OrderTableRow key={order.id} order={order} assets={assets} investors={investors} onApprove={handleApprove} onReject={handleReject} userRole={userRole} />
               ))}
             </TableBody>
           </Table>
