@@ -46,7 +46,7 @@ export async function GET(request: Request) {
   
   if (assetId) {
     filteredInvestors = filteredInvestors.filter(investor => 
-        investor.transactions?.some(tx => tx && tx.asset && tx.asset.id === assetId)
+        investor.holdings?.some(holding => holding.assetId === assetId)
     );
   }
 
