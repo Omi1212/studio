@@ -8,12 +8,21 @@ const assetPostSchema = z.object({
   assetName: z.string().min(1),
   assetTicker: z.string().min(1).max(5),
   destinationAddress: z.string().min(1),
-  decimals: z.number().int().min(0).max(18),
-  maxSupply: z.number().positive(),
+  decimals: z.coerce.number().int().min(0).max(18),
+  maxSupply: z.coerce.number().positive(),
   isFreezable: z.boolean(),
   network: z.array(z.string()).min(1),
   status: z.enum(['pending', 'active', 'frozen', 'draft']),
-  issuerId: z.string().optional()
+  issuerId: z.string().optional(),
+  assetType: z.string().min(1),
+  eligibleInvestors: z.array(z.string()).optional(),
+  subscriptionTime: z.string().optional(),
+  minInvestment: z.coerce.number().optional(),
+  maxInvestment: z.coerce.number().optional(),
+  subscriptionFees: z.coerce.number().optional(),
+  redemptionTime: z.string().optional(),
+  minRedemptionAmount: z.coerce.number().optional(),
+  redemptionFees: z.coerce.number().optional(),
 });
 
 const querySchema = z.object({

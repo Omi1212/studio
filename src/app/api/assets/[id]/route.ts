@@ -13,7 +13,16 @@ const patchSchema = z.object({
   maxSupply: z.number().positive().optional(),
   isFreezable: z.boolean().optional(),
   network: z.array(z.string()).min(1).optional(),
-  issuerId: z.string().optional()
+  issuerId: z.string().optional(),
+  assetType: z.string().min(1).optional(),
+  eligibleInvestors: z.array(z.string()).optional(),
+  subscriptionTime: z.string().optional(),
+  minInvestment: z.coerce.number().optional(),
+  maxInvestment: z.coerce.number().optional(),
+  subscriptionFees: z.coerce.number().optional(),
+  redemptionTime: z.string().optional(),
+  minRedemptionAmount: z.coerce.number().optional(),
+  redemptionFees: z.coerce.number().optional(),
 }).partial();
 
 
