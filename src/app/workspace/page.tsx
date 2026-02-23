@@ -16,6 +16,7 @@ import Link from 'next/link';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
 import AssetIcon from '@/components/ui/asset-icon';
+import TokensTable from '@/components/workspace/tokens-table';
 
 export default function WorkspacePage() {
   const [selectedAsset, setSelectedAsset] = useState<AssetDetails | null>(null);
@@ -80,7 +81,7 @@ export default function WorkspacePage() {
                   <AssetIcon asset={selectedAsset} className="h-10 w-10" />
                   <h1 className="text-3xl font-headline font-semibold">{selectedAsset.assetName}</h1>
                 </div>
-                <Tabs defaultValue="overview">
+                <Tabs defaultValue="overview" className="w-full">
                   <TabsList className="grid w-full grid-cols-6">
                     <TabsTrigger value="overview">Overview</TabsTrigger>
                     <TabsTrigger value="tokens">Tokens</TabsTrigger>
@@ -92,35 +93,31 @@ export default function WorkspacePage() {
                   <TabsContent value="overview" className="mt-6">
                     <AssetDetailsView asset={selectedAsset} view="workspace" userRole={userRole} />
                   </TabsContent>
-                   <TabsContent value="tokens">
-                    <Card>
-                      <CardContent className="p-6">
-                        <p>Tokens content goes here.</p>
-                      </CardContent>
-                    </Card>
+                   <TabsContent value="tokens" className="mt-6">
+                    <TokensTable asset={selectedAsset} />
                   </TabsContent>
-                  <TabsContent value="liquidity">
+                  <TabsContent value="liquidity" className="mt-6">
                     <Card>
                       <CardContent className="p-6">
                         <p>Liquidity content goes here.</p>
                       </CardContent>
                     </Card>
                   </TabsContent>
-                  <TabsContent value="reports">
+                  <TabsContent value="reports" className="mt-6">
                     <Card>
                       <CardContent className="p-6">
                         <p>Reports content goes here.</p>
                       </CardContent>
                     </Card>
                   </TabsContent>
-                   <TabsContent value="data">
+                   <TabsContent value="data" className="mt-6">
                     <Card>
                       <CardContent className="p-6">
                         <p>Data content goes here.</p>
                       </CardContent>
                     </Card>
                   </TabsContent>
-                   <TabsContent value="fees">
+                   <TabsContent value="fees" className="mt-6">
                     <Card>
                       <CardContent className="p-6">
                         <p>Fees content goes here.</p>
