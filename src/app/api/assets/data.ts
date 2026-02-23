@@ -59,6 +59,19 @@ const initialData: Omit<AssetDetails, 'assetIcon' | 'whitepaper' | 'legalAssetiz
     issuerId: 'iss-002',
     destinationAddress: 'spark1q...iss3da',
   },
+  {
+    id: 'example-5',
+    assetName: 'Tether Gold',
+    assetTicker: 'XAUT',
+    status: 'active' as const,
+    network: ['spark', 'liquid', 'rgb', 'taproot'],
+    maxSupply: 100000,
+    price: 2300.00,
+    decimals: 6,
+    isFreezable: true,
+    issuerId: 'iss-002',
+    destinationAddress: 'spark1q...xautdest',
+  },
 ];
 
 // To prevent the data from being lost on hot-reloads in development
