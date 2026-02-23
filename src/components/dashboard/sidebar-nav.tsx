@@ -1,4 +1,3 @@
-
 'use client';
 
 import {
@@ -120,9 +119,18 @@ export default function SidebarNav() {
     }
 
     try {
-      const companyPromise = currentUser.companyId
-        ? fetch(`/api/companies/${currentUser.companyId}`).then((res) => (res.ok ? res.json() : null))
-        : Promise.resolve(null);
+      const getCompaniesPromise = async () => {
+        if (role === 'investor') {
+          const res = await fetch('/api/companies?perPage=999');
+          return res.ok ? await res.json() : { data: [] };
+        }
+        if (currentUser.companyId) {
+          const res = await fetch(`/api/companies/${currentUser.companyId}`);
+          const company = res.ok ? await res.json() : null;
+          return company ? { data: [company] } : { data: [] };
+        }
+        return { data: [] };
+      };
 
       const getAssetsPromise = async (): Promise<{ data: AssetDetails[] }> => {
           if (currentUser.role === 'issuer') {
@@ -151,19 +159,26 @@ export default function SidebarNav() {
           }
       };
       
-      const assetsPromise = getAssetsPromise();
-      
-      const [companyData, assetsData] = await Promise.all([companyPromise, assetsPromise]);
+      const [companiesResponse, assetsData] = await Promise.all([getCompaniesPromise(), getAssetsPromise()]);
 
-      if (companyData) {
-        setCompanies([companyData]);
-        setSelectedCompany(companyData);
-        localStorage.setItem('selectedCompanyId', companyData.id);
-      } else {
-        setCompanies([]);
-        setSelectedCompany(null);
+      const companyList = companiesResponse.data || [];
+      setCompanies(companyList);
+
+      const storedCompanyId = localStorage.getItem('selectedCompanyId');
+      let currentCompany: { id: string; name: string } | null = null;
+      if (storedCompanyId) {
+        currentCompany = companyList.find((c: any) => c.id === storedCompanyId);
+      }
+      
+      if (!currentCompany && companyList.length > 0) {
+        currentCompany = companyList[0];
+        localStorage.setItem('selectedCompanyId', currentCompany.id);
+      } else if (!currentCompany) {
         localStorage.removeItem('selectedCompanyId');
       }
+      
+      setSelectedCompany(currentCompany);
+
 
       const combinedAssets: AssetDetails[] = (assetsData.data || []).map((t: any) => ({
         ...t,
