@@ -10,12 +10,20 @@ import {
 } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type { AssetDetails } from '@/lib/types';
+import Image from 'next/image';
 
 const networkExplorerMap: { [key: string]: { name: string; url: string; addressPath?: string; } } = {
   spark: { name: 'Spark', url: 'https://sparkscan.io', addressPath: '/address/' },
   liquid: { name: 'Liquid', url: 'https://mempool.space/liquid', addressPath: '/address/' },
   rgb: { name: 'RGB', url: 'https://rgb.tech' },
   taproot: { name: 'Taproot Assets', url: 'https://mempool.space' },
+};
+
+const networkIconMap: { [key: string]: React.ReactNode } = {
+    spark: <svg width="24" height="24" viewBox="0 0 68 64" fill="none" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" clipRule="evenodd" d="M39.68 24.656L40.836 0H26.398l1.156 24.656-23.092-8.718L0 29.668l23.807 6.52L8.38 55.457l11.68 8.487 13.558-20.628 13.558 20.627 11.68-8.486L43.43 36.188l23.804-6.52-4.461-13.73-23.092 8.718zM33.617 33v.001z" fill="currentColor"></path></svg>,
+    liquid: <Image src="https://liquid.net/_next/static/media/logo.28b5ba97.svg" alt="Liquid Network Logo" width={24} height={24} />,
+    rgb: <Image src="https://rgb.tech/logo/rgb-symbol-color.svg" alt="RGB Protocol Logo" width={24} height={24} />,
+    taproot: <Image src="https://docs.lightning.engineering/~gitbook/image?url=https%3A%2F%2F2545062540-files.gitbook.io%2F~%2Ffiles%2Fv0%2Fb%2Fgitbook-legacy-files%2Fo%2Fspaces%252F-MIzyiDsFtJBYVyhr1nT%252Favatar-1602260100761.png%3Fgeneration%3D1602260100982225%26alt%3Dmedia&width=32&dpr=2&quality=100&sign=15d20b51&sv=2" alt="Taproot Assets Logo" width={24} height={24} />,
 };
 
 export default function TokensTable({ asset }: { asset: AssetDetails }) {
@@ -73,7 +81,12 @@ export default function TokensTable({ asset }: { asset: AssetDetails }) {
 
                 return (
                 <TableRow key={net}>
-                    <TableCell>{networkExplorerMap[net]?.name || net}</TableCell>
+                    <TableCell>
+                        <div className="flex items-center gap-2">
+                            {networkIconMap[net] || null}
+                            <span>{networkExplorerMap[net]?.name || net}</span>
+                        </div>
+                    </TableCell>
                     <TableCell>{tokenStandard}</TableCell>
                     <TableCell className="font-mono">{tokenSupply.toLocaleString()}</TableCell>
                     <TableCell className="font-mono">{circulatingSupply.toLocaleString()}</TableCell>
