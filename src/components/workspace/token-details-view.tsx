@@ -250,10 +250,14 @@ export default function AssetDetailsView({
         </CardHeader>
         <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
             <OverviewRow label="Asset type" value={assetTypeLabel} />
-            <OverviewRow label="APY" value="5%" />
-            <OverviewRow label="Average asset maturity" value="19 days" />
-            <OverviewRow label="Min. investment" value={asset.minInvestment ? `$${asset.minInvestment.toLocaleString('en-US')}` : 'N/A'} />
-            <OverviewRow label="Investor type" value={asset.eligibleInvestors?.join(', ') || 'N/A'} />
+            <OverviewRow label="Eligible Investors" value={asset.eligibleInvestors?.join(', ') || 'N/A'} />
+            <OverviewRow label="Subscription Time" value={asset.subscriptionTime || 'N/A'} />
+            <OverviewRow label="Min. Investment" value={asset.minInvestment ? `$${asset.minInvestment.toLocaleString('en-US')} USDC` : 'N/A'} />
+            <OverviewRow label="Max. Investment" value={asset.maxInvestment ? `$${asset.maxInvestment.toLocaleString('en-US')} USDC` : 'Not set'} />
+            <OverviewRow label="Order Fee" value={asset.subscriptionFees !== undefined ? `${asset.subscriptionFees}%` : 'N/A'} />
+            <OverviewRow label="Redemption Time" value={asset.redemptionTime || 'N/A'} />
+            <OverviewRow label="Min. Redemption Amount" value={asset.minRedemptionAmount ? `$${asset.minRedemptionAmount.toLocaleString('en-US')} USDC` : 'N/A'} />
+            <OverviewRow label="Redemption Fees" value={asset.redemptionFees !== undefined ? `${asset.redemptionFees}%` : 'N/A'} />
             <OverviewRow label="Available networks" value={<NetworkIcons networks={asset.network} />} />
         </CardContent>
     </Card>
