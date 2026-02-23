@@ -58,6 +58,13 @@ const assetTypes = [
     { value: 'other', label: 'Other' },
 ];
 
+const eligibleInvestorTypes = [
+    { value: 'U.S. Qualified Purchaser', label: 'U.S. Qualified Purchaser' },
+    { value: 'Accredited Investor', label: 'Accredited Investor' },
+    { value: 'Retail Investor', label: 'Retail Investor' },
+    { value: 'Institutional Investor', label: 'Institutional Investor' },
+];
+
 export default function Step1AssetInfo({ onNext, defaultValues, formRef }: Step1AssetInfoProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   
@@ -189,11 +196,22 @@ export default function Step1AssetInfo({ onNext, defaultValues, formRef }: Step1
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Eligible Investors</FormLabel>
-                        <FormControl>
-                          <Input placeholder="e.g. U.S. Qualified Purchaser" {...field} />
-                        </FormControl>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select investor type" />
+                                </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                                {eligibleInvestorTypes.map(type => (
+                                    <SelectItem key={type.value} value={type.value}>
+                                        {type.label}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
                         <FormDescription>
-                          Comma-separated list of eligible investor types.
+                          Define the type of investor eligible for this asset.
                         </FormDescription>
                         <FormMessage />
                       </FormItem>
