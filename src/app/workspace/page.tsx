@@ -1,4 +1,3 @@
-
 'use client';
 import {
   Sidebar,
@@ -17,6 +16,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
 import AssetIcon from '@/components/ui/asset-icon';
 import TokensTable from '@/components/workspace/tokens-table';
+import AssetDocuments from '@/components/workspace/AssetDocuments';
 
 export default function WorkspacePage() {
   const [selectedAsset, setSelectedAsset] = useState<AssetDetails | null>(null);
@@ -34,6 +34,21 @@ export default function WorkspacePage() {
               const response = await fetch(`/api/assets/${storedAssetId}`);
               if (response.ok) {
                 const assetData = await response.json();
+
+                // Add fake documents if they don't exist for review purposes
+                if (!assetData.whitepaper) {
+                    const fakeFile = new File(["fake content"], `${assetData.assetTicker}_Whitepaper.pdf`, { type: "application/pdf" });
+                    assetData.whitepaper = [fakeFile];
+                }
+                if (!assetData.legalAssetizationDoc) {
+                    const fakeFile = new File(["fake content"], `Legal_Assetization.pdf`, { type: "application/pdf" });
+                    assetData.legalAssetizationDoc = [fakeFile];
+                }
+                if (!assetData.assetIssuanceLegalDoc) {
+                    const fakeFile = new File(["fake content"], `Asset_Issuance_Agreement.pdf`, { type: "application/pdf" });
+                    assetData.assetIssuanceLegalDoc = [fakeFile];
+                }
+
                  setSelectedAsset({
                     ...assetData,
                     network: Array.isArray(assetData.network) ? assetData.network : [assetData.network].filter(Boolean),
@@ -111,11 +126,7 @@ export default function WorkspacePage() {
                     </Card>
                   </TabsContent>
                    <TabsContent value="data" className="mt-6">
-                    <Card>
-                      <CardContent className="p-6">
-                        <p>Data content goes here.</p>
-                      </CardContent>
-                    </Card>
+                    <AssetDocuments asset={selectedAsset} />
                   </TabsContent>
                    <TabsContent value="fees" className="mt-6">
                     <Card>
