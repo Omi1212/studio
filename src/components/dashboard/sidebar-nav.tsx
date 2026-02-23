@@ -108,70 +108,68 @@ export default function SidebarNav() {
   useEffect(() => {
     setIsClient(true);
     const role = localStorage.getItem('userRole');
-    let currentUser: User | null = JSON.parse(localStorage.getItem('currentUser') || 'null');
+    const currentUser: User | null = JSON.parse(localStorage.getItem('currentUser') || 'null');
     setUserRole(role);
 
     if (!currentUser) {
-        return;
+      return;
     }
 
     const fetchData = async () => {
-        try {
-            const userRes = await fetch(`/api/users/${currentUser!.id}`);
-            const freshUser = userRes.ok ? await userRes.json() : currentUser;
-            currentUser = freshUser; // Update currentUser with fresh data
+      try {
+        const companyPromise = currentUser.companyId
+          ? fetch(`/api/companies/${currentUser.companyId}`).then((res) => (res.ok ? res.json() : null))
+          : Promise.resolve(null);
 
-            if (freshUser && freshUser.companyId) {
-                const companyRes = await fetch(`/api/companies/${freshUser.companyId}`);
-                if (companyRes.ok) {
-                    const companyData = await companyRes.json();
-                    setCompanies([companyData]); // Set an array with just the user's company
-                    setSelectedCompany(companyData);
-                    localStorage.setItem('selectedCompanyId', companyData.id);
-                }
-            } else {
-                setCompanies([]);
-                setSelectedCompany(null);
-                localStorage.removeItem('selectedCompanyId');
-            }
-            
-            const assetsResponse = await fetch('/api/assets?perPage=999');
-            const assetsData = await assetsResponse.json();
-            const combinedAssets: AssetDetails[] = (assetsData.data || []).map((t: any) => ({
-                ...t,
-                decimals: t.decimals ?? 0,
-                isFreezable: t.isFreezable ?? false,
-                publicKey: t.publicKey ?? `02f...${t.id.slice(-10)}`,
-                network: Array.isArray(t.network) ? t.network : [t.network].filter(Boolean),
-            }));
-            setAllAssets(combinedAssets);
+        const assetsPromise = fetch('/api/assets?perPage=999').then((res) => (res.ok ? res.json() : { data: [] }));
+        
+        const [companyData, assetsData] = await Promise.all([companyPromise, assetsPromise]);
 
-            const storedAssetId = localStorage.getItem('selectedAssetId');
-            if (storedAssetId) {
-                const foundAsset = combinedAssets.find(t => t.id === storedAssetId);
-                if (foundAsset) {
-                    setSelectedAsset(foundAsset);
-                } else if (combinedAssets.length > 0) {
-                    const firstAsset = combinedAssets[0];
-                    setSelectedAsset(firstAsset);
-                    localStorage.setItem('selectedAssetId', firstAsset.id);
-                } else {
-                    setSelectedAsset(null);
-                    localStorage.removeItem('selectedAssetId');
-                }
-            } else if (combinedAssets.length > 0) {
-                const firstAsset = combinedAssets[0];
-                setSelectedAsset(firstAsset);
-                localStorage.setItem('selectedAssetId', firstAsset.id);
-            }
-
-        } catch (error) {
-            console.error('Error fetching sidebar data:', error);
+        // Process company data
+        if (companyData) {
+          setCompanies([companyData]);
+          setSelectedCompany(companyData);
+          localStorage.setItem('selectedCompanyId', companyData.id);
+        } else {
+          setCompanies([]);
+          setSelectedCompany(null);
+          localStorage.removeItem('selectedCompanyId');
         }
+
+        // Process assets data
+        const combinedAssets: AssetDetails[] = (assetsData.data || []).map((t: any) => ({
+          ...t,
+          decimals: t.decimals ?? 0,
+          isFreezable: t.isFreezable ?? false,
+          publicKey: t.publicKey ?? `02f...${t.id.slice(-10)}`,
+          network: Array.isArray(t.network) ? t.network : [t.network].filter(Boolean),
+        }));
+        setAllAssets(combinedAssets);
+
+        const storedAssetId = localStorage.getItem('selectedAssetId');
+        if (storedAssetId) {
+          const foundAsset = combinedAssets.find((t) => t.id === storedAssetId);
+          if (foundAsset) {
+            setSelectedAsset(foundAsset);
+          } else if (combinedAssets.length > 0) {
+            const firstAsset = combinedAssets[0];
+            setSelectedAsset(firstAsset);
+            localStorage.setItem('selectedAssetId', firstAsset.id);
+          } else {
+            setSelectedAsset(null);
+            localStorage.removeItem('selectedAssetId');
+          }
+        } else if (combinedAssets.length > 0) {
+          const firstAsset = combinedAssets[0];
+          setSelectedAsset(firstAsset);
+          localStorage.setItem('selectedAssetId', firstAsset.id);
+        }
+      } catch (error) {
+        console.error('Error fetching sidebar data:', error);
+      }
     };
 
     fetchData();
-
   }, []);
 
   const handleAssetSelect = (asset: AssetDetails) => {
