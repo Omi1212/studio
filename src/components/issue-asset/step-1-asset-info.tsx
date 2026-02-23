@@ -195,7 +195,19 @@ export default function Step1AssetInfo({ onNext, defaultValues, formRef }: Step1
                       name="eligibleInvestors"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Eligible Investors</FormLabel>
+                            <div className="flex items-center gap-2">
+                                <FormLabel>Eligible Investors</FormLabel>
+                                <TooltipProvider>
+                                    <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <Info className="h-4 w-4 text-muted-foreground cursor-pointer" />
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                        <p>Define the type of investor eligible for this asset.</p>
+                                    </TooltipContent>
+                                    </Tooltip>
+                                </TooltipProvider>
+                            </div>
                             <Select onValueChange={field.onChange} defaultValue={field.value}>
                               <FormControl>
                                   <SelectTrigger>
@@ -210,9 +222,6 @@ export default function Step1AssetInfo({ onNext, defaultValues, formRef }: Step1
                                   ))}
                               </SelectContent>
                           </Select>
-                          <FormDescription>
-                            Define the type of investor eligible for this asset.
-                          </FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -223,7 +232,19 @@ export default function Step1AssetInfo({ onNext, defaultValues, formRef }: Step1
                         name="subscriptionTime"
                         render={({ field }) => (
                             <FormItem>
-                            <FormLabel>Subscription Time</FormLabel>
+                            <div className="flex items-center gap-2">
+                                <FormLabel>Subscription Time</FormLabel>
+                                <TooltipProvider>
+                                    <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <Info className="h-4 w-4 text-muted-foreground cursor-pointer" />
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                        <p>The frequency at which investors can subscribe.</p>
+                                    </TooltipContent>
+                                    </Tooltip>
+                                </TooltipProvider>
+                            </div>
                             <Select onValueChange={field.onChange} defaultValue={field.value}>
                                 <FormControl>
                                 <SelectTrigger>
@@ -333,7 +354,19 @@ export default function Step1AssetInfo({ onNext, defaultValues, formRef }: Step1
                         name="redemptionTime"
                         render={({ field }) => (
                             <FormItem>
-                            <FormLabel>Redemption Time</FormLabel>
+                            <div className="flex items-center gap-2">
+                                <FormLabel>Redemption Time</FormLabel>
+                                <TooltipProvider>
+                                    <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <Info className="h-4 w-4 text-muted-foreground cursor-pointer" />
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                        <p>The frequency at which investors can redeem.</p>
+                                    </TooltipContent>
+                                    </Tooltip>
+                                </TooltipProvider>
+                            </div>
                             <Select onValueChange={field.onChange} defaultValue={field.value}>
                                 <FormControl>
                                 <SelectTrigger>
@@ -356,7 +389,19 @@ export default function Step1AssetInfo({ onNext, defaultValues, formRef }: Step1
                         name="minRedemptionAmount"
                         render={({ field }) => (
                             <FormItem>
-                            <FormLabel>Minimum Redemption Amount</FormLabel>
+                            <div className="flex items-center gap-2">
+                                <FormLabel>Minimum Redemption Amount</FormLabel>
+                                <TooltipProvider>
+                                    <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <Info className="h-4 w-4 text-muted-foreground cursor-pointer" />
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                        <p>The minimum amount that can be redeemed.</p>
+                                    </TooltipContent>
+                                    </Tooltip>
+                                </TooltipProvider>
+                            </div>
                             <FormControl>
                                 <div className="relative">
                                     <Input type="number" placeholder="250,000" {...field} />
