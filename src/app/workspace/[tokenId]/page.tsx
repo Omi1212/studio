@@ -36,6 +36,7 @@ function AssetDetailsComponent({ params }: { params: { assetId: string } }) {
       .then((assetData: AssetDetails) => {
         setAsset({
           ...assetData,
+          network: Array.isArray(assetData.network) ? assetData.network : [assetData.network].filter(Boolean),
           decimals: assetData.decimals ?? 0,
           isFreezable: assetData.isFreezable ?? false,
           publicKey: assetData.publicKey ?? `02f...${assetData.id.slice(-10)}`,
