@@ -102,6 +102,21 @@ export default function SignupForm() {
         
         const createdUser: User = await response.json();
 
+        if (createdUser.role === 'issuer') {
+            await fetch('/api/issuers', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name: createdUser.name,
+                    email: createdUser.email,
+                    walletAddress: createdUser.walletAddress,
+                    issuedAssets: 0,
+                    pendingAssets: 0,
+                    status: 'active'
+                }),
+            });
+        }
+
         localStorage.setItem('userRole', createdUser.role);
         localStorage.setItem('currentUser', JSON.stringify(createdUser));
 
