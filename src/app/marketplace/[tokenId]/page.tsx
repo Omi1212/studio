@@ -26,6 +26,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import PlaceOrder from '@/components/marketplace/place-order';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 const chartConfig = {
   price: {
@@ -290,6 +291,49 @@ function AssetOfferingPage({ params }: { params: { tokenId: string } }) {
                             </LineChart>
                         </ResponsiveContainer>
                     </ChartContainer>
+                </CardContent>
+            </Card>
+
+             <Card>
+                <CardHeader>
+                    <CardTitle>Tokens</CardTitle>
+                </CardHeader>
+                <CardContent className="p-0">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Network</TableHead>
+                        <TableHead>Token Standard</TableHead>
+                        <TableHead>Token Supply</TableHead>
+                        <TableHead>Circulating Supply</TableHead>
+                        <TableHead>Holders</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {(asset.network || []).map((net) => {
+                        const tokenStandardMap: { [key: string]: string } = {
+                            spark: 'SPK-20',
+                            liquid: 'L-ASSET',
+                            rgb: 'RGB-20',
+                            taproot: 'TAP',
+                        };
+                        const tokenStandard = tokenStandardMap[net] || 'Unknown';
+
+                        const tokenSupply = Math.floor(asset.maxSupply / (asset.network.length || 1));
+                        const circulatingSupply = Math.floor(tokenSupply * 0.85); // Mock 85% circulating
+                        const holders = (parseInt(asset.id.replace(/\D/g, '').slice(-4) || '100', 10)) * (asset.network.length > 1 ? 2 : 1) + 150 + Math.floor(Math.random() * 50);
+
+                        return (
+                        <TableRow key={net}>
+                            <TableCell>{networkMap[net] || net}</TableCell>
+                            <TableCell>{tokenStandard}</TableCell>
+                            <TableCell className="font-mono">{tokenSupply.toLocaleString()}</TableCell>
+                            <TableCell className="font-mono">{circulatingSupply.toLocaleString()}</TableCell>
+                            <TableCell className="font-mono">{holders.toLocaleString()}</TableCell>
+                        </TableRow>
+                        )})}
+                    </TableBody>
+                  </Table>
                 </CardContent>
             </Card>
 
