@@ -1,4 +1,3 @@
-
 'use client';
 
 import {
@@ -121,7 +120,34 @@ export default function SidebarNav() {
           ? fetch(`/api/companies/${currentUser.companyId}`).then((res) => (res.ok ? res.json() : null))
           : Promise.resolve(null);
 
-        const assetsPromise = fetch('/api/assets?perPage=999').then((res) => (res.ok ? res.json() : { data: [] }));
+        const getAssetsPromise = async (): Promise<{ data: AssetDetails[] }> => {
+            if (currentUser.role === 'issuer') {
+                const issuersRes = await fetch('/api/issuers?perPage=999');
+                if (!issuersRes.ok) throw new Error("Failed to fetch issuers");
+                const issuersData = await issuersRes.json();
+                const currentIssuer = (issuersData.data || []).find((i: Issuer) => i.email === currentUser.email);
+
+                if (currentIssuer) {
+                    const assetsResponse = await fetch(`/api/assets?perPage=999&issuerId=${currentIssuer.id}`);
+                    return assetsResponse.ok ? assetsResponse.json() : { data: [] };
+                } else {
+                    return { data: [] };
+                }
+            } else if (currentUser.role === 'agent') {
+                const [allAssignments, allAssetsRes] = await Promise.all([
+                    fetch(`/api/agents/assignments`).then(res => res.ok ? res.json() : {}),
+                    fetch('/api/assets?perPage=999').then(res => res.ok ? res.json() : { data: [] })
+                ]);
+                const assignedAssetIds = allAssignments[currentUser.id] || [];
+                const agentAssets = (allAssetsRes.data || []).filter((asset: AssetDetails) => assignedAssetIds.includes(asset.id));
+                return { data: agentAssets };
+            } else { // for superadmin and any other case
+                const assetsResponse = await fetch('/api/assets?perPage=999');
+                return assetsResponse.ok ? assetsResponse.json() : { data: [] };
+            }
+        };
+        
+        const assetsPromise = getAssetsPromise();
         
         const [companyData, assetsData] = await Promise.all([companyPromise, assetsPromise]);
 
@@ -163,6 +189,9 @@ export default function SidebarNav() {
           const firstAsset = combinedAssets[0];
           setSelectedAsset(firstAsset);
           localStorage.setItem('selectedAssetId', firstAsset.id);
+        } else {
+          setSelectedAsset(null);
+          localStorage.removeItem('selectedAssetId');
         }
       } catch (error) {
         console.error('Error fetching sidebar data:', error);
