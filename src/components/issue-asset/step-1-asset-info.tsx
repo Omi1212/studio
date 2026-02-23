@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useForm } from 'react-hook-form';
@@ -33,9 +34,9 @@ const step1Schema = z.object({
   assetIcon: z.any().optional(),
   assetType: z.string().min(1, 'Asset type is required'),
   eligibleInvestors: z.string().optional(),
-  baseAssets: z.string().optional(),
   subscriptionTime: z.string().optional(),
   minInvestment: z.coerce.number().optional(),
+  maxInvestment: z.coerce.number().optional(),
   subscriptionFees: z.coerce.number().optional(),
   redemptionTime: z.string().optional(),
   minRedemptionAmount: z.coerce.number().optional(),
@@ -76,9 +77,9 @@ export default function Step1AssetInfo({ onNext, defaultValues, formRef }: Step1
         assetIcon: defaultValues?.assetIcon,
         assetType: defaultValues?.assetType || '',
         eligibleInvestors: defaultValues?.eligibleInvestors?.join(', ') || 'U.S. Qualified Purchaser',
-        baseAssets: defaultValues?.baseAssets?.join(', ') || 'USDC, USD',
         subscriptionTime: defaultValues?.subscriptionTime || 'Daily',
         minInvestment: defaultValues?.minInvestment || 5000000,
+        maxInvestment: defaultValues?.maxInvestment,
         subscriptionFees: defaultValues?.subscriptionFees || 0,
         redemptionTime: defaultValues?.redemptionTime || 'Daily',
         minRedemptionAmount: defaultValues?.minRedemptionAmount || 250000,
@@ -91,7 +92,6 @@ export default function Step1AssetInfo({ onNext, defaultValues, formRef }: Step1
     const dataToSubmit = {
         ...data,
         eligibleInvestors: data.eligibleInvestors?.split(',').map(s => s.trim()).filter(Boolean),
-        baseAssets: data.baseAssets?.split(',').map(s => s.trim()).filter(Boolean),
     };
     await new Promise((resolve) => setTimeout(resolve, 500)); // Simulate async validation/operation
     onNext(dataToSubmit);
@@ -220,23 +220,6 @@ export default function Step1AssetInfo({ onNext, defaultValues, formRef }: Step1
                     />
 
                     <FormField
-                      control={form.control}
-                      name="baseAssets"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Base Assets</FormLabel>
-                          <FormControl>
-                            <Input placeholder="e.g. USDC, USD" {...field} />
-                          </FormControl>
-                          <FormDescription>
-                            Accepted assets for investment.
-                          </FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
                         control={form.control}
                         name="subscriptionTime"
                         render={({ field }) => (
@@ -280,6 +263,35 @@ export default function Step1AssetInfo({ onNext, defaultValues, formRef }: Step1
                             <FormControl>
                                 <div className="relative">
                                     <Input type="number" placeholder="5,000,000" {...field} />
+                                    <span className="absolute inset-y-0 right-4 flex items-center text-muted-foreground">USDC</span>
+                                </div>
+                            </FormControl>
+                            <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+
+                    <FormField
+                        control={form.control}
+                        name="maxInvestment"
+                        render={({ field }) => (
+                            <FormItem>
+                            <div className="flex items-center gap-2">
+                                <FormLabel>Max. Investment</FormLabel>
+                                <TooltipProvider>
+                                    <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <Info className="h-4 w-4 text-muted-foreground cursor-pointer" />
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                        <p>The maximum investment amount allowed (optional).</p>
+                                    </TooltipContent>
+                                    </Tooltip>
+                                </TooltipProvider>
+                            </div>
+                            <FormControl>
+                                <div className="relative">
+                                    <Input type="number" placeholder="10,000,000" {...field} />
                                     <span className="absolute inset-y-0 right-4 flex items-center text-muted-foreground">USDC</span>
                                 </div>
                             </FormControl>

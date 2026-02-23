@@ -63,9 +63,9 @@ export const formSchema = z.object({
     ),
   
   eligibleInvestors: z.array(z.string()).optional(),
-  baseAssets: z.array(z.string()).optional(),
   subscriptionTime: z.string().optional(),
   minInvestment: z.coerce.number().optional(),
+  maxInvestment: z.coerce.number().optional(),
   subscriptionFees: z.coerce.number().optional(),
   redemptionTime: z.string().optional(),
   minRedemptionAmount: z.coerce.number().optional(),

@@ -124,9 +124,9 @@ export default function Step5Review({ onSubmit, onBack, onSaveDraft, formData }:
 
         <ReviewSection title="Primary Market">
             <ReviewRow icon={Users} label="Eligible Investors" value={formData.eligibleInvestors?.join(', ') || 'N/A'} />
-            <ReviewRow icon={Info} label="Base Assets" value={formData.baseAssets?.join(', ') || 'N/A'} />
             <ReviewRow icon={Clock} label="Subscription Time" value={formData.subscriptionTime || 'N/A'} />
             <ReviewRow icon={Hash} label="Min. Investment" value={formData.minInvestment ? `${formData.minInvestment.toLocaleString()} USDC` : 'N/A'} />
+            <ReviewRow icon={Hash} label="Max. Investment" value={formData.maxInvestment ? `${formData.maxInvestment.toLocaleString()} USDC` : 'N/A'} />
             <ReviewRow icon={Percent} label="Subscription Fees" value={formData.subscriptionFees !== undefined ? `${formData.subscriptionFees}%` : 'N/A'} />
             <ReviewRow icon={Clock} label="Redemption Time" value={formData.redemptionTime || 'N/A'} />
             <ReviewRow icon={Hash} label="Min. Redemption Amount" value={formData.minRedemptionAmount ? `${formData.minRedemptionAmount.toLocaleString()} USDC` : 'N/A'} />
