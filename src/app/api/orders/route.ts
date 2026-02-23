@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { ordersData } from './data';
 import type { Order } from '@/lib/types';
 import { z } from 'zod';
+import { exampleAssets } from '../assets/data';
 
 const orderPostSchema = z.object({
     investorId: z.string(),
@@ -22,6 +23,7 @@ const querySchema = z.object({
     query: z.string().optional(),
     assetId: z.string().optional(),
     investorId: z.string().optional(),
+    network: z.string().optional(),
 });
 
 export async function GET(request: Request) {
@@ -32,9 +34,22 @@ export async function GET(request: Request) {
       return NextResponse.json({ errors: validation.error.errors }, { status: 400 });
   }
 
-  const { page, perPage, status, query, assetId, investorId } = validation.data;
+  const { page, perPage, status, query, assetId, investorId, network } = validation.data;
 
-  let filteredOrders = ordersData;
+  const augmentedOrders = ordersData.map(order => {
+      const asset = exampleAssets.find(a => a.id === order.assetId);
+      const assetNetworks = asset ? (Array.isArray(asset.network) ? asset.network : [asset.network]) : [];
+      return {
+          ...order,
+          networks: assetNetworks
+      };
+  });
+
+  let filteredOrders = augmentedOrders;
+
+  if (network && network !== 'all') {
+    filteredOrders = filteredOrders.filter(order => order.networks.includes(network));
+  }
 
   if (assetId) {
     filteredOrders = filteredOrders.filter(order => order.assetId === assetId);

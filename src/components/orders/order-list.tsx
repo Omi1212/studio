@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import type { Order, AssetDetails, User } from '@/lib/types';
 import { Card } from '../ui/card';
@@ -189,6 +189,7 @@ export default function OrderList() {
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [networkFilter, setNetworkFilter] = useState('all');
   const [selectedAsset, setSelectedAsset] = useState<AssetDetails | null>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -253,6 +254,9 @@ export default function OrderList() {
     if (statusFilter !== 'all') {
       params.append('status', statusFilter);
     }
+    if (networkFilter !== 'all') {
+      params.append('network', networkFilter);
+    }
     if (searchQuery) {
       params.append('query', searchQuery);
     }
@@ -270,7 +274,7 @@ export default function OrderList() {
         }
     };
     fetchOrders();
-  }, [currentPage, searchQuery, statusFilter, selectedAsset, userRole, assetCheckComplete]);
+  }, [currentPage, searchQuery, statusFilter, networkFilter, selectedAsset, userRole, assetCheckComplete]);
   
   const totalPages = Math.ceil(totalOrders / ITEMS_PER_PAGE);
 
@@ -386,10 +390,10 @@ export default function OrderList() {
               description: "Please select an asset from the sidebar to view its orders."
           }
       }
-      if (searchQuery || statusFilter !== 'all') {
+      if (searchQuery || statusFilter !== 'all' || networkFilter !== 'all') {
           return {
               title: "No Orders Found",
-              description: "Try adjusting your search or filter."
+              description: "Try adjusting your search or filters."
           }
       }
       if (userRole === 'investor') {
@@ -431,6 +435,18 @@ export default function OrderList() {
                     <SelectItem value="pending">Pending</SelectItem>
                     <SelectItem value="completed">Completed</SelectItem>
                     <SelectItem value="rejected">Rejected</SelectItem>
+                </SelectContent>
+            </Select>
+            <Select value={networkFilter} onValueChange={setNetworkFilter}>
+                <SelectTrigger className="w-full sm:w-[180px]">
+                    <SelectValue placeholder="Filter by network" />
+                </SelectTrigger>
+                <SelectContent>
+                    <SelectItem value="all">All Networks</SelectItem>
+                    <SelectItem value="spark">Spark</SelectItem>
+                    <SelectItem value="liquid">Liquid</SelectItem>
+                    <SelectItem value="rgb">RGB</SelectItem>
+                    <SelectItem value="taproot">Taproot Assets</SelectItem>
                 </SelectContent>
             </Select>
         </div>

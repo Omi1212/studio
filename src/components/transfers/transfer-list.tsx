@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import type { Transfer, AssetDetails } from '@/lib/types';
 import { Card, CardContent } from '../ui/card';
@@ -51,7 +51,7 @@ export default function TransferList() {
   const [assetCheckComplete, setAssetCheckComplete] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState('all');
-
+  const [networkFilter, setNetworkFilter] = useState('all');
 
   useEffect(() => {
     const role = localStorage.getItem('userRole');
@@ -111,6 +111,9 @@ export default function TransferList() {
       if (typeFilter !== 'all') {
           params.append('type', typeFilter);
       }
+      if (networkFilter !== 'all') {
+        params.append('network', networkFilter);
+      }
       if (searchQuery) {
           params.append('query', searchQuery);
       }
@@ -127,7 +130,7 @@ export default function TransferList() {
       }
     };
     fetchTransfers();
-  }, [currentPage, searchQuery, typeFilter, selectedAsset, userRole, assetCheckComplete]);
+  }, [currentPage, searchQuery, typeFilter, networkFilter, selectedAsset, userRole, assetCheckComplete]);
 
 
   const totalPages = Math.ceil(totalTransfers / ITEMS_PER_PAGE);
@@ -158,6 +161,18 @@ export default function TransferList() {
                 <SelectItem value="Transfer">Transfer</SelectItem>
                 <SelectItem value="Mint">Mint</SelectItem>
                 <SelectItem value="Burn">Burn</SelectItem>
+            </SelectContent>
+        </Select>
+        <Select value={networkFilter} onValueChange={setNetworkFilter}>
+            <SelectTrigger className="w-full sm:w-[180px]">
+                <SelectValue placeholder="Filter by network" />
+            </SelectTrigger>
+            <SelectContent>
+                <SelectItem value="all">All Networks</SelectItem>
+                <SelectItem value="spark">Spark</SelectItem>
+                <SelectItem value="liquid">Liquid</SelectItem>
+                <SelectItem value="rgb">RGB</SelectItem>
+                <SelectItem value="taproot">Taproot Assets</SelectItem>
             </SelectContent>
         </Select>
     </div>
@@ -192,10 +207,10 @@ export default function TransferList() {
                   description: "Please select an asset from the sidebar to view its transfers."
               }
           }
-          if (searchQuery || typeFilter !== 'all') {
+          if (searchQuery || typeFilter !== 'all' || networkFilter !== 'all') {
               return {
                   title: "No Transfers Found",
-                  description: "Try adjusting your search or filter."
+                  description: "Try adjusting your search or filters."
               }
           }
           return {
