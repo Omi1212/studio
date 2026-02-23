@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useForm } from 'react-hook-form';
@@ -20,15 +21,25 @@ import {
   CardFooter,
 } from '@/components/ui/card';
 import { useState, Ref } from 'react';
-import { Loader2 } from 'lucide-react';
+import { Info, Loader2 } from 'lucide-react';
 import type { AssetFormValues } from './issue-asset-form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { Separator } from '../ui/separator';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 
 const step1Schema = z.object({
   assetName: z.string().min(1, 'Asset name is required'),
   assetTicker: z.string().min(1, 'Asset ticker is required').max(5, 'Ticker cannot exceed 5 characters'),
   assetIcon: z.any().optional(),
   assetType: z.string().min(1, 'Asset type is required'),
+  eligibleInvestors: z.string().optional(),
+  baseAssets: z.string().optional(),
+  subscriptionTime: z.string().optional(),
+  minInvestment: z.coerce.number().optional(),
+  subscriptionFees: z.coerce.number().optional(),
+  redemptionTime: z.string().optional(),
+  minRedemptionAmount: z.coerce.number().optional(),
+  redemptionFees: z.coerce.number().optional(),
 });
 
 type Step1FormValues = z.infer<typeof step1Schema>;
@@ -57,13 +68,26 @@ export default function Step1AssetInfo({ onNext, defaultValues, formRef }: Step1
         assetTicker: defaultValues?.assetTicker || '',
         assetIcon: defaultValues?.assetIcon,
         assetType: defaultValues?.assetType || '',
+        eligibleInvestors: defaultValues?.eligibleInvestors?.join(', ') || 'U.S. Qualified Purchaser',
+        baseAssets: defaultValues?.baseAssets?.join(', ') || 'USDC, USD',
+        subscriptionTime: defaultValues?.subscriptionTime || 'Daily',
+        minInvestment: defaultValues?.minInvestment || 5000000,
+        subscriptionFees: defaultValues?.subscriptionFees || 0,
+        redemptionTime: defaultValues?.redemptionTime || 'Daily',
+        minRedemptionAmount: defaultValues?.minRedemptionAmount || 250000,
+        redemptionFees: defaultValues?.redemptionFees || 0,
     }
   });
 
   const handleSubmit = async (data: Step1FormValues) => {
     setIsSubmitting(true);
+    const dataToSubmit = {
+        ...data,
+        eligibleInvestors: data.eligibleInvestors?.split(',').map(s => s.trim()).filter(Boolean),
+        baseAssets: data.baseAssets?.split(',').map(s => s.trim()).filter(Boolean),
+    };
     await new Promise((resolve) => setTimeout(resolve, 500)); // Simulate async validation/operation
-    onNext(data);
+    onNext(dataToSubmit);
     setIsSubmitting(false);
   };
   
@@ -147,6 +171,197 @@ export default function Step1AssetInfo({ onNext, defaultValues, formRef }: Step1
                 </FormItem>
               )}
             />
+
+            <Separator className="my-6" />
+            <div className="space-y-2">
+                <h3 className="text-lg font-medium">Primary Market</h3>
+                <p className="text-sm text-muted-foreground">Define the terms for the primary market of your asset.</p>
+            </div>
+
+            <FormField
+              control={form.control}
+              name="eligibleInvestors"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Eligible Investors</FormLabel>
+                  <FormControl>
+                    <Input placeholder="e.g. U.S. Qualified Purchaser" {...field} />
+                  </FormControl>
+                  <FormDescription>
+                    Comma-separated list of eligible investor types.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="baseAssets"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Base Assets</FormLabel>
+                  <FormControl>
+                    <Input placeholder="e.g. USDC, USD" {...field} />
+                  </FormControl>
+                  <FormDescription>
+                    Comma-separated list of accepted base assets for investment.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+                control={form.control}
+                name="subscriptionTime"
+                render={({ field }) => (
+                    <FormItem>
+                    <FormLabel>Subscription Time</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                        <SelectTrigger>
+                            <SelectValue placeholder="Select subscription time" />
+                        </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                            <SelectItem value="Daily">Daily</SelectItem>
+                            <SelectItem value="Weekly">Weekly</SelectItem>
+                            <SelectItem value="Monthly">Monthly</SelectItem>
+                        </SelectContent>
+                    </Select>
+                    <FormMessage />
+                    </FormItem>
+                )}
+            />
+
+            <FormField
+                control={form.control}
+                name="minInvestment"
+                render={({ field }) => (
+                    <FormItem>
+                    <div className="flex items-center gap-2">
+                        <FormLabel>Min. Investment</FormLabel>
+                        <TooltipProvider>
+                            <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Info className="h-4 w-4 text-muted-foreground cursor-pointer" />
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                <p>The minimum investment amount required.</p>
+                            </TooltipContent>
+                            </Tooltip>
+                        </TooltipProvider>
+                    </div>
+                    <FormControl>
+                        <div className="relative">
+                            <Input type="number" placeholder="5,000,000" {...field} />
+                            <span className="absolute inset-y-0 right-4 flex items-center text-muted-foreground">USDC</span>
+                        </div>
+                    </FormControl>
+                    <FormMessage />
+                    </FormItem>
+                )}
+            />
+
+            <FormField
+                control={form.control}
+                name="subscriptionFees"
+                render={({ field }) => (
+                    <FormItem>
+                    <div className="flex items-center gap-2">
+                        <FormLabel>Subscription Fees</FormLabel>
+                         <TooltipProvider>
+                            <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Info className="h-4 w-4 text-muted-foreground cursor-pointer" />
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                <p>Fees applied at the time of subscription.</p>
+                            </TooltipContent>
+                            </Tooltip>
+                        </TooltipProvider>
+                    </div>
+                    <FormControl>
+                        <div className="relative">
+                            <Input type="number" placeholder="0" {...field} />
+                            <span className="absolute inset-y-0 right-4 flex items-center text-muted-foreground">%</span>
+                        </div>
+                    </FormControl>
+                    <FormMessage />
+                    </FormItem>
+                )}
+            />
+
+            <FormField
+                control={form.control}
+                name="redemptionTime"
+                render={({ field }) => (
+                    <FormItem>
+                    <FormLabel>Redemption Time</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                        <SelectTrigger>
+                            <SelectValue placeholder="Select redemption time" />
+                        </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                            <SelectItem value="Daily">Daily</SelectItem>
+                            <SelectItem value="Weekly">Weekly</SelectItem>
+                            <SelectItem value="Monthly">Monthly</SelectItem>
+                        </SelectContent>
+                    </Select>
+                    <FormMessage />
+                    </FormItem>
+                )}
+            />
+
+            <FormField
+                control={form.control}
+                name="minRedemptionAmount"
+                render={({ field }) => (
+                    <FormItem>
+                    <FormLabel>Minimum Redemption Amount</FormLabel>
+                    <FormControl>
+                        <div className="relative">
+                            <Input type="number" placeholder="250,000" {...field} />
+                            <span className="absolute inset-y-0 right-4 flex items-center text-muted-foreground">USDC</span>
+                        </div>
+                    </FormControl>
+                    <FormMessage />
+                    </FormItem>
+                )}
+            />
+
+            <FormField
+                control={form.control}
+                name="redemptionFees"
+                render={({ field }) => (
+                    <FormItem>
+                    <div className="flex items-center gap-2">
+                        <FormLabel>Redemption Fees</FormLabel>
+                         <TooltipProvider>
+                            <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Info className="h-4 w-4 text-muted-foreground cursor-pointer" />
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                <p>Fees applied at the time of redemption.</p>
+                            </TooltipContent>
+                            </Tooltip>
+                        </TooltipProvider>
+                    </div>
+                    <FormControl>
+                        <div className="relative">
+                            <Input type="number" placeholder="0" {...field} />
+                            <span className="absolute inset-y-0 right-4 flex items-center text-muted-foreground">%</span>
+                        </div>
+                    </FormControl>
+                    <FormMessage />
+                    </FormItem>
+                )}
+            />
+
           </CardContent>
           <CardFooter className="justify-end">
             <Button type="submit" disabled={isSubmitting}>

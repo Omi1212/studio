@@ -61,6 +61,15 @@ export const formSchema = z.object({
       (files) => !files || files.length === 0 || ACCEPTED_FILE_TYPES.includes(files?.[0]?.type),
       ".pdf and .doc files are accepted."
     ),
+  
+  eligibleInvestors: z.array(z.string()).optional(),
+  baseAssets: z.array(z.string()).optional(),
+  subscriptionTime: z.string().optional(),
+  minInvestment: z.coerce.number().optional(),
+  subscriptionFees: z.coerce.number().optional(),
+  redemptionTime: z.string().optional(),
+  minRedemptionAmount: z.coerce.number().optional(),
+  redemptionFees: z.coerce.number().optional(),
 });
 
 export type AssetFormValues = z.infer<typeof formSchema>;

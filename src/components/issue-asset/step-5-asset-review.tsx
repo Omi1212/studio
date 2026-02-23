@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import type { AssetFormValues } from './issue-asset-form';
 import { useState, useEffect } from 'react';
-import { FileText, HardDrive, Hash, Image as ImageIcon, Info, Loader2, Network, Tag, ToggleRight } from 'lucide-react';
+import { FileText, HardDrive, Hash, Image as ImageIcon, Info, Loader2, Network, Tag, ToggleRight, Users, Clock, Percent } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 
 interface Step5ReviewProps {
@@ -120,6 +120,17 @@ export default function Step5Review({ onSubmit, onBack, onSaveDraft, formData }:
                   </Avatar>
               ) : <span className="text-muted-foreground">Not provided</span>
             } />
+        </ReviewSection>
+
+        <ReviewSection title="Primary Market">
+            <ReviewRow icon={Users} label="Eligible Investors" value={formData.eligibleInvestors?.join(', ') || 'N/A'} />
+            <ReviewRow icon={Info} label="Base Assets" value={formData.baseAssets?.join(', ') || 'N/A'} />
+            <ReviewRow icon={Clock} label="Subscription Time" value={formData.subscriptionTime || 'N/A'} />
+            <ReviewRow icon={Hash} label="Min. Investment" value={formData.minInvestment ? `${formData.minInvestment.toLocaleString()} USDC` : 'N/A'} />
+            <ReviewRow icon={Percent} label="Subscription Fees" value={formData.subscriptionFees !== undefined ? `${formData.subscriptionFees}%` : 'N/A'} />
+            <ReviewRow icon={Clock} label="Redemption Time" value={formData.redemptionTime || 'N/A'} />
+            <ReviewRow icon={Hash} label="Min. Redemption Amount" value={formData.minRedemptionAmount ? `${formData.minRedemptionAmount.toLocaleString()} USDC` : 'N/A'} />
+            <ReviewRow icon={Percent} label="Redemption Fees" value={formData.redemptionFees !== undefined ? `${formData.redemptionFees}%` : 'N/A'} />
         </ReviewSection>
 
         <ReviewSection title="Asset Details">
