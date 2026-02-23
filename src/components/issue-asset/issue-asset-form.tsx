@@ -33,6 +33,7 @@ const ACCEPTED_FILE_TYPES = ["application/pdf", "application/msword", "applicati
 export const formSchema = z.object({
   assetName: z.string().min(1, 'Asset name is required'),
   assetTicker: z.string().min(1, 'Asset ticker is required').max(5, 'Ticker cannot exceed 5 characters'),
+  assetType: z.string().min(1, 'Asset type is required'),
   destinationAddress: z.string().min(1, 'Destination address is required'),
   decimals: z.coerce.number().int().min(0).max(18),
   maxSupply: z.coerce.number().positive('Max supply must be a positive number'),

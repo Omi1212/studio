@@ -32,6 +32,7 @@ export default function NewAssetPage() {
     maxSupply: 1_000_000_000000,
     isFreezable: true,
     network: 'spark',
+    assetType: 'utility_token',
   });
   const { toast } = useToast();
   const router = useRouter();

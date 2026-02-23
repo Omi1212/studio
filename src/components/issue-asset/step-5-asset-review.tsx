@@ -50,6 +50,14 @@ function FilePreview({ fileList }: { fileList: FileList | File[] | null | undefi
     )
 }
 
+const assetTypes = [
+    { value: 'security_token', label: 'Security Token' },
+    { value: 'utility_token', label: 'Utility Token' },
+    { value: 'stablecoin', label: 'Stablecoin' },
+    { value: 'real_estate', label: 'Real Estate' },
+    { value: 'other', label: 'Other' },
+];
+
 
 export default function Step5Review({ onSubmit, onBack, onSaveDraft, formData }: Step5ReviewProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -88,6 +96,8 @@ export default function Step5Review({ onSubmit, onBack, onSaveDraft, formData }:
     rgb: 'RGB Protocol',
     taproot: 'Taproot Assets',
   };
+  
+  const assetTypeLabel = assetTypes.find(t => t.value === formData.assetType)?.label || formData.assetType;
 
   return (
     <Card>
@@ -100,6 +110,7 @@ export default function Step5Review({ onSubmit, onBack, onSaveDraft, formData }:
         <ReviewSection title="Asset Information">
             <ReviewRow icon={Info} label="Asset Name" value={formData.assetName} />
             <ReviewRow icon={Tag} label="Asset Ticker" value={formData.assetTicker} />
+            <ReviewRow icon={Info} label="Asset Type" value={assetTypeLabel} />
             <ReviewRow icon={ImageIcon} label="Asset Icon" value={
               iconPreview ? (
                   <Avatar className="h-6 w-6">
@@ -108,10 +119,10 @@ export default function Step5Review({ onSubmit, onBack, onSaveDraft, formData }:
                   </Avatar>
               ) : <span className="text-muted-foreground">Not provided</span>
             } />
-            <ReviewRow icon={HardDrive} label="Destination Address" value={<span className="font-mono">{formData.destinationAddress}</span>} />
         </ReviewSection>
 
         <ReviewSection title="Asset Details">
+            <ReviewRow icon={HardDrive} label="Destination Address" value={<span className="font-mono">{formData.destinationAddress}</span>} />
             <ReviewRow icon={Hash} label="Decimals" value={formData.decimals} />
             <ReviewRow icon={Hash} label="Max Supply" value={formData.maxSupply.toLocaleString()} />
             <ReviewRow icon={ToggleRight} label="Is Freezable" value={formData.isFreezable ? 'Yes' : 'No'} />

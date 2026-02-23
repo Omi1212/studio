@@ -22,12 +22,13 @@ import {
 import { useState, Ref } from 'react';
 import { Loader2 } from 'lucide-react';
 import type { AssetFormValues } from './issue-asset-form';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 
 const step1Schema = z.object({
   assetName: z.string().min(1, 'Asset name is required'),
   assetTicker: z.string().min(1, 'Asset ticker is required').max(5, 'Ticker cannot exceed 5 characters'),
   assetIcon: z.any().optional(),
-  destinationAddress: z.string().min(1, 'Destination address is required'),
+  assetType: z.string().min(1, 'Asset type is required'),
 });
 
 type Step1FormValues = z.infer<typeof step1Schema>;
@@ -38,6 +39,14 @@ interface Step1AssetInfoProps {
   formRef: Ref<HTMLFormElement>;
 }
 
+const assetTypes = [
+    { value: 'security_token', label: 'Security Token' },
+    { value: 'utility_token', label: 'Utility Token' },
+    { value: 'stablecoin', label: 'Stablecoin' },
+    { value: 'real_estate', label: 'Real Estate' },
+    { value: 'other', label: 'Other' },
+];
+
 export default function Step1AssetInfo({ onNext, defaultValues, formRef }: Step1AssetInfoProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   
@@ -46,8 +55,8 @@ export default function Step1AssetInfo({ onNext, defaultValues, formRef }: Step1
     defaultValues: {
         assetName: defaultValues?.assetName || '',
         assetTicker: defaultValues?.assetTicker || '',
-        destinationAddress: defaultValues?.destinationAddress || '',
         assetIcon: defaultValues?.assetIcon,
+        assetType: defaultValues?.assetType || '',
     }
   });
 
@@ -90,6 +99,30 @@ export default function Step1AssetInfo({ onNext, defaultValues, formRef }: Step1
               )}
             />
              <FormField
+                control={form.control}
+                name="assetType"
+                render={({ field }) => (
+                    <FormItem>
+                    <FormLabel>Asset Type</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                        <SelectTrigger>
+                            <SelectValue placeholder="Select an asset type" />
+                        </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                        {assetTypes.map(type => (
+                            <SelectItem key={type.value} value={type.value}>
+                                {type.label}
+                            </SelectItem>
+                        ))}
+                        </SelectContent>
+                    </Select>
+                    <FormMessage />
+                    </FormItem>
+                )}
+            />
+             <FormField
               control={form.control}
               name="assetIcon"
               render={({ field }) => (
@@ -109,22 +142,6 @@ export default function Step1AssetInfo({ onNext, defaultValues, formRef }: Step1
                   </FormControl>
                   <FormDescription>
                     Upload an image for your asset (e.g., PNG, JPG, SVG).
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="destinationAddress"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Destination Address</FormLabel>
-                  <FormControl>
-                    <Input placeholder="e.g. spark1..." {...field} />
-                  </FormControl>
-                   <FormDescription>
-                    The address that will receive the initial supply of assets.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>

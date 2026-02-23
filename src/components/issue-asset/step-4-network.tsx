@@ -7,10 +7,13 @@ import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
+  FormMessage,
 } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
 import {
   Card,
   CardContent,
@@ -25,6 +28,7 @@ import { Separator } from '../ui/separator';
 
 const step4Schema = z.object({
   network: z.string().min(1, 'Please select a network'),
+  destinationAddress: z.string().min(1, 'Destination address is required'),
 });
 
 type Step4FormValues = z.infer<typeof step4Schema>;
@@ -98,6 +102,7 @@ export default function Step4Network({ onNext, onBack, defaultValues, formRef }:
     resolver: zodResolver(step4Schema),
     defaultValues: {
       network: defaultValues?.network || 'spark',
+      destinationAddress: defaultValues?.destinationAddress || '',
     }
   });
 
@@ -113,11 +118,29 @@ export default function Step4Network({ onNext, onBack, defaultValues, formRef }:
       <form ref={formRef} onSubmit={form.handleSubmit(handleSubmit)}>
         <Card>
           <CardContent className="space-y-6 pt-6">
+             <FormField
+              control={form.control}
+              name="destinationAddress"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Destination Address</FormLabel>
+                  <FormControl>
+                    <Input placeholder="e.g. spark1..." {...field} />
+                  </FormControl>
+                   <FormDescription>
+                    The address that will receive the initial supply of assets.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <Separator />
             <FormField
               control={form.control}
               name="network"
               render={({ field }) => (
                 <FormItem className="space-y-3">
+                  <FormLabel>Network</FormLabel>
                   <FormControl>
                     <RadioGroup
                       onValueChange={field.onChange}
