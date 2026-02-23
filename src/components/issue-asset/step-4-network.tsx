@@ -22,9 +22,9 @@ import {
 import { useState, Ref } from 'react';
 import { Loader2 } from 'lucide-react';
 import type { AssetFormValues } from './issue-asset-form';
-import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
 import { cn } from '@/lib/utils';
 import { Separator } from '../ui/separator';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
 
 const step4Schema = z.object({
   network: z.string().min(1, 'Please select a network'),
@@ -142,47 +142,43 @@ export default function Step4Network({ onNext, onBack, defaultValues, formRef }:
                 <FormItem className="space-y-3">
                   <FormLabel>Network</FormLabel>
                   <FormControl>
-                    <RadioGroup
+                    <Accordion
+                      type="single"
+                      collapsible
+                      className="w-full space-y-4"
                       onValueChange={field.onChange}
                       defaultValue={field.value}
-                      className="grid grid-cols-1 gap-4"
                     >
-                      {networks.map(network => (
-                          <FormItem key={network.id} className="w-full">
-                              <FormLabel
-                                  htmlFor={network.id}
-                                  className={cn(
-                                  'flex flex-col items-start justify-start gap-4 rounded-md border-2 border-muted bg-popover p-6 hover:bg-accent hover:text-accent-foreground cursor-pointer transition-all',
-                                  field.value === network.id && 'border-primary'
-                                  )}
-                              >
-                                  <RadioGroupItem value={network.id} id={network.id} className="sr-only" />
-                                  <div className="flex items-center gap-4">
-                                      {network.icon}
-                                      <span className="font-semibold">{network.name}</span>
-                                  </div>
-                                  {field.value === network.id && (
-                                      <div className="space-y-4 pt-4 text-sm w-full animate-in fade-in-0 duration-500">
-                                          <Separator />
-                                          <div className="text-muted-foreground space-y-4">
-                                              <div>
-                                                  <h4 className="font-semibold text-foreground mb-1">What is it?</h4>
-                                                  <p>{network.description.whatIsIt}</p>
-                                              </div>
-                                              <div>
-                                                  <h4 className="font-semibold text-foreground mb-1">Best for:</h4>
-                                                  <ul className="list-disc pl-5 space-y-1">
-                                                      {network.description.bestFor.map((item, i) => <li key={i}>{item}</li>)}
-                                                  </ul>
-                                              </div>
-                                          </div>
-                                      </div>
-                                  )}
-                              </FormLabel>
-                          </FormItem>
+                      {networks.map((network) => (
+                        <AccordionItem key={network.id} value={network.id} className="border-b-0">
+                            <Card className={cn("overflow-hidden", field.value === network.id && "border-2 border-primary")}>
+                                <AccordionTrigger className="p-6 hover:no-underline">
+                                    <div className="flex items-center gap-4">
+                                        {network.icon}
+                                        <span className="font-semibold">{network.name}</span>
+                                    </div>
+                                </AccordionTrigger>
+                                <AccordionContent className="px-6 pb-6 pt-0">
+                                  <Separator className="mb-4" />
+                                    <div className="text-muted-foreground space-y-4 text-sm">
+                                        <div>
+                                            <h4 className="font-semibold text-foreground mb-1">What is it?</h4>
+                                            <p>{network.description.whatIsIt}</p>
+                                        </div>
+                                        <div>
+                                            <h4 className="font-semibold text-foreground mb-1">Best for:</h4>
+                                            <ul className="list-disc pl-5 space-y-1">
+                                                {network.description.bestFor.map((item, i) => <li key={i}>{item}</li>)}
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </AccordionContent>
+                            </Card>
+                        </AccordionItem>
                       ))}
-                    </RadioGroup>
+                    </Accordion>
                   </FormControl>
+                  <FormMessage />
                 </FormItem>
               )}
             />
