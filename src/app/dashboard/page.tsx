@@ -68,7 +68,7 @@ function DashboardRenderer() {
         loadComplianceStatus();
 
         const handleAssetChange = async () => {
-            if (userRole === 'issuer' || userRole === 'agent') {
+            if (userRole === 'issuer' || userRole === 'agent' || userRole === 'superadmin') {
                 const storedAssetId = localStorage.getItem('selectedAssetId');
                 try {
                     const response = await fetch('/api/assets?perPage=999');
@@ -148,25 +148,24 @@ function DashboardRenderer() {
                 ) : selectedAsset ? (
                      <AssetDetailsView asset={selectedAsset} view="dashboard" userRole="issuer" />
                 ) : (
-                    <>
-                        <h1 className="text-3xl font-headline font-semibold">Dashboard</h1>
-                        <VolumeCards />
-                        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-                            <PaymentSummaryDynamic className="lg:col-span-3" />
-                            <CryptocurrenciesList className="lg:col-span-2" />
-                        </div>
-                        <TransactionsList limit={7} />
-                    </>
+                    <div className="border-dashed border-2 border-muted-foreground/50 rounded-lg h-96 flex flex-col items-center justify-center text-center p-4">
+                        <Rocket className="h-16 w-16 text-muted-foreground mb-4" />
+                        <h2 className="text-xl font-semibold mb-2">No Asset Selected</h2>
+                        <p className="text-muted-foreground mb-4">Please select an asset from the sidebar or go to the Launchpad to create one.</p>
+                        <Button asChild>
+                            <Link href="/issue-asset">Go to Launchpad</Link>
+                        </Button>
+                    </div>
                 )}
             </main>
         );
     }
     
-    if (role === 'agent') {
+    if (role === 'agent' || role === 'superadmin') {
         if (selectedAsset) {
             return (
                 <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-8 bg-background">
-                    <AssetDetailsView asset={selectedAsset} view="dashboard" userRole="agent" />
+                    <AssetDetailsView asset={selectedAsset} view="dashboard" userRole={role} />
                 </main>
             );
         } else {
