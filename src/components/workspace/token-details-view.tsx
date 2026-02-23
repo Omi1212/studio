@@ -4,12 +4,11 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Copy, Globe, Coins, Flame, Snowflake, TrendingUp, BarChart, CircleDollarSign } from 'lucide-react';
+import { Copy, Coins, Flame, Snowflake, TrendingUp, BarChart, CircleDollarSign } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import type { AssetDetails, User } from '@/lib/types';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
@@ -62,8 +61,6 @@ export default function AssetDetailsView({
     rgb: { name: 'RGB', url: 'https://rgb.tech' },
     taproot: { name: 'Taproot Assets', url: 'https://mempool.space' },
   };
-
-  const explorer = (asset && asset.network.length > 0 && networkExplorerMap[asset.network[0]]) || { name: 'Explorer', url: '#'};
 
 
   useEffect(() => {
@@ -212,14 +209,6 @@ export default function AssetDetailsView({
             <Progress value={0} />
              <div className="text-right text-sm text-muted-foreground">0%</div>
           </CardContent>
-          <CardFooter>
-             <Button variant="outline" className="w-full" asChild>
-              <a href={explorer.url} target="_blank" rel="noopener noreferrer">
-                <Globe className="mr-2 h-4 w-4" />
-                View on {explorer.name}
-              </a>
-            </Button>
-          </CardFooter>
         </Card>
       </div>
 
@@ -238,6 +227,7 @@ export default function AssetDetailsView({
                 <TableHead>Token Supply</TableHead>
                 <TableHead>Circulating Supply</TableHead>
                 <TableHead>Holders</TableHead>
+                <TableHead className="text-right">Explorer</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -253,6 +243,8 @@ export default function AssetDetailsView({
                 const tokenSupply = Math.floor(asset.maxSupply / (asset.network.length || 1));
                 const circulatingSupply = Math.floor(tokenSupply * 0.85); // Mock 85% circulating
                 const holders = (parseInt(asset.id.replace(/\D/g, '').slice(-4) || '100', 10)) * (asset.network.length > 1 ? 2 : 1) + 150 + Math.floor(Math.random() * 50);
+                
+                const explorer = networkExplorerMap[net];
 
                 return (
                 <TableRow key={net}>
@@ -261,6 +253,15 @@ export default function AssetDetailsView({
                     <TableCell className="font-mono">{tokenSupply.toLocaleString()}</TableCell>
                     <TableCell className="font-mono">{circulatingSupply.toLocaleString()}</TableCell>
                     <TableCell className="font-mono">{holders.toLocaleString()}</TableCell>
+                    <TableCell className="text-right">
+                      {explorer && (
+                        <Button variant="outline" size="sm" asChild>
+                          <a href={explorer.url} target="_blank" rel="noopener noreferrer">
+                            View
+                          </a>
+                        </Button>
+                      )}
+                    </TableCell>
                 </TableRow>
                 )})}
             </TableBody>
