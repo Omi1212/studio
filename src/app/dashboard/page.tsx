@@ -8,7 +8,7 @@ import SidebarNav from '@/components/dashboard/sidebar-nav';
 import HeaderDynamic from '@/components/dashboard/header-dynamic';
 import DefaultDashboard from './default/page';
 import { useEffect, useState } from 'react';
-import type { AssetDetails, Company, User } from '@/lib/types';
+import type { AssetDetails, Company, User, Issuer } from '@/lib/types';
 import AssetDetailsView from '@/components/workspace/token-details-view';
 import InvestorDashboard from './investor-dashboard';
 import KybBanner from '@/components/dashboard/kyb-banner';
@@ -71,8 +71,37 @@ function DashboardRenderer() {
             if (userRole === 'issuer' || userRole === 'agent' || userRole === 'superadmin') {
                 const storedAssetId = localStorage.getItem('selectedAssetId');
                 try {
-                    const response = await fetch('/api/assets?perPage=999');
-                    const assetsResponse = await response.json();
+                    const currentUser: User | null = JSON.parse(localStorage.getItem('currentUser') || 'null');
+                    
+                    const getAssetsPromise = async (): Promise<{ data: AssetDetails[] }> => {
+                        if (!currentUser) return { data: [] };
+
+                        if (currentUser.role === 'issuer') {
+                            const issuersRes = await fetch('/api/issuers?perPage=999');
+                            if (!issuersRes.ok) throw new Error("Failed to fetch issuers");
+                            const issuersData = await issuersRes.json();
+                            const currentIssuer = (issuersData.data || []).find((i: Issuer) => i.email === currentUser.email);
+                            if (currentIssuer) {
+                                const assetsResponse = await fetch(`/api/assets?perPage=999&issuerId=${currentIssuer.id}`);
+                                return assetsResponse.ok ? assetsResponse.json() : { data: [] };
+                            } else {
+                                return { data: [] };
+                            }
+                        } else if (currentUser.role === 'agent') {
+                            const [allAssignments, allAssetsRes] = await Promise.all([
+                                fetch(`/api/agents/assignments`).then(res => res.ok ? res.json() : {}),
+                                fetch('/api/assets?perPage=999').then(res => res.ok ? res.json() : { data: [] })
+                            ]);
+                            const assignedAssetIds = allAssignments[currentUser.id] || [];
+                            const agentAssets = (allAssetsRes.data || []).filter((asset: AssetDetails) => assignedAssetIds.includes(asset.id));
+                            return { data: agentAssets };
+                        } else { // for superadmin and any other case
+                            const assetsResponse = await fetch('/api/assets?perPage=999');
+                            return assetsResponse.ok ? assetsResponse.json() : { data: [] };
+                        }
+                    };
+                    const assetsResponse = await getAssetsPromise();
+
                     const allAssets: AssetDetails[] = (assetsResponse.data || []).map((asset: any) => ({
                         ...asset,
                         network: Array.isArray(asset.network) ? asset.network : [asset.network].filter(Boolean)
@@ -97,6 +126,9 @@ function DashboardRenderer() {
                         };
                         setSelectedAsset(enrichedAsset);
                         localStorage.setItem('selectedAssetId', firstAsset.id);
+                    } else {
+                        setSelectedAsset(null);
+                        localStorage.removeItem('selectedAssetId');
                     }
                 } catch (error) {
                     console.error("Failed to fetch assets:", error);
