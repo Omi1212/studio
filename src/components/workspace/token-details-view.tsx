@@ -1,4 +1,3 @@
-
 'use client';
 
 import {
@@ -19,6 +18,14 @@ import { Separator } from '../ui/separator';
 import { Progress } from '../ui/progress';
 import { useState, useEffect } from 'react';
 import AssignedAgents from './assigned-agents';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 interface AssetDetailsViewProps {
   asset: AssetDetails;
@@ -50,10 +57,10 @@ export default function AssetDetailsView({
   const [iconPreview, setIconPreview] = useState<string | null>(null);
 
   const networkExplorerMap: { [key: string]: { name: string; url: string } } = {
-    spark: { name: 'Sparkscan', url: 'https://sparkscan.io' },
-    liquid: { name: 'Liquid Explorer', url: 'https://mempool.space/liquid' },
-    rgb: { name: 'RGB Explorer', url: 'https://rgb.tech' },
-    taproot: { name: 'Taproot Explorer', url: 'https://mempool.space' },
+    spark: { name: 'Spark', url: 'https://sparkscan.io' },
+    liquid: { name: 'Liquid', url: 'https://mempool.space/liquid' },
+    rgb: { name: 'RGB', url: 'https://rgb.tech' },
+    taproot: { name: 'Taproot Assets', url: 'https://mempool.space' },
   };
 
   const explorer = (asset && asset.network.length > 0 && networkExplorerMap[asset.network[0]]) || { name: 'Explorer', url: '#'};
@@ -217,6 +224,36 @@ export default function AssetDetailsView({
       </div>
 
       {renderConditionalContent()}
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Tokens</CardTitle>
+        </CardHeader>
+        <CardContent className="p-0">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Network</TableHead>
+                <TableHead>Token Standard</TableHead>
+                <TableHead>Token Supply</TableHead>
+                <TableHead>Circulating Supply</TableHead>
+                <TableHead>Holders</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {(asset.network || []).map((net) => (
+                <TableRow key={net}>
+                  <TableCell>{networkExplorerMap[net]?.name || net}</TableCell>
+                  <TableCell>--</TableCell>
+                  <TableCell>--</TableCell>
+                  <TableCell>--</TableCell>
+                  <TableCell>--</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
     </div>
   );
 }
