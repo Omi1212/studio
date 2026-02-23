@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import type { Transfer, AssetDetails } from '@/lib/types';
 import { Card, CardContent } from '../ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
-import { ArrowRight, ArrowRightLeft, Search } from 'lucide-react';
+import { ArrowRightLeft, Search } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
@@ -264,29 +264,39 @@ export default function TransferList() {
                 <TableRow>
                     <TableHead>Type</TableHead>
                     <TableHead>From</TableHead>
-                    <TableHead></TableHead>
                     <TableHead>To</TableHead>
+                    <TableHead>Network</TableHead>
                     <TableHead className="text-right">Amount</TableHead>
                     <TableHead className="text-right">Date</TableHead>
                 </TableRow>
                 </TableHeader>
                 <TableBody>
-                {transfers.map((transfer) => (
-                    <TableRow 
-                    key={transfer.txId} 
-                    onClick={() => router.push(`/transfers/${transfer.txId}`)}
-                    className="cursor-pointer"
-                    >
-                    <TableCell>{getTypeBadge(transfer.type)}</TableCell>
-                    <TableCell className="font-mono">{transfer.from.startsWith('spark1') ? `${transfer.from.slice(0, 7)}...${transfer.from.slice(-4)}` : transfer.from}</TableCell>
-                    <TableCell className="px-0 text-muted-foreground"><ArrowRight className="h-4 w-4" /></TableCell>
-                    <TableCell className={cn("font-mono", transfer.type === 'Burn' && 'text-red-500')}>{transfer.to.startsWith('spark1') ? `${transfer.to.slice(0, 7)}...${transfer.to.slice(-4)}` : transfer.to}</TableCell>
-                    <TableCell className={cn("font-mono text-right", getAmountClass(transfer.type))}>
-                        {transfer.amount.toLocaleString()} {transfer.assetTicker}
-                    </TableCell>
-                    <TableCell className="text-right text-muted-foreground">{new Date(transfer.date).toLocaleDateString()}</TableCell>
-                    </TableRow>
-                ))}
+                {transfers.map((transfer) => {
+                    const networks = (transfer as any).networks || [];
+                    const displayNetwork = networks.length > 0 ? networkMap[networks[0]] || networks[0] : 'N/A';
+                    const remainingCount = networks.length - 1;
+                    return (
+                        <TableRow 
+                        key={transfer.txId} 
+                        onClick={() => router.push(`/transfers/${transfer.txId}`)}
+                        className="cursor-pointer"
+                        >
+                        <TableCell>{getTypeBadge(transfer.type)}</TableCell>
+                        <TableCell className="font-mono">{transfer.from.startsWith('spark1') ? `${transfer.from.slice(0, 7)}...${transfer.from.slice(-4)}` : transfer.from}</TableCell>
+                        <TableCell className={cn("font-mono", transfer.type === 'Burn' && 'text-red-500')}>{transfer.to.startsWith('spark1') ? `${transfer.to.slice(0, 7)}...${transfer.to.slice(-4)}` : transfer.to}</TableCell>
+                        <TableCell>
+                            <div className="flex items-center gap-2">
+                                <span>{displayNetwork}</span>
+                                {remainingCount > 0 && <Badge variant="secondary">+{remainingCount}</Badge>}
+                            </div>
+                        </TableCell>
+                        <TableCell className={cn("font-mono text-right", getAmountClass(transfer.type))}>
+                            {transfer.amount.toLocaleString()} {transfer.assetTicker}
+                        </TableCell>
+                        <TableCell className="text-right text-muted-foreground">{new Date(transfer.date).toLocaleDateString()}</TableCell>
+                        </TableRow>
+                    )
+                })}
                 </TableBody>
             </Table>
             </div>
