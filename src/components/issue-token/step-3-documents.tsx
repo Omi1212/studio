@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useForm } from 'react-hook-form';
@@ -22,7 +21,7 @@ import {
 } from '@/components/ui/card';
 import { useState, Ref } from 'react';
 import { Loader2 } from 'lucide-react';
-import type { TokenFormValues } from './issue-token-form';
+import type { AssetFormValues } from '../issue-asset/issue-asset-form';
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const ACCEPTED_FILE_TYPES = ["application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"];
@@ -35,14 +34,14 @@ const step3Schema = z.object({
       (files) => !files || files.length === 0 || ACCEPTED_FILE_TYPES.includes(files?.[0]?.type),
       ".pdf and .doc files are accepted."
     ),
-  legalTokenizationDoc: z.any()
+  legalAssetizationDoc: z.any()
     .optional()
     .refine((files) => !files || files.length === 0 || files?.[0]?.size <= MAX_FILE_SIZE, `Max file size is 5MB.`)
     .refine(
       (files) => !files || files.length === 0 || ACCEPTED_FILE_TYPES.includes(files?.[0]?.type),
       ".pdf and .doc files are accepted."
     ),
-  tokenIssuanceLegalDoc: z.any()
+  assetIssuanceLegalDoc: z.any()
     .optional()
     .refine((files) => !files || files.length === 0 || files?.[0]?.size <= MAX_FILE_SIZE, `Max file size is 5MB.`)
     .refine(
@@ -54,9 +53,9 @@ const step3Schema = z.object({
 type Step3FormValues = z.infer<typeof step3Schema>;
 
 interface Step3DocumentsProps {
-  onNext: (data: Partial<TokenFormValues>) => void;
+  onNext: (data: Partial<AssetFormValues>) => void;
   onBack: () => void;
-  defaultValues?: Partial<TokenFormValues>;
+  defaultValues?: Partial<AssetFormValues>;
   formRef: Ref<HTMLFormElement>;
 }
 
@@ -67,8 +66,8 @@ export default function Step3Documents({ onNext, onBack, defaultValues, formRef 
     resolver: zodResolver(step3Schema),
     defaultValues: {
       whitepaper: defaultValues?.whitepaper,
-      legalTokenizationDoc: defaultValues?.legalTokenizationDoc,
-      tokenIssuanceLegalDoc: defaultValues?.tokenIssuanceLegalDoc,
+      legalAssetizationDoc: defaultValues?.legalAssetizationDoc,
+      assetIssuanceLegalDoc: defaultValues?.assetIssuanceLegalDoc,
     }
   });
 
@@ -109,28 +108,28 @@ export default function Step3Documents({ onNext, onBack, defaultValues, formRef 
             />
             <FormField
               control={form.control}
-              name="legalTokenizationDoc"
+              name="legalAssetizationDoc"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Legal Tokenization Document</FormLabel>
+                  <FormLabel>Legal Assetization Document</FormLabel>
                   <FormControl>
                     <FileInput field={field} />
                   </FormControl>
-                  <FormDescription>Upload the legal tokenization document (PDF, DOC, DOCX).</FormDescription>
+                  <FormDescription>Upload the legal assetization document (PDF, DOC, DOCX).</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
             />
             <FormField
               control={form.control}
-              name="tokenIssuanceLegalDoc"
+              name="assetIssuanceLegalDoc"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Token Issuance Legal Document</FormLabel>
+                  <FormLabel>Asset Issuance Legal Document</FormLabel>
                   <FormControl>
                      <FileInput field={field} />
                   </FormControl>
-                   <FormDescription>Upload the token issuance legal document (PDF, DOC, DOCX).</FormDescription>
+                   <FormDescription>Upload the asset issuance legal document (PDF, DOC, DOCX).</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}

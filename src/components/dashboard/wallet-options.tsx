@@ -1,5 +1,3 @@
-
-
 'use client';
 
 import { Asterisk, ExternalLink, Plus, Power, Copy, ArrowDownToLine, ArrowUpFromLine } from "lucide-react";
@@ -11,7 +9,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Separator } from "../ui/separator";
 import type { User } from "@/lib/types";
-import TokenIcon from "../ui/token-icon";
+import AssetIcon from "../ui/asset-icon";
 import { ScrollArea } from "../ui/scroll-area";
 import { useEffect, useState } from "react";
 
@@ -36,11 +34,11 @@ function ConnectedView({ onDisconnect }: { onDisconnect: () => void }) {
             fetch('/api/crypto').then(res => res.json())
         ]).then(([investorData, cryptoData]) => {
             setInvestor(investorData);
-            setCrypto(cryptoData);
+            setCrypto(cryptoData.data);
         }).catch(console.error);
     }, []);
 
-    const totalValue = investor?.holdings.reduce((acc: number, token: any) => acc + token.amount * token.value, 0) || 0;
+    const totalValue = investor?.holdings.reduce((acc: number, asset: any) => acc + asset.amount * asset.value, 0) || 0;
     const bitcoin = crypto.find(c => c.ticker === 'BTC');
 
 
@@ -108,16 +106,16 @@ function ConnectedView({ onDisconnect }: { onDisconnect: () => void }) {
                         <p className="font-mono">${(bitcoin.balance * bitcoin.value).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                     </div>
                 )}
-                {investor?.holdings?.map((token:any) => (
-                    <div key={token.tokenId} className="flex items-center justify-between">
+                {investor?.holdings?.map((asset:any) => (
+                    <div key={asset.assetId} className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                            <TokenIcon token={token} className="h-10 w-10" />
+                            <AssetIcon asset={asset} className="h-10 w-10" />
                             <div>
-                            <p className="font-semibold">{token.tokenName}</p>
-                            <p className="text-sm text-muted-foreground">{token.amount.toLocaleString()} {token.tokenTicker}</p>
+                            <p className="font-semibold">{asset.assetName}</p>
+                            <p className="text-sm text-muted-foreground">{asset.amount.toLocaleString()} {asset.assetTicker}</p>
                             </div>
                         </div>
-                        <p className="font-mono">${(token.amount * token.value).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                        <p className="font-mono">${(asset.amount * asset.value).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                     </div>
                 ))}
                 {!bitcoin && (!investor?.holdings || investor.holdings.length === 0) && (

@@ -1,15 +1,14 @@
-
 'use client';
 
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback } from './avatar';
 import type { AssetDetails } from '@/lib/types';
 
-interface TokenIconProps extends React.HTMLAttributes<HTMLElement> {
+interface AssetIconProps extends React.HTMLAttributes<HTMLElement> {
     asset?: Partial<AssetDetails>;
 }
 
-export default function TokenIcon({ asset, className }: TokenIconProps) {
+export default function TokenIcon({ asset, className }: AssetIconProps) {
     if (!asset) {
         return (
             <Avatar className={cn("flex items-center justify-center bg-muted text-muted-foreground", className)}>

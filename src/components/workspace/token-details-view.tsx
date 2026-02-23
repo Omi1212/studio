@@ -55,7 +55,7 @@ export default function AssetDetailsView({
     taproot: { name: 'Taproot Explorer', url: 'https://mempool.space' },
   };
 
-  const explorer = networkExplorerMap[asset.network] || { name: 'Explorer', url: '#'};
+  const explorer = (asset && networkExplorerMap[asset.network]) || { name: 'Explorer', url: '#'};
 
 
   useEffect(() => {

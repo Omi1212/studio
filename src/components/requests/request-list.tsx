@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import type { TokenDetails, Issuer, ViewMode } from '@/lib/types';
+import type { AssetDetails, Issuer, ViewMode } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/card';
 import { Avatar, AvatarFallback } from '../ui/avatar';
 import { Button } from '../ui/button';
@@ -10,17 +10,17 @@ import { Search, FilePenLine, MoreVertical, LayoutGrid, List, Copy } from 'lucid
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
 import { useToast } from '@/hooks/use-toast';
 import { Input } from '../ui/input';
-import TokenIcon from '../ui/token-icon';
+import AssetIcon from '../ui/asset-icon';
 import { Badge } from '../ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
 import Link from 'next/link';
 
-type CombinedRequest = TokenDetails & { issuer?: Issuer };
+type CombinedRequest = AssetDetails & { issuer?: Issuer };
 
 const ITEMS_PER_PAGE = 10;
 
-function getStatusBadge(status: TokenDetails['status']) {
+function getStatusBadge(status: AssetDetails['status']) {
   switch (status) {
     case 'active':
       return <Badge variant="outline" className="text-green-400 border-green-400">Approved</Badge>;
@@ -41,10 +41,10 @@ function RequestCard({ request }: { request: CombinedRequest }) {
       <CardHeader>
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-4">
-            <TokenIcon token={request} className="h-10 w-10" />
+            <AssetIcon asset={request} className="h-10 w-10" />
             <div>
-              <CardTitle className="text-lg">{request.tokenName}</CardTitle>
-              <CardDescription className="text-primary font-bold">{request.tokenTicker}</CardDescription>
+              <CardTitle className="text-lg">{request.assetName}</CardTitle>
+              <CardDescription className="text-primary font-bold">{request.assetTicker}</CardDescription>
             </div>
           </div>
         </div>
@@ -86,10 +86,10 @@ function RequestTableRow({ request }: { request: CombinedRequest }) {
     <TableRow onClick={() => router.push(`/requests/${request.id}`)} className="cursor-pointer">
       <TableCell>
         <div className="flex items-center gap-3">
-            <TokenIcon token={request} className="h-8 w-8" />
+            <AssetIcon asset={request} className="h-8 w-8" />
             <div>
-                <p className="font-medium">{request.tokenName}</p>
-                <p className="text-sm text-primary">{request.tokenTicker}</p>
+                <p className="font-medium">{request.assetName}</p>
+                <p className="text-sm text-primary">{request.assetTicker}</p>
             </div>
         </div>
       </TableCell>
@@ -165,23 +165,23 @@ export default function RequestList({ view, setView }: { view: ViewMode, setView
     }
 
     Promise.all([
-      fetch(`/api/tokens?${params.toString()}`).then(res => res.json()),
+      fetch(`/api/assets?${params.toString()}`).then(res => res.json()),
       fetch('/api/issuers').then(res => res.json())
-    ]).then(([tokensResponse, issuersData]) => {
-      const combinedRequests = tokensResponse.data.map((token: TokenDetails) => ({
-        ...token,
-        issuer: (issuersData.data || []).find((issuer: Issuer) => issuer.id === token.issuerId)
+    ]).then(([assetsResponse, issuersData]) => {
+      const combinedRequests = assetsResponse.data.map((asset: AssetDetails) => ({
+        ...asset,
+        issuer: (issuersData.data || []).find((issuer: Issuer) => issuer.id === asset.issuerId)
       }));
 
         const statusOrder = { 'pending': 1, 'active': 2, 'rejected': 3 };
-        combinedRequests.sort((a, b) => {
+        combinedRequests.sort((a: AssetDetails, b: AssetDetails) => {
             const orderA = statusOrder[a.status as keyof typeof statusOrder] || 4;
             const orderB = statusOrder[b.status as keyof typeof statusOrder] || 4;
             return orderA - orderB;
         });
 
       setRequests(combinedRequests);
-      setTotalRequests(tokensResponse.meta.total);
+      setTotalRequests(assetsResponse.meta.total);
     }).catch(console.error).finally(() => setLoading(false));
   }, [currentPage, searchQuery, statusFilter]);
 
@@ -196,7 +196,7 @@ export default function RequestList({ view, setView }: { view: ViewMode, setView
   if (loading) {
     return (
       <div className="space-y-4">
-        <h1 className="text-3xl font-headline font-semibold">Token Requests</h1>
+        <h1 className="text-3xl font-headline font-semibold">Asset Requests</h1>
         <Card className="h-64 animate-pulse bg-muted/50"></Card>
       </div>
     );
@@ -234,7 +234,7 @@ export default function RequestList({ view, setView }: { view: ViewMode, setView
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-headline font-semibold">Token Requests</h1>
+        <h1 className="text-3xl font-headline font-semibold">Asset Requests</h1>
       </div>
 
       <div className="space-y-4">
@@ -242,7 +242,7 @@ export default function RequestList({ view, setView }: { view: ViewMode, setView
             <div className="relative w-full sm:w-auto flex-grow sm:flex-grow-0">
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
-                    placeholder="Search by token or issuer..."
+                    placeholder="Search by asset or issuer..."
                     className="pl-8 w-full sm:w-64"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
@@ -287,7 +287,7 @@ export default function RequestList({ view, setView }: { view: ViewMode, setView
             <FilePenLine className="h-16 w-16 text-muted-foreground mb-4" />
             <h2 className="text-xl font-semibold mb-2">No Requests Found</h2>
             <p className="text-muted-foreground mb-4">
-                {searchQuery || statusFilter !== 'all' ? "Try adjusting your search or filter." : "There are no token requests at this time."}
+                {searchQuery || statusFilter !== 'all' ? "Try adjusting your search or filter." : "There are no asset requests at this time."}
             </p>
         </div>
       ) : view === 'card' ? (
@@ -304,7 +304,7 @@ export default function RequestList({ view, setView }: { view: ViewMode, setView
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Token</TableHead>
+                <TableHead>Asset</TableHead>
                 <TableHead className="hidden md:table-cell">Issuer</TableHead>
                 <TableHead className="hidden lg:table-cell">Wallet</TableHead>
                 <TableHead>Status</TableHead>

@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useForm } from 'react-hook-form';
@@ -23,7 +22,7 @@ import {
 } from '@/components/ui/card';
 import { useState, Ref } from 'react';
 import { Loader2 } from 'lucide-react';
-import type { TokenFormValues } from './issue-token-form';
+import type { AssetFormValues } from '../issue-asset/issue-asset-form';
 
 const step2Schema = z.object({
   decimals: z.coerce.number().int().min(0).max(18),
@@ -33,14 +32,14 @@ const step2Schema = z.object({
 
 type Step2FormValues = z.infer<typeof step2Schema>;
 
-interface Step2TokenDetailsProps {
-  onNext: (data: Partial<TokenFormValues>) => void;
+interface Step2AssetDetailsProps {
+  onNext: (data: Partial<AssetFormValues>) => void;
   onBack: () => void;
-  defaultValues?: Partial<TokenFormValues>;
+  defaultValues?: Partial<AssetFormValues>;
   formRef: Ref<HTMLFormElement>;
 }
 
-export default function Step2TokenDetails({ onNext, onBack, defaultValues, formRef }: Step2TokenDetailsProps) {
+export default function Step2TokenDetails({ onNext, onBack, defaultValues, formRef }: Step2AssetDetailsProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const form = useForm<Step2FormValues>({
@@ -74,7 +73,7 @@ export default function Step2TokenDetails({ onNext, onBack, defaultValues, formR
                     <Input type="number" {...field} />
                   </FormControl>
                   <FormDescription>
-                    The number of decimal places the token can have (0-18).
+                    The number of decimal places the asset can have (0-18).
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -90,7 +89,7 @@ export default function Step2TokenDetails({ onNext, onBack, defaultValues, formR
                     <Input type="number" {...field} />
                   </FormControl>
                   <FormDescription>
-                    The maximum number of tokens that can be minted.
+                    The maximum number of assets that can be minted.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -104,7 +103,7 @@ export default function Step2TokenDetails({ onNext, onBack, defaultValues, formR
                   <div className="space-y-0.5">
                     <FormLabel>Is Freezable?</FormLabel>
                     <FormDescription>
-                      Can the token supply be frozen by the issuer?
+                      Can the asset supply be frozen by the issuer?
                     </FormDescription>
                   </div>
                   <FormControl>

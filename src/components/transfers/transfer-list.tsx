@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import type { Transfer, TokenDetails } from '@/lib/types';
+import type { Transfer, AssetDetails } from '@/lib/types';
 import { Card, CardContent } from '../ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
 import { ArrowRight, ArrowRightLeft, Search } from 'lucide-react';
@@ -46,9 +46,9 @@ export default function TransferList() {
   const [totalTransfers, setTotalTransfers] = useState(0);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
-  const [selectedToken, setSelectedToken] = useState<TokenDetails | null>(null);
+  const [selectedAsset, setSelectedAsset] = useState<AssetDetails | null>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
-  const [tokenCheckComplete, setTokenCheckComplete] = useState(false);
+  const [assetCheckComplete, setAssetCheckComplete] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState('all');
 
@@ -57,38 +57,38 @@ export default function TransferList() {
     const role = localStorage.getItem('userRole');
     setUserRole(role);
     
-    const handleTokenChange = async () => {
-        const storedTokenId = localStorage.getItem('selectedTokenId');
-        if (storedTokenId) {
+    const handleAssetChange = async () => {
+        const storedAssetId = localStorage.getItem('selectedAssetId');
+        if (storedAssetId) {
             try {
-                const response = await fetch(`/api/tokens/${storedTokenId}`);
+                const response = await fetch(`/api/assets/${storedAssetId}`);
                 if (response.ok) {
                     const data = await response.json();
-                    setSelectedToken(data);
+                    setSelectedAsset(data);
                 } else {
-                    setSelectedToken(null);
+                    setSelectedAsset(null);
                 }
             } catch (error) {
-                console.error("Failed to fetch token:", error);
-                setSelectedToken(null);
+                console.error("Failed to fetch asset:", error);
+                setSelectedAsset(null);
             }
         } else {
-            setSelectedToken(null);
+            setSelectedAsset(null);
         }
-        setTokenCheckComplete(true);
+        setAssetCheckComplete(true);
     };
 
-    handleTokenChange();
-    window.addEventListener('tokenChanged', handleTokenChange);
+    handleAssetChange();
+    window.addEventListener('assetChanged', handleAssetChange);
 
     return () => {
-        window.removeEventListener('tokenChanged', handleTokenChange);
+        window.removeEventListener('assetChanged', handleAssetChange);
     };
 
   }, []);
 
   useEffect(() => {
-    if (!tokenCheckComplete) {
+    if (!assetCheckComplete) {
         return;
     }
       
@@ -99,9 +99,9 @@ export default function TransferList() {
         perPage: ITEMS_PER_PAGE.toString(),
       });
 
-      if ((userRole === 'issuer' || userRole === 'agent') && selectedToken) {
-        params.append('tokenTicker', selectedToken.tokenTicker);
-      } else if ((userRole === 'issuer' || userRole === 'agent') && !selectedToken) {
+      if ((userRole === 'issuer' || userRole === 'agent') && selectedAsset) {
+        params.append('assetTicker', selectedAsset.assetTicker);
+      } else if ((userRole === 'issuer' || userRole === 'agent') && !selectedAsset) {
         setTransfers([]);
         setTotalTransfers(0);
         setLoading(false);
@@ -127,7 +127,7 @@ export default function TransferList() {
       }
     };
     fetchTransfers();
-  }, [currentPage, searchQuery, typeFilter, selectedToken, userRole, tokenCheckComplete]);
+  }, [currentPage, searchQuery, typeFilter, selectedAsset, userRole, assetCheckComplete]);
 
 
   const totalPages = Math.ceil(totalTransfers / ITEMS_PER_PAGE);
@@ -170,15 +170,15 @@ export default function TransferList() {
     );
   }
 
-  if ((userRole === 'issuer' || userRole === 'agent') && !selectedToken && tokenCheckComplete) {
+  if ((userRole === 'issuer' || userRole === 'agent') && !selectedAsset && assetCheckComplete) {
       return (
         <div className="space-y-8">
           <KybBanner />
           <IdentityProvidersBanner />
           <div className="border-dashed border-2 border-muted-foreground/50 rounded-lg h-96 flex flex-col items-center justify-center text-center p-4">
             <ArrowRightLeft className="h-16 w-16 text-muted-foreground mb-4" />
-            <h2 className="text-xl font-semibold mb-2">No token selected</h2>
-            <p className="text-muted-foreground mb-4">Please select a token from the sidebar to view transfers.</p>
+            <h2 className="text-xl font-semibold mb-2">No asset selected</h2>
+            <p className="text-muted-foreground mb-4">Please select an asset from the sidebar to view transfers.</p>
           </div>
         </div>
       )
@@ -186,10 +186,10 @@ export default function TransferList() {
 
   if (transfers.length === 0) {
       const noTransfersMessage = () => {
-          if ((userRole === 'issuer' || userRole === 'agent') && !selectedToken) {
+          if ((userRole === 'issuer' || userRole === 'agent') && !selectedAsset) {
               return {
-                  title: "No token selected or found",
-                  description: "Please select a token from the sidebar to view its transfers."
+                  title: "No asset selected or found",
+                  description: "Please select an asset from the sidebar to view its transfers."
               }
           }
           if (searchQuery || typeFilter !== 'all') {
@@ -200,7 +200,7 @@ export default function TransferList() {
           }
           return {
               title: "No Transfers Found",
-              description: `There are no transfers for ${selectedToken?.tokenTicker} at this time.`
+              description: `There are no transfers for ${selectedAsset?.assetTicker} at this time.`
           }
       }
       return (
@@ -246,7 +246,7 @@ export default function TransferList() {
                     <TableCell className="px-0 text-muted-foreground"><ArrowRight className="h-4 w-4" /></TableCell>
                     <TableCell className={cn("font-mono", transfer.type === 'Burn' && 'text-red-500')}>{transfer.to.startsWith('spark1') ? `${transfer.to.slice(0, 7)}...${transfer.to.slice(-4)}` : transfer.to}</TableCell>
                     <TableCell className={cn("font-mono text-right", getAmountClass(transfer.type))}>
-                        {transfer.amount.toLocaleString()} {transfer.tokenTicker}
+                        {transfer.amount.toLocaleString()} {transfer.assetTicker}
                     </TableCell>
                     <TableCell className="text-right text-muted-foreground">{new Date(transfer.date).toLocaleDateString()}</TableCell>
                     </TableRow>

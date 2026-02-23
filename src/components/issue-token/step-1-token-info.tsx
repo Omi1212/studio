@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useForm } from 'react-hook-form';
@@ -22,33 +21,33 @@ import {
 } from '@/components/ui/card';
 import { useState, Ref } from 'react';
 import { Loader2 } from 'lucide-react';
-import type { TokenFormValues } from './issue-token-form';
+import type { AssetFormValues } from '../issue-asset/issue-asset-form';
 
 const step1Schema = z.object({
-  tokenName: z.string().min(1, 'Token name is required'),
-  tokenTicker: z.string().min(1, 'Token ticker is required').max(5, 'Ticker cannot exceed 5 characters'),
-  tokenIcon: z.any().optional(),
+  assetName: z.string().min(1, 'Asset name is required'),
+  assetTicker: z.string().min(1, 'Asset ticker is required').max(5, 'Ticker cannot exceed 5 characters'),
+  assetIcon: z.any().optional(),
   destinationAddress: z.string().min(1, 'Destination address is required'),
 });
 
 type Step1FormValues = z.infer<typeof step1Schema>;
 
-interface Step1TokenInfoProps {
-  onNext: (data: Partial<TokenFormValues>) => void;
-  defaultValues?: Partial<TokenFormValues>;
+interface Step1AssetInfoProps {
+  onNext: (data: Partial<AssetFormValues>) => void;
+  defaultValues?: Partial<AssetFormValues>;
   formRef: Ref<HTMLFormElement>;
 }
 
-export default function Step1TokenInfo({ onNext, defaultValues, formRef }: Step1TokenInfoProps) {
+export default function Step1TokenInfo({ onNext, defaultValues, formRef }: Step1AssetInfoProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const form = useForm<Step1FormValues>({
     resolver: zodResolver(step1Schema),
     defaultValues: {
-        tokenName: defaultValues?.tokenName || '',
-        tokenTicker: defaultValues?.tokenTicker || '',
+        assetName: defaultValues?.assetName || '',
+        assetTicker: defaultValues?.assetTicker || '',
         destinationAddress: defaultValues?.destinationAddress || '',
-        tokenIcon: defaultValues?.tokenIcon,
+        assetIcon: defaultValues?.assetIcon,
     }
   });
 
@@ -66,12 +65,12 @@ export default function Step1TokenInfo({ onNext, defaultValues, formRef }: Step1
           <CardContent className="space-y-6 pt-6">
             <FormField
               control={form.control}
-              name="tokenName"
+              name="assetName"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Token Name</FormLabel>
+                  <FormLabel>Asset Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="e.g. My Awesome Token" {...field} />
+                    <Input placeholder="e.g. My Awesome Asset" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -79,12 +78,12 @@ export default function Step1TokenInfo({ onNext, defaultValues, formRef }: Step1
             />
             <FormField
               control={form.control}
-              name="tokenTicker"
+              name="assetTicker"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Token Ticker</FormLabel>
+                  <FormLabel>Asset Ticker</FormLabel>
                   <FormControl>
-                    <Input placeholder="e.g. MAT" {...field} />
+                    <Input placeholder="e.g. MAA" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -92,10 +91,10 @@ export default function Step1TokenInfo({ onNext, defaultValues, formRef }: Step1
             />
              <FormField
               control={form.control}
-              name="tokenIcon"
+              name="assetIcon"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Token Icon</FormLabel>
+                  <FormLabel>Asset Icon</FormLabel>
                   <FormControl>
                     <div className="flex items-center gap-4">
                       <div className="w-full">
@@ -109,7 +108,7 @@ export default function Step1TokenInfo({ onNext, defaultValues, formRef }: Step1
                     </div>
                   </FormControl>
                   <FormDescription>
-                    Upload an image for your token (e.g., PNG, JPG, SVG).
+                    Upload an image for your asset (e.g., PNG, JPG, SVG).
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -125,7 +124,7 @@ export default function Step1TokenInfo({ onNext, defaultValues, formRef }: Step1
                     <Input placeholder="e.g. spark1..." {...field} />
                   </FormControl>
                    <FormDescription>
-                    The address that will receive the initial supply of tokens.
+                    The address that will receive the initial supply of assets.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>

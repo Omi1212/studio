@@ -6,8 +6,8 @@ import {
 import SidebarNav from '@/components/dashboard/sidebar-nav';
 import type { Metadata } from 'next';
 import HeaderDynamic from '@/components/dashboard/header-dynamic';
-import PortfolioValue from '@/components/my-tokens/portfolio-value';
-import AssetsListDynamic from '@/components/my-tokens/tokens-list-dynamic';
+import PortfolioValue from '@/components/my-assets/portfolio-value';
+import AssetsListDynamic from '@/components/my-assets/assets-list-dynamic';
 
 export const metadata: Metadata = {
   title: 'Portfolio - SATS Dashboard',

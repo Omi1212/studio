@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -177,10 +176,12 @@ export default function AssetsList() {
             fetch('/api/investors/inv-001').then(res => res.json()),
             fetch('/api/assets?perPage=999').then(res => res.json())
         ]).then(([investor, assetsResponse]: [any, any]) => {
-            if (!investor) return;
+            if (!investor?.holdings) return;
 
             const allAssets = assetsResponse.data || [];
-            const pAssets = investor.holdings.map((holding: any) => {
+            const pAssets = investor.holdings
+              .filter((holding: any) => holding && holding.assetId)
+              .map((holding: any) => {
                 const assetDetail = allAssets.find((t: AssetDetails) => t.id === holding.assetId);
                 return {
                     id: holding.assetId,
