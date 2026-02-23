@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -40,6 +41,7 @@ import {
   SidebarMenuButton,
   SidebarFooter,
 } from '@/components/ui/sidebar';
+import * as React from 'react';
 
 
 const superAdminMenu = [
@@ -104,87 +106,79 @@ export default function SidebarNav() {
   const [selectedCompany, setSelectedCompany] = useState<{ id: string; name: string } | null>(null);
 
 
-  useEffect(() => {
-    setIsClient(true);
+  const fetchData = React.useCallback(async () => {
     const role = localStorage.getItem('userRole');
     const currentUser: User | null = JSON.parse(localStorage.getItem('currentUser') || 'null');
     setUserRole(role);
 
     if (!currentUser) {
+      setAllAssets([]);
+      setSelectedAsset(null);
+      setCompanies([]);
+      setSelectedCompany(null);
       return;
     }
 
-    const fetchData = async () => {
-      try {
-        const companyPromise = currentUser.companyId
-          ? fetch(`/api/companies/${currentUser.companyId}`).then((res) => (res.ok ? res.json() : null))
-          : Promise.resolve(null);
+    try {
+      const companyPromise = currentUser.companyId
+        ? fetch(`/api/companies/${currentUser.companyId}`).then((res) => (res.ok ? res.json() : null))
+        : Promise.resolve(null);
 
-        const getAssetsPromise = async (): Promise<{ data: AssetDetails[] }> => {
-            if (currentUser.role === 'issuer') {
-                const issuersRes = await fetch('/api/issuers?perPage=999');
-                if (!issuersRes.ok) throw new Error("Failed to fetch issuers");
-                const issuersData = await issuersRes.json();
-                const currentIssuer = (issuersData.data || []).find((i: Issuer) => i.email === currentUser.email);
+      const getAssetsPromise = async (): Promise<{ data: AssetDetails[] }> => {
+          if (currentUser.role === 'issuer') {
+              const issuersRes = await fetch('/api/issuers?perPage=999');
+              if (!issuersRes.ok) throw new Error("Failed to fetch issuers");
+              const issuersData = await issuersRes.json();
+              const currentIssuer = (issuersData.data || []).find((i: Issuer) => i.email === currentUser.email);
 
-                if (currentIssuer) {
-                    const assetsResponse = await fetch(`/api/assets?perPage=999&issuerId=${currentIssuer.id}`);
-                    return assetsResponse.ok ? assetsResponse.json() : { data: [] };
-                } else {
-                    return { data: [] };
-                }
-            } else if (currentUser.role === 'agent') {
-                const [allAssignments, allAssetsRes] = await Promise.all([
-                    fetch(`/api/agents/assignments`).then(res => res.ok ? res.json() : {}),
-                    fetch('/api/assets?perPage=999').then(res => res.ok ? res.json() : { data: [] })
-                ]);
-                const assignedAssetIds = allAssignments[currentUser.id] || [];
-                const agentAssets = (allAssetsRes.data || []).filter((asset: AssetDetails) => assignedAssetIds.includes(asset.id));
-                return { data: agentAssets };
-            } else { // for superadmin and any other case
-                const assetsResponse = await fetch('/api/assets?perPage=999');
-                return assetsResponse.ok ? assetsResponse.json() : { data: [] };
-            }
-        };
-        
-        const assetsPromise = getAssetsPromise();
-        
-        const [companyData, assetsData] = await Promise.all([companyPromise, assetsPromise]);
-
-        // Process company data
-        if (companyData) {
-          setCompanies([companyData]);
-          setSelectedCompany(companyData);
-          localStorage.setItem('selectedCompanyId', companyData.id);
-        } else {
-          setCompanies([]);
-          setSelectedCompany(null);
-          localStorage.removeItem('selectedCompanyId');
-        }
-
-        // Process assets data
-        const combinedAssets: AssetDetails[] = (assetsData.data || []).map((t: any) => ({
-          ...t,
-          decimals: t.decimals ?? 0,
-          isFreezable: t.isFreezable ?? false,
-          publicKey: t.publicKey ?? `02f...${t.id.slice(-10)}`,
-          network: Array.isArray(t.network) ? t.network : [t.network].filter(Boolean),
-        }));
-        setAllAssets(combinedAssets);
-
-        const storedAssetId = localStorage.getItem('selectedAssetId');
-        if (storedAssetId) {
-          const foundAsset = combinedAssets.find((t) => t.id === storedAssetId);
-          if (foundAsset) {
-            setSelectedAsset(foundAsset);
-          } else if (combinedAssets.length > 0) {
-            const firstAsset = combinedAssets[0];
-            setSelectedAsset(firstAsset);
-            localStorage.setItem('selectedAssetId', firstAsset.id);
-          } else {
-            setSelectedAsset(null);
-            localStorage.removeItem('selectedAssetId');
+              if (currentIssuer) {
+                  const assetsResponse = await fetch(`/api/assets?perPage=999&issuerId=${currentIssuer.id}`);
+                  return assetsResponse.ok ? assetsResponse.json() : { data: [] };
+              } else {
+                  return { data: [] };
+              }
+          } else if (currentUser.role === 'agent') {
+              const [allAssignments, allAssetsRes] = await Promise.all([
+                  fetch(`/api/agents/assignments`).then(res => res.ok ? res.json() : {}),
+                  fetch('/api/assets?perPage=999').then(res => res.ok ? res.json() : { data: [] })
+              ]);
+              const assignedAssetIds = allAssignments[currentUser.id] || [];
+              const agentAssets = (allAssetsRes.data || []).filter((asset: AssetDetails) => assignedAssetIds.includes(asset.id));
+              return { data: agentAssets };
+          } else { // for superadmin and any other case
+              const assetsResponse = await fetch('/api/assets?perPage=999');
+              return assetsResponse.ok ? assetsResponse.json() : { data: [] };
           }
+      };
+      
+      const assetsPromise = getAssetsPromise();
+      
+      const [companyData, assetsData] = await Promise.all([companyPromise, assetsPromise]);
+
+      if (companyData) {
+        setCompanies([companyData]);
+        setSelectedCompany(companyData);
+        localStorage.setItem('selectedCompanyId', companyData.id);
+      } else {
+        setCompanies([]);
+        setSelectedCompany(null);
+        localStorage.removeItem('selectedCompanyId');
+      }
+
+      const combinedAssets: AssetDetails[] = (assetsData.data || []).map((t: any) => ({
+        ...t,
+        decimals: t.decimals ?? 0,
+        isFreezable: t.isFreezable ?? false,
+        publicKey: t.publicKey ?? `02f...${t.id.slice(-10)}`,
+        network: Array.isArray(t.network) ? t.network : [t.network].filter(Boolean),
+      }));
+      setAllAssets(combinedAssets);
+
+      const storedAssetId = localStorage.getItem('selectedAssetId');
+      if (storedAssetId) {
+        const foundAsset = combinedAssets.find((t) => t.id === storedAssetId);
+        if (foundAsset) {
+          setSelectedAsset(foundAsset);
         } else if (combinedAssets.length > 0) {
           const firstAsset = combinedAssets[0];
           setSelectedAsset(firstAsset);
@@ -193,13 +187,28 @@ export default function SidebarNav() {
           setSelectedAsset(null);
           localStorage.removeItem('selectedAssetId');
         }
-      } catch (error) {
-        console.error('Error fetching sidebar data:', error);
+      } else if (combinedAssets.length > 0) {
+        const firstAsset = combinedAssets[0];
+        setSelectedAsset(firstAsset);
+        localStorage.setItem('selectedAssetId', firstAsset.id);
+      } else {
+        setSelectedAsset(null);
+        localStorage.removeItem('selectedAssetId');
       }
-    };
-
-    fetchData();
+    } catch (error) {
+      console.error('Error fetching sidebar data:', error);
+    }
   }, []);
+
+  useEffect(() => {
+    setIsClient(true);
+    fetchData();
+
+    window.addEventListener('assetChanged', fetchData);
+    return () => {
+      window.removeEventListener('assetChanged', fetchData);
+    };
+  }, [fetchData]);
 
   const handleAssetSelect = (asset: AssetDetails) => {
     setSelectedAsset(asset);

@@ -19,12 +19,12 @@ import Step3Documents from '@/components/issue-asset/step-3-documents';
 import Step4Network from '@/components/issue-asset/step-4-network';
 import Step5Review from '@/components/issue-asset/step-5-asset-review';
 import { Button } from '@/components/ui/button';
-import type { Issuer } from '@/lib/types';
+import type { Issuer, User } from '@/lib/types';
 import Link from 'next/link';
 
 export default function NewAssetPage() {
   const [currentStep, setCurrentStep] = useState(1);
-  const [issuers, setIssuers] = useState<Issuer[]>([]);
+  const [currentIssuer, setCurrentIssuer] = useState<Issuer | null>(null);
   const [formData, setFormData] = useState<Partial<AssetFormValues>>({
     assetName: 'Ingeniería Coin',
     assetTicker: 'ING',
@@ -41,7 +41,18 @@ export default function NewAssetPage() {
   const stepFormRef = useRef<HTMLFormElement>(null);
   
   useEffect(() => {
-    fetch('/api/issuers?perPage=1000').then(res => res.json()).then(response => setIssuers(response.data));
+    const userStr = localStorage.getItem('currentUser');
+    if (userStr) {
+      const currentUser: User = JSON.parse(userStr);
+      if (currentUser.role === 'issuer') {
+        fetch('/api/issuers?perPage=999')
+          .then(res => res.json())
+          .then(response => {
+            const issuer = (response.data || []).find((i: Issuer) => i.email === currentUser.email);
+            setCurrentIssuer(issuer);
+          });
+      }
+    }
   }, []);
 
   const steps = [
@@ -71,15 +82,15 @@ export default function NewAssetPage() {
   const handleFinalSubmit = async (data: Partial<AssetFormValues>) => {
     const finalData = { ...formData, ...data } as AssetFormValues;
     
-    if (issuers.length < 2) {
-        toast({ title: 'Error', description: 'Not enough issuer data to submit.'});
+    if (!currentIssuer) {
+        toast({ variant: 'destructive', title: 'Error', description: 'Could not identify the issuer. Please log in again.'});
         return;
     }
 
     const newAssetData = { 
       ...finalData, 
       status: 'pending',
-      issuerId: issuers[1].id, // For demo purposes, assign to AssetForge
+      issuerId: currentIssuer.id,
     };
     
     // Remove file objects before sending to API
@@ -102,6 +113,7 @@ export default function NewAssetPage() {
           title: 'Request Submitted!',
           description: `Your new asset "${createdAsset.assetName}" has been submitted for review.`,
         });
+        window.dispatchEvent(new Event('assetChanged'));
         router.push('/issue-asset');
 
     } catch (error) {

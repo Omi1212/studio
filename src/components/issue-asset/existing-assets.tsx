@@ -1,6 +1,7 @@
+
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import type { AssetDetails, User, Issuer, ViewMode, Company } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/card';
@@ -159,69 +160,75 @@ export default function ExistingAssets({ view, setView, canCreate, company }: { 
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
 
-  useEffect(() => {
+  const fetchIssuerAndAssets = useCallback(async () => {
     setLoading(true);
 
-    const fetchIssuerAndAssets = async () => {
-        const userStr = localStorage.getItem('currentUser');
-        if (!userStr) {
-            setLoading(false);
-            return;
-        }
-        const currentUser: User = JSON.parse(userStr);
+    const userStr = localStorage.getItem('currentUser');
+    if (!userStr) {
+        setLoading(false);
+        return;
+    }
+    const currentUser: User = JSON.parse(userStr);
 
-        if (currentUser.role !== 'issuer') {
+    if (currentUser.role !== 'issuer') {
+        setAssets([]);
+        setTotalAssets(0);
+        setLoading(false);
+        return;
+    }
+
+    try {
+        const issuersRes = await fetch('/api/issuers?perPage=999');
+        if (!issuersRes.ok) throw new Error("Failed to fetch issuers");
+        const issuersData = await issuersRes.json();
+        const currentIssuer = (issuersData.data || []).find((i: Issuer) => i.email === currentUser.email);
+        
+        if (!currentIssuer) {
             setAssets([]);
             setTotalAssets(0);
             setLoading(false);
             return;
         }
 
-        try {
-            const issuersRes = await fetch('/api/issuers?perPage=999');
-            if (!issuersRes.ok) throw new Error("Failed to fetch issuers");
-            const issuersData = await issuersRes.json();
-            const currentIssuer = (issuersData.data || []).find((i: Issuer) => i.email === currentUser.email);
-            
-            if (!currentIssuer) {
-                setAssets([]);
-                setTotalAssets(0);
-                return;
-            }
+        const params = new URLSearchParams({
+            page: currentPage.toString(),
+            perPage: ITEMS_PER_PAGE.toString(),
+            issuerId: currentIssuer.id
+        });
+        const assetsResponse = await fetch(`/api/assets?${params.toString()}`);
+        if (!assetsResponse.ok) throw new Error("Failed to fetch assets");
+        const assetsData = await assetsResponse.json();
+        
+        const mappedAssets = (assetsData.data || []).map((t: any) => ({
+            ...t,
+            decimals: t.decimals ?? 0,
+            isFreezable: t.isFreezable ?? false,
+            publicKey: t.publicKey ?? `02f...${t.id.slice(-10)}`,
+            assetName: t.assetName || 'Untitled Asset',
+            assetTicker: t.assetTicker || '---',
+            network: Array.isArray(t.network) ? t.network : [t.network].filter(Boolean),
+            maxSupply: t.maxSupply || 0,
+        }));
+        setAssets(mappedAssets);
+        setTotalAssets(assetsData.meta.total);
 
-            const params = new URLSearchParams({
-                page: currentPage.toString(),
-                perPage: ITEMS_PER_PAGE.toString(),
-                issuerId: currentIssuer.id
-            });
-            const assetsResponse = await fetch(`/api/assets?${params.toString()}`);
-            if (!assetsResponse.ok) throw new Error("Failed to fetch assets");
-            const assetsData = await assetsResponse.json();
-            
-            const mappedAssets = (assetsData.data || []).map((t: any) => ({
-                ...t,
-                decimals: t.decimals ?? 0,
-                isFreezable: t.isFreezable ?? false,
-                publicKey: t.publicKey ?? `02f...${t.id.slice(-10)}`,
-                assetName: t.assetName || 'Untitled Asset',
-                assetTicker: t.assetTicker || '---',
-                network: Array.isArray(t.network) ? t.network : [t.network].filter(Boolean),
-                maxSupply: t.maxSupply || 0,
-            }));
-            setAssets(mappedAssets);
-            setTotalAssets(assetsData.meta.total);
-
-        } catch (error) {
-            console.error("Failed to fetch data:", error);
-            setAssets([]);
-            setTotalAssets(0);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    fetchIssuerAndAssets();
+    } catch (error) {
+        console.error("Failed to fetch data:", error);
+        setAssets([]);
+        setTotalAssets(0);
+    } finally {
+        setLoading(false);
+    }
   }, [currentPage]);
+
+  useEffect(() => {
+    fetchIssuerAndAssets();
+    window.addEventListener('assetChanged', fetchIssuerAndAssets);
+
+    return () => {
+        window.removeEventListener('assetChanged', fetchIssuerAndAssets);
+    };
+  }, [fetchIssuerAndAssets]);
   
   const totalPages = Math.ceil(totalAssets / ITEMS_PER_PAGE);
 
