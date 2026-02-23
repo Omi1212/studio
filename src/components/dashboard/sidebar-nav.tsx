@@ -142,6 +142,7 @@ export default function SidebarNav() {
                 decimals: t.decimals ?? 0,
                 isFreezable: t.isFreezable ?? false,
                 publicKey: t.publicKey ?? `02f...${t.id.slice(-10)}`,
+                network: Array.isArray(t.network) ? t.network : [t.network].filter(Boolean),
             }));
             setAllAssets(combinedAssets);
 
@@ -277,9 +278,6 @@ export default function SidebarNav() {
                         <span className="text-primary font-semibold text-xs">
                           {selectedAsset.assetTicker}
                         </span>
-                        <span className="text-xs text-muted-foreground">
-                          ({(selectedAsset.network as string[]).map(n => networkMap[n] || n).join(', ')})
-                        </span>
                       </div>
                     </div>
                   </div>
@@ -302,9 +300,6 @@ export default function SidebarNav() {
                         <div className="flex items-center gap-2">
                           <span className="text-primary font-semibold text-xs">
                             {asset.assetTicker}
-                          </span>
-                          <span className="text-xs text-muted-foreground">
-                            ({(asset.network as string[]).map(n => networkMap[n] || n).join(', ')})
                           </span>
                         </div>
                       </div>
