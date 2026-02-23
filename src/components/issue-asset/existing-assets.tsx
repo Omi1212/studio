@@ -153,7 +153,7 @@ function AssetTable({ assets }: { assets: AssetDetails[] }) {
     )
 }
 
-export default function ExistingAssets({ view, setView }: { view: ViewMode, setView: (mode: ViewMode) => void }) {
+export default function ExistingAssets({ view, setView, canCreate }: { view: ViewMode, setView: (mode: ViewMode) => void, canCreate?: boolean }) {
   const [assets, setAssets] = useState<AssetDetails[]>([]);
   const [totalAssets, setTotalAssets] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -278,17 +278,23 @@ export default function ExistingAssets({ view, setView }: { view: ViewMode, setV
   }
   
   if (assets.length === 0) {
+      if (canCreate) {
+        return (
+          <div className="border-dashed border-2 border-muted-foreground/50 rounded-lg h-96 flex flex-col items-center justify-center text-center p-4">
+              <Rocket className="h-16 w-16 text-muted-foreground mb-4" />
+              <h2 className="text-xl font-semibold mb-2">No assets found</h2>
+              <p className="text-muted-foreground mb-4">Get started by launching your first asset using the button above.</p>
+          </div>
+        );
+      }
       return (
         <div className="space-y-8">
           <KybBanner />
           <IdentityProvidersBanner />
           <div className="border-dashed border-2 border-muted-foreground/50 rounded-lg h-96 flex flex-col items-center justify-center text-center p-4">
               <Rocket className="h-16 w-16 text-muted-foreground mb-4" />
-              <h2 className="text-xl font-semibold mb-2">No assets found</h2>
-              <p className="text-muted-foreground mb-4">Get started by launching your first asset.</p>
-              <Button asChild>
-                  <Link href="/issue-asset/new">Create New Asset</Link>
-              </Button>
+              <h2 className="text-xl font-semibold mb-2">Start by verifying your business</h2>
+              <p className="text-muted-foreground mb-4">Please complete your business verification to create a new asset.</p>
           </div>
         </div>
       );

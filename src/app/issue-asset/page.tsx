@@ -1,4 +1,3 @@
-
 'use client';
 
 import {
@@ -12,12 +11,33 @@ import ExistingAssets from '@/components/issue-asset/existing-assets';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { Plus } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import type { User } from '@/lib/types';
 
 export type ViewMode = 'card' | 'table';
 
 export default function IssueAssetPage() {
   const [viewMode, setViewMode] = useState<ViewMode>('card');
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem('currentUser');
+    if (storedUser) {
+      const parsedUser = JSON.parse(storedUser);
+       fetch(`/api/users/${parsedUser.id}`)
+        .then(res => res.ok ? res.json() : parsedUser)
+        .then(dbUser => setUser(dbUser))
+        .catch(() => setUser(parsedUser)) // Fallback to localStorage user
+        .finally(() => setLoading(false));
+    } else {
+      setLoading(false);
+    }
+  }, []);
+
+  const canCreateAssets = !loading && user && user.role === 'issuer' && (user.kybStatus === 'verified' || user.email === 'issuer@gmail.com');
+
+
   return (
     <SidebarProvider>
       <Sidebar className="border-r">
@@ -33,14 +53,16 @@ export default function IssueAssetPage() {
                     <h1 className="text-3xl font-headline font-semibold">
                     Launchpad
                     </h1>
-                    <Button asChild>
-                        <Link href="/issue-asset/new">
-                            <Plus className="mr-2 h-4 w-4" />
-                            Create New Asset
-                        </Link>
-                    </Button>
+                    {canCreateAssets && (
+                      <Button asChild>
+                          <Link href="/issue-asset/new">
+                              <Plus className="mr-2 h-4 w-4" />
+                              Create New Asset
+                          </Link>
+                      </Button>
+                    )}
                 </div>
-                <ExistingAssets view={viewMode} setView={setViewMode} />
+                <ExistingAssets view={viewMode} setView={setViewMode} canCreate={canCreateAssets} />
               </div>
             </div>
           </main>
