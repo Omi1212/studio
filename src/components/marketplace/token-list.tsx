@@ -144,7 +144,7 @@ export default function AssetList() {
           publicKey: t.publicKey ?? `02f...${t.id.slice(-10)}`,
           assetName: t.assetName || 'Untitled Asset',
           assetTicker: t.assetTicker || '---',
-          network: t.network || [],
+          network: Array.isArray(t.network) ? t.network : [t.network].filter(Boolean),
           maxSupply: t.maxSupply || 0,
           price: t.price || 0,
         }));

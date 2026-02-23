@@ -167,14 +167,14 @@ export default function AssetList() {
       fetch(`/api/assets?${params.toString()}`).then(res => res.json()),
       fetch('/api/issuers').then(res => res.json()) // Fetch all issuers to map names
     ]).then(([assetsResponse, issuersResponse]) => {
-      const combinedAssets: AssetDetails[] = assetsResponse.data.map((t: AssetDetails) => ({
+      const combinedAssets: AssetDetails[] = (assetsResponse.data || []).map((t: AssetDetails) => ({
         ...t,
         decimals: t.decimals ?? 0,
         isFreezable: t.isFreezable ?? false,
         publicKey: t.publicKey ?? `02f...${t.id.slice(-10)}`,
         assetName: t.assetName || 'Untitled Asset',
         assetTicker: t.assetTicker || '---',
-        network: t.network || [],
+        network: Array.isArray(t.network) ? t.network : [t.network].filter(Boolean),
         maxSupply: t.maxSupply || 0,
       }));
       setAssets(combinedAssets);

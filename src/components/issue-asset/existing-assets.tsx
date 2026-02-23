@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -190,7 +189,7 @@ export default function ExistingAssets({ view, setView }: { view: ViewMode, setV
                 publicKey: t.publicKey ?? `02f...${t.id.slice(-10)}`,
                 assetName: t.assetName || 'Untitled Asset',
                 assetTicker: t.assetTicker || '---',
-                network: t.network || [],
+                network: Array.isArray(t.network) ? t.network : [t.network].filter(Boolean),
                 maxSupply: t.maxSupply || 0,
             }));
             setAssets(mappedAssets);

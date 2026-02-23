@@ -48,7 +48,10 @@ function DashboardRenderer() {
                 try {
                     const response = await fetch('/api/assets?perPage=999');
                     const assetsResponse = await response.json();
-                    const allAssets: AssetDetails[] = assetsResponse.data || [];
+                    const allAssets: AssetDetails[] = (assetsResponse.data || []).map((asset: any) => ({
+                        ...asset,
+                        network: Array.isArray(asset.network) ? asset.network : [asset.network].filter(Boolean)
+                    }));
 
                     if (storedAssetId) {
                         const foundAsset = allAssets.find(t => t.id === storedAssetId);
