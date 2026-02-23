@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Button } from '@/components/ui/button';
@@ -127,7 +126,7 @@ export default function Step5Review({ onSubmit, onBack, onSaveDraft, formData }:
             <ReviewRow icon={Clock} label="Subscription Time" value={formData.subscriptionTime || 'N/A'} />
             <ReviewRow icon={Hash} label="Min. Investment" value={formData.minInvestment ? `${formData.minInvestment.toLocaleString()} USDC` : 'N/A'} />
             <ReviewRow icon={Hash} label="Max. Investment" value={formData.maxInvestment ? `${formData.maxInvestment.toLocaleString()} USDC` : 'N/A'} />
-            <ReviewRow icon={Percent} label="Subscription Fees" value={formData.subscriptionFees !== undefined ? `${formData.subscriptionFees}%` : 'N/A'} />
+            <ReviewRow icon={Percent} label="Order Fee" value={formData.subscriptionFees !== undefined ? `${formData.subscriptionFees}%` : 'N/A'} />
             <ReviewRow icon={Clock} label="Redemption Time" value={formData.redemptionTime || 'N/A'} />
             <ReviewRow icon={Hash} label="Min. Redemption Amount" value={formData.minRedemptionAmount ? `${formData.minRedemptionAmount.toLocaleString()} USDC` : 'N/A'} />
             <ReviewRow icon={Percent} label="Redemption Fees" value={formData.redemptionFees !== undefined ? `${formData.redemptionFees}%` : 'N/A'} />

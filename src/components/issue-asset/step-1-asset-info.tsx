@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useForm } from 'react-hook-form';
@@ -306,7 +305,7 @@ export default function Step1AssetInfo({ onNext, defaultValues, formRef }: Step1
                         render={({ field }) => (
                             <FormItem>
                             <div className="flex items-center gap-2">
-                                <FormLabel>Subscription Fees</FormLabel>
+                                <FormLabel>Order Fee</FormLabel>
                                 <TooltipProvider>
                                     <Tooltip>
                                     <TooltipTrigger asChild>
