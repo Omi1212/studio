@@ -76,9 +76,9 @@ export default function WorkspacePage() {
               <div>
                 <h1 className="text-3xl font-headline font-semibold mb-4">{selectedAsset.assetName}</h1>
                 <Tabs defaultValue="overview">
-                  <TabsList>
+                  <TabsList className="grid w-full grid-cols-6">
                     <TabsTrigger value="overview">Overview</TabsTrigger>
-                    <TabsTrigger value="assets">Assets</TabsTrigger>
+                    <TabsTrigger value="tokens">Tokens</TabsTrigger>
                     <TabsTrigger value="liquidity">Liquidity</TabsTrigger>
                     <TabsTrigger value="reports">Reports</TabsTrigger>
                     <TabsTrigger value="data">Data</TabsTrigger>
@@ -87,10 +87,10 @@ export default function WorkspacePage() {
                   <TabsContent value="overview" className="mt-6">
                     <AssetDetailsView asset={selectedAsset} view="workspace" userRole={userRole} />
                   </TabsContent>
-                   <TabsContent value="assets">
+                   <TabsContent value="tokens">
                     <Card>
                       <CardContent className="p-6">
-                        <p>Assets content goes here.</p>
+                        <p>Tokens content goes here.</p>
                       </CardContent>
                     </Card>
                   </TabsContent>
