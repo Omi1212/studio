@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import type { Order, AssetDetails, User } from '@/lib/types';
 import { Card } from '../ui/card';
@@ -437,18 +437,32 @@ export default function OrderList() {
                     <SelectItem value="rejected">Rejected</SelectItem>
                 </SelectContent>
             </Select>
-            <Select value={networkFilter} onValueChange={setNetworkFilter}>
-                <SelectTrigger className="w-full sm:w-[180px]">
-                    <SelectValue placeholder="Filter by network" />
-                </SelectTrigger>
-                <SelectContent>
-                    <SelectItem value="all">All Networks</SelectItem>
-                    <SelectItem value="spark">Spark</SelectItem>
-                    <SelectItem value="liquid">Liquid</SelectItem>
-                    <SelectItem value="rgb">RGB</SelectItem>
-                    <SelectItem value="taproot">Taproot Assets</SelectItem>
-                </SelectContent>
-            </Select>
+            { (userRole === 'issuer' || userRole === 'agent') && selectedAsset && Array.isArray(selectedAsset.network) && selectedAsset.network.length > 1 ? (
+              <Select value={networkFilter} onValueChange={setNetworkFilter}>
+                  <SelectTrigger className="w-full sm:w-[180px]">
+                      <SelectValue placeholder="Filter by network" />
+                  </SelectTrigger>
+                  <SelectContent>
+                      <SelectItem value="all">All Networks</SelectItem>
+                      {selectedAsset.network.map(net => (
+                          <SelectItem key={net} value={net}>{networkMap[net] || net}</SelectItem>
+                      ))}
+                  </SelectContent>
+              </Select>
+            ) : (userRole !== 'issuer' && userRole !== 'agent') ? (
+              <Select value={networkFilter} onValueChange={setNetworkFilter}>
+                  <SelectTrigger className="w-full sm:w-[180px]">
+                      <SelectValue placeholder="Filter by network" />
+                  </SelectTrigger>
+                  <SelectContent>
+                      <SelectItem value="all">All Networks</SelectItem>
+                      <SelectItem value="spark">Spark</SelectItem>
+                      <SelectItem value="liquid">Liquid</SelectItem>
+                      <SelectItem value="rgb">RGB</SelectItem>
+                      <SelectItem value="taproot">Taproot Assets</SelectItem>
+                  </SelectContent>
+              </Select>
+            ) : null }
         </div>
       </div>
 

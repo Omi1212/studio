@@ -16,6 +16,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 
 const ITEMS_PER_PAGE = 10;
 
+const networkMap: { [key: string]: string } = {
+    spark: 'Spark',
+    liquid: 'Liquid',
+    rgb: 'RGB',
+    taproot: 'Taproot Assets',
+};
+
 function getAmountClass(type: Transfer['type']) {
     switch (type) {
         case 'Mint':
@@ -163,18 +170,32 @@ export default function TransferList() {
                 <SelectItem value="Burn">Burn</SelectItem>
             </SelectContent>
         </Select>
-        <Select value={networkFilter} onValueChange={setNetworkFilter}>
-            <SelectTrigger className="w-full sm:w-[180px]">
-                <SelectValue placeholder="Filter by network" />
-            </SelectTrigger>
-            <SelectContent>
-                <SelectItem value="all">All Networks</SelectItem>
-                <SelectItem value="spark">Spark</SelectItem>
-                <SelectItem value="liquid">Liquid</SelectItem>
-                <SelectItem value="rgb">RGB</SelectItem>
-                <SelectItem value="taproot">Taproot Assets</SelectItem>
-            </SelectContent>
-        </Select>
+        { (userRole === 'issuer' || userRole === 'agent') && selectedAsset && Array.isArray(selectedAsset.network) && selectedAsset.network.length > 1 ? (
+          <Select value={networkFilter} onValueChange={setNetworkFilter}>
+              <SelectTrigger className="w-full sm:w-[180px]">
+                  <SelectValue placeholder="Filter by network" />
+              </SelectTrigger>
+              <SelectContent>
+                  <SelectItem value="all">All Networks</SelectItem>
+                  {selectedAsset.network.map(net => (
+                      <SelectItem key={net} value={net}>{networkMap[net] || net}</SelectItem>
+                  ))}
+              </SelectContent>
+          </Select>
+        ) : (userRole !== 'issuer' && userRole !== 'agent') ? (
+          <Select value={networkFilter} onValueChange={setNetworkFilter}>
+              <SelectTrigger className="w-full sm:w-[180px]">
+                  <SelectValue placeholder="Filter by network" />
+              </SelectTrigger>
+              <SelectContent>
+                  <SelectItem value="all">All Networks</SelectItem>
+                  <SelectItem value="spark">Spark</SelectItem>
+                  <SelectItem value="liquid">Liquid</SelectItem>
+                  <SelectItem value="rgb">RGB</SelectItem>
+                  <SelectItem value="taproot">Taproot Assets</SelectItem>
+              </SelectContent>
+          </Select>
+        ) : null }
     </div>
   );
 
