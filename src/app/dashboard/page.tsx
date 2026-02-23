@@ -8,7 +8,7 @@ import SidebarNav from '@/components/dashboard/sidebar-nav';
 import HeaderDynamic from '@/components/dashboard/header-dynamic';
 import DefaultDashboard from './default/page';
 import { useEffect, useState } from 'react';
-import type { AssetDetails, User } from '@/lib/types';
+import type { AssetDetails, Company, User } from '@/lib/types';
 import AssetDetailsView from '@/components/workspace/token-details-view';
 import InvestorDashboard from './investor-dashboard';
 import KybBanner from '@/components/dashboard/kyb-banner';
@@ -25,6 +25,7 @@ import Link from 'next/link';
 function DashboardRenderer() {
     const [role, setRole] = useState<string | null>(null);
     const [user, setUser] = useState<User | null>(null);
+    const [company, setCompany] = useState<Company | null>(null);
     const [selectedAsset, setSelectedAsset] = useState<AssetDetails | null>(null);
     const [loading, setLoading] = useState(true);
 
@@ -32,15 +33,25 @@ function DashboardRenderer() {
         const userRole = localStorage.getItem('userRole');
         setRole(userRole);
         
-        const storedUser = localStorage.getItem('currentUser');
-        if (storedUser) {
-            const parsedUser: User = JSON.parse(storedUser);
-            setUser(parsedUser); // Set immediately for faster UI response
-            fetch(`/api/users/${parsedUser.id}`)
-                .then(res => res.ok ? res.json() : parsedUser)
-                .then(dbUser => setUser(dbUser))
-                .catch(() => {});
+        const loadUserData = () => {
+            const storedUser = localStorage.getItem('currentUser');
+            if (storedUser) {
+                const parsedUser: User = JSON.parse(storedUser);
+                setUser(parsedUser); // Set immediately for faster UI response
+                fetch(`/api/users/${parsedUser.id}`)
+                    .then(res => res.ok ? res.json() : parsedUser)
+                    .then(dbUser => {
+                      setUser(dbUser)
+                      if (dbUser.companyId) {
+                        fetch(`/api/companies/${dbUser.companyId}`)
+                          .then(res => res.ok ? res.json() : null)
+                          .then(companyData => setCompany(companyData));
+                      }
+                    })
+                    .catch(() => {});
+            }
         }
+        loadUserData();
 
         const handleAssetChange = async () => {
             if (userRole === 'issuer' || userRole === 'agent') {
@@ -82,9 +93,11 @@ function DashboardRenderer() {
 
         handleAssetChange();
         window.addEventListener('assetChanged', handleAssetChange);
+        window.addEventListener('companyChanged', loadUserData);
 
         return () => {
             window.removeEventListener('assetChanged', handleAssetChange);
+            window.removeEventListener('companyChanged', loadUserData);
         };
     }, [role]);
 
@@ -97,7 +110,7 @@ function DashboardRenderer() {
     }
 
     if (role === 'issuer') {
-        const showKybBanner = user && user.kybStatus !== 'verified' && user.email !== 'issuer@gmail.com';
+        const showKybBanner = user && company && company.kybStatus !== 'verified' && user.email !== 'issuer@gmail.com';
         return (
             <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-8 bg-background">
                 {showKybBanner && (

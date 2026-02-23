@@ -12,30 +12,53 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { Plus } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import type { User } from '@/lib/types';
+import type { User, Company } from '@/lib/types';
 
 export type ViewMode = 'card' | 'table';
 
 export default function IssueAssetPage() {
   const [viewMode, setViewMode] = useState<ViewMode>('card');
   const [user, setUser] = useState<User | null>(null);
+  const [company, setCompany] = useState<Company | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const storedUser = localStorage.getItem('currentUser');
-    if (storedUser) {
-      const parsedUser = JSON.parse(storedUser);
-       fetch(`/api/users/${parsedUser.id}`)
-        .then(res => res.ok ? res.json() : parsedUser)
-        .then(dbUser => setUser(dbUser))
-        .catch(() => setUser(parsedUser)) // Fallback to localStorage user
-        .finally(() => setLoading(false));
-    } else {
-      setLoading(false);
-    }
+    const loadData = () => {
+      const storedUser = localStorage.getItem('currentUser');
+      if (storedUser) {
+        const parsedUser:User = JSON.parse(storedUser);
+        setLoading(true);
+        fetch(`/api/users/${parsedUser.id}`)
+          .then(res => res.ok ? res.json() : parsedUser)
+          .then(dbUser => {
+            setUser(dbUser);
+            if (dbUser.companyId) {
+              fetch(`/api/companies/${dbUser.companyId}`)
+                .then(res => res.ok ? res.json() : null)
+                .then(companyData => setCompany(companyData))
+                .finally(() => setLoading(false));
+            } else {
+              setLoading(false);
+            }
+          })
+          .catch(() => {
+            setUser(parsedUser);
+            setLoading(false);
+          });
+      } else {
+        setLoading(false);
+      }
+    };
+    
+    loadData();
+    window.addEventListener('companyChanged', loadData);
+
+    return () => {
+      window.removeEventListener('companyChanged', loadData);
+    };
   }, []);
 
-  const canCreateAssets = !loading && user && user.role === 'issuer' && (user.kybStatus === 'verified' || user.email === 'issuer@gmail.com');
+  const canCreateAssets = !loading && user && user.role === 'issuer' && (company?.kybStatus === 'verified' || user.email === 'issuer@gmail.com');
 
 
   return (

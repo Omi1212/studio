@@ -38,13 +38,13 @@ export default function GeneralSettingsContent() {
   const defaultAccordionValue = openSection === 'kyb' ? 'kyb-verification' : 'business-info';
 
   useEffect(() => {
-    setLoading(true);
-    const storedUser = localStorage.getItem('currentUser');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
+    const loadData = () => {
+      setLoading(true);
+      const storedUser = localStorage.getItem('currentUser');
+      if (storedUser) {
+        setUser(JSON.parse(storedUser));
+      }
 
-    const handleCompanyChange = () => {
       const selectedCompanyId = localStorage.getItem('selectedCompanyId');
       if (selectedCompanyId) {
         fetch(`/api/companies/${selectedCompanyId}`)
@@ -57,12 +57,12 @@ export default function GeneralSettingsContent() {
       }
     };
 
-    handleCompanyChange(); // Initial load
+    loadData(); // Initial load
 
-    window.addEventListener('companyChanged', handleCompanyChange);
+    window.addEventListener('companyChanged', loadData);
 
     return () => {
-      window.removeEventListener('companyChanged', handleCompanyChange);
+      window.removeEventListener('companyChanged', loadData);
     };
   }, []);
   
@@ -93,15 +93,7 @@ export default function GeneralSettingsContent() {
         const updatedCompany = await response.json();
         setSelectedCompany(updatedCompany);
 
-        // Update user in localStorage to reflect KYB status for other parts of the app
-        const storedUser = localStorage.getItem('currentUser');
-        if (storedUser) {
-            const currentUser = JSON.parse(storedUser);
-            // @ts-ignore - kybStatus is a dynamic property for the demo
-            const updatedUser = { ...currentUser, kybStatus: newStatus, kybLevel: newLevel };
-            localStorage.setItem('currentUser', JSON.stringify(updatedUser));
-            setUser(updatedUser); // Update local user state as well
-        }
+        window.dispatchEvent(new Event('companyChanged'));
 
         toast({
             title: `Business Verified!`,
