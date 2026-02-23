@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '../ui/button';
 import { Card, CardTitle, CardHeader, CardContent, CardFooter, CardDescription } from '../ui/card';
 import { Switch } from '../ui/switch';
@@ -14,9 +14,7 @@ const providers = [
   { name: 'Persona', logo: 'https://i.ibb.co/xkfbNB6/6.png', description: 'Identity infrastructure for businesses.' },
 ];
 
-function ProviderCard({ name, logo, description }: { name: string; logo: string; description: string; }) {
-  const [isConnected, setIsConnected] = useState(false);
-
+function ProviderCard({ name, logo, description, isConnected, onToggle }: { name: string; logo: string; description: string; isConnected: boolean; onToggle: (checked: boolean) => void; }) {
   return (
     <Card className="flex flex-col">
       <CardHeader>
@@ -43,10 +41,10 @@ function ProviderCard({ name, logo, description }: { name: string; logo: string;
             <span className="text-sm font-medium text-green-500">
               Connected
             </span>
-            <Switch checked={isConnected} onCheckedChange={setIsConnected} />
+            <Switch checked={isConnected} onCheckedChange={onToggle} />
           </div>
         ) : (
-          <Button variant="outline" className="w-full" onClick={() => setIsConnected(true)}>
+          <Button variant="outline" className="w-full" onClick={() => onToggle(true)}>
             Connect
           </Button>
         )}
@@ -57,6 +55,31 @@ function ProviderCard({ name, logo, description }: { name: string; logo: string;
 
 
 export default function KycProviderList() {
+  const [connectedProviders, setConnectedProviders] = useState<string[]>([]);
+
+  useEffect(() => {
+    const connected = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith('compliance-provider-')) {
+        connected.push(key.replace('compliance-provider-', ''));
+      }
+    }
+    setConnectedProviders(connected);
+  }, []);
+
+  const handleToggle = (providerName: string, checked: boolean) => {
+    const storageKey = `compliance-provider-${providerName}`;
+    if (checked) {
+      localStorage.setItem(storageKey, 'true');
+      setConnectedProviders(prev => [...prev, providerName]);
+    } else {
+      localStorage.removeItem(storageKey);
+      setConnectedProviders(prev => prev.filter(p => p !== providerName));
+    }
+    window.dispatchEvent(new Event('complianceProvidersChanged'));
+  };
+  
   return (
     <div className="space-y-6">
       <p className="text-sm text-center text-muted-foreground">
@@ -64,7 +87,12 @@ export default function KycProviderList() {
       </p>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {providers.map((provider) => (
-          <ProviderCard key={provider.name} {...provider} />
+          <ProviderCard 
+            key={provider.name} 
+            {...provider}
+            isConnected={connectedProviders.includes(provider.name)}
+            onToggle={(checked) => handleToggle(provider.name, checked)}
+          />
         ))}
       </div>
     </div>

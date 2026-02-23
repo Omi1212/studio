@@ -21,6 +21,19 @@ export default function IssueAssetPage() {
   const [user, setUser] = useState<User | null>(null);
   const [company, setCompany] = useState<Company | null>(null);
   const [loading, setLoading] = useState(true);
+  const [areComplianceProvidersLinked, setAreComplianceProvidersLinked] = useState(false);
+
+  const loadComplianceStatus = () => {
+    let complianceLinked = false;
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith('compliance-provider-')) {
+        complianceLinked = true;
+        break;
+      }
+    }
+    setAreComplianceProvidersLinked(complianceLinked);
+  };
 
   useEffect(() => {
     const loadData = () => {
@@ -51,16 +64,17 @@ export default function IssueAssetPage() {
     };
     
     loadData();
+    loadComplianceStatus();
     window.addEventListener('companyChanged', loadData);
+    window.addEventListener('complianceProvidersChanged', loadComplianceStatus);
 
     return () => {
       window.removeEventListener('companyChanged', loadData);
+      window.removeEventListener('complianceProvidersChanged', loadComplianceStatus);
     };
   }, []);
 
   const isKybVerified = company?.kybStatus === 'verified' || user?.email === 'issuer@gmail.com';
-  // For this demo, let's assume compliance providers are never linked.
-  const areComplianceProvidersLinked = false;
   const canCreateAssets = !loading && user && user.role === 'issuer' && isKybVerified && areComplianceProvidersLinked;
 
 

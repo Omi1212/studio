@@ -28,6 +28,19 @@ function DashboardRenderer() {
     const [company, setCompany] = useState<Company | null>(null);
     const [selectedAsset, setSelectedAsset] = useState<AssetDetails | null>(null);
     const [loading, setLoading] = useState(true);
+    const [areComplianceProvidersLinked, setAreComplianceProvidersLinked] = useState(false);
+
+    const loadComplianceStatus = () => {
+        let complianceLinked = false;
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key && key.startsWith('compliance-provider-')) {
+                complianceLinked = true;
+                break;
+            }
+        }
+        setAreComplianceProvidersLinked(complianceLinked);
+    };
 
     useEffect(() => {
         const userRole = localStorage.getItem('userRole');
@@ -52,6 +65,7 @@ function DashboardRenderer() {
             }
         }
         loadUserData();
+        loadComplianceStatus();
 
         const handleAssetChange = async () => {
             if (userRole === 'issuer' || userRole === 'agent') {
@@ -94,10 +108,12 @@ function DashboardRenderer() {
         handleAssetChange();
         window.addEventListener('assetChanged', handleAssetChange);
         window.addEventListener('companyChanged', loadUserData);
+        window.addEventListener('complianceProvidersChanged', loadComplianceStatus);
 
         return () => {
             window.removeEventListener('assetChanged', handleAssetChange);
             window.removeEventListener('companyChanged', loadUserData);
+            window.removeEventListener('complianceProvidersChanged', loadComplianceStatus);
         };
     }, [role]);
 
@@ -111,9 +127,7 @@ function DashboardRenderer() {
 
     if (role === 'issuer') {
         const isKybVerified = company?.kybStatus === 'verified' || user?.email === 'issuer@gmail.com';
-        // For this demo, let's assume compliance providers are never linked.
-        const areComplianceProvidersLinked = false; 
-
+        
         const showKybBanner = user && !isKybVerified;
         const showComplianceBanner = user && isKybVerified && !areComplianceProvidersLinked;
         
