@@ -115,11 +115,11 @@ export default function AssetDetailsView({
           <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Button variant="outline" disabled={asset.status !== 'active'}>
               <Coins className="mr-2 h-4 w-4" />
-              Mint Assets
+              Mint Tokens
             </Button>
             <Button variant="outline" disabled={asset.status !== 'active'}>
               <Flame className="mr-2 h-4 w-4" />
-              Burn Assets
+              Burn Tokens
             </Button>
             <Button variant="outline" disabled={asset.status !== 'active'}>
               <Snowflake className="mr-2 h-4 w-4" />
