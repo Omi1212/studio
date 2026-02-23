@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
@@ -31,7 +32,7 @@ export default function NewAssetPage() {
     decimals: 6,
     maxSupply: 1_000_000_000000,
     isFreezable: true,
-    network: 'spark',
+    network: ['spark'],
     assetType: 'utility_token',
   });
   const { toast } = useToast();

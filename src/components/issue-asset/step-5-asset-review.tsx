@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Button } from '@/components/ui/button';
@@ -135,7 +136,7 @@ export default function Step5Review({ onSubmit, onBack, onSaveDraft, formData }:
         </ReviewSection>
         
         <ReviewSection title="Network">
-             <ReviewRow icon={Network} label="Network" value={networkMap[formData.network] || formData.network} />
+             <ReviewRow icon={Network} label="Networks" value={formData.network.map(n => networkMap[n] || n).join(', ')} />
         </ReviewSection>
 
       </CardContent>

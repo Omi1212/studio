@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -68,7 +69,7 @@ function AssetCard({ asset }: { asset: AssetDetails }) {
         </div>
         <div className="flex justify-between text-sm mt-2">
             <span className="text-muted-foreground">Network</span>
-            <span className="font-medium">{networkMap[asset.network] || asset.network}</span>
+            <span className="font-medium">{(asset.network || []).map(n => networkMap[n] || n).join(', ')}</span>
         </div>
          <div className="flex justify-between text-sm mt-2">
             <span className="text-muted-foreground">Max Supply</span>
@@ -121,7 +122,7 @@ function AssetTable({ assets }: { assets: AssetDetails[] }) {
                                     </div>
                                 </div>
                             </TableCell>
-                            <TableCell>{networkMap[asset.network] || asset.network}</TableCell>
+                            <TableCell>{(asset.network || []).map(n => networkMap[n] || n).join(', ')}</TableCell>
                             <TableCell className="font-mono">{asset.maxSupply ? asset.maxSupply.toLocaleString() : '--'}</TableCell>
                             <TableCell>{getStatusBadge(asset.status)}</TableCell>
                             <TableCell className="text-right">
@@ -189,7 +190,7 @@ export default function ExistingAssets({ view, setView }: { view: ViewMode, setV
                 publicKey: t.publicKey ?? `02f...${t.id.slice(-10)}`,
                 assetName: t.assetName || 'Untitled Asset',
                 assetTicker: t.assetTicker || '---',
-                network: t.network || 'unknown',
+                network: t.network || [],
                 maxSupply: t.maxSupply || 0,
             }));
             setAssets(mappedAssets);

@@ -11,7 +11,7 @@ const assetPostSchema = z.object({
   decimals: z.number().int().min(0).max(18),
   maxSupply: z.number().positive(),
   isFreezable: z.boolean(),
-  network: z.string().min(1),
+  network: z.array(z.string()).min(1),
   status: z.enum(['pending', 'active', 'frozen', 'draft']),
   issuerId: z.string().optional()
 });

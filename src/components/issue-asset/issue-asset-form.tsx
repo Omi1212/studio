@@ -39,7 +39,7 @@ export const formSchema = z.object({
   maxSupply: z.coerce.number().positive('Max supply must be a positive number'),
   isFreezable: z.boolean(),
   assetIcon: z.any().optional(),
-  network: z.string().min(1, 'Network selection is required'),
+  network: z.array(z.string()).min(1, 'At least one network is required'),
   whitepaper: z.any()
     .optional()
     .refine((files) => !files || files.length === 0 || files?.[0]?.size <= MAX_FILE_SIZE, `Max file size is 5MB.`)

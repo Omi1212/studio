@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useEffect, useState, use } from 'react';
@@ -136,7 +137,7 @@ function AssetOfferingPage({ params }: { params: { tokenId: string } }) {
     price: asset.price || 0.12, // Use asset price or default
   };
 
-  const explorer = networkExplorerMap[asset.network] || { name: 'Explorer', url: '#'};
+  const explorer = (asset.network.length > 0 && networkExplorerMap[asset.network[0]]) || { name: 'Explorer', url: '#'};
 
 
   return (
@@ -169,7 +170,7 @@ function AssetOfferingPage({ params }: { params: { tokenId: string } }) {
                         </div>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                        <InfoRow label="Network" value={networkMap[asset.network] || asset.network} />
+                        <InfoRow label="Networks" value={(asset.network || []).map(n => networkMap[n] || n).join(', ')} />
                         <InfoRow label="Market Cap" value={`${offeringData.marketCap.toLocaleString('en-US', {maximumFractionDigits: 3})} USDT`} valueClassName="font-mono" />
                         <InfoRow label="Circulating" value={`${offeringData.circulating.toLocaleString('en-US', {maximumFractionDigits: 3})} ${asset.assetTicker}`} valueClassName="font-mono" />
                         <InfoRow label="Max. Supply" value={`${asset.maxSupply.toLocaleString('en-US')} ${asset.assetTicker}`} valueClassName="font-mono" />

@@ -278,10 +278,7 @@ export default function SidebarNav() {
                           {selectedAsset.assetTicker}
                         </span>
                         <span className="text-xs text-muted-foreground">
-                          (
-                          {networkMap[selectedAsset.network as string] ||
-                            selectedAsset.network}
-                          )
+                          ({(selectedAsset.network as string[]).map(n => networkMap[n] || n).join(', ')})
                         </span>
                       </div>
                     </div>
@@ -307,10 +304,7 @@ export default function SidebarNav() {
                             {asset.assetTicker}
                           </span>
                           <span className="text-xs text-muted-foreground">
-                            (
-                            {networkMap[asset.network as string] ||
-                              asset.network}
-                            )
+                            ({(asset.network as string[]).map(n => networkMap[n] || n).join(', ')})
                           </span>
                         </div>
                       </div>

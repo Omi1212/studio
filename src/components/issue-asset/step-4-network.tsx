@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useForm } from 'react-hook-form';
@@ -27,7 +28,7 @@ import { Separator } from '../ui/separator';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
 
 const step4Schema = z.object({
-  network: z.string().min(1, 'Please select a network'),
+  network: z.array(z.string()).min(1, 'Please select at least one network'),
   destinationAddress: z.string().min(1, 'Destination address is required'),
 });
 
@@ -101,7 +102,7 @@ export default function Step4Network({ onNext, onBack, defaultValues, formRef }:
   const form = useForm<Step4FormValues>({
     resolver: zodResolver(step4Schema),
     defaultValues: {
-      network: defaultValues?.network || 'spark',
+      network: Array.isArray(defaultValues?.network) ? defaultValues.network : (defaultValues?.network ? [defaultValues.network] : []),
       destinationAddress: defaultValues?.destinationAddress || '',
     }
   });
@@ -141,17 +142,19 @@ export default function Step4Network({ onNext, onBack, defaultValues, formRef }:
               render={({ field }) => (
                 <FormItem className="space-y-3">
                   <FormLabel>Network</FormLabel>
+                   <FormDescription>
+                    Select one or more networks to issue your asset on.
+                  </FormDescription>
                   <FormControl>
                     <Accordion
-                      type="single"
-                      collapsible
+                      type="multiple"
                       className="w-full space-y-4"
                       onValueChange={field.onChange}
-                      defaultValue={field.value}
+                      value={field.value}
                     >
                       {networks.map((network) => (
                         <AccordionItem key={network.id} value={network.id} className="border-b-0">
-                            <Card className={cn("overflow-hidden", field.value === network.id && "border-2 border-primary")}>
+                            <Card className={cn("overflow-hidden", field.value?.includes(network.id) && "border-2 border-primary")}>
                                 <AccordionTrigger className="p-6 hover:no-underline">
                                     <div className="flex items-center gap-4">
                                         {network.icon}

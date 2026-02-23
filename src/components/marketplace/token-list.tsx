@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useEffect, useState, useMemo } from 'react';
@@ -56,7 +57,7 @@ function AssetCard({ asset, onAction, subscriptionStatus }: { asset: AssetDetail
       <CardContent>
         <div className="flex justify-between text-sm mt-2">
             <span className="text-muted-foreground">Network</span>
-            <span className="font-medium">{networkMap[asset.network] || asset.network}</span>
+            <span className="font-medium">{(asset.network || []).map(n => networkMap[n] || n).join(', ')}</span>
         </div>
          <div className="flex justify-between text-sm mt-2">
             <span className="text-muted-foreground">Max Supply</span>
@@ -105,7 +106,7 @@ function AssetTableRow({ asset, onAction, subscriptionStatus }: { asset: AssetDe
                     </div>
                 </div>
             </TableCell>
-            <TableCell>{networkMap[asset.network] || asset.network}</TableCell>
+            <TableCell>{(asset.network || []).map(n => networkMap[n] || n).join(', ')}</TableCell>
             <TableCell className="font-mono">{asset.maxSupply ? asset.maxSupply.toLocaleString() : '--'}</TableCell>
             <TableCell className="text-right space-x-2" onClick={(e) => e.stopPropagation()}>
                 <Button variant="outline" size="sm" onClick={handleView}>
@@ -143,7 +144,7 @@ export default function AssetList() {
           publicKey: t.publicKey ?? `02f...${t.id.slice(-10)}`,
           assetName: t.assetName || 'Untitled Asset',
           assetTicker: t.assetTicker || '---',
-          network: t.network || 'unknown',
+          network: t.network || [],
           maxSupply: t.maxSupply || 0,
           price: t.price || 0,
         }));

@@ -69,7 +69,7 @@ function AssetCard({ asset, issuer }: { asset: AssetDetails, issuer?: Issuer }) 
         </div>
         <div className="flex justify-between text-sm mt-2">
             <span className="text-muted-foreground">Network</span>
-            <span className="font-medium">{networkMap[asset.network] || asset.network}</span>
+            <span className="font-medium">{(asset.network || []).map(n => networkMap[n] || n).join(', ')}</span>
         </div>
          <div className="flex justify-between text-sm mt-2">
             <span className="text-muted-foreground">Issuer</span>
@@ -125,7 +125,7 @@ function AssetTable({ assets, issuers }: { assets: AssetDetails[], issuers: Issu
                                 </div>
                             </TableCell>
                             <TableCell>{issuer?.name || 'N/A'}</TableCell>
-                            <TableCell>{networkMap[asset.network] || asset.network}</TableCell>
+                            <TableCell>{(asset.network || []).map(n => networkMap[n] || n).join(', ')}</TableCell>
                             <TableCell>{getStatusBadge(asset.status)}</TableCell>
                             <TableCell className="text-right">
                                 <Button variant="outline" size="sm">
@@ -174,7 +174,7 @@ export default function AssetList() {
         publicKey: t.publicKey ?? `02f...${t.id.slice(-10)}`,
         assetName: t.assetName || 'Untitled Asset',
         assetTicker: t.assetTicker || '---',
-        network: t.network || 'unknown',
+        network: t.network || [],
         maxSupply: t.maxSupply || 0,
       }));
       setAssets(combinedAssets);

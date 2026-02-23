@@ -12,7 +12,7 @@ const patchSchema = z.object({
   decimals: z.number().int().min(0).max(18).optional(),
   maxSupply: z.number().positive().optional(),
   isFreezable: z.boolean().optional(),
-  network: z.string().min(1).optional(),
+  network: z.array(z.string()).min(1).optional(),
   issuerId: z.string().optional()
 }).partial();
 

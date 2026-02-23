@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -55,7 +56,7 @@ export default function AssetDetailsView({
     taproot: { name: 'Taproot Explorer', url: 'https://mempool.space' },
   };
 
-  const explorer = (asset && networkExplorerMap[asset.network]) || { name: 'Explorer', url: '#'};
+  const explorer = (asset && asset.network.length > 0 && networkExplorerMap[asset.network[0]]) || { name: 'Explorer', url: '#'};
 
 
   useEffect(() => {
