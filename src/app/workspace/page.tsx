@@ -12,6 +12,8 @@ import { Rocket } from 'lucide-react';
 import AssetDetailsView from '@/components/workspace/token-details-view';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card, CardContent } from '@/components/ui/card';
 
 export default function WorkspacePage() {
   const [selectedAsset, setSelectedAsset] = useState<AssetDetails | null>(null);
@@ -66,14 +68,62 @@ export default function WorkspacePage() {
         <div className="flex flex-col min-h-dvh">
           <HeaderDynamic />
           <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-8 bg-background">
-            <h1 className="text-3xl font-headline font-semibold">Workspace</h1>
-            
             {loading ? (
                 <div className="border-dashed border-2 border-muted-foreground/50 rounded-lg h-96 flex flex-col items-center justify-center text-center">
                    <p className="text-muted-foreground">Loading asset details...</p>
                 </div>
             ) : selectedAsset ? (
-               <AssetDetailsView asset={selectedAsset} view="workspace" userRole={userRole} />
+              <div>
+                <h1 className="text-3xl font-headline font-semibold mb-4">{selectedAsset.assetName}</h1>
+                <Tabs defaultValue="overview">
+                  <TabsList>
+                    <TabsTrigger value="overview">Overview</TabsTrigger>
+                    <TabsTrigger value="assets">Assets</TabsTrigger>
+                    <TabsTrigger value="liquidity">Liquidity</TabsTrigger>
+                    <TabsTrigger value="reports">Reports</TabsTrigger>
+                    <TabsTrigger value="data">Data</TabsTrigger>
+                    <TabsTrigger value="fees">Fees</TabsTrigger>
+                  </TabsList>
+                  <TabsContent value="overview" className="mt-6">
+                    <AssetDetailsView asset={selectedAsset} view="workspace" userRole={userRole} />
+                  </TabsContent>
+                   <TabsContent value="assets">
+                    <Card>
+                      <CardContent className="p-6">
+                        <p>Assets content goes here.</p>
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+                  <TabsContent value="liquidity">
+                    <Card>
+                      <CardContent className="p-6">
+                        <p>Liquidity content goes here.</p>
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+                  <TabsContent value="reports">
+                    <Card>
+                      <CardContent className="p-6">
+                        <p>Reports content goes here.</p>
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+                   <TabsContent value="data">
+                    <Card>
+                      <CardContent className="p-6">
+                        <p>Data content goes here.</p>
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+                   <TabsContent value="fees">
+                    <Card>
+                      <CardContent className="p-6">
+                        <p>Fees content goes here.</p>
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+                </Tabs>
+              </div>
             ) : (
               <div className="border-dashed border-2 border-muted-foreground/50 rounded-lg h-96 flex flex-col items-center justify-center text-center p-4">
                   <Rocket className="h-16 w-16 text-muted-foreground mb-4" />
