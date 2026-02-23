@@ -21,6 +21,13 @@ import IdentityProvidersBanner from '@/components/dashboard/identity-providers-b
 
 const ITEMS_PER_PAGE = 10;
 
+const networkMap: { [key: string]: string } = {
+    spark: 'Spark',
+    liquid: 'Liquid',
+    rgb: 'RGB',
+    taproot: 'Taproot Assets',
+};
+
 function getStatusBadge(status: Order['status']) {
   switch (status) {
     case 'completed':
@@ -43,6 +50,11 @@ function OrderTableRow({ order, assets, investors, onApprove, onReject, userRole
   const total = order.amount * order.price;
 
   const targetUrl = order.status === 'waiting payment' ? `/orders/${order.id}/pay` : `/orders/${order.id}`;
+
+  const networks = asset?.network ? (Array.isArray(asset.network) ? asset.network : [asset.network]) : [];
+  const displayNetwork = networks.length > 0 ? networkMap[networks[0]] || networks[0] : 'N/A';
+  const remainingCount = networks.length - 1;
+
 
   return (
     <TableRow onClick={() => router.push(targetUrl)} className="cursor-pointer">
@@ -82,6 +94,12 @@ function OrderTableRow({ order, assets, investors, onApprove, onReject, userRole
                 <span className="font-medium text-primary">{asset.assetTicker}</span>
             </div>
         )}
+      </TableCell>
+      <TableCell className="hidden lg:table-cell">
+          <div className="flex items-center gap-2">
+            <span>{displayNetwork}</span>
+            {remainingCount > 0 && <Badge variant="secondary">+{remainingCount}</Badge>}
+          </div>
       </TableCell>
       <TableCell className="hidden sm:table-cell text-right">
         <p className="font-mono">{order.amount.toLocaleString()}</p>
@@ -392,6 +410,7 @@ export default function OrderList() {
                 <TableHead>Investor</TableHead>
                 <TableHead>Order</TableHead>
                 <TableHead className="hidden lg:table-cell">Asset</TableHead>
+                <TableHead className="hidden lg:table-cell">Network</TableHead>
                 <TableHead className="hidden sm:table-cell text-right">Amount</TableHead>
                 <TableHead className="hidden md:table-cell text-right">Total</TableHead>
                 <TableHead className="hidden sm:table-cell">Status</TableHead>

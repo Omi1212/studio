@@ -36,6 +36,13 @@ import {
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 
+const networkMap: { [key: string]: string } = {
+    spark: 'Spark',
+    liquid: 'Liquid',
+    rgb: 'RGB',
+    taproot: 'Taproot Assets',
+};
+
 function getStatusBadge(status: Order['status']) {
   switch (status) {
     case 'completed':
@@ -275,12 +282,22 @@ export default function OrderDetailsPage() {
                              } />
                         )}
                         {asset && (
+                             <>
                              <InfoRow label="Asset" value={
                                 <div className="flex items-center gap-2 justify-end">
                                     <span className="font-medium">{asset.assetName} ({asset.assetTicker})</span>
                                     <AssetIcon asset={asset} className="h-6 w-6" />
                                 </div>
                              } />
+                              <InfoRow 
+                                label="Network" 
+                                value={
+                                    (Array.isArray(asset.network) ? asset.network : [asset.network])
+                                    .map(n => networkMap[n] || n)
+                                    .join(', ')
+                                } 
+                              />
+                            </>
                         )}
                         <Separator />
                         <InfoRow label="Amount" value={<span className="font-mono">{order.amount.toLocaleString()}</span>} />
