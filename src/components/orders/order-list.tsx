@@ -7,9 +7,9 @@ import { Card } from '../ui/card';
 import { Avatar, AvatarFallback } from '../ui/avatar';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
-import { MoreVertical, Search, ShoppingBag, ArrowUpRight, ArrowDownLeft } from 'lucide-react';
+import { MoreVertical, Search, ShoppingBag, ArrowUpRight, ArrowDownLeft, Check, X } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '../ui/dropdown-menu';
 import Link from 'next/link';
 import { useToast } from '@/hooks/use-toast';
 import { Input } from '../ui/input';
@@ -18,6 +18,17 @@ import { cn } from '@/lib/utils';
 import AssetIcon from '../ui/asset-icon';
 import KybBanner from '@/components/dashboard/kyb-banner';
 import IdentityProvidersBanner from '@/components/dashboard/identity-providers-banner';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -111,15 +122,8 @@ function OrderTableRow({ order, assets, investors, onApprove, onReject, userRole
         </p>
       </TableCell>
        <TableCell className="hidden sm:table-cell">{getStatusBadge(order.status)}</TableCell>
-      <TableCell className="text-right">
-        <div className="flex items-center justify-end gap-2" onClick={(e) => e.stopPropagation()}>
-            {order.status === 'pending' && (userRole === 'issuer' || userRole === 'agent') && (
-                <>
-                    <Button size="sm" variant="outline" onClick={() => onReject(order.id)}>Reject</Button>
-                    <Button size="sm" onClick={() => onApprove(order.id)}>Accept</Button>
-                </>
-            )}
-            <DropdownMenu>
+      <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
+        <DropdownMenu>
             <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="h-8 w-8">
                 <MoreVertical className="h-4 w-4" />
@@ -129,9 +133,47 @@ function OrderTableRow({ order, assets, investors, onApprove, onReject, userRole
                 <DropdownMenuItem asChild>
                     <Link href={targetUrl}>View Details</Link>
                 </DropdownMenuItem>
+                {order.status === 'pending' && (userRole === 'issuer' || userRole === 'agent') && (
+                    <>
+                        <DropdownMenuSeparator />
+                        <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                                    <Check className="mr-2 h-4 w-4" /> Accept
+                                </DropdownMenuItem>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                                <AlertDialogHeader>
+                                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                    <AlertDialogDescription>This will mark the order as complete.</AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction onClick={() => onApprove(order.id)}>Accept</AlertDialogAction>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
+                        <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                                <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-red-500">
+                                    <X className="mr-2 h-4 w-4" /> Reject
+                                </DropdownMenuItem>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                                <AlertDialogHeader>
+                                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                    <AlertDialogDescription>This action cannot be undone.</AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction onClick={() => onReject(order.id)}>Reject</AlertDialogAction>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
+                    </>
+                )}
             </DropdownMenuContent>
-            </DropdownMenu>
-        </div>
+        </DropdownMenu>
       </TableCell>
     </TableRow>
   );
