@@ -50,6 +50,10 @@ function AssetCard({ asset }: { asset: AssetDetails }) {
     }
   };
 
+  const networks = Array.isArray(asset.network) ? asset.network : [asset.network].filter(Boolean);
+  const displayNetwork = networks.length > 0 ? networkMap[networks[0]] || networks[0] : 'N/A';
+  const remainingCount = networks.length - 1;
+
   return (
     <Card>
       <CardHeader>
@@ -66,9 +70,12 @@ function AssetCard({ asset }: { asset: AssetDetails }) {
             <span className="text-muted-foreground">Status</span>
             {getStatusBadge(asset.status)}
         </div>
-        <div className="flex justify-between text-sm mt-2">
+        <div className="flex justify-between items-center text-sm mt-2">
             <span className="text-muted-foreground">Network</span>
-            <span className="font-medium">{(asset.network || []).map(n => networkMap[n] || n).join(', ')}</span>
+            <div className="flex items-center gap-2">
+              <span className="font-medium">{displayNetwork}</span>
+              {remainingCount > 0 && <Badge variant="secondary">+{remainingCount}</Badge>}
+            </div>
         </div>
          <div className="flex justify-between text-sm mt-2">
             <span className="text-muted-foreground">Max Supply</span>
@@ -110,7 +117,11 @@ function AssetTable({ assets }: { assets: AssetDetails[] }) {
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {assets.map(asset => (
+                    {assets.map(asset => {
+                         const networks = Array.isArray(asset.network) ? asset.network : [asset.network].filter(Boolean);
+                         const displayNetwork = networks.length > 0 ? networkMap[networks[0]] || networks[0] : 'N/A';
+                         const remainingCount = networks.length - 1;
+                        return (
                         <TableRow key={asset.id}>
                             <TableCell>
                                 <div className="flex items-center gap-3">
@@ -121,7 +132,12 @@ function AssetTable({ assets }: { assets: AssetDetails[] }) {
                                     </div>
                                 </div>
                             </TableCell>
-                            <TableCell>{(asset.network || []).map(n => networkMap[n] || n).join(', ')}</TableCell>
+                            <TableCell>
+                                <div className="flex items-center gap-2">
+                                    <span>{displayNetwork}</span>
+                                    {remainingCount > 0 && <Badge variant="secondary">+{remainingCount}</Badge>}
+                                </div>
+                            </TableCell>
                             <TableCell className="font-mono">{asset.maxSupply ? asset.maxSupply.toLocaleString() : '--'}</TableCell>
                             <TableCell>{getStatusBadge(asset.status)}</TableCell>
                             <TableCell className="text-right">
@@ -130,7 +146,7 @@ function AssetTable({ assets }: { assets: AssetDetails[] }) {
                                 </Button>
                             </TableCell>
                         </TableRow>
-                    ))}
+                    )})}
                 </TableBody>
             </Table>
         </Card>

@@ -14,6 +14,7 @@ import { Input } from '../ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Dialog, DialogContent, DialogTrigger } from '../ui/dialog';
 import PlaceOrder from './place-order';
+import { Badge } from '../ui/badge';
 
 const networkMap: { [key: string]: string } = {
     spark: 'Spark',
@@ -43,6 +44,10 @@ function AssetCard({ asset, onAction, subscriptionStatus }: { asset: AssetDetail
     }
   }
 
+  const networks = Array.isArray(asset.network) ? asset.network : [asset.network].filter(Boolean);
+  const displayNetwork = networks.length > 0 ? networkMap[networks[0]] || networks[0] : 'N/A';
+  const remainingCount = networks.length - 1;
+
   return (
     <Card>
       <CardHeader>
@@ -55,9 +60,12 @@ function AssetCard({ asset, onAction, subscriptionStatus }: { asset: AssetDetail
         </div>
       </CardHeader>
       <CardContent>
-        <div className="flex justify-between text-sm mt-2">
+        <div className="flex justify-between items-center text-sm mt-2">
             <span className="text-muted-foreground">Network</span>
-            <span className="font-medium">{(asset.network || []).map(n => networkMap[n] || n).join(', ')}</span>
+             <div className="flex items-center gap-2">
+                <span className="font-medium">{displayNetwork}</span>
+                {remainingCount > 0 && <Badge variant="secondary">+{remainingCount}</Badge>}
+            </div>
         </div>
          <div className="flex justify-between text-sm mt-2">
             <span className="text-muted-foreground">Max Supply</span>
@@ -94,6 +102,10 @@ function AssetTableRow({ asset, onAction, subscriptionStatus }: { asset: AssetDe
             return <Button variant="outline" size="sm" onClick={() => onAction(asset)}>Subscribe</Button>;
         }
     }
+    
+    const networks = Array.isArray(asset.network) ? asset.network : [asset.network].filter(Boolean);
+    const displayNetwork = networks.length > 0 ? networkMap[networks[0]] || networks[0] : 'N/A';
+    const remainingCount = networks.length - 1;
 
     return (
         <TableRow onClick={handleView} className="cursor-pointer">
@@ -106,7 +118,12 @@ function AssetTableRow({ asset, onAction, subscriptionStatus }: { asset: AssetDe
                     </div>
                 </div>
             </TableCell>
-            <TableCell>{(asset.network || []).map(n => networkMap[n] || n).join(', ')}</TableCell>
+            <TableCell>
+                <div className="flex items-center gap-2">
+                    <span>{displayNetwork}</span>
+                    {remainingCount > 0 && <Badge variant="secondary">+{remainingCount}</Badge>}
+                </div>
+            </TableCell>
             <TableCell className="font-mono">{asset.maxSupply ? asset.maxSupply.toLocaleString() : '--'}</TableCell>
             <TableCell className="text-right space-x-2" onClick={(e) => e.stopPropagation()}>
                 <Button variant="outline" size="sm" onClick={handleView}>

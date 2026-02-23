@@ -51,6 +51,10 @@ function AssetCard({ asset, issuer }: { asset: AssetDetails, issuer?: Issuer }) 
     }
   };
 
+  const networks = Array.isArray(asset.network) ? asset.network : [asset.network].filter(Boolean);
+  const displayNetwork = networks.length > 0 ? networkMap[networks[0]] || networks[0] : 'N/A';
+  const remainingCount = networks.length - 1;
+
   return (
     <Card>
       <CardHeader>
@@ -67,9 +71,12 @@ function AssetCard({ asset, issuer }: { asset: AssetDetails, issuer?: Issuer }) 
             <span className="text-muted-foreground">Status</span>
             {getStatusBadge(asset.status)}
         </div>
-        <div className="flex justify-between text-sm mt-2">
+        <div className="flex justify-between items-center text-sm mt-2">
             <span className="text-muted-foreground">Network</span>
-            <span className="font-medium">{(asset.network || []).map(n => networkMap[n] || n).join(', ')}</span>
+            <div className="flex items-center gap-2">
+                <span className="font-medium">{displayNetwork}</span>
+                {remainingCount > 0 && <Badge variant="secondary">+{remainingCount}</Badge>}
+            </div>
         </div>
          <div className="flex justify-between text-sm mt-2">
             <span className="text-muted-foreground">Issuer</span>
@@ -113,6 +120,9 @@ function AssetTable({ assets, issuers }: { assets: AssetDetails[], issuers: Issu
                 <TableBody>
                     {assets.map(asset => {
                         const issuer = issuers.find(i => i.id === asset.issuerId);
+                        const networks = Array.isArray(asset.network) ? asset.network : [asset.network].filter(Boolean);
+                        const displayNetwork = networks.length > 0 ? networkMap[networks[0]] || networks[0] : 'N/A';
+                        const remainingCount = networks.length - 1;
                         return (
                         <TableRow key={asset.id} onClick={() => handleView(asset)} className="cursor-pointer">
                             <TableCell>
@@ -125,7 +135,12 @@ function AssetTable({ assets, issuers }: { assets: AssetDetails[], issuers: Issu
                                 </div>
                             </TableCell>
                             <TableCell>{issuer?.name || 'N/A'}</TableCell>
-                            <TableCell>{(asset.network || []).map(n => networkMap[n] || n).join(', ')}</TableCell>
+                            <TableCell>
+                                <div className="flex items-center gap-2">
+                                    <span>{displayNetwork}</span>
+                                    {remainingCount > 0 && <Badge variant="secondary">+{remainingCount}</Badge>}
+                                </div>
+                            </TableCell>
                             <TableCell>{getStatusBadge(asset.status)}</TableCell>
                             <TableCell className="text-right">
                                 <Button variant="outline" size="sm">
