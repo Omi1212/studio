@@ -24,18 +24,18 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import type { User, TokenDetails } from '@/lib/types';
+import type { User, AssetDetails } from '@/lib/types';
 import { DropdownMenuItem, DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator } from '../ui/dropdown-menu';
-import TokenIcon from '../ui/token-icon';
+import AssetIcon from '../ui/asset-icon';
 import { MoreVertical, Trash2, Search, Check } from 'lucide-react';
 import { Card } from '../ui/card';
 import { Input } from '../ui/input';
 
-interface AssignTokenDialogProps {
+interface AssignAssetDialogProps {
     agent: User;
-    allTokens: TokenDetails[];
-    assignedTokenIds: string[];
-    onUpdate: (agentId: string, tokenIds: string[]) => void;
+    allAssets: AssetDetails[];
+    assignedAssetIds: string[];
+    onUpdate: (agentId: string, assetIds: string[]) => void;
 }
 
 const networkMap: { [key: string]: string } = {
@@ -45,73 +45,73 @@ const networkMap: { [key: string]: string } = {
     taproot: 'Taproot Assets',
 };
 
-export function AssignTokenDialog({ agent, allTokens, assignedTokenIds, onUpdate }: AssignTokenDialogProps) {
+export function AssignTokenDialog({ agent, allAssets, assignedAssetIds, onUpdate }: AssignAssetDialogProps) {
     const [isOpen, setIsOpen] = useState(false);
-    const [selectedTokenIds, setSelectedTokenIds] = useState<string[]>([]);
+    const [selectedAssetIds, setSelectedAssetIds] = useState<string[]>([]);
     const [searchQuery, setSearchQuery] = useState('');
     
     useEffect(() => {
         if (isOpen) {
-            setSelectedTokenIds(assignedTokenIds);
+            setSelectedAssetIds(assignedAssetIds);
             setSearchQuery('');
         }
-    }, [isOpen, assignedTokenIds]);
+    }, [isOpen, assignedAssetIds]);
 
-    const handleTokenAdd = (tokenId: string) => {
-        if (tokenId && !selectedTokenIds.includes(tokenId)) {
-            setSelectedTokenIds(prev => [...prev, tokenId]);
+    const handleAssetAdd = (assetId: string) => {
+        if (assetId && !selectedAssetIds.includes(assetId)) {
+            setSelectedAssetIds(prev => [...prev, assetId]);
         }
     };
 
-    const handleTokenRemove = (tokenId: string) => {
-        setSelectedTokenIds(prev => prev.filter(id => id !== tokenId));
+    const handleAssetRemove = (assetId: string) => {
+        setSelectedAssetIds(prev => prev.filter(id => id !== assetId));
     };
 
     const handleSave = () => {
-        onUpdate(agent.id, selectedTokenIds);
+        onUpdate(agent.id, selectedAssetIds);
         setIsOpen(false);
     };
     
     const assigned = useMemo(() => {
-        return allTokens.filter(token => selectedTokenIds.includes(token.id));
-    }, [allTokens, selectedTokenIds]);
+        return allAssets.filter(asset => selectedAssetIds.includes(asset.id));
+    }, [allAssets, selectedAssetIds]);
 
     const unassigned = useMemo(() => {
-        let filtered = allTokens.filter(token => !selectedTokenIds.includes(token.id));
+        let filtered = allAssets.filter(asset => !selectedAssetIds.includes(asset.id));
         if (searchQuery) {
-            filtered = filtered.filter(token => 
-                token.tokenName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                token.tokenTicker.toLowerCase().includes(searchQuery.toLowerCase())
+            filtered = filtered.filter(asset => 
+                asset.assetName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                asset.assetTicker.toLowerCase().includes(searchQuery.toLowerCase())
             );
         }
         return filtered;
-    }, [allTokens, selectedTokenIds, searchQuery]);
+    }, [allAssets, selectedAssetIds, searchQuery]);
 
 
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
                 <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                    Manage Tokens
+                    Manage Assets
                 </DropdownMenuItem>
             </DialogTrigger>
             <DialogContent className="sm:max-w-xl">
                 <DialogHeader>
-                    <DialogTitle>Manage Token Assignments</DialogTitle>
+                    <DialogTitle>Manage Asset Assignments</DialogTitle>
                     <DialogDescription>
-                        Select which tokens {agent.name} should be able to manage.
+                        Select which assets {agent.name} should be able to manage.
                     </DialogDescription>
                 </DialogHeader>
                 
                 <ScrollArea className="max-h-72 -mx-6 px-6">
                     <div className="space-y-3 py-2 pr-1">
-                        {assigned.map(token => (
-                            <Card key={token.id} className="p-4 flex items-center justify-between">
+                        {assigned.map(asset => (
+                            <Card key={asset.id} className="p-4 flex items-center justify-between">
                                 <div className="flex items-center gap-4">
-                                    <TokenIcon token={token} className="h-8 w-8" />
+                                    <AssetIcon asset={asset} className="h-8 w-8" />
                                     <div>
-                                        <p className="font-semibold">{token.tokenName}</p>
-                                        <p className="text-sm text-muted-foreground">{token.tokenTicker} on {networkMap[token.network] || token.network}</p>
+                                        <p className="font-semibold">{asset.assetName}</p>
+                                        <p className="text-sm text-muted-foreground">{asset.assetTicker} on {networkMap[asset.network] || asset.network}</p>
                                     </div>
                                 </div>
                                 <AlertDialog>
@@ -133,12 +133,12 @@ export function AssignTokenDialog({ agent, allTokens, assignedTokenIds, onUpdate
                                         <AlertDialogHeader>
                                             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
                                             <AlertDialogDescription>
-                                                This will unassign the token "{token.tokenName}" from {agent.name}. They will no longer be able to manage it.
+                                                This will unassign the asset "{asset.assetName}" from {agent.name}. They will no longer be able to manage it.
                                             </AlertDialogDescription>
                                         </AlertDialogHeader>
                                         <AlertDialogFooter>
                                             <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                            <AlertDialogAction onClick={() => handleTokenRemove(token.id)}>Confirm Remove</AlertDialogAction>
+                                            <AlertDialogAction onClick={() => handleAssetRemove(asset.id)}>Confirm Remove</AlertDialogAction>
                                         </AlertDialogFooter>
                                     </AlertDialogContent>
                                 </AlertDialog>
@@ -146,7 +146,7 @@ export function AssignTokenDialog({ agent, allTokens, assignedTokenIds, onUpdate
                         ))}
                          {assigned.length === 0 && (
                              <div className="text-center text-muted-foreground py-10">
-                                <p>No tokens assigned yet.</p>
+                                <p>No assets assigned yet.</p>
                             </div>
                         )}
                     </div>
@@ -155,7 +155,7 @@ export function AssignTokenDialog({ agent, allTokens, assignedTokenIds, onUpdate
                  <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <Button variant="link" className="p-0 h-auto text-primary">
-                            + Add Another Token
+                            + Add Another Asset
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent className="w-[--radix-dropdown-menu-trigger-width]">
@@ -163,7 +163,7 @@ export function AssignTokenDialog({ agent, allTokens, assignedTokenIds, onUpdate
                              <div className="relative">
                                 <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                                 <Input 
-                                    placeholder="Search tokens..." 
+                                    placeholder="Search assets..." 
                                     className="pl-8"
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
@@ -171,22 +171,22 @@ export function AssignTokenDialog({ agent, allTokens, assignedTokenIds, onUpdate
                             </div>
                         </div>
                         <DropdownMenuSeparator />
-                        <DropdownMenuLabel>Available Tokens</DropdownMenuLabel>
+                        <DropdownMenuLabel>Available Assets</DropdownMenuLabel>
                          <ScrollArea className="max-h-48">
                             {unassigned.length > 0 ? (
-                                unassigned.map(token => (
-                                <DropdownMenuItem key={token.id} onSelect={() => handleTokenAdd(token.id)}>
+                                unassigned.map(asset => (
+                                <DropdownMenuItem key={asset.id} onSelect={() => handleAssetAdd(asset.id)}>
                                     <div className="flex items-center justify-between w-full">
                                         <div className="flex items-center gap-2">
-                                            <TokenIcon token={token} className="h-6 w-6" />
-                                            <span>{token.tokenName} ({token.tokenTicker})</span>
+                                            <AssetIcon asset={asset} className="h-6 w-6" />
+                                            <span>{asset.assetName} ({asset.assetTicker})</span>
                                         </div>
                                     </div>
                                 </DropdownMenuItem>
                                 ))
                             ) : (
                                 <div className="px-2 py-1.5 text-sm text-muted-foreground">
-                                    {searchQuery ? "No tokens match your search." : "No other tokens to add."}
+                                    {searchQuery ? "No assets match your search." : "No other assets to add."}
                                 </div>
                             )}
                         </ScrollArea>

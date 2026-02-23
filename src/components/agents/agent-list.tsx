@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import type { User, TokenDetails } from '@/lib/types';
+import type { User, AssetDetails } from '@/lib/types';
 import { Card } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { AssignTokenDialog } from './assign-token-dialog';
@@ -16,7 +16,7 @@ import Link from 'next/link';
 import { useToast } from '@/hooks/use-toast';
 
 type Agent = User;
-type Assignments = Record<string, string[]>; // agentId: tokenId[]
+type Assignments = Record<string, string[]>; // agentId: assetId[]
 
 const ITEMS_PER_PAGE = 10;
 
@@ -34,7 +34,7 @@ function getStatusBadge(status: User['status']) {
 export default function AgentList() {
     const [agents, setAgents] = useState<Agent[]>([]);
     const [totalAgents, setTotalAgents] = useState(0);
-    const [activeTokens, setActiveTokens] = useState<TokenDetails[]>([]);
+    const [activeAssets, setActiveAssets] = useState<AssetDetails[]>([]);
     const [assignments, setAssignments] = useState<Assignments>({});
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
@@ -44,10 +44,10 @@ export default function AgentList() {
 
     useEffect(() => {
         Promise.all([
-            fetch('/api/tokens').then(res => res.json()),
+            fetch('/api/assets').then(res => res.json()),
             fetch('/api/agents/assignments').then(res => res.json()),
-        ]).then(([tokensData, assignmentsData]) => {
-            setActiveTokens(tokensData.data.filter((token: TokenDetails) => token.status === 'active'));
+        ]).then(([assetsData, assignmentsData]) => {
+            setActiveAssets(assetsData.data.filter((asset: AssetDetails) => asset.status === 'active'));
             setAssignments(assignmentsData);
         }).catch(console.error);
     }, []);
@@ -79,21 +79,21 @@ export default function AgentList() {
         fetchAgents();
     }, [currentPage, searchQuery]);
     
-    const handleUpdateAssignments = async (agentId: string, tokenIds: string[]) => {
+    const handleUpdateAssignments = async (agentId: string, assetIds: string[]) => {
         try {
             const response = await fetch(`/api/agents/${agentId}/assignments`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ tokenIds }),
+                body: JSON.stringify({ assetIds }),
             });
 
             if (!response.ok) throw new Error('Failed to update assignments');
-            const updatedTokenIds = await response.json();
-            setAssignments(prev => ({ ...prev, [agentId]: updatedTokenIds }));
+            const updatedAssetIds = await response.json();
+            setAssignments(prev => ({ ...prev, [agentId]: updatedAssetIds }));
             
             toast({
                 title: "Assignments Updated",
-                description: `Token assignments have been updated for the agent.`,
+                description: `Asset assignments have been updated for the agent.`,
             });
         } catch (error) {
             console.error(error);
@@ -181,14 +181,14 @@ export default function AgentList() {
                         <TableHeader>
                             <TableRow>
                                 <TableHead>Agent</TableHead>
-                                <TableHead className="text-center">Assigned Tokens</TableHead>
+                                <TableHead className="text-center">Assigned Assets</TableHead>
                                 <TableHead className="hidden sm:table-cell">Status</TableHead>
                                 <TableHead className="text-right">Actions</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {agents.map(agent => {
-                                const assignedTokenIds = assignments[agent.id] || [];
+                                const assignedAssetIds = assignments[agent.id] || [];
                                 return (
                                     <TableRow key={agent.id} onClick={() => router.push(`/agents/${agent.id}`)} className="cursor-pointer">
                                         <TableCell>
@@ -203,7 +203,7 @@ export default function AgentList() {
                                             </div>
                                         </TableCell>
                                         <TableCell className="text-center">
-                                            <Badge variant="secondary">{assignedTokenIds.length}</Badge>
+                                            <Badge variant="secondary">{assignedAssetIds.length}</Badge>
                                         </TableCell>
                                         <TableCell className="hidden sm:table-cell">{getStatusBadge(agent.status)}</TableCell>
                                         <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
@@ -220,8 +220,8 @@ export default function AgentList() {
                                                         </DropdownMenuItem>
                                                          <AssignTokenDialog 
                                                             agent={agent}
-                                                            allTokens={activeTokens}
-                                                            assignedTokenIds={assignedTokenIds}
+                                                            allAssets={activeAssets}
+                                                            assignedAssetIds={assignedAssetIds}
                                                             onUpdate={handleUpdateAssignments}
                                                         />
                                                     </DropdownMenuContent>

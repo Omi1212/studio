@@ -163,7 +163,7 @@ export default function TransferDetailsPage() {
                                 <Tag className="h-4 w-4" />
                                 <h3 className="text-sm font-semibold">Type</h3>
                             </div>
-                            <p className="font-medium">{transfer.type === 'Transfer' ? 'Token Transfer' : transfer.type}</p>
+                            <p className="font-medium">{transfer.type === 'Transfer' ? 'Asset Transfer' : transfer.type}</p>
                         </CardContent>
                     </Card>
                 </div>
@@ -188,7 +188,7 @@ export default function TransferDetailsPage() {
                              <div>
                                 <p className="text-muted-foreground mb-1">Amount</p>
                                 <p className={cn("font-mono font-semibold", getAmountClass(transfer.type))}>
-                                    {transfer.amount.toLocaleString()} ${transfer.tokenTicker}
+                                    {transfer.amount.toLocaleString()} ${transfer.assetTicker}
                                 </p>
                             </div>
                              <div className="text-right">
