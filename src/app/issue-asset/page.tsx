@@ -58,7 +58,10 @@ export default function IssueAssetPage() {
     };
   }, []);
 
-  const canCreateAssets = !loading && user && user.role === 'issuer' && (company?.kybStatus === 'verified' || user.email === 'issuer@gmail.com');
+  const isKybVerified = company?.kybStatus === 'verified' || user?.email === 'issuer@gmail.com';
+  // For this demo, let's assume compliance providers are never linked.
+  const areComplianceProvidersLinked = false;
+  const canCreateAssets = !loading && user && user.role === 'issuer' && isKybVerified && areComplianceProvidersLinked;
 
 
   return (
@@ -85,7 +88,7 @@ export default function IssueAssetPage() {
                       </Button>
                     )}
                 </div>
-                <ExistingAssets view={viewMode} setView={setViewMode} canCreate={canCreateAssets} />
+                <ExistingAssets view={viewMode} setView={setViewMode} canCreate={canCreateAssets} company={company} />
               </div>
             </div>
           </main>

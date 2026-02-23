@@ -110,16 +110,19 @@ function DashboardRenderer() {
     }
 
     if (role === 'issuer') {
-        const showKybBanner = user && company && company.kybStatus !== 'verified' && user.email !== 'issuer@gmail.com';
+        const isKybVerified = company?.kybStatus === 'verified' || user?.email === 'issuer@gmail.com';
+        // For this demo, let's assume compliance providers are never linked.
+        const areComplianceProvidersLinked = false; 
+
+        const showKybBanner = user && !isKybVerified;
+        const showComplianceBanner = user && isKybVerified && !areComplianceProvidersLinked;
+        
         return (
             <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-8 bg-background">
-                {showKybBanner && (
-                  <>
-                    <KybBanner />
-                    <IdentityProvidersBanner />
-                  </>
-                )}
-                {showKybBanner ? (
+                {showKybBanner && <KybBanner />}
+                {showComplianceBanner && <IdentityProvidersBanner />}
+                
+                {showKybBanner || showComplianceBanner ? (
                     <div className="border-dashed border-2 border-muted-foreground/50 rounded-lg h-96 flex flex-col items-center justify-center text-center p-4">
                         <Rocket className="h-16 w-16 text-muted-foreground mb-4" />
                         <h2 className="text-xl font-semibold mb-2">No Issued Assets</h2>

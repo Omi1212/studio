@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import type { AssetDetails, User, Issuer, ViewMode } from '@/lib/types';
+import type { AssetDetails, User, Issuer, ViewMode, Company } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/card';
 import AssetIcon from '../ui/asset-icon';
 import { Badge } from '../ui/badge';
@@ -153,7 +153,7 @@ function AssetTable({ assets }: { assets: AssetDetails[] }) {
     )
 }
 
-export default function ExistingAssets({ view, setView, canCreate }: { view: ViewMode, setView: (mode: ViewMode) => void, canCreate?: boolean }) {
+export default function ExistingAssets({ view, setView, canCreate, company }: { view: ViewMode, setView: (mode: ViewMode) => void, canCreate?: boolean, company?: Company | null }) {
   const [assets, setAssets] = useState<AssetDetails[]>([]);
   const [totalAssets, setTotalAssets] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -287,14 +287,17 @@ export default function ExistingAssets({ view, setView, canCreate }: { view: Vie
           </div>
         );
       }
+      const showKybBanner = company && company.kybStatus !== 'verified';
+      const showComplianceBanner = company && company.kybStatus === 'verified';
+
       return (
         <div className="space-y-8">
-          <KybBanner />
-          <IdentityProvidersBanner />
+          {showKybBanner && <KybBanner />}
+          {showComplianceBanner && <IdentityProvidersBanner />}
           <div className="border-dashed border-2 border-muted-foreground/50 rounded-lg h-96 flex flex-col items-center justify-center text-center p-4">
               <Rocket className="h-16 w-16 text-muted-foreground mb-4" />
               <h2 className="text-xl font-semibold mb-2">Start by verifying your business</h2>
-              <p className="text-muted-foreground mb-4">Please complete your business verification to create a new asset.</p>
+              <p className="text-muted-foreground mb-4">Please complete all verification steps to create a new asset.</p>
           </div>
         </div>
       );
