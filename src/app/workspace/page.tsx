@@ -1,3 +1,4 @@
+
 'use client';
 import {
   Sidebar,
@@ -75,7 +76,7 @@ export default function WorkspacePage() {
                 </div>
             ) : selectedAsset ? (
               <div>
-                <div className="flex items-center gap-4 mb-4">
+                <div className="flex items-center gap-4 mb-8">
                   <AssetIcon asset={selectedAsset} className="h-10 w-10" />
                   <h1 className="text-3xl font-headline font-semibold">{selectedAsset.assetName}</h1>
                 </div>
