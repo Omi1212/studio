@@ -14,6 +14,7 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
+import AssetIcon from '@/components/ui/asset-icon';
 
 export default function WorkspacePage() {
   const [selectedAsset, setSelectedAsset] = useState<AssetDetails | null>(null);
@@ -74,7 +75,10 @@ export default function WorkspacePage() {
                 </div>
             ) : selectedAsset ? (
               <div>
-                <h1 className="text-3xl font-headline font-semibold mb-4">{selectedAsset.assetName}</h1>
+                <div className="flex items-center gap-4 mb-4">
+                  <AssetIcon asset={selectedAsset} className="h-10 w-10" />
+                  <h1 className="text-3xl font-headline font-semibold">{selectedAsset.assetName}</h1>
+                </div>
                 <Tabs defaultValue="overview">
                   <TabsList className="grid w-full grid-cols-6">
                     <TabsTrigger value="overview">Overview</TabsTrigger>
