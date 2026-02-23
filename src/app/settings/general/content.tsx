@@ -75,6 +75,44 @@ export default function GeneralSettingsContent() {
     });
   };
 
+  const handleVerifyBusiness = async () => {
+    if (!selectedCompany) return;
+
+    const newLevel = 3;
+    const newStatus = 'verified';
+
+    try {
+        const response = await fetch(`/api/companies/${selectedCompany.id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ kybLevel: newLevel, kybStatus: newStatus }),
+        });
+
+        if (!response.ok) throw new Error('Failed to update verification status.');
+
+        const updatedCompany = await response.json();
+        setSelectedCompany(updatedCompany);
+
+        // Update user in localStorage to reflect KYB status for other parts of the app
+        const storedUser = localStorage.getItem('currentUser');
+        if (storedUser) {
+            const currentUser = JSON.parse(storedUser);
+            // @ts-ignore - kybStatus is a dynamic property for the demo
+            const updatedUser = { ...currentUser, kybStatus: newStatus, kybLevel: newLevel };
+            localStorage.setItem('currentUser', JSON.stringify(updatedUser));
+            setUser(updatedUser); // Update local user state as well
+        }
+
+        toast({
+            title: `Business Verified!`,
+            description: "Your business verification has been updated."
+        });
+
+    } catch (error: any) {
+        toast({ variant: 'destructive', title: "Verification Failed", description: error.message });
+    }
+  };
+
 
   if (loading) {
     return (
@@ -200,7 +238,10 @@ export default function GeneralSettingsContent() {
                           </div>
                       </AccordionTrigger>
                       <AccordionContent className="p-6 pt-0">
-                          <BusinessVerification kybLevel={selectedCompany?.kybLevel || 0} />
+                          <BusinessVerification
+                            kybLevel={selectedCompany?.kybLevel || 0}
+                            onVerify={handleVerifyBusiness}
+                          />
                       </AccordionContent>
                   </Card>
               </AccordionItem>
