@@ -163,7 +163,7 @@ function AssetTable({ assets }: { assets: AssetDetails[] }) {
     )
 }
 
-export default function ExistingAssets({ view, setView, canCreate, company }: { view: ViewMode, setView: (mode: ViewMode) => void, canCreate?: boolean, company?: Company | null }) {
+export default function ExistingAssets({ view, setView, canCreate, company, complianceProvidersCount = 0 }: { view: ViewMode, setView: (mode: ViewMode) => void, canCreate?: boolean, company?: Company | null, complianceProvidersCount?: number }) {
   const [assets, setAssets] = useState<AssetDetails[]>([]);
   const [totalAssets, setTotalAssets] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -297,7 +297,7 @@ export default function ExistingAssets({ view, setView, canCreate, company }: { 
         );
       }
       const showKybBanner = company && company.kybStatus !== 'verified';
-      const showComplianceBanner = company && company.kybStatus === 'verified';
+      const showComplianceBanner = company && company.kybStatus === 'verified' && complianceProvidersCount < 3;
 
       return (
         <div className="space-y-8">

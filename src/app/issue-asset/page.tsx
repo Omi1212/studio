@@ -21,18 +21,17 @@ export default function IssueAssetPage() {
   const [user, setUser] = useState<User | null>(null);
   const [company, setCompany] = useState<Company | null>(null);
   const [loading, setLoading] = useState(true);
-  const [areComplianceProvidersLinked, setAreComplianceProvidersLinked] = useState(false);
+  const [complianceProvidersCount, setComplianceProvidersCount] = useState(0);
 
   const loadComplianceStatus = () => {
-    let complianceLinked = false;
+    let count = 0;
     for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (key && key.startsWith('compliance-provider-')) {
-        complianceLinked = true;
-        break;
-      }
+        const key = localStorage.key(i);
+        if (key && key.startsWith('compliance-provider-')) {
+            count++;
+        }
     }
-    setAreComplianceProvidersLinked(complianceLinked);
+    setComplianceProvidersCount(count);
   };
 
   useEffect(() => {
@@ -74,8 +73,8 @@ export default function IssueAssetPage() {
     };
   }, []);
 
-  const isKybVerified = company?.kybStatus === 'verified' || user?.email === 'issuer@gmail.com';
-  const canCreateAssets = !loading && user && user.role === 'issuer' && isKybVerified && areComplianceProvidersLinked;
+  const isKybVerified = company?.kybStatus === 'verified';
+  const canCreateAssets = !loading && user && user.role === 'issuer' && isKybVerified && complianceProvidersCount >= 3;
 
 
   return (
@@ -102,7 +101,7 @@ export default function IssueAssetPage() {
                       </Button>
                     )}
                 </div>
-                <ExistingAssets view={viewMode} setView={setViewMode} canCreate={canCreateAssets} company={company} />
+                <ExistingAssets view={viewMode} setView={setViewMode} canCreate={canCreateAssets} company={company} complianceProvidersCount={complianceProvidersCount} />
               </div>
             </div>
           </main>

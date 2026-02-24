@@ -28,18 +28,17 @@ function DashboardRenderer() {
     const [company, setCompany] = useState<Company | null>(null);
     const [selectedAsset, setSelectedAsset] = useState<AssetDetails | null>(null);
     const [loading, setLoading] = useState(true);
-    const [areComplianceProvidersLinked, setAreComplianceProvidersLinked] = useState(false);
+    const [complianceProvidersCount, setComplianceProvidersCount] = useState(0);
 
     const loadComplianceStatus = () => {
-        let complianceLinked = false;
+        let count = 0;
         for (let i = 0; i < localStorage.length; i++) {
             const key = localStorage.key(i);
             if (key && key.startsWith('compliance-provider-')) {
-                complianceLinked = true;
-                break;
+                count++;
             }
         }
-        setAreComplianceProvidersLinked(complianceLinked);
+        setComplianceProvidersCount(count);
     };
 
     useEffect(() => {
@@ -162,10 +161,10 @@ function DashboardRenderer() {
     }
 
     if (role === 'issuer') {
-        const isKybVerified = company?.kybStatus === 'verified' || user?.email === 'issuer@gmail.com';
+        const isKybVerified = company?.kybStatus === 'verified';
         
         const showKybBanner = user && !isKybVerified;
-        const showComplianceBanner = user && isKybVerified && !areComplianceProvidersLinked;
+        const showComplianceBanner = user && isKybVerified && complianceProvidersCount < 3;
         
         return (
             <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-8 bg-background">
