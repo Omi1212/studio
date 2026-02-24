@@ -46,11 +46,11 @@ function DashboardRenderer() {
                             const companyToFetchId = localStorage.getItem('selectedCompanyId') || dbUser.companyId[0];
                             if (!localStorage.getItem('selectedCompanyId')) {
                                 localStorage.setItem('selectedCompanyId', companyToFetchId);
-                                window.dispatchEvent(new Event('companyChanged'));
                             }
                             fetch(`/api/companies/${companyToFetchId}`)
                                 .then(res => res.ok ? res.json() : null)
                                 .then(companyData => setCompany(companyData));
+                            window.dispatchEvent(new Event('companyChanged'));
                         }
                     })
                     .catch(() => {});
@@ -66,9 +66,9 @@ function DashboardRenderer() {
                     
                     const getAssetsPromise = async (): Promise<{ data: AssetDetails[] }> => {
                         if (!currentUser) return { data: [] };
+                        const selectedCompanyId = localStorage.getItem('selectedCompanyId');
 
                         if (currentUser.role === 'issuer') {
-                            const selectedCompanyId = localStorage.getItem('selectedCompanyId');
                             if (selectedCompanyId) {
                                 const assetsResponse = await fetch(`/api/assets?perPage=999&companyId=${selectedCompanyId}`);
                                 return assetsResponse.ok ? assetsResponse.json() : { data: [] };
@@ -153,6 +153,9 @@ function DashboardRenderer() {
         
         return (
             <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-8 bg-background">
+              <h1 className="text-3xl font-headline font-semibold">
+                {canShowAssetDetails && selectedAsset ? selectedAsset.assetName : 'Dashboard'}
+              </h1>
                 {showKybBanner && <KybBanner />}
                 {showComplianceBanner && <IdentityProvidersBanner />}
                 
@@ -176,6 +179,7 @@ function DashboardRenderer() {
         if (selectedAsset) {
             return (
                 <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-8 bg-background">
+                    <h1 className="text-3xl font-headline font-semibold">{selectedAsset.assetName}</h1>
                     <AssetDetailsView asset={selectedAsset} view="dashboard" userRole={role} />
                 </main>
             );
