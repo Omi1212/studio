@@ -283,7 +283,7 @@ export default function Step1AssetInfo({ onNext, defaultValues, formRef }: Step1
                             <FormControl>
                                 <div className="relative">
                                     <Input type="number" placeholder="5,000,000" {...field} />
-                                    <span className="absolute inset-y-0 right-4 flex items-center text-muted-foreground">USDC</span>
+                                    <span className="absolute inset-y-0 right-4 flex items-center text-muted-foreground">USD</span>
                                 </div>
                             </FormControl>
                             <FormMessage />
@@ -312,7 +312,7 @@ export default function Step1AssetInfo({ onNext, defaultValues, formRef }: Step1
                             <FormControl>
                                 <div className="relative">
                                     <Input type="number" placeholder="10,000,000" {...field} />
-                                    <span className="absolute inset-y-0 right-4 flex items-center text-muted-foreground">USDC</span>
+                                    <span className="absolute inset-y-0 right-4 flex items-center text-muted-foreground">USD</span>
                                 </div>
                             </FormControl>
                             <FormMessage />
@@ -405,7 +405,7 @@ export default function Step1AssetInfo({ onNext, defaultValues, formRef }: Step1
                             <FormControl>
                                 <div className="relative">
                                     <Input type="number" placeholder="250,000" {...field} />
-                                    <span className="absolute inset-y-0 right-4 flex items-center text-muted-foreground">USDC</span>
+                                    <span className="absolute inset-y-0 right-4 flex items-center text-muted-foreground">USD</span>
                                 </div>
                             </FormControl>
                             <FormMessage />
