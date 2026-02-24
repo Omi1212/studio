@@ -55,11 +55,12 @@ function DashboardRenderer() {
                     .then(res => res.ok ? res.json() : parsedUser)
                     .then(dbUser => {
                       setUser(dbUser)
-                      if (dbUser.companyId) {
-                        fetch(`/api/companies/${dbUser.companyId}`)
-                          .then(res => res.ok ? res.json() : null)
-                          .then(companyData => setCompany(companyData));
-                      }
+                        if (Array.isArray(dbUser.companyId) && dbUser.companyId.length > 0) {
+                            const companyToFetch = localStorage.getItem('selectedCompanyId') || dbUser.companyId[0];
+                            fetch(`/api/companies/${companyToFetch}`)
+                                .then(res => res.ok ? res.json() : null)
+                                .then(companyData => setCompany(companyData));
+                        }
                     })
                     .catch(() => {});
             }

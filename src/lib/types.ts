@@ -91,7 +91,7 @@ export type User = {
   idDoc?: string;
   address?: string;
   city?: string;
-  companyId?: string;
+  companyId?: string[];
   joinedDate?: string;
   totalInvested?: number;
   isFrozen?: boolean;

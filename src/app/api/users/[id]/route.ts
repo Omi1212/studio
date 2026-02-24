@@ -20,7 +20,7 @@ const patchSchema = z.object({
   idDoc: z.string().optional(),
   address: z.string().optional(),
   city: z.string().optional(),
-  companyId: z.string().optional(),
+  companyId: z.array(z.string()).optional(),
   language: z.string().optional(),
   currency: z.string().optional(),
 }).partial();

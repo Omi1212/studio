@@ -124,10 +124,12 @@ export default function SidebarNav() {
           const res = await fetch('/api/companies?perPage=999');
           return res.ok ? await res.json() : { data: [] };
         }
-        if (currentUser.companyId) {
-          const res = await fetch(`/api/companies/${currentUser.companyId}`);
-          const company = res.ok ? await res.json() : null;
-          return company ? { data: [company] } : { data: [] };
+        if (currentUser.companyId && Array.isArray(currentUser.companyId) && currentUser.companyId.length > 0) {
+            const companyPromises = currentUser.companyId.map(id =>
+              fetch(`/api/companies/${id}`).then(res => (res.ok ? res.json() : null))
+            );
+            const companies = await Promise.all(companyPromises);
+            return { data: companies.filter(c => c) };
         }
         return { data: [] };
       };
@@ -270,7 +272,7 @@ export default function SidebarNav() {
         </div>
       </SidebarHeader>
       
-      {isClient && (userRole === 'investor' || userRole === 'issuer') && (
+      {isClient && (userRole === 'issuer' || userRole === 'investor') && (
         <div className="px-3 pb-3">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>

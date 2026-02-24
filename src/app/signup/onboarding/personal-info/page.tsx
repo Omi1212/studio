@@ -150,7 +150,7 @@ export default function PersonalInfoPage() {
             
             const newCompany: Company = await companyResponse.json();
 
-            updatedUserData.companyId = newCompany.id;
+            updatedUserData.companyId = [newCompany.id];
             localStorage.setItem('selectedCompanyId', newCompany.id);
         }
 
