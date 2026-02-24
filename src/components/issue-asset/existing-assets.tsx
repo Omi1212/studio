@@ -76,10 +76,6 @@ function AssetCard({ asset }: { asset: AssetDetails }) {
             <span className="text-muted-foreground">Status</span>
             {getStatusBadge(asset.status)}
         </div>
-        <div className="flex justify-between text-sm mt-2">
-            <span className="text-muted-foreground">Max Supply</span>
-            <span className="font-medium font-mono">{asset.maxSupply ? asset.maxSupply.toLocaleString() : '--'}</span>
-        </div>
         <div className="flex justify-between items-center text-sm mt-2">
             <span className="text-muted-foreground">Network</span>
             <div className="flex items-center gap-2">
@@ -89,6 +85,10 @@ function AssetCard({ asset }: { asset: AssetDetails }) {
                 </div>
               ))}
             </div>
+        </div>
+         <div className="flex justify-between text-sm mt-2">
+            <span className="text-muted-foreground">Max Supply</span>
+            <span className="font-medium font-mono">{asset.maxSupply ? asset.maxSupply.toLocaleString() : '--'}</span>
         </div>
       </CardContent>
       <CardFooter>
@@ -119,8 +119,8 @@ function AssetTable({ assets }: { assets: AssetDetails[] }) {
                 <TableHeader>
                     <TableRow>
                         <TableHead className="w-[40%]">Asset</TableHead>
-                        <TableHead>Max Supply</TableHead>
                         <TableHead>Network</TableHead>
+                        <TableHead>Max Supply</TableHead>
                         <TableHead>Status</TableHead>
                         <TableHead className="text-right">Action</TableHead>
                     </TableRow>
@@ -139,7 +139,6 @@ function AssetTable({ assets }: { assets: AssetDetails[] }) {
                                     </div>
                                 </div>
                             </TableCell>
-                            <TableCell className="font-mono">{asset.maxSupply ? asset.maxSupply.toLocaleString() : '--'}</TableCell>
                             <TableCell>
                                 <div className="flex items-center gap-2">
                                     {networks.map(net => (
@@ -149,6 +148,7 @@ function AssetTable({ assets }: { assets: AssetDetails[] }) {
                                     ))}
                                 </div>
                             </TableCell>
+                            <TableCell className="font-mono">{asset.maxSupply ? asset.maxSupply.toLocaleString() : '--'}</TableCell>
                             <TableCell>{getStatusBadge(asset.status)}</TableCell>
                             <TableCell className="text-right">
                                 <Button variant="outline" size="sm" onClick={() => handleView(asset)}>
