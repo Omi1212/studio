@@ -127,8 +127,14 @@ export default function SidebarNav() {
     try {
       const getCompaniesPromise = async () => {
         if (role === 'investor') {
-          const res = await fetch('/api/companies?perPage=999');
-          return res.ok ? await res.json() : { data: [] };
+          if (currentUser.companyId && Array.isArray(currentUser.companyId) && currentUser.companyId.length > 0) {
+            const companyPromises = currentUser.companyId.filter(id => !!id).map(id =>
+              fetch(`/api/companies/${id}`).then(res => (res.ok ? res.json() : null))
+            );
+            const companiesResult = await Promise.all(companyPromises);
+            return { data: companiesResult.filter(c => c) };
+          }
+          return { data: [] };
         }
         if (currentUser.companyId && Array.isArray(currentUser.companyId) && currentUser.companyId.length > 0) {
             const companyPromises = currentUser.companyId.filter(id => !!id).map(id =>
