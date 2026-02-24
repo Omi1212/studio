@@ -17,7 +17,7 @@ const initialData: Omit<AssetDetails, 'assetIcon' | 'whitepaper' | 'legalAssetiz
     price: 2300.00,
     decimals: 6,
     isFreezable: true,
-    companyId: 'issuer-a-comp',
+    companyId: 'bstratus-securities',
     destinationAddress: 'spark1q...xautdest',
     assetType: 'security_token',
     eligibleInvestors: ['Accredited Investor'],
