@@ -13,7 +13,7 @@ import type { AssetDetails } from '@/lib/types';
 import Image from 'next/image';
 
 const networkExplorerMap: { [key: string]: { name: string; url: string; addressPath?: string; } } = {
-  spark: { name: 'Spark', url: 'https://sparkscan.io', addressPath: '/address/' },
+  spark: { name: 'Spark', url: 'https://sparkscan.io', addressPath: '/token/' },
   liquid: { name: 'Liquid', url: 'https://mempool.space/liquid', addressPath: '/address/' },
   rgb: { name: 'RGB', url: 'https://rgb.tech' },
   taproot: { name: 'Taproot Assets', url: 'https://mempool.space' },
