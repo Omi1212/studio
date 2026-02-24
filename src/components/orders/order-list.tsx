@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import type { Order, AssetDetails, User } from '@/lib/types';
+import type { Order, AssetDetails, User, Company } from '@/lib/types';
 import { Card } from '../ui/card';
 import { Avatar, AvatarFallback } from '../ui/avatar';
 import { Badge } from '../ui/badge';
@@ -194,6 +194,8 @@ export default function OrderList() {
   const [userRole, setUserRole] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [assetCheckComplete, setAssetCheckComplete] = useState(false);
+  const [company, setCompany] = useState<Company | null>(null);
+  const [complianceProvidersCount, setComplianceProvidersCount] = useState(0);
 
   useEffect(() => {
     const role = localStorage.getItem('userRole');
@@ -206,6 +208,33 @@ export default function OrderList() {
       setAssets(assetsData.data || []);
       setInvestors(investorsData.data || []);
     }).catch(console.error);
+
+    const loadCompanyAndCompliance = () => {
+      const selectedCompanyId = localStorage.getItem('selectedCompanyId');
+      if (selectedCompanyId) {
+          fetch(`/api/companies/${selectedCompanyId}`).then(res => res.json()).then(setCompany);
+      } else {
+          setCompany(null);
+      }
+
+      let count = 0;
+      for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key && key.startsWith('compliance-provider-')) {
+              count++;
+          }
+      }
+      setComplianceProvidersCount(count);
+  };
+
+    loadCompanyAndCompliance();
+    window.addEventListener('companyChanged', loadCompanyAndCompliance);
+    window.addEventListener('complianceProvidersChanged', loadCompanyAndCompliance);
+
+    return () => {
+        window.removeEventListener('companyChanged', loadCompanyAndCompliance);
+        window.removeEventListener('complianceProvidersChanged', loadCompanyAndCompliance);
+    };
   }, []);
 
   useEffect(() => {
@@ -331,14 +360,16 @@ export default function OrderList() {
   }
 
   if ((userRole === 'issuer' || userRole === 'agent') && !selectedAsset && assetCheckComplete) {
+    const showKybBanner = company && company.kybStatus !== 'verified';
+    const showComplianceBanner = company && company.kybStatus === 'verified' && complianceProvidersCount < 3;
     return (
       <div className="space-y-4">
         <div className="flex justify-between items-center">
           <h1 className="text-3xl font-headline font-semibold">Orders</h1>
         </div>
         <div className="space-y-8">
-            <KybBanner />
-            <IdentityProvidersBanner />
+            {showKybBanner && <KybBanner />}
+            {showComplianceBanner && <IdentityProvidersBanner />}
         </div>
         <div className="border-dashed border-2 border-muted-foreground/50 rounded-lg h-96 flex flex-col items-center justify-center text-center p-4 mt-8">
           <ShoppingBag className="h-16 w-16 text-muted-foreground mb-4" />

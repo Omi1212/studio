@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import type { Transfer, AssetDetails } from '@/lib/types';
+import type { Transfer, AssetDetails, User, Company } from '@/lib/types';
 import { Card, CardContent } from '../ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
 import { ArrowRightLeft, Search } from 'lucide-react';
@@ -59,11 +59,32 @@ export default function TransferList() {
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState('all');
   const [networkFilter, setNetworkFilter] = useState('all');
+  const [company, setCompany] = useState<Company | null>(null);
+  const [complianceProvidersCount, setComplianceProvidersCount] = useState(0);
+
 
   useEffect(() => {
     const role = localStorage.getItem('userRole');
     setUserRole(role);
     
+    const loadCompanyAndCompliance = () => {
+        const selectedCompanyId = localStorage.getItem('selectedCompanyId');
+        if (selectedCompanyId) {
+            fetch(`/api/companies/${selectedCompanyId}`).then(res => res.json()).then(setCompany);
+        } else {
+            setCompany(null);
+        }
+
+        let count = 0;
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key && key.startsWith('compliance-provider-')) {
+                count++;
+            }
+        }
+        setComplianceProvidersCount(count);
+    };
+
     const handleAssetChange = async () => {
         const storedAssetId = localStorage.getItem('selectedAssetId');
         if (storedAssetId) {
@@ -85,11 +106,16 @@ export default function TransferList() {
         setAssetCheckComplete(true);
     };
 
+    loadCompanyAndCompliance();
     handleAssetChange();
     window.addEventListener('assetChanged', handleAssetChange);
+    window.addEventListener('companyChanged', loadCompanyAndCompliance);
+    window.addEventListener('complianceProvidersChanged', loadCompanyAndCompliance);
 
     return () => {
         window.removeEventListener('assetChanged', handleAssetChange);
+        window.removeEventListener('companyChanged', loadCompanyAndCompliance);
+        window.removeEventListener('complianceProvidersChanged', loadCompanyAndCompliance);
     };
 
   }, []);
@@ -207,10 +233,12 @@ export default function TransferList() {
   }
 
   if ((userRole === 'issuer' || userRole === 'agent') && !selectedAsset && assetCheckComplete) {
+      const showKybBanner = company && company.kybStatus !== 'verified';
+      const showComplianceBanner = company && company.kybStatus === 'verified' && complianceProvidersCount < 3;
       return (
         <div className="space-y-8">
-          <KybBanner />
-          <IdentityProvidersBanner />
+          {showKybBanner && <KybBanner />}
+          {showComplianceBanner && <IdentityProvidersBanner />}
           <div className="border-dashed border-2 border-muted-foreground/50 rounded-lg h-96 flex flex-col items-center justify-center text-center p-4">
             <ArrowRightLeft className="h-16 w-16 text-muted-foreground mb-4" />
             <h2 className="text-xl font-semibold mb-2">No asset selected</h2>

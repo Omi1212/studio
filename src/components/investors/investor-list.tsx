@@ -1,9 +1,8 @@
-
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import type { ViewMode, AssetDetails, User } from '@/lib/types';
+import type { ViewMode, AssetDetails, User, Company } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/card';
 import { Avatar, AvatarFallback } from '../ui/avatar';
 import { Badge } from '../ui/badge';
@@ -172,6 +171,37 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
   const [selectedAsset, setSelectedAsset] = useState<AssetDetails | null>(null);
   const [dialogInvestor, setDialogInvestor] = useState<Investor | null>(null);
   const [assetCheckComplete, setAssetCheckComplete] = useState(false);
+  const [company, setCompany] = useState<Company | null>(null);
+  const [complianceProvidersCount, setComplianceProvidersCount] = useState(0);
+
+  useEffect(() => {
+    const loadCompanyAndCompliance = () => {
+        const selectedCompanyId = localStorage.getItem('selectedCompanyId');
+        if (selectedCompanyId) {
+            fetch(`/api/companies/${selectedCompanyId}`).then(res => res.json()).then(setCompany);
+        } else {
+            setCompany(null);
+        }
+
+        let count = 0;
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key && key.startsWith('compliance-provider-')) {
+                count++;
+            }
+        }
+        setComplianceProvidersCount(count);
+    };
+
+    loadCompanyAndCompliance();
+    window.addEventListener('companyChanged', loadCompanyAndCompliance);
+    window.addEventListener('complianceProvidersChanged', loadCompanyAndCompliance);
+
+    return () => {
+        window.removeEventListener('companyChanged', loadCompanyAndCompliance);
+        window.removeEventListener('complianceProvidersChanged', loadCompanyAndCompliance);
+    };
+  }, []);
 
   useEffect(() => {
     fetch('/api/assets').then(res => res.json()).then(assetsData => {
@@ -295,14 +325,16 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
   }
 
   if (!selectedAsset) {
+    const showKybBanner = company && company.kybStatus !== 'verified';
+    const showComplianceBanner = company && company.kybStatus === 'verified' && complianceProvidersCount < 3;
      return (
       <div className="space-y-4">
         <div className="flex justify-between items-center">
           <h1 className="text-3xl font-headline font-semibold">Investors</h1>
         </div>
         <div className="space-y-8">
-          <KybBanner />
-          <IdentityProvidersBanner />
+          {showKybBanner && <KybBanner />}
+          {showComplianceBanner && <IdentityProvidersBanner />}
         </div>
         <div className="border-dashed border-2 border-muted-foreground/50 rounded-lg h-96 flex flex-col items-center justify-center text-center p-4 mt-8">
             <UserPlus className="h-16 w-16 text-muted-foreground mb-4" />

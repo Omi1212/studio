@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import type { ViewMode, User, AssetDetails, SubscriptionStatus } from '@/lib/types';
+import type { ViewMode, User, AssetDetails, SubscriptionStatus, Company } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/card';
 import { Avatar, AvatarFallback } from '../ui/avatar';
 import { Badge } from '../ui/badge';
@@ -115,6 +115,8 @@ export default function RequestList({ view, setView }: { view: ViewMode, setView
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedAsset, setSelectedAsset] = useState<AssetDetails | null>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
+  const [company, setCompany] = useState<Company | null>(null);
+  const [complianceProvidersCount, setComplianceProvidersCount] = useState(0);
 
   const [allInvestors, setAllInvestors] = useState<User[]>([]);
   const [allSubscriptions, setAllSubscriptions] = useState<Record<string, Record<string, SubscriptionStatus>>>({});
@@ -123,6 +125,24 @@ export default function RequestList({ view, setView }: { view: ViewMode, setView
   useEffect(() => {
     const role = localStorage.getItem('userRole');
     setUserRole(role);
+
+    const loadCompanyAndCompliance = () => {
+      const selectedCompanyId = localStorage.getItem('selectedCompanyId');
+      if (selectedCompanyId) {
+          fetch(`/api/companies/${selectedCompanyId}`).then(res => res.json()).then(setCompany);
+      } else {
+          setCompany(null);
+      }
+
+      let count = 0;
+      for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key && key.startsWith('compliance-provider-')) {
+              count++;
+          }
+      }
+      setComplianceProvidersCount(count);
+    };
 
     const initialFetch = async () => {
       setLoading(true);
@@ -157,11 +177,16 @@ export default function RequestList({ view, setView }: { view: ViewMode, setView
         setLoading(false);
     };
 
+    loadCompanyAndCompliance();
     handleAssetChange();
     window.addEventListener('assetChanged', handleAssetChange);
+    window.addEventListener('companyChanged', loadCompanyAndCompliance);
+    window.addEventListener('complianceProvidersChanged', loadCompanyAndCompliance);
 
     return () => {
         window.removeEventListener('assetChanged', handleAssetChange);
+        window.removeEventListener('companyChanged', loadCompanyAndCompliance);
+        window.removeEventListener('complianceProvidersChanged', loadCompanyAndCompliance);
     };
   }, []);
 
@@ -228,14 +253,16 @@ export default function RequestList({ view, setView }: { view: ViewMode, setView
   }
   
   if ((userRole === 'issuer' || userRole === 'agent') && !selectedAsset && assetCheckComplete) {
+    const showKybBanner = company && company.kybStatus !== 'verified';
+    const showComplianceBanner = company && company.kybStatus === 'verified' && complianceProvidersCount < 3;
     return (
       <div className="space-y-4">
         <div className="flex justify-between items-center">
             <h1 className="text-3xl font-headline font-semibold">Whitelisting Requests</h1>
         </div>
         <div className="space-y-8">
-            <KybBanner />
-            <IdentityProvidersBanner />
+            {showKybBanner && <KybBanner />}
+            {showComplianceBanner && <IdentityProvidersBanner />}
         </div>
         <div className="border-dashed border-2 border-muted-foreground/50 rounded-lg h-96 flex flex-col items-center justify-center text-center p-4 mt-8">
             <FilePenLine className="h-16 w-16 text-muted-foreground mb-4" />
