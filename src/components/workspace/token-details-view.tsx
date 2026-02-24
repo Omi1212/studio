@@ -129,7 +129,7 @@ export default function AssetDetailsView({
       return <AssignedAgents assetId={asset.id} />;
     }
 
-    if (view === 'dashboard' || view === 'workspace') {
+    if (view === 'workspace') {
       return (
         <Card>
           <CardHeader>

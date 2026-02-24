@@ -20,6 +20,7 @@ import CryptocurrenciesList from '@/components/dashboard/cryptocurrencies-list';
 import { Rocket } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import AssetIcon from '@/components/ui/asset-icon';
 
 
 function DashboardRenderer() {
@@ -153,9 +154,12 @@ function DashboardRenderer() {
         
         return (
             <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-8 bg-background">
-              <h1 className="text-3xl font-headline font-semibold">
-                {canShowAssetDetails && selectedAsset ? selectedAsset.assetName : 'Dashboard'}
-              </h1>
+              <div className="flex items-center gap-4">
+                  {canShowAssetDetails && selectedAsset && <AssetIcon asset={selectedAsset} className="h-10 w-10" />}
+                  <h1 className="text-3xl font-headline font-semibold">
+                      {canShowAssetDetails && selectedAsset ? selectedAsset.assetName : 'Dashboard'}
+                  </h1>
+              </div>
                 {showKybBanner && <KybBanner />}
                 {showComplianceBanner && <IdentityProvidersBanner />}
                 
@@ -179,7 +183,10 @@ function DashboardRenderer() {
         if (selectedAsset) {
             return (
                 <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-8 bg-background">
-                    <h1 className="text-3xl font-headline font-semibold">{selectedAsset.assetName}</h1>
+                    <div className="flex items-center gap-4">
+                        {selectedAsset && <AssetIcon asset={selectedAsset} className="h-10 w-10" />}
+                        <h1 className="text-3xl font-headline font-semibold">{selectedAsset.assetName}</h1>
+                    </div>
                     <AssetDetailsView asset={selectedAsset} view="dashboard" userRole={role} />
                 </main>
             );
