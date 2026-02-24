@@ -44,17 +44,24 @@ export default function IssueAssetPage() {
           .then(res => res.ok ? res.json() : parsedUser)
           .then(dbUser => {
             setUser(dbUser);
-            if (dbUser.companyId) {
-              fetch(`/api/companies/${dbUser.companyId}`)
-                .then(res => res.ok ? res.json() : null)
-                .then(companyData => setCompany(companyData))
-                .finally(() => setLoading(false));
+            if (Array.isArray(dbUser.companyId) && dbUser.companyId.length > 0) {
+                const companyToFetchId = localStorage.getItem('selectedCompanyId') || dbUser.companyId[0];
+                if (!localStorage.getItem('selectedCompanyId')) {
+                    localStorage.setItem('selectedCompanyId', companyToFetchId);
+                    window.dispatchEvent(new Event('companyChanged'));
+                }
+                fetch(`/api/companies/${companyToFetchId}`)
+                    .then(res => res.ok ? res.json() : null)
+                    .then(companyData => setCompany(companyData))
+                    .finally(() => setLoading(false));
             } else {
-              setLoading(false);
+                setCompany(null);
+                setLoading(false);
             }
           })
           .catch(() => {
             setUser(parsedUser);
+            setCompany(null);
             setLoading(false);
           });
       } else {
