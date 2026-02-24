@@ -28,18 +28,6 @@ function DashboardRenderer() {
     const [company, setCompany] = useState<Company | null>(null);
     const [selectedAsset, setSelectedAsset] = useState<AssetDetails | null>(null);
     const [loading, setLoading] = useState(true);
-    const [complianceProvidersCount, setComplianceProvidersCount] = useState(0);
-
-    const loadComplianceStatus = () => {
-        let count = 0;
-        for (let i = 0; i < localStorage.length; i++) {
-            const key = localStorage.key(i);
-            if (key && key.startsWith('compliance-provider-')) {
-                count++;
-            }
-        }
-        setComplianceProvidersCount(count);
-    };
 
     useEffect(() => {
         const userRole = localStorage.getItem('userRole');
@@ -69,7 +57,6 @@ function DashboardRenderer() {
             }
         }
         loadUserData();
-        loadComplianceStatus();
 
         const handleAssetChange = async () => {
             if (userRole === 'issuer' || userRole === 'agent' || userRole === 'superadmin') {
@@ -140,12 +127,10 @@ function DashboardRenderer() {
         handleAssetChange();
         window.addEventListener('assetChanged', handleAssetChange);
         window.addEventListener('companyChanged', loadUserData);
-        window.addEventListener('complianceProvidersChanged', loadComplianceStatus);
 
         return () => {
             window.removeEventListener('assetChanged', handleAssetChange);
             window.removeEventListener('companyChanged', loadUserData);
-            window.removeEventListener('complianceProvidersChanged', loadComplianceStatus);
         };
     }, [role]);
 
@@ -159,6 +144,7 @@ function DashboardRenderer() {
 
     if (role === 'issuer') {
         const isKybVerified = company?.kybStatus === 'verified';
+        const complianceProvidersCount = company?.complianceProviders?.length ?? 0;
         
         const showKybBanner = user && !isKybVerified;
         const showComplianceBanner = user && isKybVerified && complianceProvidersCount < 3;

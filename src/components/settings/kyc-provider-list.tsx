@@ -5,6 +5,8 @@ import { Button } from '../ui/button';
 import { Card, CardTitle, CardHeader, CardContent, CardFooter, CardDescription } from '../ui/card';
 import { Switch } from '../ui/switch';
 import Image from 'next/image';
+import type { Company } from '@/lib/types';
+import { useToast } from '@/hooks/use-toast';
 
 const providers = [
   { name: 'Didit', logo: 'https://i.ibb.co/XrPTRgRf/Dise-o-sin-t-tulo-15.png', description: 'Verify user identities with Didit.' },
@@ -55,30 +57,56 @@ function ProviderCard({ name, logo, description, isConnected, onToggle }: { name
 
 
 export default function KycProviderList() {
-  const [connectedProviders, setConnectedProviders] = useState<string[]>([]);
+  const [company, setCompany] = useState<Company | null>(null);
+  const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
 
   useEffect(() => {
-    const connected = [];
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (key && key.startsWith('compliance-provider-')) {
-        connected.push(key.replace('compliance-provider-', ''));
-      }
+    const selectedCompanyId = localStorage.getItem('selectedCompanyId');
+    if(selectedCompanyId) {
+      setLoading(true);
+      fetch(`/api/companies/${selectedCompanyId}`)
+        .then(res => res.ok ? res.json() : null)
+        .then(data => {
+          setCompany(data);
+        }).finally(() => setLoading(false));
+    } else {
+      setLoading(false);
     }
-    setConnectedProviders(connected);
   }, []);
 
-  const handleToggle = (providerName: string, checked: boolean) => {
-    const storageKey = `compliance-provider-${providerName}`;
+  const handleToggle = async (providerName: string, checked: boolean) => {
+    if (!company) {
+      toast({ variant: 'destructive', title: 'Error', description: 'No company selected.' });
+      return;
+    };
+
+    let updatedProviders: string[];
     if (checked) {
-      localStorage.setItem(storageKey, 'true');
-      setConnectedProviders(prev => [...prev, providerName]);
+        updatedProviders = [...(company.complianceProviders || []), providerName];
     } else {
-      localStorage.removeItem(storageKey);
-      setConnectedProviders(prev => prev.filter(p => p !== providerName));
+        updatedProviders = (company.complianceProviders || []).filter(p => p !== providerName);
     }
-    window.dispatchEvent(new Event('complianceProvidersChanged'));
+    
+    const response = await fetch(`/api/companies/${company.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ complianceProviders: updatedProviders }),
+    });
+    
+    if (response.ok) {
+        const updatedCompany = await response.json();
+        setCompany(updatedCompany);
+        window.dispatchEvent(new Event('companyChanged'));
+        toast({ title: 'Providers updated' });
+    } else {
+        toast({ variant: 'destructive', title: 'Error', description: 'Failed to update providers.' });
+    }
   };
+  
+  if (loading) return <p>Loading providers...</p>
+
+  const connectedProviders = company?.complianceProviders || [];
   
   return (
     <div className="space-y-6">

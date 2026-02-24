@@ -60,29 +60,19 @@ export default function TransferList() {
   const [typeFilter, setTypeFilter] = useState('all');
   const [networkFilter, setNetworkFilter] = useState('all');
   const [company, setCompany] = useState<Company | null>(null);
-  const [complianceProvidersCount, setComplianceProvidersCount] = useState(0);
 
 
   useEffect(() => {
     const role = localStorage.getItem('userRole');
     setUserRole(role);
     
-    const loadCompanyAndCompliance = () => {
+    const loadCompany = () => {
         const selectedCompanyId = localStorage.getItem('selectedCompanyId');
         if (selectedCompanyId) {
             fetch(`/api/companies/${selectedCompanyId}`).then(res => res.json()).then(setCompany);
         } else {
             setCompany(null);
         }
-
-        let count = 0;
-        for (let i = 0; i < localStorage.length; i++) {
-            const key = localStorage.key(i);
-            if (key && key.startsWith('compliance-provider-')) {
-                count++;
-            }
-        }
-        setComplianceProvidersCount(count);
     };
 
     const handleAssetChange = async () => {
@@ -106,16 +96,14 @@ export default function TransferList() {
         setAssetCheckComplete(true);
     };
 
-    loadCompanyAndCompliance();
+    loadCompany();
     handleAssetChange();
     window.addEventListener('assetChanged', handleAssetChange);
-    window.addEventListener('companyChanged', loadCompanyAndCompliance);
-    window.addEventListener('complianceProvidersChanged', loadCompanyAndCompliance);
+    window.addEventListener('companyChanged', loadCompany);
 
     return () => {
         window.removeEventListener('assetChanged', handleAssetChange);
-        window.removeEventListener('companyChanged', loadCompanyAndCompliance);
-        window.removeEventListener('complianceProvidersChanged', loadCompanyAndCompliance);
+        window.removeEventListener('companyChanged', loadCompany);
     };
 
   }, []);
@@ -234,6 +222,7 @@ export default function TransferList() {
 
   if ((userRole === 'issuer' || userRole === 'agent') && !selectedAsset && assetCheckComplete) {
       const showKybBanner = company && company.kybStatus !== 'verified';
+      const complianceProvidersCount = company?.complianceProviders?.length ?? 0;
       const showComplianceBanner = company && company.kybStatus === 'verified' && complianceProvidersCount < 3;
       return (
         <div className="space-y-8">

@@ -21,18 +21,6 @@ export default function IssueAssetPage() {
   const [user, setUser] = useState<User | null>(null);
   const [company, setCompany] = useState<Company | null>(null);
   const [loading, setLoading] = useState(true);
-  const [complianceProvidersCount, setComplianceProvidersCount] = useState(0);
-
-  const loadComplianceStatus = () => {
-    let count = 0;
-    for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (key && key.startsWith('compliance-provider-')) {
-            count++;
-        }
-    }
-    setComplianceProvidersCount(count);
-  };
 
   useEffect(() => {
     const loadData = () => {
@@ -70,17 +58,15 @@ export default function IssueAssetPage() {
     };
     
     loadData();
-    loadComplianceStatus();
     window.addEventListener('companyChanged', loadData);
-    window.addEventListener('complianceProvidersChanged', loadComplianceStatus);
 
     return () => {
       window.removeEventListener('companyChanged', loadData);
-      window.removeEventListener('complianceProvidersChanged', loadComplianceStatus);
     };
   }, []);
 
   const isKybVerified = company?.kybStatus === 'verified';
+  const complianceProvidersCount = company?.complianceProviders?.length ?? 0;
   const canCreateAssets = !loading && user && user.role === 'issuer' && isKybVerified && complianceProvidersCount >= 3;
 
 

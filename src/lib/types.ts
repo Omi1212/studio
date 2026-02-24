@@ -58,6 +58,7 @@ export interface Company {
   employeeRange?: string;
   kybLevel?: number;
   kybStatus?: 'verified' | 'pending' | 'rejected';
+  complianceProviders?: string[];
 }
 
 

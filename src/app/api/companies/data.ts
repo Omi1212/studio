@@ -18,6 +18,7 @@ const initialData: Company[] = [
     website: 'https://bstratus.com',
     employeeRange: '51-200',
     countryOfJurisdiction: 'US',
+    complianceProviders: ['Sumsub', 'Onfido', 'Kyckr'],
   },
   { 
     id: 'emisores-de-activos-digitales', 
@@ -31,6 +32,7 @@ const initialData: Company[] = [
     website: 'https://emisores.digital',
     employeeRange: '11-50',
     countryOfJurisdiction: 'SV',
+    complianceProviders: [],
   },
   { 
     id: 'neobank-sa-de-cv', 
@@ -44,6 +46,7 @@ const initialData: Company[] = [
     website: 'https://neobank.sv',
     employeeRange: '1-10',
     countryOfJurisdiction: 'SV',
+    complianceProviders: ['Didit', 'Sumsub'],
   },
   { 
     id: 'tradfi-bank-sa', 
@@ -57,6 +60,7 @@ const initialData: Company[] = [
     website: 'https://tradfi.bank',
     employeeRange: '201-500',
     countryOfJurisdiction: 'PA',
+    complianceProviders: ['Onfido'],
   },
   { 
     id: 'global-agents-co', 
@@ -67,6 +71,7 @@ const initialData: Company[] = [
     industry: 'Consulting',
     kybStatus: 'verified',
     kybLevel: 2,
+    complianceProviders: [],
   },
   { 
     id: 'poppins-co-associates', 
@@ -77,6 +82,7 @@ const initialData: Company[] = [
     industry: 'Financial Services',
     kybStatus: 'pending',
     kybLevel: 0,
+    complianceProviders: [],
   },
   { 
     id: 'blockstratus-platform', 
@@ -90,6 +96,7 @@ const initialData: Company[] = [
     website: 'https://blockstratus.com',
     employeeRange: '501-1000',
     countryOfJurisdiction: 'US',
+    complianceProviders: ['Didit', 'Sumsub', 'Onfido', 'Chainalysis', 'Scorechain'],
   },
 ];
 
