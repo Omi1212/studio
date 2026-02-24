@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -130,7 +131,7 @@ export default function SidebarNav() {
           return res.ok ? await res.json() : { data: [] };
         }
         if (currentUser.companyId && Array.isArray(currentUser.companyId) && currentUser.companyId.length > 0) {
-            const companyPromises = currentUser.companyId.map(id =>
+            const companyPromises = currentUser.companyId.filter(id => !!id).map(id =>
               fetch(`/api/companies/${id}`).then(res => (res.ok ? res.json() : null))
             );
             const companiesResult = await Promise.all(companyPromises);
