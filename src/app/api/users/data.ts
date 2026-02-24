@@ -20,7 +20,7 @@ const initialData: User[] = [
         kycLevel: 3,
         legalName: 'Johnathan Doe',
         address: '456 Oak Avenue, Financial District',
-        companyId: ['global-agents-co'],
+        companyId: ['bstratus-securities'],
     },
     {
         id: 'user-002',
@@ -55,20 +55,6 @@ const initialData: User[] = [
         idDoc: 'ID Card, 06**********38',
         address: 'San Salvador Centro, El Salvador',
     },
-    {
-        id: 'user-004',
-        name: 'Mary Poppins',
-        email: 'mary.poppins@example.com',
-        role: 'agent',
-        walletAddress: 'spark1q...user04',
-        kycStatus: 'rejected',
-        status: 'active',
-        phone: '+1 555-0104',
-        kycLevel: 0,
-        legalName: 'Mary P. Poppins',
-        address: '17 Cherry Tree Lane, London',
-        companyId: ['poppins-co-associates'],
-    },
      {
         id: 'user-005',
         name: 'Super Admin',
@@ -81,7 +67,7 @@ const initialData: User[] = [
         kycLevel: 4,
         legalName: 'S. Admin',
         address: '2 Infinite Loop, Cupertino, CA',
-        companyId: ['blockstratus-platform'],
+        companyId: ['bstratus-securities'],
     }
 ];
 

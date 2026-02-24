@@ -5,7 +5,6 @@ declare global {
 
 const initialData: Record<string, string[]> = {
     "user-001": ["example-1", "example-2"],
-    "user-004": ["example-4"],
 };
 
 // To prevent the data from being lost on hot-reloads in development
