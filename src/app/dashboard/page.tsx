@@ -165,30 +165,23 @@ function DashboardRenderer() {
         
         const showKybBanner = user && !isKybVerified;
         const showComplianceBanner = user && isKybVerified && complianceProvidersCount < 3;
+
+        const canShowAssetDetails = !showKybBanner && !showComplianceBanner && selectedAsset;
         
         return (
             <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-8 bg-background">
                 {showKybBanner && <KybBanner />}
                 {showComplianceBanner && <IdentityProvidersBanner />}
                 
-                {showKybBanner || showComplianceBanner ? (
+                {canShowAssetDetails ? (
+                    <AssetDetailsView asset={selectedAsset!} view="dashboard" userRole="issuer" />
+                ) : (
                     <div className="border-dashed border-2 border-muted-foreground/50 rounded-lg h-96 flex flex-col items-center justify-center text-center p-4">
                         <Rocket className="h-16 w-16 text-muted-foreground mb-4" />
                         <h2 className="text-xl font-semibold mb-2">No Issued Assets</h2>
                         <p className="text-muted-foreground mb-4">Launch your first asset to see your workspace.</p>
                         <Button asChild>
                           <Link href="/issue-asset">Go to Launchpad</Link>
-                        </Button>
-                    </div>
-                ) : selectedAsset ? (
-                     <AssetDetailsView asset={selectedAsset} view="dashboard" userRole="issuer" />
-                ) : (
-                    <div className="border-dashed border-2 border-muted-foreground/50 rounded-lg h-96 flex flex-col items-center justify-center text-center p-4">
-                        <Rocket className="h-16 w-16 text-muted-foreground mb-4" />
-                        <h2 className="text-xl font-semibold mb-2">No Asset Selected</h2>
-                        <p className="text-muted-foreground mb-4">Please select an asset from the sidebar or go to the Launchpad to create one.</p>
-                        <Button asChild>
-                            <Link href="/issue-asset">Go to Launchpad</Link>
                         </Button>
                     </div>
                 )}
