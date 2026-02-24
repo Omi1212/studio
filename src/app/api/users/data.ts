@@ -55,7 +55,8 @@ const initialData: User[] = [
         totalInvested: 0,
         isFrozen: false,
         holdings: [],
-        transactions: []
+        transactions: [],
+        companyId: ['issuer-a-comp', 'issuer-b-comp'],
     },
     {
         id: 'inv-002',
@@ -76,7 +77,8 @@ const initialData: User[] = [
         totalInvested: 0,
         isFrozen: false,
         holdings: [],
-        transactions: []
+        transactions: [],
+        companyId: ['issuer-b-comp', 'issuer-c-comp'],
     },
     {
         id: 'inv-003',
@@ -97,7 +99,8 @@ const initialData: User[] = [
         totalInvested: 0,
         isFrozen: false,
         holdings: [],
-        transactions: []
+        transactions: [],
+        companyId: ['issuer-a-comp', 'issuer-c-comp'],
     },
     // New Issuers
     {
