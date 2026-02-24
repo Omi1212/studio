@@ -85,15 +85,15 @@ export default function RequestDetailsPage() {
   const { toast } = useToast();
   const [request, setRequest] = useState<WhitelistRequest | null>(null);
   const [loading, setLoading] = useState(true);
-  const [tokenId, setTokenId] = useState<string | null>(null);
+  const [assetId, setAssetId] = useState<string | null>(null);
   const [subscriptionStatus, setSubscriptionStatus] = useState<SubscriptionStatus>('none');
 
   useEffect(() => {
     const { id } = params;
-    const token_id = searchParams.get('tokenId');
-    setTokenId(token_id);
+    const asset_id = searchParams.get('assetId');
+    setAssetId(asset_id);
 
-    if (!id || !token_id) {
+    if (!id || !asset_id) {
         setLoading(false);
         return;
     };
@@ -109,7 +109,7 @@ export default function RequestDetailsPage() {
 
         if(subsRes.ok) {
             const subsData = await subsRes.json();
-            setSubscriptionStatus(subsData[token_id] || 'none');
+            setSubscriptionStatus(subsData[asset_id] || 'none');
         }
     }).catch(console.error)
       .finally(() => setLoading(false));
@@ -117,13 +117,13 @@ export default function RequestDetailsPage() {
   }, [params, searchParams]);
   
   const handleUpdateStatus = async (status: 'approved' | 'rejected') => {
-    if (!request || !tokenId) return;
+    if (!request || !assetId) return;
 
     try {
       const response = await fetch(`/api/investors/${request.id}/subscriptions`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tokenId, status }),
+        body: JSON.stringify({ assetId, status }),
       });
       if (!response.ok) throw new Error('Failed to update request');
       

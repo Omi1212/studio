@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import type { ViewMode, User, TokenDetails, SubscriptionStatus } from '@/lib/types';
+import type { ViewMode, User, AssetDetails, SubscriptionStatus } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/card';
 import { Avatar, AvatarFallback } from '../ui/avatar';
 import { Badge } from '../ui/badge';
@@ -17,7 +17,7 @@ import IdentityProvidersBanner from '@/components/dashboard/identity-providers-b
 
 type WhitelistRequest = User & {
   requestStatus: SubscriptionStatus;
-  tokenId: string;
+  assetId: string;
 };
 
 const ITEMS_PER_PAGE = 10;
@@ -69,7 +69,7 @@ function RequestCard({ request }: { request: WhitelistRequest }) {
       </CardContent>
       <CardFooter>
           <Button variant="outline" className="w-full" asChild>
-            <Link href={`/whitelisting-requests/${request.id}?tokenId=${request.tokenId}`}>View</Link>
+            <Link href={`/whitelisting-requests/${request.id}?assetId=${request.assetId}`}>View</Link>
           </Button>
       </CardFooter>
     </Card>
@@ -79,7 +79,7 @@ function RequestCard({ request }: { request: WhitelistRequest }) {
 function RequestTableRow({ request }: { request: WhitelistRequest }) {
   const router = useRouter();
   return (
-    <TableRow onClick={() => router.push(`/whitelisting-requests/${request.id}?tokenId=${request.tokenId}`)} className="cursor-pointer">
+    <TableRow onClick={() => router.push(`/whitelisting-requests/${request.id}?assetId=${request.assetId}`)} className="cursor-pointer">
       <TableCell>
         <div className="flex items-center gap-3">
           <Avatar className="h-8 w-8">
@@ -100,7 +100,7 @@ function RequestTableRow({ request }: { request: WhitelistRequest }) {
        <TableCell className="hidden sm:table-cell">{getStatusBadge(request)}</TableCell>
       <TableCell className="text-right">
         <Button asChild variant="outline" size="sm" onClick={(e) => e.stopPropagation()}>
-            <Link href={`/whitelisting-requests/${request.id}?tokenId=${request.tokenId}`}>View</Link>
+            <Link href={`/whitelisting-requests/${request.id}?assetId=${request.assetId}`}>View</Link>
         </Button>
       </TableCell>
     </TableRow>
@@ -113,12 +113,12 @@ export default function RequestList({ view, setView }: { view: ViewMode, setView
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('pending');
   const [currentPage, setCurrentPage] = useState(1);
-  const [selectedToken, setSelectedToken] = useState<TokenDetails | null>(null);
+  const [selectedAsset, setSelectedAsset] = useState<AssetDetails | null>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
 
   const [allInvestors, setAllInvestors] = useState<User[]>([]);
   const [allSubscriptions, setAllSubscriptions] = useState<Record<string, Record<string, SubscriptionStatus>>>({});
-  const [tokenCheckComplete, setTokenCheckComplete] = useState(false);
+  const [assetCheckComplete, setAssetCheckComplete] = useState(false);
 
   useEffect(() => {
     const role = localStorage.getItem('userRole');
@@ -136,37 +136,37 @@ export default function RequestList({ view, setView }: { view: ViewMode, setView
     }
     initialFetch();
 
-    const handleTokenChange = async () => {
-        const storedTokenId = localStorage.getItem('selectedTokenId');
-        if (storedTokenId) {
+    const handleAssetChange = async () => {
+        const storedAssetId = localStorage.getItem('selectedAssetId');
+        if (storedAssetId) {
             try {
-                const response = await fetch(`/api/tokens/${storedTokenId}`);
+                const response = await fetch(`/api/assets/${storedAssetId}`);
                 if (response.ok) {
-                    setSelectedToken(await response.json());
+                    setSelectedAsset(await response.json());
                 } else {
-                    setSelectedToken(null);
+                    setSelectedAsset(null);
                 }
             } catch (error) {
-                console.error("Failed to fetch selected token:", error);
-                setSelectedToken(null);
+                console.error("Failed to fetch selected asset:", error);
+                setSelectedAsset(null);
             }
         } else {
-            setSelectedToken(null);
+            setSelectedAsset(null);
         }
-        setTokenCheckComplete(true);
+        setAssetCheckComplete(true);
         setLoading(false);
     };
 
-    handleTokenChange();
-    window.addEventListener('tokenChanged', handleTokenChange);
+    handleAssetChange();
+    window.addEventListener('assetChanged', handleAssetChange);
 
     return () => {
-        window.removeEventListener('tokenChanged', handleTokenChange);
+        window.removeEventListener('assetChanged', handleAssetChange);
     };
   }, []);
 
   const pendingRequests = useMemo(() => {
-    if ((userRole !== 'issuer' && userRole !== 'agent') || !selectedToken) {
+    if ((userRole !== 'issuer' && userRole !== 'agent') || !selectedAsset) {
         return [];
     }
 
@@ -174,10 +174,10 @@ export default function RequestList({ view, setView }: { view: ViewMode, setView
     
     Object.entries(allSubscriptions).forEach(([investorId, tokenSubs]) => {
         Object.entries(tokenSubs).forEach(([tokenId, status]) => {
-            if (tokenId === selectedToken.id) {
+            if (tokenId === selectedAsset.id) {
                 const investor = allInvestors.find(inv => inv.id === investorId);
                 if (investor) {
-                    requests.push({ ...investor, requestStatus: status, tokenId });
+                    requests.push({ ...investor, requestStatus: status, assetId: tokenId });
                 }
             }
         });
@@ -203,7 +203,7 @@ export default function RequestList({ view, setView }: { view: ViewMode, setView
     
     return filtered;
 
-  }, [selectedToken, allSubscriptions, allInvestors, statusFilter, searchQuery, userRole]);
+  }, [selectedAsset, allSubscriptions, allInvestors, statusFilter, searchQuery, userRole]);
 
   const paginatedRequests = useMemo(() => {
       const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
@@ -227,7 +227,7 @@ export default function RequestList({ view, setView }: { view: ViewMode, setView
     );
   }
   
-  if ((userRole === 'issuer' || userRole === 'agent') && !selectedToken && tokenCheckComplete) {
+  if ((userRole === 'issuer' || userRole === 'agent') && !selectedAsset && assetCheckComplete) {
     return (
       <div className="space-y-4">
         <div className="flex justify-between items-center">
@@ -239,8 +239,8 @@ export default function RequestList({ view, setView }: { view: ViewMode, setView
         </div>
         <div className="border-dashed border-2 border-muted-foreground/50 rounded-lg h-96 flex flex-col items-center justify-center text-center p-4 mt-8">
             <FilePenLine className="h-16 w-16 text-muted-foreground mb-4" />
-            <h2 className="text-xl font-semibold mb-2">No token selected or found</h2>
-            <p className="text-muted-foreground mb-4">Please select a token from the sidebar to view whitelisting requests.</p>
+            <h2 className="text-xl font-semibold mb-2">No asset selected or found</h2>
+            <p className="text-muted-foreground mb-4">Please select an asset from the sidebar to view whitelisting requests.</p>
         </div>
       </div>
     );
