@@ -1,3 +1,4 @@
+
 import type { User } from '@/lib/types';
 
 // Use a global variable in development to preserve data across HMR
@@ -37,7 +38,7 @@ const initialData: User[] = [
         address: 'Residencial Las Flores, #123, San Salvador',
         country: 'SV',
         city: 'San Salvador',
-        companyId: 'blockstratus-platform',
+        companyId: 'bstratus-securities',
     },
     {
         id: 'user-003',
