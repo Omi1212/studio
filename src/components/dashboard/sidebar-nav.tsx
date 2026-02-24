@@ -222,8 +222,10 @@ export default function SidebarNav() {
     fetchData();
 
     window.addEventListener('assetChanged', fetchData);
+    window.addEventListener('companyChanged', fetchData);
     return () => {
       window.removeEventListener('assetChanged', fetchData);
+      window.removeEventListener('companyChanged', fetchData);
     };
   }, [fetchData]);
 

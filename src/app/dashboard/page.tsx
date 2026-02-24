@@ -56,8 +56,12 @@ function DashboardRenderer() {
                     .then(dbUser => {
                       setUser(dbUser)
                         if (Array.isArray(dbUser.companyId) && dbUser.companyId.length > 0) {
-                            const companyToFetch = localStorage.getItem('selectedCompanyId') || dbUser.companyId[0];
-                            fetch(`/api/companies/${companyToFetch}`)
+                            const companyToFetchId = localStorage.getItem('selectedCompanyId') || dbUser.companyId[0];
+                            if (!localStorage.getItem('selectedCompanyId')) {
+                                localStorage.setItem('selectedCompanyId', companyToFetchId);
+                                window.dispatchEvent(new Event('companyChanged'));
+                            }
+                            fetch(`/api/companies/${companyToFetchId}`)
                                 .then(res => res.ok ? res.json() : null)
                                 .then(companyData => setCompany(companyData));
                         }
