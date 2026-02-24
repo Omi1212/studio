@@ -24,6 +24,7 @@ const querySchema = z.object({
     assetId: z.string().optional(),
     investorId: z.string().optional(),
     network: z.string().optional(),
+    companyId: z.string().optional(),
 });
 
 export async function GET(request: Request) {
@@ -34,18 +35,23 @@ export async function GET(request: Request) {
       return NextResponse.json({ errors: validation.error.errors }, { status: 400 });
   }
 
-  const { page, perPage, status, query, assetId, investorId, network } = validation.data;
+  const { page, perPage, status, query, assetId, investorId, network, companyId } = validation.data;
 
   const augmentedOrders = ordersData.map(order => {
       const asset = exampleAssets.find(a => a.id === order.assetId);
       const assetNetworks = asset ? (Array.isArray(asset.network) ? asset.network : [asset.network]) : [];
       return {
           ...order,
-          networks: assetNetworks
+          networks: assetNetworks,
+          companyId: asset?.companyId
       };
   });
 
   let filteredOrders = augmentedOrders;
+
+  if (companyId) {
+    filteredOrders = filteredOrders.filter(order => order.companyId === companyId);
+  }
 
   if (network && network !== 'all') {
     filteredOrders = filteredOrders.filter(order => order.networks.includes(network));

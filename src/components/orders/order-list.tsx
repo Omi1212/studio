@@ -195,23 +195,25 @@ export default function OrderList() {
   const [currentPage, setCurrentPage] = useState(1);
   const [assetCheckComplete, setAssetCheckComplete] = useState(false);
   const [company, setCompany] = useState<Company | null>(null);
+  const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(null);
 
   useEffect(() => {
     const role = localStorage.getItem('userRole');
     setUserRole(role);
     
     Promise.all([
-      fetch('/api/assets').then(res => res.json()),
-      fetch('/api/investors').then(res => res.json())
+      fetch('/api/assets?perPage=999').then(res => res.json()),
+      fetch('/api/investors?perPage=999').then(res => res.json())
     ]).then(([assetsData, investorsData]) => {
       setAssets(assetsData.data || []);
       setInvestors(investorsData.data || []);
     }).catch(console.error);
 
     const loadCompany = () => {
-      const selectedCompanyId = localStorage.getItem('selectedCompanyId');
-      if (selectedCompanyId) {
-          fetch(`/api/companies/${selectedCompanyId}`).then(res => res.json()).then(setCompany);
+      const companyId = localStorage.getItem('selectedCompanyId');
+      setSelectedCompanyId(companyId);
+      if (companyId) {
+          fetch(`/api/companies/${companyId}`).then(res => res.json()).then(setCompany);
       } else {
           setCompany(null);
       }
@@ -259,6 +261,14 @@ export default function OrderList() {
 
     if (userRole === 'investor') {
         params.append('investorId', 'inv-001'); // Hardcoded for demo
+        if (selectedCompanyId) {
+            params.append('companyId', selectedCompanyId);
+        } else {
+             setOrders([]);
+             setTotalOrders(0);
+             setLoading(false);
+             return;
+        }
     } else if ((userRole === 'issuer' || userRole === 'agent') && selectedAsset) {
         params.append('assetId', selectedAsset.id);
     } else if ((userRole === 'issuer' || userRole === 'agent') && !selectedAsset) {
@@ -291,7 +301,7 @@ export default function OrderList() {
         }
     };
     fetchOrders();
-  }, [currentPage, searchQuery, statusFilter, networkFilter, selectedAsset, userRole, assetCheckComplete]);
+  }, [currentPage, searchQuery, statusFilter, networkFilter, selectedAsset, userRole, assetCheckComplete, selectedCompanyId]);
   
   const totalPages = Math.ceil(totalOrders / ITEMS_PER_PAGE);
 
@@ -346,6 +356,20 @@ export default function OrderList() {
       </div>
     );
   }
+  
+  if (userRole === 'investor' && !selectedCompanyId) {
+    return (
+      <div className="space-y-4">
+        <h1 className="text-3xl font-headline font-semibold">My Orders</h1>
+        <div className="border-dashed border-2 border-muted-foreground/50 rounded-lg h-96 flex flex-col items-center justify-center text-center p-4">
+            <ShoppingBag className="h-16 w-16 text-muted-foreground mb-4" />
+            <h2 className="text-xl font-semibold mb-2">No Company Selected</h2>
+            <p className="text-muted-foreground mb-4">Please select a company from the sidebar to view your orders.</p>
+        </div>
+      </div>
+    );
+  }
+
 
   if ((userRole === 'issuer' || userRole === 'agent') && !selectedAsset && assetCheckComplete) {
     const showKybBanner = company && company.kybStatus !== 'verified';

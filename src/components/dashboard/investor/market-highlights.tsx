@@ -6,15 +6,20 @@ import AssetIcon from '@/components/ui/asset-icon';
 import Link from 'next/link';
 import type { AssetDetails } from '@/lib/types';
 
-export default function MarketHighlights() {
+export default function MarketHighlights({ selectedCompanyId }: { selectedCompanyId: string | null }) {
     const [highlights, setHighlights] = useState<AssetDetails[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+      if (!selectedCompanyId) {
+        setHighlights([]);
+        setLoading(false);
+        return;
+      }
       setLoading(true);
       Promise.all([
         fetch('/api/investors/inv-001').then(res => res.json()),
-        fetch('/api/assets').then(res => res.json())
+        fetch(`/api/assets?companyId=${selectedCompanyId}`).then(res => res.json())
       ]).then(([investorData, assetsData]) => {
         const holdingsIds = investorData?.holdings.map((h: any) => h.assetId) || [];
         const filteredHighlights = assetsData.data
@@ -23,7 +28,7 @@ export default function MarketHighlights() {
         setHighlights(filteredHighlights);
       }).catch(console.error)
       .finally(() => setLoading(false));
-    }, []);
+    }, [selectedCompanyId]);
 
     if(loading) {
         return (

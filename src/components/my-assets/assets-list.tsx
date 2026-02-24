@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -171,6 +170,18 @@ function InfoRow({ label, value, onCopy }: { label: string; value: string, onCop
 
 export default function AssetsList() {
     const [portfolioAssets, setPortfolioAssets] = React.useState<PortfolioAsset[]>([]);
+    const [selectedCompanyId, setSelectedCompanyId] = React.useState<string | null>(null);
+
+    React.useEffect(() => {
+        const companyId = localStorage.getItem('selectedCompanyId');
+        setSelectedCompanyId(companyId);
+        const handleCompanyChange = () => {
+            const companyId = localStorage.getItem('selectedCompanyId');
+            setSelectedCompanyId(companyId);
+        };
+        window.addEventListener('companyChanged', handleCompanyChange);
+        return () => window.removeEventListener('companyChanged', handleCompanyChange);
+    }, []);
 
     React.useEffect(() => {
         Promise.all([
@@ -179,8 +190,15 @@ export default function AssetsList() {
         ]).then(([investor, assetsResponse]: [any, any]) => {
             if (!investor?.holdings) return;
 
-            const allAssets = assetsResponse.data || [];
-            const pAssets = investor.holdings
+            const allAssets: AssetDetails[] = assetsResponse.data || [];
+            let holdings = investor.holdings;
+
+            if (selectedCompanyId) {
+                const companyAssetIds = allAssets.filter(a => a.companyId === selectedCompanyId).map(a => a.id);
+                holdings = holdings.filter((h: any) => companyAssetIds.includes(h.assetId));
+            }
+
+            const pAssets = holdings
               .filter((holding: any) => holding && holding.assetId)
               .map((holding: any) => {
                 const assetDetail = allAssets.find((t: AssetDetails) => t.id === holding.assetId);
@@ -200,7 +218,7 @@ export default function AssetsList() {
             setPortfolioAssets(pAssets);
         }).catch(console.error);
 
-    }, []);
+    }, [selectedCompanyId]);
 
   return (
     <Card>

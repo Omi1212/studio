@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartConfig } from '@/components/ui/chart';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useMemo, useState, useEffect } from 'react';
+import type { AssetDetails } from '@/lib/types';
 
 const chartConfig = {
   value: {
@@ -12,7 +13,7 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-export default function PortfolioOverview() {
+export default function PortfolioOverview({ selectedCompanyId }: { selectedCompanyId: string | null }) {
   const [totalValue, setTotalValue] = useState(0);
   const [chartData, setChartData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -21,14 +22,23 @@ export default function PortfolioOverview() {
     setLoading(true);
     Promise.all([
       fetch('/api/investors/inv-001').then(res => res.json()),
-      fetch('/api/portfolio-history').then(res => res.json())
-    ]).then(([investorData, historyData]) => {
-      const value = investorData?.holdings.reduce((acc: number, holding: any) => acc + (holding.amount * holding.value), 0) || 0;
+      fetch('/api/portfolio-history').then(res => res.json()),
+      fetch('/api/assets?perPage=999').then(res => res.json())
+    ]).then(([investorData, historyData, assetsData]) => {
+      const allAssets: AssetDetails[] = assetsData.data || [];
+      let holdings = investorData?.holdings || [];
+
+      if (selectedCompanyId) {
+          const companyAssetIds = allAssets.filter(a => a.companyId === selectedCompanyId).map(a => a.id);
+          holdings = holdings.filter((h: any) => companyAssetIds.includes(h.assetId));
+      }
+      
+      const value = holdings.reduce((acc: number, holding: any) => acc + (holding.amount * holding.value), 0) || 0;
       setTotalValue(value);
       setChartData(historyData.data);
     }).catch(console.error)
     .finally(() => setLoading(false));
-  }, []);
+  }, [selectedCompanyId]);
 
   if(loading) {
       return <Card className="h-[350px] animate-pulse bg-muted/50"></Card>;

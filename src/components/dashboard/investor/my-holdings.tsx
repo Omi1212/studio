@@ -5,20 +5,30 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Button } from '@/components/ui/button';
 import AssetIcon from '@/components/ui/asset-icon';
 import Link from 'next/link';
+import type { AssetDetails } from '@/lib/types';
 
-export default function MyHoldings() {
+export default function MyHoldings({ selectedCompanyId }: { selectedCompanyId: string | null }) {
     const [holdings, setHoldings] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         setLoading(true);
-        fetch('/api/investors/inv-001')
-            .then(res => res.json())
-            .then(investor => {
-                setHoldings(investor?.holdings || []);
-            }).catch(console.error)
-            .finally(() => setLoading(false));
-    }, []);
+        Promise.all([
+            fetch('/api/investors/inv-001').then(res => res.json()),
+            fetch('/api/assets?perPage=999').then(res => res.json())
+        ]).then(([investor, assetsData]) => {
+            const allAssets: AssetDetails[] = assetsData.data || [];
+            let investorHoldings = investor?.holdings || [];
+
+            if (selectedCompanyId) {
+                const companyAssetIds = allAssets.filter(a => a.companyId === selectedCompanyId).map(a => a.id);
+                investorHoldings = investorHoldings.filter((h: any) => companyAssetIds.includes(h.assetId));
+            }
+            
+            setHoldings(investorHoldings);
+        }).catch(console.error)
+        .finally(() => setLoading(false));
+    }, [selectedCompanyId]);
 
     if (loading) {
         return <Card className="h-80 animate-pulse bg-muted/50"></Card>

@@ -9,6 +9,7 @@ import MarketHighlights from '@/components/dashboard/investor/market-highlights'
 
 export default function InvestorDashboard() {
     const [user, setUser] = useState<User | null>(null);
+    const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(null);
 
     useEffect(() => {
         // For demo purposes, we'll just find the default investor user.
@@ -21,6 +22,15 @@ export default function InvestorDashboard() {
                 setUser(investorUser);
             }
           }).catch(console.error);
+        
+        const handleCompanyChange = () => {
+            const companyId = localStorage.getItem('selectedCompanyId');
+            setSelectedCompanyId(companyId);
+        };
+        handleCompanyChange();
+
+        window.addEventListener('companyChanged', handleCompanyChange);
+        return () => window.removeEventListener('companyChanged', handleCompanyChange);
     }, []);
 
     return (
@@ -30,16 +40,16 @@ export default function InvestorDashboard() {
                     Welcome, {user?.name || 'Investor'}!
                 </h1>
             </div>
-            <PortfolioOverview />
+            <PortfolioOverview selectedCompanyId={selectedCompanyId} />
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <div className="lg:col-span-1">
-                    <MyHoldings />
+                    <MyHoldings selectedCompanyId={selectedCompanyId} />
                 </div>
                 <div className="lg:col-span-1">
-                    <MarketHighlights />
+                    <MarketHighlights selectedCompanyId={selectedCompanyId} />
                 </div>
             </div>
-            <RecentActivity />
+            <RecentActivity selectedCompanyId={selectedCompanyId} />
         </main>
     );
 }
