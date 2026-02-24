@@ -117,7 +117,7 @@ const initialData: Omit<AssetDetails, 'assetIcon' | 'whitepaper' | 'legalAssetiz
     assetName: 'UTXO',
     assetTicker: 'UTXO',
     status: 'active' as const,
-    network: ['spark'],
+    network: ['spark', 'liquid'],
     maxSupply: 21000000,
     price: 7.26,
     decimals: 6,
@@ -138,7 +138,7 @@ const initialData: Omit<AssetDetails, 'assetIcon' | 'whitepaper' | 'legalAssetiz
     assetName: 'FlashSparks',
     assetTicker: 'FLS',
     status: 'active' as const,
-    network: ['spark'],
+    network: ['spark', 'rgb'],
     maxSupply: 1000000000,
     price: 0.50,
     decimals: 8,
@@ -159,7 +159,7 @@ const initialData: Omit<AssetDetails, 'assetIcon' | 'whitepaper' | 'legalAssetiz
     assetName: 'Bitcoin USD',
     assetTicker: 'BUSD',
     status: 'active' as const,
-    network: ['liquid'],
+    network: ['spark', 'liquid'],
     maxSupply: 500000000,
     price: 1.00,
     decimals: 2,
@@ -180,7 +180,7 @@ const initialData: Omit<AssetDetails, 'assetIcon' | 'whitepaper' | 'legalAssetiz
     assetName: 'Snowflake',
     assetTicker: 'SNW',
     status: 'active' as const,
-    network: ['rgb'],
+    network: ['spark', 'rgb', 'taproot'],
     maxSupply: 100000000,
     price: 15.25,
     decimals: 4,
@@ -204,3 +204,5 @@ if (process.env.NODE_ENV !== 'production' && !global.__exampleAssets__) {
 }
 
 export let exampleAssets: Omit<AssetDetails, 'assetIcon' | 'whitepaper' | 'legalAssetizationDoc' | 'assetIssuanceLegalDoc' | 'publicKey'>[] = global.__exampleAssets__ || initialData;
+
+    
