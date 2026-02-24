@@ -13,7 +13,7 @@ const assetPostSchema = z.object({
   isFreezable: z.boolean(),
   network: z.array(z.string()).min(1),
   status: z.enum(['pending', 'active', 'frozen', 'draft']),
-  issuerId: z.string().optional(),
+  companyId: z.string().optional(),
   assetType: z.string().min(1),
   eligibleInvestors: z.array(z.string()).optional(),
   subscriptionTime: z.string().optional(),
@@ -31,7 +31,7 @@ const querySchema = z.object({
     status: z.enum(['pending', 'active', 'frozen', 'draft', 'all']).optional(),
     query: z.string().optional(),
     excludeStatus: z.string().optional(),
-    issuerId: z.string().optional(),
+    companyId: z.string().optional(),
 });
 
 
@@ -43,12 +43,12 @@ export async function GET(request: Request) {
       return NextResponse.json({ errors: validation.error.errors }, { status: 400 });
   }
 
-  const { page, perPage, status, query, excludeStatus, issuerId } = validation.data;
+  const { page, perPage, status, query, excludeStatus, companyId } = validation.data;
 
   let filteredAssets = exampleAssets;
 
-  if (issuerId) {
-    filteredAssets = filteredAssets.filter(asset => asset.issuerId === issuerId);
+  if (companyId) {
+    filteredAssets = filteredAssets.filter(asset => asset.companyId === companyId);
   }
 
   if (excludeStatus) {

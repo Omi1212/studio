@@ -179,12 +179,10 @@ export default function IssuerDetailsPage() {
                 <CardContent className="space-y-4">
                     <InfoRow label="Email" value={issuer.email} />
                     <InfoRow label="Wallet Address" value={<span className="font-mono">{issuer.walletAddress}</span>} />
-                    <InfoRow label="Issued Assets" value={<span className="font-mono">{issuer.issuedAssets}</span>} />
-                    <InfoRow label="Pending Assets" value={<span className="font-mono">{issuer.pendingAssets}</span>} />
                 </CardContent>
             </Card>
 
-            <IssuerAssets issuerId={issuer.id} />
+            <IssuerAssets issuer={issuer} />
 
             </div>
           </main>

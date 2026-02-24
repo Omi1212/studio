@@ -169,12 +169,14 @@ export default function ExistingAssets({ view, setView, canCreate, company }: { 
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
 
-  const fetchIssuerAndAssets = useCallback(async () => {
-    setLoading(true);
-
+  const fetchAssets = useCallback(async () => {
     const userStr = localStorage.getItem('currentUser');
-    if (!userStr) {
+    const selectedCompanyId = localStorage.getItem('selectedCompanyId');
+
+    if (!userStr || !selectedCompanyId) {
         setLoading(false);
+        setAssets([]);
+        setTotalAssets(0);
         return;
     }
     const currentUser: User = JSON.parse(userStr);
@@ -185,24 +187,13 @@ export default function ExistingAssets({ view, setView, canCreate, company }: { 
         setLoading(false);
         return;
     }
+    setLoading(true);
 
     try {
-        const issuersRes = await fetch('/api/issuers?perPage=999');
-        if (!issuersRes.ok) throw new Error("Failed to fetch issuers");
-        const issuersData = await issuersRes.json();
-        const currentIssuer = (issuersData.data || []).find((i: Issuer) => i.email === currentUser.email);
-        
-        if (!currentIssuer) {
-            setAssets([]);
-            setTotalAssets(0);
-            setLoading(false);
-            return;
-        }
-
         const params = new URLSearchParams({
             page: currentPage.toString(),
             perPage: ITEMS_PER_PAGE.toString(),
-            issuerId: currentIssuer.id
+            companyId: selectedCompanyId
         });
         const assetsResponse = await fetch(`/api/assets?${params.toString()}`);
         if (!assetsResponse.ok) throw new Error("Failed to fetch assets");
@@ -231,13 +222,15 @@ export default function ExistingAssets({ view, setView, canCreate, company }: { 
   }, [currentPage]);
 
   useEffect(() => {
-    fetchIssuerAndAssets();
-    window.addEventListener('assetChanged', fetchIssuerAndAssets);
+    fetchAssets();
+    window.addEventListener('assetChanged', fetchAssets);
+    window.addEventListener('companyChanged', fetchAssets);
 
     return () => {
-        window.removeEventListener('assetChanged', fetchIssuerAndAssets);
+        window.removeEventListener('assetChanged', fetchAssets);
+        window.removeEventListener('companyChanged', fetchAssets);
     };
-  }, [fetchIssuerAndAssets]);
+  }, [fetchAssets]);
   
   const totalPages = Math.ceil(totalAssets / ITEMS_PER_PAGE);
 

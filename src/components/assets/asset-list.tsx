@@ -3,7 +3,7 @@
 
 import { useEffect, useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import type { AssetDetails, ViewMode, Issuer } from '@/lib/types';
+import type { AssetDetails, ViewMode, Company } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/card';
 import AssetIcon from '../ui/asset-icon';
 import { Badge } from '../ui/badge';
@@ -38,7 +38,7 @@ const networkMap: { [key: string]: string } = {
     taproot: 'Taproot Assets',
 };
 
-function AssetCard({ asset, issuer }: { asset: AssetDetails, issuer?: Issuer }) {
+function AssetCard({ asset, company }: { asset: AssetDetails, company?: Company }) {
   const router = useRouter();
   
   const handleView = () => {
@@ -79,8 +79,8 @@ function AssetCard({ asset, issuer }: { asset: AssetDetails, issuer?: Issuer }) 
             </div>
         </div>
          <div className="flex justify-between text-sm mt-2">
-            <span className="text-muted-foreground">Issuer</span>
-            <span className="font-medium">{issuer?.name || 'N/A'}</span>
+            <span className="text-muted-foreground">Company</span>
+            <span className="font-medium">{company?.name || 'N/A'}</span>
         </div>
       </CardContent>
       <CardFooter>
@@ -92,7 +92,7 @@ function AssetCard({ asset, issuer }: { asset: AssetDetails, issuer?: Issuer }) 
   );
 }
 
-function AssetTable({ assets, issuers }: { assets: AssetDetails[], issuers: Issuer[] }) {
+function AssetTable({ assets, companies }: { assets: AssetDetails[], companies: Company[] }) {
     const router = useRouter();
 
     const handleView = (asset: AssetDetails) => {
@@ -111,7 +111,7 @@ function AssetTable({ assets, issuers }: { assets: AssetDetails[], issuers: Issu
                 <TableHeader>
                     <TableRow>
                         <TableHead className="w-[30%]">Asset</TableHead>
-                        <TableHead>Issuer</TableHead>
+                        <TableHead>Company</TableHead>
                         <TableHead>Network</TableHead>
                         <TableHead>Status</TableHead>
                         <TableHead className="text-right">Action</TableHead>
@@ -119,7 +119,7 @@ function AssetTable({ assets, issuers }: { assets: AssetDetails[], issuers: Issu
                 </TableHeader>
                 <TableBody>
                     {assets.map(asset => {
-                        const issuer = issuers.find(i => i.id === asset.issuerId);
+                        const company = companies.find(c => c.id === asset.companyId);
                         const networks = Array.isArray(asset.network) ? asset.network : [asset.network].filter(Boolean);
                         const displayNetwork = networks.length > 0 ? networkMap[networks[0]] || networks[0] : 'N/A';
                         const remainingCount = networks.length - 1;
@@ -134,7 +134,7 @@ function AssetTable({ assets, issuers }: { assets: AssetDetails[], issuers: Issu
                                     </div>
                                 </div>
                             </TableCell>
-                            <TableCell>{issuer?.name || 'N/A'}</TableCell>
+                            <TableCell>{company?.name || 'N/A'}</TableCell>
                             <TableCell>
                                 <div className="flex items-center gap-2">
                                     <span>{displayNetwork}</span>
@@ -158,7 +158,7 @@ function AssetTable({ assets, issuers }: { assets: AssetDetails[], issuers: Issu
 export default function AssetList() {
   const [assets, setAssets] = useState<AssetDetails[]>([]);
   const [totalAssets, setTotalAssets] = useState(0);
-  const [issuers, setIssuers] = useState<Issuer[]>([]);
+  const [companies, setCompanies] = useState<Company[]>([]);
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState<ViewMode>('card');
   const [searchQuery, setSearchQuery] = useState('');
@@ -180,8 +180,8 @@ export default function AssetList() {
 
     Promise.all([
       fetch(`/api/assets?${params.toString()}`).then(res => res.json()),
-      fetch('/api/issuers').then(res => res.json()) // Fetch all issuers to map names
-    ]).then(([assetsResponse, issuersResponse]) => {
+      fetch('/api/companies').then(res => res.json())
+    ]).then(([assetsResponse, companiesResponse]) => {
       const combinedAssets: AssetDetails[] = (assetsResponse.data || []).map((t: AssetDetails) => ({
         ...t,
         decimals: t.decimals ?? 0,
@@ -194,7 +194,7 @@ export default function AssetList() {
       }));
       setAssets(combinedAssets);
       setTotalAssets(assetsResponse.meta.total);
-      setIssuers(issuersResponse.data || []);
+      setCompanies(companiesResponse.data || []);
     }).catch(console.error).finally(() => setLoading(false));
   }, [searchQuery, statusFilter, currentPage]);
 
@@ -326,15 +326,15 @@ export default function AssetList() {
             <>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {assets.map(asset => {
-                    const issuer = issuers.find(i => i.id === asset.issuerId);
-                    return <AssetCard key={asset.id} asset={asset} issuer={issuer} />
+                    const company = companies.find(c => c.id === asset.companyId);
+                    return <AssetCard key={asset.id} asset={asset} company={company} />
                     })}
                 </div>
                 {renderPagination()}
             </>
         ) : (
             <>
-                <AssetTable assets={assets} issuers={issuers} />
+                <AssetTable assets={assets} companies={companies} />
                 {renderPagination()}
             </>
         )}

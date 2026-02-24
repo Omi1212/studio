@@ -7,8 +7,6 @@ const issuerSchema = z.object({
   name: z.string().min(1, 'Issuer Name is required'),
   email: z.string().email('Invalid email address'),
   walletAddress: z.string().min(1, 'Wallet address is required'),
-  issuedAssets: z.number().int().nonnegative(),
-  pendingAssets: z.number().int().nonnegative(),
   status: z.enum(['active', 'inactive']),
 });
 

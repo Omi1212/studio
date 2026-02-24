@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import type { AssetDetails } from '@/lib/types';
+import type { AssetDetails, Issuer, User } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/card';
 import AssetIcon from '../ui/asset-icon';
 import { Badge } from '../ui/badge';
@@ -85,20 +85,40 @@ function AssetCard({ asset }: { asset: AssetDetails }) {
   );
 }
 
-export default function IssuerAssets({ issuerId }: { issuerId: string }) {
+export default function IssuerAssets({ issuer }: { issuer: Issuer }) {
   const [issuerAssets, setIssuerAssets] = useState<AssetDetails[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!issuer) {
+        setLoading(false);
+        return;
+    };
+    
     setLoading(true);
-    fetch(`/api/assets?perPage=999&issuerId=${issuerId}`)
+
+    fetch(`/api/users?query=${issuer.email}`)
       .then(res => res.json())
-      .then((assetsResponse) => {
-        setIssuerAssets(assetsResponse.data || []);
+      .then(usersResponse => {
+        const user: User = usersResponse.data[0];
+        if (user && user.companyId && user.companyId.length > 0) {
+          const companyIdsQuery = user.companyId.map(id => `companyId=${id}`).join('&');
+          // The API doesn't support multiple IDs, so we fetch all and filter client-side
+          fetch(`/api/assets?perPage=999`)
+            .then(res => res.json())
+            .then(assetsResponse => {
+              const allAssets = assetsResponse.data || [];
+              const companyAssets = allAssets.filter((asset: AssetDetails) => user.companyId!.includes(asset.companyId || ''));
+              setIssuerAssets(companyAssets);
+            });
+        } else {
+          setIssuerAssets([]);
+        }
       })
       .catch(console.error)
       .finally(() => setLoading(false));
-  }, [issuerId]);
+
+  }, [issuer]);
 
   if (loading) {
     return (

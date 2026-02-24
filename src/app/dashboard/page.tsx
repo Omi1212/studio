@@ -82,16 +82,15 @@ function DashboardRenderer() {
                         if (!currentUser) return { data: [] };
 
                         if (currentUser.role === 'issuer') {
-                            const issuersRes = await fetch('/api/issuers?perPage=999');
-                            if (!issuersRes.ok) throw new Error("Failed to fetch issuers");
-                            const issuersData = await issuersRes.json();
-                            const currentIssuer = (issuersData.data || []).find((i: Issuer) => i.email === currentUser.email);
-                            if (currentIssuer) {
-                                const assetsResponse = await fetch(`/api/assets?perPage=999&issuerId=${currentIssuer.id}`);
-                                return assetsResponse.ok ? assetsResponse.json() : { data: [] };
-                            } else {
-                                return { data: [] };
+                            if (currentUser.companyId && currentUser.companyId.length > 0) {
+                                const assetPromises = currentUser.companyId.map(cId => 
+                                    fetch(`/api/assets?perPage=999&companyId=${cId}`).then(res => res.ok ? res.json() : { data: [] })
+                                );
+                                const assetResponses = await Promise.all(assetPromises);
+                                const allCompanyAssets = assetResponses.flatMap(res => res.data);
+                                return { data: allCompanyAssets };
                             }
+                            return { data: [] };
                         } else if (currentUser.role === 'agent') {
                             const [allAssignments, allAssetsRes] = await Promise.all([
                                 fetch(`/api/agents/assignments`).then(res => res.ok ? res.json() : {}),

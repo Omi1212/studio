@@ -82,15 +82,16 @@ export default function NewAssetPage() {
   const handleFinalSubmit = async (data: Partial<AssetFormValues>) => {
     const finalData = { ...formData, ...data } as AssetFormValues;
     
-    if (!currentIssuer) {
-        toast({ variant: 'destructive', title: 'Error', description: 'Could not identify the issuer. Please log in again.'});
+    const selectedCompanyId = localStorage.getItem('selectedCompanyId');
+    if (!selectedCompanyId) {
+        toast({ variant: 'destructive', title: 'Error', description: 'No company selected. Please select a company from the sidebar.'});
         return;
     }
 
     const newAssetData = { 
       ...finalData, 
       status: 'pending',
-      issuerId: currentIssuer.id,
+      companyId: selectedCompanyId,
     };
     
     // Remove file objects before sending to API

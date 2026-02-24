@@ -6,7 +6,7 @@ export interface AssetDetails extends AssetFormValues {
   status: 'pending' | 'active' | 'frozen' | 'draft';
   price?: number;
   savedStep?: number;
-  issuerId?: string;
+  companyId?: string;
 }
 
 export type ViewMode = 'card' | 'table';
@@ -66,8 +66,6 @@ export type Issuer = {
   name: string;
   email: string;
   walletAddress: string;
-  issuedAssets: number;
-  pendingAssets: number;
   status: 'active' | 'inactive';
 };
 

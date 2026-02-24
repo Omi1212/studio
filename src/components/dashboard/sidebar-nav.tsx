@@ -29,7 +29,7 @@ import {
 import { Button } from '../ui/button';
 import AssetIcon from '../ui/asset-icon';
 import { cn } from '@/lib/utils';
-import type { AssetDetails, User, Issuer } from '@/lib/types';
+import type { AssetDetails, User, Issuer, Company } from '@/lib/types';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../ui/collapsible';
 import Image from 'next/image';
 import {
@@ -101,8 +101,8 @@ export default function SidebarNav() {
   const [isClient, setIsClient] = useState(false);
   const [allAssets, setAllAssets] = useState<AssetDetails[]>([]);
   const [selectedAsset, setSelectedAsset] = useState<AssetDetails | null>(null);
-  const [companies, setCompanies] = useState<{ id: string; name: string }[]>([]);
-  const [selectedCompany, setSelectedCompany] = useState<{ id: string; name: string } | null>(null);
+  const [companies, setCompanies] = useState<Company[]>([]);
+  const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
 
 
   const fetchData = React.useCallback(async () => {
@@ -128,25 +128,23 @@ export default function SidebarNav() {
             const companyPromises = currentUser.companyId.map(id =>
               fetch(`/api/companies/${id}`).then(res => (res.ok ? res.json() : null))
             );
-            const companies = await Promise.all(companyPromises);
-            return { data: companies.filter(c => c) };
+            const companiesResult = await Promise.all(companyPromises);
+            return { data: companiesResult.filter(c => c) };
         }
         return { data: [] };
       };
 
       const getAssetsPromise = async (): Promise<{ data: AssetDetails[] }> => {
           if (currentUser.role === 'issuer') {
-              const issuersRes = await fetch('/api/issuers?perPage=999');
-              if (!issuersRes.ok) throw new Error("Failed to fetch issuers");
-              const issuersData = await issuersRes.json();
-              const currentIssuer = (issuersData.data || []).find((i: Issuer) => i.email === currentUser.email);
-
-              if (currentIssuer) {
-                  const assetsResponse = await fetch(`/api/assets?perPage=999&issuerId=${currentIssuer.id}`);
-                  return assetsResponse.ok ? assetsResponse.json() : { data: [] };
-              } else {
-                  return { data: [] };
+              if (currentUser.companyId && currentUser.companyId.length > 0) {
+                const assetPromises = currentUser.companyId.map(cId => 
+                    fetch(`/api/assets?perPage=999&companyId=${cId}`).then(res => res.ok ? res.json() : { data: [] })
+                );
+                const assetResponses = await Promise.all(assetPromises);
+                const allCompanyAssets = assetResponses.flatMap(res => res.data);
+                return { data: allCompanyAssets };
               }
+              return { data: [] };
           } else if (currentUser.role === 'agent') {
               const [allAssignments, allAssetsRes] = await Promise.all([
                   fetch(`/api/agents/assignments`).then(res => res.ok ? res.json() : {}),
@@ -163,11 +161,11 @@ export default function SidebarNav() {
       
       const [companiesResponse, assetsData] = await Promise.all([getCompaniesPromise(), getAssetsPromise()]);
 
-      const companyList = companiesResponse.data || [];
+      const companyList: Company[] = companiesResponse.data || [];
       setCompanies(companyList);
 
       const storedCompanyId = localStorage.getItem('selectedCompanyId');
-      let currentCompany: { id: string; name: string } | null = null;
+      let currentCompany: Company | null = null;
       if (storedCompanyId) {
         currentCompany = companyList.find((c: any) => c.id === storedCompanyId);
       }
@@ -235,7 +233,7 @@ export default function SidebarNav() {
     window.dispatchEvent(new Event('assetChanged'));
   }
 
-  const handleCompanySelect = (company: { id: string; name: string }) => {
+  const handleCompanySelect = (company: Company) => {
     setSelectedCompany(company);
     localStorage.setItem('selectedCompanyId', company.id);
     window.dispatchEvent(new Event('companyChanged'));
