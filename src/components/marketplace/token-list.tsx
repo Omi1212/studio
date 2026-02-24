@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useEffect, useState, useMemo } from 'react';
@@ -145,11 +144,38 @@ export default function AssetList() {
   const [view, setView] = useState<ViewMode>('card');
   const [selectedAsset, setSelectedAsset] = useState<AssetDetails | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(null);
 
   useEffect(() => {
+    const handleCompanyChange = () => {
+      const companyId = localStorage.getItem('selectedCompanyId');
+      setSelectedCompanyId(companyId);
+    };
+
+    handleCompanyChange(); // Initial load
+    window.addEventListener('companyChanged', handleCompanyChange);
+
+    return () => {
+      window.removeEventListener('companyChanged', handleCompanyChange);
+    };
+  }, []);
+
+  useEffect(() => {
+    const userRole = localStorage.getItem('userRole');
+    if (userRole === 'investor' && !selectedCompanyId) {
+        setAllAssets([]);
+        setLoading(false);
+        return;
+    }
+
     setLoading(true);
+    const params = new URLSearchParams({ perPage: '999' });
+    if (selectedCompanyId) {
+        params.append('companyId', selectedCompanyId);
+    }
+    
     Promise.all([
-      fetch('/api/assets?perPage=999').then(res => res.json()),
+      fetch(`/api/assets?${params.toString()}`).then(res => res.json()),
       fetch('/api/investors/inv-001/subscriptions').then(res => res.ok ? res.json() : {})
     ]).then(([assetsResponse, subscriptionsData]: [any, Record<string, SubscriptionStatus>]) => {
       const activeAssets = (assetsResponse.data || [])
@@ -170,7 +196,7 @@ export default function AssetList() {
     }).catch(console.error)
     .finally(() => setLoading(false));
 
-  }, []);
+  }, [selectedCompanyId]);
 
   const filteredAssets = useMemo(() => {
     let filtered = [...allAssets];
@@ -246,7 +272,7 @@ export default function AssetList() {
         <div className="border-dashed border-2 border-muted-foreground/50 rounded-lg h-96 flex flex-col items-center justify-center text-center p-4">
             <ShoppingBag className="h-16 w-16 text-muted-foreground mb-4" />
             <h2 className="text-xl font-semibold mb-2">No assets available</h2>
-            <p className="text-muted-foreground mb-4">There are no active asset offerings in the marketplace at this time.</p>
+            <p className="text-muted-foreground mb-4">There are no active asset offerings in the marketplace at this time for the selected company.</p>
         </div>
       );
   }
