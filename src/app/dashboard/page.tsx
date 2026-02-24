@@ -81,13 +81,10 @@ function DashboardRenderer() {
                         if (!currentUser) return { data: [] };
 
                         if (currentUser.role === 'issuer') {
-                            if (currentUser.companyId && currentUser.companyId.length > 0) {
-                                const assetPromises = currentUser.companyId.map(cId => 
-                                    fetch(`/api/assets?perPage=999&companyId=${cId}`).then(res => res.ok ? res.json() : { data: [] })
-                                );
-                                const assetResponses = await Promise.all(assetPromises);
-                                const allCompanyAssets = assetResponses.flatMap(res => res.data);
-                                return { data: allCompanyAssets };
+                            const selectedCompanyId = localStorage.getItem('selectedCompanyId');
+                            if (selectedCompanyId) {
+                                const assetsResponse = await fetch(`/api/assets?perPage=999&companyId=${selectedCompanyId}`);
+                                return assetsResponse.ok ? assetsResponse.json() : { data: [] };
                             }
                             return { data: [] };
                         } else if (currentUser.role === 'agent') {
