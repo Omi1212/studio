@@ -136,7 +136,7 @@ const initialData: Omit<AssetDetails, 'assetIcon' | 'whitepaper' | 'legalAssetiz
   {
     id: 'btkn1-flashsparks-asset',
     assetName: 'FlashSparks',
-    assetTicker: 'FLS',
+    assetTicker: 'FSPKS',
     status: 'active' as const,
     network: ['spark', 'rgb'],
     maxSupply: 1000000000,
@@ -157,7 +157,7 @@ const initialData: Omit<AssetDetails, 'assetIcon' | 'whitepaper' | 'legalAssetiz
   {
     id: 'btkn1-bitcoin-usd-asset',
     assetName: 'Bitcoin USD',
-    assetTicker: 'BUSD',
+    assetTicker: 'USDB',
     status: 'active' as const,
     network: ['spark', 'liquid'],
     maxSupply: 500000000,
@@ -178,7 +178,7 @@ const initialData: Omit<AssetDetails, 'assetIcon' | 'whitepaper' | 'legalAssetiz
   {
     id: 'btkn1-snowflake-asset',
     assetName: 'Snowflake',
-    assetTicker: 'SNW',
+    assetTicker: 'SNOW',
     status: 'active' as const,
     network: ['spark', 'rgb', 'taproot'],
     maxSupply: 100000000,
