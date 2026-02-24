@@ -38,7 +38,7 @@ const initialData: User[] = [
         address: 'Residencial Las Flores, #123, San Salvador',
         country: 'SV',
         city: 'San Salvador',
-        companyId: ['bstratus-securities', 'emisores-de-activos-digitales'],
+        companyId: ['bstratus-securities', 'neobank-sa-de-cv'],
     },
     {
         id: 'user-003',
