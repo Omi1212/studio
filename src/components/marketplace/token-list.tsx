@@ -14,12 +14,20 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Dialog, DialogContent, DialogTrigger } from '../ui/dialog';
 import PlaceOrder from './place-order';
 import { Badge } from '../ui/badge';
+import Image from 'next/image';
 
 const networkMap: { [key: string]: string } = {
     spark: 'Spark',
     liquid: 'Liquid',
     rgb: 'RGB',
     taproot: 'Taproot Assets',
+};
+
+const networkIconMap: { [key: string]: React.ReactNode } = {
+    spark: <svg width="24" height="24" viewBox="0 0 68 64" fill="none" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" clipRule="evenodd" d="M39.68 24.656L40.836 0H26.398l1.156 24.656-23.092-8.718L0 29.668l23.807 6.52L8.38 55.457l11.68 8.487 13.558-20.628 13.558 20.627 11.68-8.486L43.43 36.188l23.804-6.52-4.461-13.73-23.092 8.718zM33.617 33v.001z" fill="currentColor"></path></svg>,
+    liquid: <Image src="https://liquid.net/_next/static/media/logo.28b5ba97.svg" alt="Liquid Network Logo" width={24} height={24} />,
+    rgb: <Image src="https://rgb.tech/logo/rgb-symbol-color.svg" alt="RGB Protocol Logo" width={24} height={24} />,
+    taproot: <Image src="https://docs.lightning.engineering/~gitbook/image?url=https%3A%2F%2F2545062540-files.gitbook.io%2F~%2Ffiles%2Fv0%2Fb%2Fgitbook-legacy-files%2Fo%2Fspaces%252F-MIzyiDsFtJBYVyhr1nT%252Favatar-1602260100761.png%3Fgeneration%3D1602260100982225%26alt%3Dmedia&width=32&dpr=2&quality=100&sign=15d20b51&sv=2" alt="Taproot Assets Logo" width={24} height={24} />,
 };
 
 function AssetCard({ asset, onAction, subscriptionStatus }: { asset: AssetDetails, onAction: (asset: AssetDetails) => void, subscriptionStatus: SubscriptionStatus }) {
@@ -44,8 +52,6 @@ function AssetCard({ asset, onAction, subscriptionStatus }: { asset: AssetDetail
   }
 
   const networks = Array.isArray(asset.network) ? asset.network : [asset.network].filter(Boolean);
-  const displayNetwork = networks.length > 0 ? networkMap[networks[0]] || networks[0] : 'N/A';
-  const remainingCount = networks.length - 1;
 
   return (
     <Card>
@@ -59,16 +65,19 @@ function AssetCard({ asset, onAction, subscriptionStatus }: { asset: AssetDetail
         </div>
       </CardHeader>
       <CardContent>
-        <div className="flex justify-between items-center text-sm mt-2">
-            <span className="text-muted-foreground">Network</span>
-             <div className="flex items-center gap-2">
-                <span className="font-medium">{displayNetwork}</span>
-                {remainingCount > 0 && <Badge variant="secondary">+{remainingCount}</Badge>}
-            </div>
-        </div>
          <div className="flex justify-between text-sm mt-2">
             <span className="text-muted-foreground">Max Supply</span>
             <span className="font-medium font-mono">{asset.maxSupply ? asset.maxSupply.toLocaleString() : '--'}</span>
+        </div>
+        <div className="flex justify-between items-center text-sm mt-2">
+            <span className="text-muted-foreground">Network</span>
+            <div className="flex items-center gap-2">
+                {networks.map(net => (
+                    <div key={net} className="h-6 w-6 flex items-center justify-center" title={networkMap[net] || net}>
+                        {networkIconMap[net] || <span>{net}</span>}
+                    </div>
+                ))}
+            </div>
         </div>
       </CardContent>
       <CardFooter className="gap-2">
@@ -103,8 +112,6 @@ function AssetTableRow({ asset, onAction, subscriptionStatus }: { asset: AssetDe
     }
     
     const networks = Array.isArray(asset.network) ? asset.network : [asset.network].filter(Boolean);
-    const displayNetwork = networks.length > 0 ? networkMap[networks[0]] || networks[0] : 'N/A';
-    const remainingCount = networks.length - 1;
 
     return (
         <TableRow onClick={handleView} className="cursor-pointer">
@@ -117,13 +124,16 @@ function AssetTableRow({ asset, onAction, subscriptionStatus }: { asset: AssetDe
                     </div>
                 </div>
             </TableCell>
+            <TableCell className="font-mono">{asset.maxSupply ? asset.maxSupply.toLocaleString() : '--'}</TableCell>
             <TableCell>
                 <div className="flex items-center gap-2">
-                    <span>{displayNetwork}</span>
-                    {remainingCount > 0 && <Badge variant="secondary">+{remainingCount}</Badge>}
+                    {networks.map(net => (
+                        <div key={net} className="h-6 w-6 flex items-center justify-center" title={networkMap[net] || net}>
+                            {networkIconMap[net] || <span>{net}</span>}
+                        </div>
+                    ))}
                 </div>
             </TableCell>
-            <TableCell className="font-mono">{asset.maxSupply ? asset.maxSupply.toLocaleString() : '--'}</TableCell>
             <TableCell className="text-right space-x-2" onClick={(e) => e.stopPropagation()}>
                 <Button variant="outline" size="sm" onClick={handleView}>
                     View
@@ -348,8 +358,8 @@ export default function AssetList() {
                         <TableHeader>
                             <TableRow>
                                 <TableHead className="w-[30%]">Asset</TableHead>
-                                <TableHead>Network</TableHead>
                                 <TableHead>Max Supply</TableHead>
+                                <TableHead>Network</TableHead>
                                 <TableHead className="text-right w-[25%]">Action</TableHead>
                             </TableRow>
                         </TableHeader>
