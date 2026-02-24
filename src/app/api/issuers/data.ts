@@ -8,21 +8,21 @@ declare global {
 const initialData: Issuer[] = [
     {
         id: 'iss-a',
-        name: 'Alice Issuer',
+        name: 'Alice Johnson',
         email: 'issuera@gmail.com',
         walletAddress: 'spark1q...issuera',
         status: 'active',
     },
     {
         id: 'iss-b',
-        name: 'Bob Issuer',
+        name: 'Bob Williams',
         email: 'issuerb@gmail.com',
         walletAddress: 'spark1q...issuerb',
         status: 'active',
     },
     {
         id: 'iss-c',
-        name: 'Carol Issuer',
+        name: 'Carol Smith',
         email: 'issuerc@gmail.com',
         walletAddress: 'spark1q...issuerc',
         status: 'active',

@@ -102,7 +102,7 @@ const initialData: User[] = [
     // New Issuers
     {
         id: 'iss-a',
-        name: 'Alice Issuer',
+        name: 'Alice Johnson',
         email: 'issuera@gmail.com',
         role: 'issuer',
         walletAddress: 'spark1q...issuera',
@@ -112,12 +112,12 @@ const initialData: User[] = [
         kycLevel: 4,
         country: 'US',
         city: 'San Francisco',
-        legalName: 'Alice Issuer Inc.',
+        legalName: 'Alice Johnson Inc.',
         companyId: ['issuer-a-comp'],
     },
     {
         id: 'iss-b',
-        name: 'Bob Issuer',
+        name: 'Bob Williams',
         email: 'issuerb@gmail.com',
         role: 'issuer',
         walletAddress: 'spark1q...issuerb',
@@ -127,12 +127,12 @@ const initialData: User[] = [
         kycLevel: 4,
         country: 'GB',
         city: 'London',
-        legalName: 'Bob Issuer Solutions',
+        legalName: 'Bob Williams Solutions',
         companyId: ['issuer-b-comp'],
     },
     {
         id: 'iss-c',
-        name: 'Carol Issuer',
+        name: 'Carol Smith',
         email: 'issuerc@gmail.com',
         role: 'issuer',
         walletAddress: 'spark1q...issuerc',
@@ -142,7 +142,7 @@ const initialData: User[] = [
         kycLevel: 4,
         country: 'SG',
         city: 'Singapore',
-        legalName: 'Carol Issuer Holdings',
+        legalName: 'Carol Smith Holdings',
         companyId: ['issuer-c-comp'],
     }
 ];
