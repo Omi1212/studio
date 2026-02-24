@@ -16,6 +16,8 @@ import { Input } from '../ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { cn } from '@/lib/utils';
 import TokenIcon from '../ui/token-icon';
+import KybBanner from '@/components/dashboard/kyb-banner';
+import IdentityProvidersBanner from '@/components/dashboard/identity-providers-banner';
 
 const ITEMS_PER_PAGE = 10;
 
@@ -130,6 +132,7 @@ export default function OrderList() {
   const [selectedToken, setSelectedToken] = useState<TokenDetails | null>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [tokenCheckComplete, setTokenCheckComplete] = useState(false);
 
   useEffect(() => {
     const role = localStorage.getItem('userRole');
@@ -145,6 +148,8 @@ export default function OrderList() {
   }, []);
 
   useEffect(() => {
+    if (tokens.length === 0 && tokenCheckComplete) return;
+
     const handleTokenChange = () => {
         const storedTokenId = localStorage.getItem('selectedTokenId');
         if (storedTokenId && tokens.length > 0) {
@@ -153,6 +158,7 @@ export default function OrderList() {
         } else {
             setSelectedToken(null);
         }
+        setTokenCheckComplete(true);
     };
 
     handleTokenChange();
@@ -161,9 +167,12 @@ export default function OrderList() {
      return () => {
         window.removeEventListener('tokenChanged', handleTokenChange);
     };
-  }, [tokens]);
+  }, [tokens, tokenCheckComplete]);
 
   useEffect(() => {
+    if (!tokenCheckComplete) {
+        return;
+    }
     setLoading(true);
     const params = new URLSearchParams({
       page: currentPage.toString(),
@@ -201,7 +210,7 @@ export default function OrderList() {
         }
     };
     fetchOrders();
-  }, [currentPage, searchQuery, statusFilter, selectedToken, userRole]);
+  }, [currentPage, searchQuery, statusFilter, selectedToken, userRole, tokenCheckComplete]);
   
   const totalPages = Math.ceil(totalOrders / ITEMS_PER_PAGE);
 
@@ -256,6 +265,25 @@ export default function OrderList() {
       </div>
     );
   }
+
+  if ((userRole === 'issuer' || userRole === 'agent') && !selectedToken && tokenCheckComplete) {
+    return (
+      <div className="space-y-4">
+        <div className="flex justify-between items-center">
+          <h1 className="text-3xl font-headline font-semibold">Orders</h1>
+        </div>
+        <div className="space-y-8">
+            <KybBanner />
+            <IdentityProvidersBanner />
+        </div>
+        <div className="border-dashed border-2 border-muted-foreground/50 rounded-lg h-96 flex flex-col items-center justify-center text-center p-4 mt-8">
+          <ShoppingBag className="h-16 w-16 text-muted-foreground mb-4" />
+          <h2 className="text-xl font-semibold mb-2">No token selected</h2>
+          <p className="text-muted-foreground mb-4">Please select a token from the sidebar to view orders.</p>
+        </div>
+      </div>
+    );
+  }
   
   const renderPagination = () => {
     if (totalPages <= 1) return null;
@@ -294,7 +322,7 @@ export default function OrderList() {
   const noOrdersMessage = () => {
       if ((userRole === 'issuer' || userRole === 'agent') && !selectedToken) {
           return {
-              title: "No Token Selected",
+              title: "No token selected or found",
               description: "Please select a token from the sidebar to view its orders."
           }
       }

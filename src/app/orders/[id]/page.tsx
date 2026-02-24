@@ -12,7 +12,7 @@ import {
 import SidebarNav from '@/components/dashboard/sidebar-nav';
 import HeaderDynamic from '@/components/dashboard/header-dynamic';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Check, X, ArrowUpRight, ArrowDownLeft } from 'lucide-react';
+import { ArrowLeft, Check, X, ArrowUpRight, ArrowDownLeft, ExternalLink, Copy, MessageSquare } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -32,7 +32,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
+} from "@/components/ui/alert-dialog";
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 
 function getStatusBadge(status: Order['status']) {
   switch (status) {
@@ -56,6 +58,66 @@ function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
       <div className="text-sm font-medium text-right">{value}</div>
     </div>
   );
+}
+
+function PaymentDetailsCard({ details }: { details: Order['paymentDetails'] }) {
+    if (!details) {
+        return null;
+    }
+
+    const getExplorer = () => {
+        if (!details.transactionId || !details.method) return null;
+        if (details.method === 'Bank Transfer') return null;
+
+        switch (details.method) {
+            case 'Bitcoin':
+                if (details.network === 'On-chain') return { name: 'Mempool', url: `https://mempool.space/tx/${details.transactionId}` };
+                return null;
+            case 'Bitcoin Spark':
+                return { name: 'Sparkscan', url: `https://sparkscan.io/tx/${details.transactionId}` };
+            case 'Stablecoin':
+                if (details.network === 'tron') return { name: 'TRONSCAN', url: `https://tronscan.org/#/transaction/${details.transactionId}` };
+                if (details.network === 'ethereum') return { name: 'Etherscan', url: `https://etherscan.io/tx/${details.transactionId}` };
+                if (details.network === 'polygon') return { name: 'Polygonscan', url: `https://polygonscan.com/tx/${details.transactionId}` };
+                return null;
+            default:
+                return null;
+        }
+    }
+    
+    const explorer = getExplorer();
+
+    return (
+        <Card>
+            <CardHeader>
+                <CardTitle>Payment Details</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+                <InfoRow label="Payment Method" value={details.method} />
+                {details.bankName && <InfoRow label="Bank" value={details.bankName} />}
+                {details.accountNumber && <InfoRow label="Account Number" value={<span className="font-mono">{details.accountNumber}</span>} />}
+                {details.reference && <InfoRow label="Reference" value={<span className="font-mono">{details.reference}</span>} />}
+                {details.stablecoin && <InfoRow label="Stablecoin" value={details.stablecoin} />}
+                {details.network && <InfoRow label="Network" value={details.network} />}
+                {details.cryptoAddress && <InfoRow label="Payment Address" value={<span className="font-mono break-all">{`${details.cryptoAddress.slice(0, 7)}...${details.cryptoAddress.slice(-4)}`}</span>} />}
+                {details.transactionId && (
+                    <div className="flex items-start justify-between">
+                         <p className="text-sm text-muted-foreground shrink-0">Transaction ID</p>
+                         <div className="flex items-center gap-2 text-right">
+                             <span className="font-mono text-sm break-all">{details.transactionId}</span>
+                             {explorer && (
+                                 <Button asChild variant="ghost" size="icon" className="h-5 w-5 shrink-0">
+                                     <a href={explorer.url} target="_blank" rel="noopener noreferrer" title={`View on ${explorer.name}`}>
+                                         <ExternalLink className="h-4 w-4" />
+                                     </a>
+                                 </Button>
+                             )}
+                         </div>
+                    </div>
+                )}
+            </CardContent>
+        </Card>
+    )
 }
 
 export default function OrderDetailsPage() {
@@ -125,6 +187,23 @@ export default function OrderDetailsPage() {
             description: 'Could not update the order status.',
         });
     }
+  };
+
+  const handleSaveObservation = () => {
+    const observationText = (document.getElementById('observation') as HTMLTextAreaElement)?.value;
+    if (!observationText?.trim()) {
+        toast({
+            variant: "destructive",
+            title: "Observation is empty",
+            description: "Please write an observation before saving.",
+        });
+        return;
+    }
+    // In a real app, you would save this observation to your backend.
+    toast({
+        title: "Observation Saved",
+        description: `Your observation for order #${order?.id} has been noted.`,
+    });
   };
 
   if (loading) {
@@ -213,35 +292,48 @@ export default function OrderDetailsPage() {
                          } />
                     </CardContent>
                 </Card>
+                
+                <PaymentDetailsCard details={order.paymentDetails} />
 
             {order.status === 'pending' && (
              <Card>
                 <CardHeader>
                     <CardTitle>Actions</CardTitle>
+                    <CardDescription>Approve or reject this order. You can add an optional observation.</CardDescription>
                 </CardHeader>
-                <CardContent className="flex flex-col sm:flex-row gap-2">
-                    <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                            <Button variant="destructive" className="w-full">
-                                <X className="mr-2 h-4 w-4" /> Reject Order
-                            </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                            <AlertDialogHeader>
-                                <AlertDialogTitle>Are you sure you want to reject this order?</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                This action cannot be undone.
-                                </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction onClick={() => handleUpdateStatus('rejected')}>Reject</AlertDialogAction>
-                            </AlertDialogFooter>
-                        </AlertDialogContent>
-                    </AlertDialog>
-                    <Button className="w-full" onClick={() => handleUpdateStatus('completed')}>
-                        <Check className="mr-2 h-4 w-4" /> Accept Order
+                <CardContent className="space-y-4">
+                    <div className="space-y-2">
+                        <Label htmlFor="observation">Observation</Label>
+                        <Textarea id="observation" placeholder="Add an observation for the investor..." />
+                    </div>
+                    <Button variant="secondary" className="w-full" onClick={handleSaveObservation}>
+                        <MessageSquare className="mr-2 h-4 w-4" />
+                        Leave Observation
                     </Button>
+                    <div className="flex flex-col sm:flex-row gap-2">
+                        <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                                <Button variant="destructive" className="w-full">
+                                    <X className="mr-2 h-4 w-4" /> Reject Order
+                                </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                                <AlertDialogHeader>
+                                    <AlertDialogTitle>Are you sure you want to reject this order?</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                    This action cannot be undone.
+                                    </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction onClick={() => handleUpdateStatus('rejected')}>Reject</AlertDialogAction>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
+                        <Button className="w-full" onClick={() => handleUpdateStatus('completed')}>
+                            <Check className="mr-2 h-4 w-4" /> Accept Order
+                        </Button>
+                    </div>
                 </CardContent>
              </Card>
             )}

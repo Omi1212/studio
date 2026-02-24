@@ -128,8 +128,8 @@ export default function AllTransactions({ className }: { className?: string }) {
                       </div>
                       <div>
                         <p className="font-medium">{transaction.type}</p>
-                        <p className="text-xs text-muted-foreground truncate max-w-28 sm:max-w-xs">
-                          {transaction.address}
+                        <p className="text-xs text-muted-foreground">
+                          {transaction.address.slice(0,7)}...{transaction.address.slice(-4)}
                         </p>
                       </div>
                     </div>

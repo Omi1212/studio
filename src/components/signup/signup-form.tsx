@@ -110,7 +110,7 @@ export default function SignupForm() {
           description: 'Welcome to BlockStratus.',
         });
 
-        router.push('/signup/onboarding');
+        router.push('/signup/onboarding/verify');
 
     } catch (error: any) {
         toast({
@@ -128,7 +128,8 @@ export default function SignupForm() {
       <CardHeader className="text-center">
         <div className="flex justify-center items-center mb-4">
             <div className="w-72 h-auto relative" style={{ aspectRatio: '170/41' }}>
-              <Image src="https://i.wpfc.ml/35/8gtsxa.png" alt="BlockStratus Logo" fill style={{objectFit: 'contain'}} sizes="18rem" priority />
+              <Image src="https://i.ibb.co/dsx2xgVc/image-69.png" alt="BlockStratus Logo" fill style={{objectFit: 'contain'}} sizes="18rem" priority className="block dark:hidden" />
+              <Image src="https://i.wpfc.ml/35/8gtsxa.png" alt="BlockStratus Logo" fill style={{objectFit: 'contain'}} sizes="18rem" priority className="hidden dark:block" />
             </div>
         </div>
         {step === 1 ? (

@@ -21,6 +21,7 @@ const querySchema = z.object({
     status: z.enum(['pending', 'active', 'frozen', 'draft', 'all']).optional(),
     query: z.string().optional(),
     excludeStatus: z.string().optional(),
+    issuerId: z.string().optional(),
 });
 
 
@@ -32,9 +33,13 @@ export async function GET(request: Request) {
       return NextResponse.json({ errors: validation.error.errors }, { status: 400 });
   }
 
-  const { page, perPage, status, query, excludeStatus } = validation.data;
+  const { page, perPage, status, query, excludeStatus, issuerId } = validation.data;
 
   let filteredTokens = exampleTokens;
+
+  if (issuerId) {
+    filteredTokens = filteredTokens.filter(token => token.issuerId === issuerId);
+  }
 
   if (excludeStatus) {
     filteredTokens = filteredTokens.filter(token => token.status !== excludeStatus);

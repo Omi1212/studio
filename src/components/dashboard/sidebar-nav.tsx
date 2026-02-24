@@ -1,14 +1,6 @@
 'use client';
 
 import {
-  SidebarHeader,
-  SidebarContent,
-  SidebarMenu,
-  SidebarMenuItem,
-  SidebarMenuButton,
-  SidebarFooter,
-} from '@/components/ui/sidebar';
-import {
   LayoutDashboard,
   ArrowRightLeft,
   Users,
@@ -37,9 +29,17 @@ import {
 import { Button } from '../ui/button';
 import TokenIcon from '../ui/token-icon';
 import { cn } from '@/lib/utils';
-import type { TokenDetails, User } from '@/lib/types';
+import type { TokenDetails, User, Issuer } from '@/lib/types';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../ui/collapsible';
 import Image from 'next/image';
+import {
+  SidebarHeader,
+  SidebarContent,
+  SidebarMenu,
+  SidebarMenuItem,
+  SidebarMenuButton,
+  SidebarFooter,
+} from '@/components/ui/sidebar';
 
 
 const superAdminMenu = [
@@ -105,64 +105,71 @@ export default function SidebarNav() {
 
 
   useEffect(() => {
-    // This ensures the code runs only on the client, preventing hydration errors.
     setIsClient(true);
     const role = localStorage.getItem('userRole');
-    const currentUser: User | null = JSON.parse(localStorage.getItem('currentUser') || 'null');
+    let currentUser: User | null = JSON.parse(localStorage.getItem('currentUser') || 'null');
     setUserRole(role);
 
-    Promise.all([
-      fetch('/api/tokens?perPage=999').then(res => res.json()),
-      fetch('/api/companies').then(res => res.json())
-    ]).then(([tokensResponse, companiesResponse]) => {
-        const companiesData = companiesResponse.data || [];
-        setCompanies(companiesData);
-        
-        if (role === 'investor' || role === 'issuer') {
-            if (companiesData.length > 0) {
-              const storedCompanyId = localStorage.getItem('selectedCompanyId');
-              const foundCompany = storedCompanyId ? companiesData.find((c: any) => c.id === storedCompanyId) : undefined;
-              setSelectedCompany(foundCompany || companiesData[0]);
-              if (!foundCompany) {
-                localStorage.setItem('selectedCompanyId', companiesData[0].id);
-              }
-            }
-        }
-        
-        let combinedTokens: TokenDetails[] = (tokensResponse.data || []).map((t: any) => ({
-          ...t,
-          decimals: t.decimals ?? 0,
-          isFreezable: t.isFreezable ?? false,
-          publicKey: t.publicKey ?? `02f...${t.id.slice(-10)}`,
-        }));
+    if (!currentUser) {
+        return;
+    }
 
-        if (role === 'agent' && currentUser) {
-            // NOTE: assignments are not persisted in this demo
-            // For demo, we'll just show all tokens. In a real app, you'd filter by assignment.
-        }
+    const fetchData = async () => {
+        try {
+            const userRes = await fetch(`/api/users/${currentUser!.id}`);
+            const freshUser = userRes.ok ? await userRes.json() : currentUser;
+            currentUser = freshUser; // Update currentUser with fresh data
 
-        setAllTokens(combinedTokens);
-
-        const storedTokenId = localStorage.getItem('selectedTokenId');
-        if (storedTokenId) {
-            const foundToken = combinedTokens.find(t => t.id === storedTokenId);
-            if (foundToken) {
-              setSelectedToken(foundToken);
-            } else if (combinedTokens.length > 0) {
-              const firstToken = combinedTokens[0];
-              setSelectedToken(firstToken);
-              localStorage.setItem('selectedTokenId', firstToken.id);
+            if (freshUser && freshUser.companyId) {
+                const companyRes = await fetch(`/api/companies/${freshUser.companyId}`);
+                if (companyRes.ok) {
+                    const companyData = await companyRes.json();
+                    setCompanies([companyData]); // Set an array with just the user's company
+                    setSelectedCompany(companyData);
+                    localStorage.setItem('selectedCompanyId', companyData.id);
+                }
             } else {
-              setSelectedToken(null);
-              localStorage.removeItem('selectedTokenId');
+                setCompanies([]);
+                setSelectedCompany(null);
+                localStorage.removeItem('selectedCompanyId');
             }
-        } else if (combinedTokens.length > 0) {
-          const firstToken = combinedTokens[0];
-          setSelectedToken(firstToken);
-          localStorage.setItem('selectedTokenId', firstToken.id);
+            
+            const tokensResponse = await fetch('/api/tokens?perPage=999');
+            const tokensData = await tokensResponse.json();
+            const combinedTokens: TokenDetails[] = (tokensData.data || []).map((t: any) => ({
+                ...t,
+                decimals: t.decimals ?? 0,
+                isFreezable: t.isFreezable ?? false,
+                publicKey: t.publicKey ?? `02f...${t.id.slice(-10)}`,
+            }));
+            setAllTokens(combinedTokens);
+
+            const storedTokenId = localStorage.getItem('selectedTokenId');
+            if (storedTokenId) {
+                const foundToken = combinedTokens.find(t => t.id === storedTokenId);
+                if (foundToken) {
+                    setSelectedToken(foundToken);
+                } else if (combinedTokens.length > 0) {
+                    const firstToken = combinedTokens[0];
+                    setSelectedToken(firstToken);
+                    localStorage.setItem('selectedTokenId', firstToken.id);
+                } else {
+                    setSelectedToken(null);
+                    localStorage.removeItem('selectedTokenId');
+                }
+            } else if (combinedTokens.length > 0) {
+                const firstToken = combinedTokens[0];
+                setSelectedToken(firstToken);
+                localStorage.setItem('selectedTokenId', firstToken.id);
+            }
+
+        } catch (error) {
+            console.error('Error fetching sidebar data:', error);
         }
-    });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    };
+
+    fetchData();
+
   }, []);
 
   const handleTokenSelect = (token: TokenDetails) => {
@@ -180,7 +187,6 @@ export default function SidebarNav() {
   let menuItems: any[] = [];
 
   if (!isClient) {
-    // Render nothing or a skeleton loader on the server/initial client render.
     return null;
   }
 
@@ -206,22 +212,31 @@ export default function SidebarNav() {
     <>
       <SidebarHeader className="p-4">
         <div className="w-full h-auto relative" style={{ aspectRatio: '170/41' }}>
-          <Image src="https://i.wpfc.ml/35/8gtsxa.png" alt="BlockStratus Logo" fill style={{objectFit: 'contain'}} sizes="14rem" />
+          <Image src="https://i.ibb.co/dsx2xgVc/image-69.png" alt="BlockStratus Logo" fill style={{objectFit: 'contain'}} sizes="14rem" className="block dark:hidden" />
+          <Image src="https://i.wpfc.ml/35/8gtsxa.png" alt="BlockStratus Logo" fill style={{objectFit: 'contain'}} sizes="14rem" className="hidden dark:block" />
         </div>
       </SidebarHeader>
       
-      {isClient && (userRole === 'investor' || userRole === 'issuer') && selectedCompany && (
+      {isClient && (userRole === 'investor' || userRole === 'issuer') && (
         <div className="px-3 pb-3">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
                 variant="outline"
                 className="w-full justify-between items-center p-2 text-left border-sidebar-border bg-sidebar hover:bg-sidebar-accent"
+                disabled={!companies || companies.length === 0}
               >
-                <div className="flex items-center gap-3">
-                    <Building className="h-5 w-5" />
-                    <span className="font-medium text-sm">{selectedCompany.name}</span>
-                </div>
+                {selectedCompany ? (
+                  <div className="flex items-center gap-3">
+                      <Building className="h-5 w-5" />
+                      <span className="font-medium text-sm">{selectedCompany.name}</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-3">
+                      <Building className="h-5 w-5" />
+                      <span className="font-medium text-sm text-sidebar-foreground/70">No Company</span>
+                  </div>
+                )}
                 <MoreVertical className="h-4 w-4 text-muted-foreground" />
               </Button>
             </DropdownMenuTrigger>
@@ -233,7 +248,7 @@ export default function SidebarNav() {
                 >
                   <div className="flex items-center justify-between w-full">
                     <span>{company.name}</span>
-                    {selectedCompany.id === company.id && <Check className="h-4 w-4" />}
+                    {selectedCompany?.id === company.id && <Check className="h-4 w-4" />}
                   </div>
                 </DropdownMenuItem>
               ))}
@@ -242,42 +257,76 @@ export default function SidebarNav() {
         </div>
       )}
 
-      {isClient && userRole !== 'superadmin' && userRole !== 'investor' && selectedToken && (
+      {isClient && (userRole === 'issuer' || userRole === 'agent') && (
         <div className="px-3 pb-3">
-          <DropdownMenu>
+          {allTokens.length > 0 && selectedToken ? (
+            <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="w-full h-auto justify-between items-center p-2 text-left bg-sidebar-accent border-sidebar-border hover:bg-sidebar-accent/80">
-                      <div className="flex items-center gap-3">
-                          <TokenIcon token={selectedToken} className="h-8 w-8" />
-                          <div className="flex-1 flex flex-col gap-0.5 leading-none">
-                            <span className="font-medium text-sm">{selectedToken.tokenName}</span>
-                            <div className="flex items-center gap-2">
-                               <span className="text-primary font-semibold text-xs">{selectedToken.tokenTicker}</span>
-                               <span className="text-xs text-muted-foreground">({networkMap[selectedToken.network as string] || selectedToken.network})</span>
-                            </div>
-                          </div>
+                <Button
+                  variant="outline"
+                  className="w-full h-auto justify-between items-center p-2 text-left bg-sidebar-accent border-sidebar-border hover:bg-sidebar-accent/80"
+                >
+                  <div className="flex items-center gap-3">
+                    <TokenIcon token={selectedToken} className="h-8 w-8" />
+                    <div className="flex-1 flex flex-col gap-0.5 leading-none">
+                      <span className="font-medium text-sm">
+                        {selectedToken.tokenName}
+                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-primary font-semibold text-xs">
+                          {selectedToken.tokenTicker}
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          (
+                          {networkMap[selectedToken.network as string] ||
+                            selectedToken.network}
+                          )
+                        </span>
                       </div>
-                      <ChevronsUpDown className="h-4 w-4 text-muted-foreground" />
-                  </Button>
+                    </div>
+                  </div>
+                  <ChevronsUpDown className="h-4 w-4 text-muted-foreground" />
+                </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-[--radix-dropdown-menu-trigger-width]">
-                  {allTokens.map((token) => (
-                      <DropdownMenuItem key={token.id} onSelect={() => handleTokenSelect(token)} className="p-2">
-                        <div className="flex items-center gap-3 w-full">
-                          <TokenIcon token={token} className="h-8 w-8" />
-                          <div className="flex-1 flex flex-col gap-0.5 leading-none">
-                            <span className="font-medium text-sm">{token.tokenName}</span>
-                            <div className="flex items-center gap-2">
-                               <span className="text-primary font-semibold text-xs">{token.tokenTicker}</span>
-                               <span className="text-xs text-muted-foreground">({networkMap[token.network as string] || token.network})</span>
-                            </div>
-                          </div>
-                          {selectedToken.id === token.id && <Check className="h-4 w-4" />}
+                {allTokens.map((token) => (
+                  <DropdownMenuItem
+                    key={token.id}
+                    onSelect={() => handleTokenSelect(token)}
+                    className="p-2"
+                  >
+                    <div className="flex items-center gap-3 w-full">
+                      <TokenIcon token={token} className="h-8 w-8" />
+                      <div className="flex-1 flex flex-col gap-0.5 leading-none">
+                        <span className="font-medium text-sm">
+                          {token.tokenName}
+                        </span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-primary font-semibold text-xs">
+                            {token.tokenTicker}
+                          </span>
+                          <span className="text-xs text-muted-foreground">
+                            (
+                            {networkMap[token.network as string] ||
+                              token.network}
+                            )
+                          </span>
                         </div>
-                      </DropdownMenuItem>
-                  ))}
+                      </div>
+                      {selectedToken.id === token.id && (
+                        <Check className="h-4 w-4" />
+                      )}
+                    </div>
+                  </DropdownMenuItem>
+                ))}
               </DropdownMenuContent>
-          </DropdownMenu>
+            </DropdownMenu>
+          ) : (
+            <div className="border border-sidebar-border rounded-md p-2 text-center text-sm text-sidebar-foreground/70 bg-sidebar-accent flex items-center justify-center gap-2">
+              <Briefcase className="h-4 w-4" />
+              <span>No Assets</span>
+            </div>
+          )}
         </div>
       )}
 
@@ -349,7 +398,7 @@ export default function SidebarNav() {
       </SidebarContent>
       <SidebarFooter className="p-2 space-y-2">
         <SidebarMenu>
-          {isClient && userRole === 'issuer' && (
+          {isClient && (userRole === 'issuer' || userRole === 'investor') && (
             <SidebarMenuItem>
               <SidebarMenuButton
                 asChild

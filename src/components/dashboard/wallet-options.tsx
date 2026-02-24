@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { Asterisk, ExternalLink, Plus, Power, Copy, ArrowDownToLine, ArrowUpFromLine } from "lucide-react";
@@ -58,7 +59,7 @@ function ConnectedView({ onDisconnect }: { onDisconnect: () => void }) {
           <Avatar className="h-10 w-10">
              <AvatarFallback>{investor ? investor.name.charAt(0) : 'A'}</AvatarFallback>
           </Avatar>
-          <span className="font-semibold font-mono text-sm">{investor ? `${investor.walletAddress.slice(0, 10)}...${investor.walletAddress.slice(-4)}` : 'spark1pg...92kjc'}</span>
+          <span className="font-semibold font-mono text-sm">{investor ? `${investor.walletAddress.slice(0, 7)}...${investor.walletAddress.slice(-4)}` : 'spark1pgs...2kjc'}</span>
         </div>
         <div className="flex items-center gap-1">
           <SheetClose asChild>

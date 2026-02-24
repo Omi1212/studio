@@ -9,16 +9,25 @@ import {
   Bell,
   FileText,
   Briefcase,
+  Settings,
+  Users,
 } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
 
-const settingsItems = [
+const allSettingsItems = [
   {
-    icon: User,
-    title: 'User Profile',
-    description: 'Manage your personal information and preferences.',
-    href: '/profile',
+    icon: Settings,
+    title: 'General',
+    description: 'Manage your business information.',
+    href: '/settings/general',
+  },
+  {
+    icon: Users,
+    title: 'Users & Access',
+    description: 'Define roles and permissions for your team.',
+    href: '/settings/users-and-access',
   },
   {
     icon: ShieldCheck,
@@ -37,12 +46,6 @@ const settingsItems = [
     title: 'Third Party Integrations',
     description: 'Connect and manage third-party applications.',
     href: '/settings/integrations',
-  },
-  {
-    icon: KeyRound,
-    title: 'Security & Access',
-    description: 'Manage your password, 2FA, and session history.',
-    href: '/settings/security',
   },
   {
     icon: Bell,
@@ -87,6 +90,25 @@ function SettingCard({ icon: Icon, title, description, href }: SettingCardProps)
 
 
 export default function SettingsGrid() {
+  const [userRole, setUserRole] = useState<string | null>(null);
+
+  useEffect(() => {
+    const role = localStorage.getItem('userRole');
+    setUserRole(role);
+  }, []);
+
+  const investorSettings = [
+    'General',
+    'Security & Access',
+    'Notifications & Alerts',
+    'Data Management',
+  ];
+
+  const settingsItems =
+    userRole === 'investor'
+      ? allSettingsItems.filter((item) => investorSettings.includes(item.title))
+      : allSettingsItems;
+
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
       {settingsItems.map((item) => (

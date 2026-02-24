@@ -10,6 +10,7 @@ const userPostSchema = z.object({
     role: z.enum(['investor', 'issuer', 'agent', 'superadmin']),
     kycStatus: z.enum(['verified', 'pending', 'rejected']),
     status: z.enum(['active', 'inactive']),
+    kycLevel: z.number().optional(),
 });
 
 const querySchema = z.object({
@@ -69,9 +70,15 @@ export async function POST(request: Request) {
         const body = await request.json();
         const newUser = userPostSchema.parse(body);
 
+        const businessRoles = ['issuer', 'agent', 'superadmin'];
+        const businessRegistrationId = businessRoles.includes(newUser.role)
+            ? `${newUser.role.substring(0, 2).toUpperCase()}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`
+            : undefined;
+
         const userWithId: User = {
             ...newUser,
             id: `user-${Math.random().toString(36).substring(2, 9)}`,
+            businessRegistrationId,
         };
         usersData.unshift(userWithId);
         return NextResponse.json(userWithId, { status: 201 });

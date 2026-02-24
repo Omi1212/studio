@@ -16,7 +16,7 @@ const initialData: Omit<TokenDetails, 'tokenIcon' | 'whitepaper' | 'legalTokeniz
     price: 1.00,
     decimals: 2,
     isFreezable: true,
-    issuerId: 'iss-001',
+    issuerId: 'iss-002',
     destinationAddress: 'spark1q...iss1pr',
   },
   {
@@ -42,7 +42,7 @@ const initialData: Omit<TokenDetails, 'tokenIcon' | 'whitepaper' | 'legalTokeniz
     price: 250.00,
     decimals: 0,
     isFreezable: true,
-    issuerId: 'iss-001',
+    issuerId: 'iss-002',
     destinationAddress: 'spark1q...iss1pr',
   },
   {
@@ -55,7 +55,7 @@ const initialData: Omit<TokenDetails, 'tokenIcon' | 'whitepaper' | 'legalTokeniz
     price: 12.75,
     decimals: 6,
     isFreezable: true,
-    issuerId: 'iss-003',
+    issuerId: 'iss-002',
     destinationAddress: 'spark1q...iss3da',
   },
 ];

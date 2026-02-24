@@ -7,7 +7,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import type { User } from '@/lib/types';
@@ -15,25 +14,40 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { countries } from '@/lib/countries';
 
-const businessInfoSchema = z.object({
-  businessName: z.string().min(1, 'Business name is required'),
+const businessDetailsSchema = z.object({
   country: z.string().min(1, 'Country is required'),
+  language: z.string().min(1, 'Language is required'),
+  currency: z.string().min(1, 'Currency is required'),
 });
 
-type BusinessInfoFormValues = z.infer<typeof businessInfoSchema>;
+type BusinessDetailsFormValues = z.infer<typeof businessDetailsSchema>;
 
-export default function BusinessInfoPage() {
+const languages = [
+  { value: 'en', label: 'English' },
+  { value: 'es', label: 'Español' },
+  { value: 'fr', label: 'Français' },
+  { value: 'de', label: 'Deutsch' },
+];
+
+const currencies = [
+  { value: 'usd', label: 'US Dollar (USD)' },
+  { value: 'eur', label: 'Euro (EUR)' },
+  { value: 'btc', label: 'Bitcoin (BTC)' },
+];
+
+export default function BusinessDetailsPage() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
 
-   const form = useForm<BusinessInfoFormValues>({
-    resolver: zodResolver(businessInfoSchema),
+   const form = useForm<BusinessDetailsFormValues>({
+    resolver: zodResolver(businessDetailsSchema),
     defaultValues: {
-      businessName: '',
       country: '',
+      language: 'es',
+      currency: 'usd',
     },
   });
 
@@ -48,11 +62,12 @@ export default function BusinessInfoPage() {
       }
       setUser(parsedUser);
       
-      const countryValue = countries.find(c => c.label === parsedUser.country)?.value || parsedUser.country || '';
+      const countryValue = parsedUser.countryOfJurisdiction || '';
 
       form.reset({
-        businessName: parsedUser.businessName || '',
         country: countryValue,
+        language: parsedUser.language || 'es',
+        currency: parsedUser.currency || 'usd',
       });
     } else {
         router.push('/signup');
@@ -60,18 +75,19 @@ export default function BusinessInfoPage() {
     setLoading(false);
   }, [router, form]);
   
-  const handleFinalSubmit = async (data: BusinessInfoFormValues) => {
+  const handleFinalSubmit = async (data: BusinessDetailsFormValues) => {
     if (!user) return;
     setIsSubmitting(true);
 
     try {
         const updatedUserData = {
-            businessName: data.businessName,
             country: data.country,
-            kybLevel: 1,
+            language: data.language,
+            currency: data.currency,
+            kybLevel: 1, // Assuming this step completes level 1
             kybStatus: 'pending' as const,
         };
-        
+
         const response = await fetch(`/api/users/${user.id}`, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
@@ -79,9 +95,9 @@ export default function BusinessInfoPage() {
         });
 
         if (!response.ok) {
-            throw new Error('Failed to update business information.');
+            throw new Error('Failed to update business details.');
         }
-
+        
         const updatedUserFromApi = await response.json();
         
         localStorage.setItem('currentUser', JSON.stringify(updatedUserFromApi));
@@ -92,7 +108,6 @@ export default function BusinessInfoPage() {
         });
 
         router.push('/dashboard');
-
     } catch (error: any) {
         toast({
             variant: 'destructive',
@@ -112,32 +127,15 @@ export default function BusinessInfoPage() {
     <div className="flex items-center justify-center min-h-screen bg-background p-4">
       <div className="w-full max-w-lg space-y-6">
         <div className="text-center">
-            <h1 className="text-3xl font-headline font-semibold">Issuer Details</h1>
+            <h1 className="text-3xl font-headline font-semibold">Business Details</h1>
             <p className="text-muted-foreground mt-2">
-                A few extra details required for issuers.
+                Add details to customize your experience.
             </p>
         </div>
         <Form {...form}>
             <form onSubmit={form.handleSubmit(handleFinalSubmit)} className="space-y-6">
                 <Card>
-                    <CardHeader>
-                        <CardTitle>Business Information</CardTitle>
-                        <CardDescription>This information may be required for KYB purposes.</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        <FormField
-                            control={form.control}
-                            name="businessName"
-                            render={({ field }) => (
-                                <FormItem>
-                                <FormLabel>Business Name</FormLabel>
-                                <FormControl>
-                                    <Input placeholder="e.g. Awesome Inc." {...field} />
-                                </FormControl>
-                                <FormMessage />
-                                </FormItem>
-                            )}
-                        />
+                    <CardContent className="space-y-4 pt-6">
                         <FormField
                             control={form.control}
                             name="country"
@@ -162,6 +160,54 @@ export default function BusinessInfoPage() {
                                 </FormItem>
                             )}
                         />
+                        <FormField
+                            control={form.control}
+                            name="language"
+                            render={({ field }) => (
+                                <FormItem>
+                                <FormLabel>Default Language</FormLabel>
+                                 <Select onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
+                                    <FormControl>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select a language" />
+                                        </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                        {languages.map(lang => (
+                                            <SelectItem key={lang.value} value={lang.value}>
+                                                {lang.label}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                                <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="currency"
+                            render={({ field }) => (
+                                <FormItem>
+                                <FormLabel>Local Currency</FormLabel>
+                                 <Select onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
+                                    <FormControl>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select a currency" />
+                                        </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                        {currencies.map(curr => (
+                                            <SelectItem key={curr.value} value={curr.value}>
+                                                {curr.label}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                                <FormMessage />
+                                </FormItem>
+                            )}
+                        />
                     </CardContent>
                 </Card>
               
@@ -176,7 +222,7 @@ export default function BusinessInfoPage() {
                             Saving...
                         </>
                         ) : (
-                        'Complete Profile'
+                        'Continue'
                         )}
                     </Button>
                 </div>

@@ -11,6 +11,17 @@ export interface TokenDetails extends TokenFormValues {
 
 export type ViewMode = 'card' | 'table';
 
+export type PaymentDetails = {
+    method: 'Bank Transfer' | 'Bitcoin' | 'Bitcoin Spark' | 'Stablecoin';
+    bankName?: string;
+    accountNumber?: string;
+    reference?: string;
+    cryptoAddress?: string;
+    network?: string;
+    transactionId?: string;
+    stablecoin?: 'USDT' | 'USDC';
+};
+
 export type Order = {
   id: string;
   investorId: string;
@@ -22,6 +33,7 @@ export type Order = {
   price: number;
   date: string;
   status: 'pending' | 'completed' | 'rejected' | 'waiting payment';
+  paymentDetails?: PaymentDetails;
 }
 
 export type Transfer = {
@@ -33,6 +45,21 @@ export type Transfer = {
     tokenTicker: string;
     date: string;
 }
+
+export interface Company {
+  id: string;
+  name: string;
+  legalName?: string;
+  address?: string;
+  registrationId?: string;
+  countryOfJurisdiction?: string;
+  industry?: string;
+  website?: string;
+  employeeRange?: string;
+  kybLevel?: number;
+  kybStatus?: 'verified' | 'pending' | 'rejected';
+}
+
 
 export type Issuer = {
   id: string;
@@ -51,20 +78,20 @@ export type User = {
   role: 'investor' | 'issuer' | 'agent' | 'superadmin';
   walletAddress: string;
   kycStatus: 'verified' | 'pending' | 'rejected';
-  kybStatus?: 'verified' | 'pending' | 'rejected';
   kytStatus?: 'verified' | 'pending' | 'rejected';
   status: 'active' | 'inactive';
   phone?: string;
   kycLevel?: number;
-  kybLevel?: number;
   kytLevel?: number;
   country?: string;
+  language?: string;
+  currency?: string;
   legalName?: string;
   dob?: string;
   idDoc?: string;
   address?: string;
   city?: string;
-  businessName?: string;
+  companyId?: string;
   joinedDate?: string;
   totalInvested?: number;
   isFrozen?: boolean;

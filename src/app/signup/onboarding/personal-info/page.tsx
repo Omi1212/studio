@@ -5,24 +5,48 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import type { User } from '@/lib/types';
+import type { User, Company } from '@/lib/types';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { countryCallingCodes } from '@/lib/country-calling-codes';
+import { countries } from '@/lib/countries';
 
-const personalInfoSchema = z.object({
-  legalName: z.string().min(1, 'Full name is required'),
-  dob: z.string().min(1, 'Date of birth is required'),
+const industries = [
+  { value: 'banking', label: 'Banking' },
+  { value: 'fintech', label: 'FinTech' },
+  { value: 'real_estate', label: 'Real Estate' },
+  { value: 'venture_capital', label: 'Venture Capital' },
+  { value: 'asset_management', label: 'Asset Management' },
+  { value: 'government', label: 'Government' },
+  { value: 'other', label: 'Other' },
+];
+
+const employeeRanges = [
+    { value: '1-10', label: '1-10' },
+    { value: '11-50', label: '11-50' },
+    { value: '51-200', label: '51-200' },
+    { value: '201-500', label: '201-500' },
+    { value: '501-1000', label: '501-1000' },
+    { value: '1000+', label: '1000+' },
+];
+
+const formSchema = z.object({
+  name: z.string().min(1, 'Full name is required'),
   phone: z.string().min(1, 'Phone number is required'),
   phoneCountryCode: z.string().min(1, "Country code is required"),
+  businessName: z.string().optional(),
+  industry: z.string().optional(),
+  website: z.string().url({ message: "Please enter a valid URL." }).optional().or(z.literal('')),
+  employeeRange: z.string().optional(),
+  countryOfJurisdiction: z.string().optional(),
 });
 
-type PersonalInfoFormValues = z.infer<typeof personalInfoSchema>;
+type FormValues = z.infer<typeof formSchema>;
 
 export default function PersonalInfoPage() {
   const [user, setUser] = useState<User | null>(null);
@@ -31,13 +55,17 @@ export default function PersonalInfoPage() {
   const router = useRouter();
   const { toast } = useToast();
 
-  const form = useForm<PersonalInfoFormValues>({
-    resolver: zodResolver(personalInfoSchema),
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
     defaultValues: {
-      legalName: '',
-      dob: '',
+      name: '',
       phone: '',
       phoneCountryCode: 'US', // Default to US
+      businessName: '',
+      industry: '',
+      website: '',
+      employeeRange: '',
+      countryOfJurisdiction: '',
     },
   });
 
@@ -59,10 +87,14 @@ export default function PersonalInfoPage() {
       }
 
       form.reset({
-        legalName: parsedUser.legalName || parsedUser.name || '',
+        name: parsedUser.name || '',
         phone: phoneNumber,
         phoneCountryCode: countryCode,
-        dob: parsedUser.dob || ''
+        businessName: parsedUser.businessName || '',
+        industry: parsedUser.industry || '',
+        website: parsedUser.website || '',
+        employeeRange: parsedUser.employeeRange || '',
+        countryOfJurisdiction: parsedUser.countryOfJurisdiction || '',
       });
     } else {
         router.push('/signup');
@@ -70,20 +102,57 @@ export default function PersonalInfoPage() {
     setLoading(false);
   }, [form, router]);
   
-  const handleContinue = async (data: PersonalInfoFormValues) => {
+  const handleContinue = async (data: FormValues) => {
     if (!user) return;
+
+    if (user.role === 'issuer' && (!data.businessName || !data.industry || !data.countryOfJurisdiction)) {
+        if (!data.businessName) {
+            form.setError('businessName', { type: 'manual', message: 'Company name is required' });
+        }
+        if (!data.industry) {
+            form.setError('industry', { type: 'manual', message: 'Industry is required' });
+        }
+        if (!data.countryOfJurisdiction) {
+            form.setError('countryOfJurisdiction', { type: 'manual', message: 'Country of Jurisdiction is required' });
+        }
+        return;
+    }
+
     setIsSubmitting(true);
 
     try {
         const countryCodeData = countryCallingCodes.find(c => c.code === data.phoneCountryCode);
         const fullPhoneNumber = `${countryCodeData?.dial_code || ''}${data.phone}`;
 
-        const updatedUserData = {
-            name: data.legalName, // Also update name field for display purposes
-            legalName: data.legalName,
+        const updatedUserData: Partial<User> = {
+            name: data.name,
             phone: fullPhoneNumber,
-            dob: data.dob,
         };
+
+        if (user.role === 'issuer') {
+            const newCompanyData = {
+                name: data.businessName,
+                industry: data.industry,
+                website: data.website,
+                employeeRange: data.employeeRange,
+                countryOfJurisdiction: data.countryOfJurisdiction,
+            };
+
+            const companyResponse = await fetch('/api/companies', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(newCompanyData),
+            });
+
+            if (!companyResponse.ok) {
+                throw new Error('Failed to create your company profile.');
+            }
+            
+            const newCompany: Company = await companyResponse.json();
+
+            updatedUserData.companyId = newCompany.id;
+            localStorage.setItem('selectedCompanyId', newCompany.id);
+        }
 
         const response = await fetch(`/api/users/${user.id}`, {
             method: 'PATCH',
@@ -92,19 +161,22 @@ export default function PersonalInfoPage() {
         });
 
         if (!response.ok) {
-            throw new Error('Failed to update personal information.');
+            throw new Error('Failed to update your personal information.');
         }
 
         const updatedUserFromApi = await response.json();
         
-        // Update currentUser in localStorage with the latest data from the API
         localStorage.setItem('currentUser', JSON.stringify(updatedUserFromApi));
         
         toast({
-          title: 'Personal Info Saved!',
+          title: 'Information Saved!',
         });
 
-        router.push('/signup/onboarding/verify');
+        if (user.role === 'issuer') {
+            router.push('/signup/onboarding/business-details');
+        } else {
+            router.push('/signup/onboarding/details');
+        }
 
     } catch (error: any) {
         toast({
@@ -139,25 +211,12 @@ export default function PersonalInfoPage() {
                     <CardContent className="space-y-4">
                         <FormField
                             control={form.control}
-                            name="legalName"
+                            name="name"
                             render={({ field }) => (
                                 <FormItem>
                                 <FormLabel>Full Name</FormLabel>
                                 <FormControl>
                                     <Input placeholder="e.g. John Doe" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                         <FormField
-                            control={form.control}
-                            name="dob"
-                            render={({ field }) => (
-                                <FormItem>
-                                <FormLabel>Date of Birth</FormLabel>
-                                <FormControl>
-                                    <Input type="date" {...field} />
                                 </FormControl>
                                 <FormMessage />
                                 </FormItem>
@@ -204,19 +263,131 @@ export default function PersonalInfoPage() {
                             </div>
                         </div>
                     </CardContent>
-                    <CardFooter>
-                        <Button type="submit" className="w-full" disabled={isSubmitting}>
-                            {isSubmitting ? (
-                            <>
-                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                Saving...
-                            </>
-                            ) : (
-                            'Continue'
-                            )}
-                        </Button>
-                    </CardFooter>
                 </Card>
+
+                {user.role === 'issuer' && (
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Business Information</CardTitle>
+                            <CardDescription>This information may be required for KYB purposes.</CardDescription>
+                        </CardHeader>
+                        <CardContent className="pt-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <FormField
+                                    control={form.control}
+                                    name="businessName"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                        <FormLabel>Company Name</FormLabel>
+                                        <FormControl>
+                                            <Input placeholder="e.g. Awesome Inc." {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name="countryOfJurisdiction"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                        <FormLabel>Country of Jurisdiction</FormLabel>
+                                        <Select onValueChange={field.onChange} value={field.value}>
+                                            <FormControl>
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="Select a country" />
+                                                </SelectTrigger>
+                                            </FormControl>
+                                            <SelectContent>
+                                                {countries.map(country => (
+                                                    <SelectItem key={country.value} value={country.value}>
+                                                        {country.label}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                        <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name="industry"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                        <FormLabel>Industry</FormLabel>
+                                        <Select onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
+                                            <FormControl>
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="Select an industry" />
+                                                </SelectTrigger>
+                                            </FormControl>
+                                            <SelectContent>
+                                                {industries.map(industry => (
+                                                    <SelectItem key={industry.value} value={industry.value}>
+                                                        {industry.label}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                        <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name="employeeRange"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                        <FormLabel>Number of Employees</FormLabel>
+                                        <Select onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
+                                            <FormControl>
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="Select a range" />
+                                                </SelectTrigger>
+                                            </FormControl>
+                                            <SelectContent>
+                                                {employeeRanges.map(range => (
+                                                    <SelectItem key={range.value} value={range.value}>
+                                                        {range.label}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                        <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <div className="md:col-span-2">
+                                     <FormField
+                                        control={form.control}
+                                        name="website"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                            <FormLabel>Company Website</FormLabel>
+                                            <FormControl>
+                                                <Input placeholder="e.g. https://awesomeinc.com" {...field} />
+                                            </FormControl>
+                                            <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+                )}
+
+                <Button type="submit" className="w-full" disabled={isSubmitting}>
+                    {isSubmitting ? (
+                    <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Saving...
+                    </>
+                    ) : (
+                    'Continue'
+                    )}
+                </Button>
             </form>
         </Form>
       </div>

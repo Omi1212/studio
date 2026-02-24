@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -55,7 +56,6 @@ export default function VerifyAccountPage() {
     const { toast } = useToast();
 
     const [emailCooldown, setEmailCooldown] = useState(30);
-    const [phoneCooldown, setPhoneCooldown] = useState(30);
 
     useEffect(() => {
         const storedUser = localStorage.getItem('currentUser');
@@ -74,21 +74,9 @@ export default function VerifyAccountPage() {
         }
     }, [emailCooldown]);
     
-    useEffect(() => {
-        if(phoneCooldown > 0) {
-            const timer = setTimeout(() => setPhoneCooldown(phoneCooldown - 1), 1000);
-            return () => clearTimeout(timer);
-        }
-    }, [phoneCooldown]);
-
     const handleResendEmail = () => {
         setEmailCooldown(30);
         toast({ title: "Code Resent", description: "A new verification code has been sent to your email." });
-    };
-
-    const handleResendPhone = () => {
-        setPhoneCooldown(30);
-         toast({ title: "Code Resent", description: "A new verification code has been sent to your phone." });
     };
 
     const handleConfirm = async () => {
@@ -98,10 +86,10 @@ export default function VerifyAccountPage() {
         
         toast({
             title: "Account Verified!",
-            description: "You are all set. Welcome!",
+            description: "Please complete your profile.",
         });
 
-        router.push('/dashboard');
+        router.push('/signup/onboarding/personal-info');
         setIsSubmitting(false);
     };
 
@@ -115,7 +103,7 @@ export default function VerifyAccountPage() {
                 <div className="text-center">
                     <h1 className="text-3xl font-headline font-semibold">Verify Your Account</h1>
                     <p className="text-muted-foreground mt-2">
-                        To finish setting up your account, please verify your email and phone number.
+                        To finish setting up your account, please verify your email.
                     </p>
                 </div>
                 <Card>
@@ -124,11 +112,6 @@ export default function VerifyAccountPage() {
                             target={user.email}
                             onResend={handleResendEmail}
                             resendCooldown={emailCooldown}
-                        />
-                         <VerificationSection 
-                            target={user.phone || ''}
-                            onResend={handleResendPhone}
-                            resendCooldown={phoneCooldown}
                         />
                     </CardContent>
                     <CardFooter className="flex flex-col gap-2">

@@ -1,0 +1,226 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import type { User } from '@/lib/types';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Plus } from 'lucide-react';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import Link from 'next/link';
+
+type Invitation = {
+  id: number;
+  email: string;
+  role: string;
+};
+
+// Mock user data to simulate a team
+const mockTeamMembers: (Partial<User> & { displayRole: string })[] = [
+    {
+        id: 'team-member-1',
+        name: 'Admin User',
+        email: 'admin.user@example.com',
+        role: 'agent',
+        displayRole: 'Admin'
+    },
+    {
+        id: 'team-member-2',
+        name: 'Operations User',
+        email: 'operations.user@example.com',
+        role: 'agent',
+        displayRole: 'Operations'
+    },
+    {
+        id: 'team-member-3',
+        name: 'Sales User',
+        email: 'sales.user@example.com',
+        role: 'agent',
+        displayRole: 'Sales'
+    },
+    {
+        id: 'team-member-4',
+        name: 'Support User',
+        email: 'support.user@example.com',
+        role: 'agent',
+        displayRole: 'Technical Support'
+    }
+];
+
+function RoleBadge({ role, isOwner }: { role: string, isOwner?: boolean }) {
+    let roleText: string;
+    if (isOwner) {
+        roleText = 'OWNER';
+    } else {
+        switch(role.toLowerCase()) {
+            case 'admin':
+                roleText = 'Admin';
+                break;
+            case 'operations':
+                roleText = 'Operations';
+                break;
+            case 'sales':
+                roleText = 'Sales';
+                break;
+            case 'support':
+                roleText = 'Technical Support';
+                break;
+            case 'technical support':
+                roleText = 'Technical Support';
+                break;
+            case 'collaborator': // for old data
+                 roleText = 'Collaborator';
+                 break;
+            default:
+                roleText = role.charAt(0).toUpperCase() + role.slice(1);
+        }
+    }
+
+    let badgeClass = "text-primary border-primary bg-primary/10";
+    
+    return (
+        <Badge variant="outline" className={badgeClass}>
+            {roleText}
+        </Badge>
+    );
+}
+
+export default function AccessList() {
+  const [user, setUser] = useState<User | null>(null);
+  const [team, setTeam] = useState<(Partial<User> & { displayRole: string })[]>([]);
+  const [pendingInvitations, setPendingInvitations] = useState<Invitation[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    setLoading(true);
+    const storedUser = localStorage.getItem('currentUser');
+    const storedInvitations = JSON.parse(localStorage.getItem('pendingInvitations') || '[]');
+    setPendingInvitations(storedInvitations);
+
+    if (storedUser) {
+        const parsedUser = JSON.parse(storedUser);
+        setUser(parsedUser);
+        
+        const fullTeam = [
+            { ...parsedUser, displayRole: 'Owner' },
+            ...mockTeamMembers,
+        ];
+        setTeam(fullTeam);
+
+    } else {
+        // Fallback for when no user is logged in
+        const fullTeam = [
+            ...mockTeamMembers
+        ];
+         setTeam(fullTeam);
+    }
+    setLoading(false);
+  }, []);
+
+  if (loading) {
+    return (
+        <Card>
+            <CardContent className="p-6 text-center text-muted-foreground">
+                Loading...
+            </CardContent>
+        </Card>
+    );
+  }
+
+  return (
+    <Tabs defaultValue="users">
+        <div className="flex justify-between items-center mb-4">
+            <TabsList>
+                <TabsTrigger value="users">Users</TabsTrigger>
+                <TabsTrigger value="invitations">Invitations</TabsTrigger>
+            </TabsList>
+             <Button asChild>
+                <Link href="/settings/users-and-access/invite">
+                    <Plus className="mr-2 h-4 w-4" />
+                    Invite users
+                </Link>
+            </Button>
+        </div>
+      
+        <TabsContent value="users">
+             <Card>
+                <Table>
+                    <TableHeader>
+                    <TableRow>
+                        <TableHead>Name</TableHead>
+                        <TableHead>Email</TableHead>
+                        <TableHead>Role</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                    {team.length > 0 ? (
+                        team.map((member, index) => (
+                             <TableRow key={member.id}>
+                                <TableCell className="font-medium">{member.name}</TableCell>
+                                <TableCell>{member.email}</TableCell>
+                                <TableCell>
+                                    <RoleBadge role={member.displayRole} isOwner={member.displayRole === 'Owner'} />
+                                </TableCell>
+                                <TableCell className="text-right">
+                                    {member.displayRole !== 'Owner' && (
+                                        <Button variant="outline" size="sm">
+                                            Edit
+                                        </Button>
+                                    )}
+                                </TableCell>
+                            </TableRow>
+                        ))
+                    ) : (
+                         <TableRow>
+                            <TableCell colSpan={4} className="h-24 text-center">
+                                No users found.
+                            </TableCell>
+                        </TableRow>
+                    )}
+                    </TableBody>
+                </Table>
+            </Card>
+        </TabsContent>
+        <TabsContent value="invitations">
+            <Card>
+                {pendingInvitations.length > 0 ? (
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Email</TableHead>
+                                <TableHead>Role</TableHead>
+                                <TableHead>Status</TableHead>
+                                <TableHead className="text-right">Actions</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {pendingInvitations.map((invitation) => (
+                                <TableRow key={invitation.id}>
+                                    <TableCell className="font-medium">{invitation.email}</TableCell>
+                                    <TableCell>
+                                        <RoleBadge role={invitation.role} />
+                                    </TableCell>
+                                    <TableCell>
+                                        <Badge variant="outline" className="text-yellow-400 border-yellow-400">Pending</Badge>
+                                    </TableCell>
+                                    <TableCell className="text-right">
+                                        <Button variant="outline" size="sm">
+                                            Resend
+                                        </Button>
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                ) : (
+                    <CardContent className="p-6 text-center text-muted-foreground">
+                        No pending invitations.
+                    </CardContent>
+                )}
+            </Card>
+        </TabsContent>
+    </Tabs>
+  );
+}

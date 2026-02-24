@@ -14,6 +14,7 @@ import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import Image from 'next/image';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
 const integrations = [
   {
@@ -93,12 +94,31 @@ export default function IntegrationsPage() {
                 </h1>
             </div>
             
-            <div className="max-w-4xl mx-auto space-y-6">
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {integrations.map((integration) => (
-                        <IntegrationCard key={integration.name} {...integration} />
-                    ))}
-                </div>
+            <div className="max-w-4xl mx-auto">
+                <Accordion type="single" collapsible defaultValue="crm-integrations" className="w-full">
+                    <AccordionItem value="crm-integrations" className="border-b-0">
+                        <Card>
+                            <AccordionTrigger className="p-6 hover:no-underline text-left">
+                                <div className="flex items-center gap-4">
+                                    <Plug className="h-6 w-6" />
+                                    <div className="space-y-1 text-left">
+                                        <h3 className="text-lg font-semibold leading-none tracking-tight">CRM Integrations</h3>
+                                        <p className="text-sm text-muted-foreground">
+                                            Connect and manage third-party applications.
+                                        </p>
+                                    </div>
+                                </div>
+                            </AccordionTrigger>
+                             <AccordionContent className="p-6 pt-0">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                                    {integrations.map((integration) => (
+                                        <IntegrationCard key={integration.name} {...integration} />
+                                    ))}
+                                </div>
+                            </AccordionContent>
+                        </Card>
+                    </AccordionItem>
+                </Accordion>
             </div>
           </main>
         </div>

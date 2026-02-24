@@ -2,29 +2,19 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import type { ViewMode, User } from '@/lib/types';
+import type { ViewMode, User, TokenDetails } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/card';
 import { Avatar, AvatarFallback } from '../ui/avatar';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
-import { MoreVertical, LayoutGrid, List, Search, Check, X, FilePenLine } from 'lucide-react';
+import { LayoutGrid, List, Search, FilePenLine } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
 import Link from 'next/link';
 import { useToast } from '@/hooks/use-toast';
 import { Input } from '../ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+import KybBanner from '@/components/dashboard/kyb-banner';
+import IdentityProvidersBanner from '@/components/dashboard/identity-providers-banner';
 
 type WhitelistRequest = User;
 
@@ -43,7 +33,7 @@ function getStatusBadge(request: WhitelistRequest) {
   }
 }
 
-function RequestCard({ request, onApprove, onReject }: { request: WhitelistRequest, onApprove: (id: string) => void, onReject: (id: string) => void }) {
+function RequestCard({ request }: { request: WhitelistRequest }) {
   return (
     <Card>
       <CardHeader>
@@ -57,21 +47,6 @@ function RequestCard({ request, onApprove, onReject }: { request: WhitelistReque
               <CardDescription>{request.email}</CardDescription>
             </div>
           </div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
-                <MoreVertical className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem asChild>
-                <Link href={`/whitelisting-requests/${request.id}`}>View Details</Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link href={`/whitelisting-requests/${request.id}/edit`}>Edit</Link>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
         </div>
       </CardHeader>
       <CardContent>
@@ -90,35 +65,16 @@ function RequestCard({ request, onApprove, onReject }: { request: WhitelistReque
             {getStatusBadge(request)}
         </div>
       </CardContent>
-      {request.kycStatus === 'pending' && (
-        <CardFooter className="flex gap-2">
-            <AlertDialog>
-                <AlertDialogTrigger asChild>
-                    <Button variant="outline" className="w-full">
-                        <X className="mr-2 h-4 w-4" /> Reject
-                    </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                    <AlertDialogHeader>
-                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                        <AlertDialogDescription>This will reject the request from {request.name}. This cannot be undone.</AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction onClick={() => onReject(request.id)}>Confirm Reject</AlertDialogAction>
-                    </AlertDialogFooter>
-                </AlertDialogContent>
-            </AlertDialog>
-            <Button className="w-full" onClick={() => onApprove(request.id)}>
-                <Check className="mr-2 h-4 w-4" /> Approve
-            </Button>
-        </CardFooter>
-      )}
+      <CardFooter>
+          <Button variant="outline" className="w-full" asChild>
+            <Link href={`/whitelisting-requests/${request.id}`}>View</Link>
+          </Button>
+      </CardFooter>
     </Card>
   );
 }
 
-function RequestTableRow({ request, onApprove, onReject }: { request: WhitelistRequest, onApprove: (id: string) => void, onReject: (id: string) => void }) {
+function RequestTableRow({ request }: { request: WhitelistRequest }) {
   const router = useRouter();
   return (
     <TableRow onClick={() => router.push(`/whitelisting-requests/${request.id}`)} className="cursor-pointer">
@@ -134,50 +90,16 @@ function RequestTableRow({ request, onApprove, onReject }: { request: WhitelistR
         </div>
       </TableCell>
        <TableCell className="hidden lg:table-cell">
-        <span className="font-mono">{request.walletAddress.slice(0, 15)}...{request.walletAddress.slice(-4)}</span>
+        <span className="font-mono">{request.walletAddress.slice(0, 7)}...{request.walletAddress.slice(-4)}</span>
        </TableCell>
        <TableCell className="hidden md:table-cell">
         {request.joinedDate ? new Date(request.joinedDate).toLocaleDateString() : 'N/A'}
        </TableCell>
        <TableCell className="hidden sm:table-cell">{getStatusBadge(request)}</TableCell>
       <TableCell className="text-right">
-        <div className="flex items-center justify-end gap-2" onClick={(e) => e.stopPropagation()}>
-            {request.kycStatus === 'pending' && (
-                <>
-                    <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                            <Button size="sm" variant="outline">Reject</Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                            <AlertDialogHeader>
-                                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                                <AlertDialogDescription>This will reject the request from {request.name}. This cannot be undone.</AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction onClick={() => onReject(request.id)}>Confirm Reject</AlertDialogAction>
-                            </AlertDialogFooter>
-                        </AlertDialogContent>
-                    </AlertDialog>
-                    <Button size="sm" onClick={() => onApprove(request.id)}>Approve</Button>
-                </>
-            )}
-            <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8">
-                <MoreVertical className="h-4 w-4" />
-                </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-                <DropdownMenuItem asChild>
-                <Link href={`/whitelisting-requests/${request.id}`}>View Details</Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                <Link href={`/whitelisting-requests/${request.id}/edit`}>Edit</Link>
-                </DropdownMenuItem>
-            </DropdownMenuContent>
-            </DropdownMenu>
-        </div>
+        <Button asChild variant="outline" size="sm" onClick={(e) => e.stopPropagation()}>
+            <Link href={`/whitelisting-requests/${request.id}`}>View</Link>
+        </Button>
       </TableCell>
     </TableRow>
   );
@@ -188,12 +110,51 @@ export default function RequestList({ view, setView }: { view: ViewMode, setView
   const [requests, setRequests] = useState<WhitelistRequest[]>([]);
   const [totalRequests, setTotalRequests] = useState(0);
   const [loading, setLoading] = useState(true);
-  const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('pending');
   const [currentPage, setCurrentPage] = useState(1);
+  const [selectedToken, setSelectedToken] = useState<TokenDetails | null>(null);
+  const [userRole, setUserRole] = useState<string | null>(null);
 
   useEffect(() => {
+    const role = localStorage.getItem('userRole');
+    setUserRole(role);
+    
+    const handleTokenChange = async () => {
+        const storedTokenId = localStorage.getItem('selectedTokenId');
+        if (storedTokenId) {
+            try {
+                const response = await fetch(`/api/tokens/${storedTokenId}`);
+                if (response.ok) {
+                    setSelectedToken(await response.json());
+                } else {
+                    setSelectedToken(null);
+                }
+            } catch (error) {
+                console.error("Failed to fetch selected token:", error);
+                setSelectedToken(null);
+            }
+        } else {
+            setSelectedToken(null);
+        }
+    };
+
+    handleTokenChange();
+    window.addEventListener('tokenChanged', handleTokenChange);
+
+    return () => {
+        window.removeEventListener('tokenChanged', handleTokenChange);
+    };
+  }, []);
+
+  useEffect(() => {
+    if ((userRole === 'issuer' || userRole === 'agent') && !selectedToken) {
+        setRequests([]);
+        setTotalRequests(0);
+        setLoading(false);
+        return;
+    }
+
     setLoading(true);
     const params = new URLSearchParams({
         page: currentPage.toString(),
@@ -220,7 +181,7 @@ export default function RequestList({ view, setView }: { view: ViewMode, setView
         }
     };
     fetchRequests();
-  }, [currentPage, searchQuery, statusFilter]);
+  }, [currentPage, searchQuery, statusFilter, userRole, selectedToken]);
 
   const totalPages = Math.ceil(totalRequests / ITEMS_PER_PAGE);
 
@@ -228,42 +189,6 @@ export default function RequestList({ view, setView }: { view: ViewMode, setView
     if (page >= 1 && page <= totalPages) {
       setCurrentPage(page);
     }
-  };
-
-
-  const updateRequestStatus = async (id: string, status: 'verified' | 'rejected') => {
-    try {
-      const response = await fetch(`/api/investors/${id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ kycStatus: status }),
-      });
-      if (!response.ok) throw new Error('Failed to update request');
-      
-      const updatedRequest = await response.json();
-      setRequests(prev => prev.map(req => (req.id === id ? updatedRequest : req)));
-
-      toast({
-          title: `Request ${status === 'verified' ? 'Approved' : 'Rejected'}`,
-          description: `The request for "${updatedRequest.name}" has been updated.`
-      });
-
-    } catch (error) {
-      console.error(error);
-      toast({
-          variant: 'destructive',
-          title: 'Error',
-          description: 'Could not update the request.'
-      });
-    }
-  }
-
-  const handleApprove = (id: string) => {
-    updateRequestStatus(id, 'verified');
-  };
-  
-  const handleReject = (id: string) => {
-    updateRequestStatus(id, 'rejected');
   };
 
   if (loading) {
@@ -275,6 +200,25 @@ export default function RequestList({ view, setView }: { view: ViewMode, setView
     );
   }
   
+  if ((userRole === 'issuer' || userRole === 'agent') && !selectedToken) {
+    return (
+      <div className="space-y-4">
+        <div className="flex justify-between items-center">
+            <h1 className="text-3xl font-headline font-semibold">Whitelisting Requests</h1>
+        </div>
+        <div className="space-y-8">
+            <KybBanner />
+            <IdentityProvidersBanner />
+        </div>
+        <div className="border-dashed border-2 border-muted-foreground/50 rounded-lg h-96 flex flex-col items-center justify-center text-center p-4 mt-8">
+            <FilePenLine className="h-16 w-16 text-muted-foreground mb-4" />
+            <h2 className="text-xl font-semibold mb-2">No token selected or found</h2>
+            <p className="text-muted-foreground mb-4">Please select a token from the sidebar to view whitelisting requests.</p>
+        </div>
+      </div>
+    );
+  }
+
   const renderPagination = () => {
     if (totalPages <= 1) return null;
     return (
@@ -367,7 +311,7 @@ export default function RequestList({ view, setView }: { view: ViewMode, setView
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {requests.map(request => (
-              <RequestCard key={request.id} request={request} onApprove={handleApprove} onReject={handleReject} />
+              <RequestCard key={request.id} request={request} />
             ))}
           </div>
           {renderPagination()}
@@ -386,7 +330,7 @@ export default function RequestList({ view, setView }: { view: ViewMode, setView
             </TableHeader>
             <TableBody>
               {requests.map(request => (
-                  <RequestTableRow key={request.id} request={request} onApprove={handleApprove} onReject={handleReject} />
+                  <RequestTableRow key={request.id} request={request} />
               ))}
             </TableBody>
           </Table>

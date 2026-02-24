@@ -28,7 +28,13 @@ const initialData: Order[] = [
         amount: 200,
         price: 75.50,
         date: '2024-07-27',
-        status: 'completed'
+        status: 'completed',
+        paymentDetails: {
+            method: 'Bitcoin',
+            network: 'Lightning',
+            cryptoAddress: 'lnbc1190n1p5kujxfpp59mejv93rk75hctd5t398fkfsncgzdk3c9d5y9mav5nelde4dul3qdp2v3shyanfde6xjctwdd5kjgzsfafjq5mpd3jhxgpsxycqzpuxqrwzqsp5u88azqdmchu3vz92hfh0zs0a53k9wh2vezrnejwem0fw5892mf0s9qxpqysgqratk74qpdt23smxz9zpl8n8tdx8rxakp5r9nehrktw4eskr9vfa9dj9rcld8krf0ra875ep4tucg2ven0v7zs2v35huwvzhh3lapcfqp7z72zt',
+            transactionId: 'btc-tx-xxxxxxxx'
+        }
     },
     {
         id: 'order-003',

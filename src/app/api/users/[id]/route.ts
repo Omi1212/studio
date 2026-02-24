@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { usersData } from '../data';
 import { z } from 'zod';
+import { companiesData } from '../../companies/data';
 
 const patchSchema = z.object({
   name: z.string().min(1, { message: "Name is required" }).optional(),
@@ -8,12 +9,10 @@ const patchSchema = z.object({
   walletAddress: z.string().min(1, { message: "Wallet address is required" }).optional(),
   role: z.enum(['investor', 'issuer', 'agent', 'superadmin']).optional(),
   kycStatus: z.enum(['verified', 'pending', 'rejected']).optional(),
-  kybStatus: z.enum(['verified', 'pending', 'rejected']).optional(),
   kytStatus: z.enum(['verified', 'pending', 'rejected']).optional(),
   status: z.enum(['active', 'inactive']).optional(),
   phone: z.string().optional(),
   kycLevel: z.number().int().optional(),
-  kybLevel: z.number().int().optional(),
   kytLevel: z.number().int().optional(),
   country: z.string().optional(),
   legalName: z.string().optional(),
@@ -21,7 +20,9 @@ const patchSchema = z.object({
   idDoc: z.string().optional(),
   address: z.string().optional(),
   city: z.string().optional(),
-  businessName: z.string().optional(),
+  companyId: z.string().optional(),
+  language: z.string().optional(),
+  currency: z.string().optional(),
 }).partial();
 
 export async function GET(
@@ -47,6 +48,7 @@ export async function PATCH(
 
     const body = await request.json();
     const validatedData = patchSchema.parse(body);
+
     usersData[userIndex] = { ...usersData[userIndex], ...validatedData };
 
     return NextResponse.json(usersData[userIndex]);

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import type { TokenDetails } from '@/lib/types';
+import type { TokenDetails, User, Issuer } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/card';
 import TokenIcon from '../ui/token-icon';
 import { Badge } from '../ui/badge';
@@ -11,6 +11,8 @@ import { Rocket, LayoutGrid, List } from 'lucide-react';
 import Link from 'next/link';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
 import type { ViewMode } from '@/app/issue-token/page';
+import KybBanner from '@/components/dashboard/kyb-banner';
+import IdentityProvidersBanner from '@/components/dashboard/identity-providers-banner';
 
 const ITEMS_PER_PAGE = 6;
 
@@ -144,27 +146,66 @@ export default function ExistingTokens({ view, setView }: { view: ViewMode, setV
 
   useEffect(() => {
     setLoading(true);
-    const params = new URLSearchParams({
-        page: currentPage.toString(),
-        perPage: ITEMS_PER_PAGE.toString(),
-    });
-    fetch(`/api/tokens?${params.toString()}`)
-        .then(res => res.json())
-        .then((tokensResponse) => {
-            const mappedTokens = tokensResponse.data.map((t: any) => ({
-            ...t,
-            decimals: t.decimals ?? 0,
-            isFreezable: t.isFreezable ?? false,
-            publicKey: t.publicKey ?? `02f...${t.id.slice(-10)}`,
-            tokenName: t.tokenName || 'Untitled Token',
-            tokenTicker: t.tokenTicker || '---',
-            network: t.network || 'unknown',
-            maxSupply: t.maxSupply || 0,
+
+    const fetchIssuerAndTokens = async () => {
+        const userStr = localStorage.getItem('currentUser');
+        if (!userStr) {
+            setLoading(false);
+            return;
+        }
+        const currentUser: User = JSON.parse(userStr);
+
+        if (currentUser.role !== 'issuer') {
+            setTokens([]);
+            setTotalTokens(0);
+            setLoading(false);
+            return;
+        }
+
+        try {
+            const issuersRes = await fetch('/api/issuers?perPage=999');
+            if (!issuersRes.ok) throw new Error("Failed to fetch issuers");
+            const issuersData = await issuersRes.json();
+            const currentIssuer = (issuersData.data || []).find((i: Issuer) => i.email === currentUser.email);
+            
+            if (!currentIssuer) {
+                setTokens([]);
+                setTotalTokens(0);
+                return;
+            }
+
+            const params = new URLSearchParams({
+                page: currentPage.toString(),
+                perPage: ITEMS_PER_PAGE.toString(),
+                issuerId: currentIssuer.id
+            });
+            const tokensResponse = await fetch(`/api/tokens?${params.toString()}`);
+            if (!tokensResponse.ok) throw new Error("Failed to fetch tokens");
+            const tokensData = await tokensResponse.json();
+            
+            const mappedTokens = (tokensData.data || []).map((t: any) => ({
+                ...t,
+                decimals: t.decimals ?? 0,
+                isFreezable: t.isFreezable ?? false,
+                publicKey: t.publicKey ?? `02f...${t.id.slice(-10)}`,
+                tokenName: t.tokenName || 'Untitled Token',
+                tokenTicker: t.tokenTicker || '---',
+                network: t.network || 'unknown',
+                maxSupply: t.maxSupply || 0,
             }));
             setTokens(mappedTokens);
-            setTotalTokens(tokensResponse.meta.total);
-        })
-        .finally(() => setLoading(false));
+            setTotalTokens(tokensData.meta.total);
+
+        } catch (error) {
+            console.error("Failed to fetch data:", error);
+            setTokens([]);
+            setTotalTokens(0);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    fetchIssuerAndTokens();
   }, [currentPage]);
   
   const totalPages = Math.ceil(totalTokens / ITEMS_PER_PAGE);
@@ -223,13 +264,17 @@ export default function ExistingTokens({ view, setView }: { view: ViewMode, setV
   
   if (tokens.length === 0) {
       return (
-        <div className="border-dashed border-2 border-muted-foreground/50 rounded-lg h-96 flex flex-col items-center justify-center text-center p-4">
-            <Rocket className="h-16 w-16 text-muted-foreground mb-4" />
-            <h2 className="text-xl font-semibold mb-2">No tokens found</h2>
-            <p className="text-muted-foreground mb-4">Get started by launching your first token.</p>
-            <Button asChild>
-                <Link href="/issue-token/new">Create New Token</Link>
-            </Button>
+        <div className="space-y-8">
+          <KybBanner />
+          <IdentityProvidersBanner />
+          <div className="border-dashed border-2 border-muted-foreground/50 rounded-lg h-96 flex flex-col items-center justify-center text-center p-4">
+              <Rocket className="h-16 w-16 text-muted-foreground mb-4" />
+              <h2 className="text-xl font-semibold mb-2">No tokens found</h2>
+              <p className="text-muted-foreground mb-4">Get started by launching your first token.</p>
+              <Button asChild>
+                  <Link href="/issue-token/new">Create New Token</Link>
+              </Button>
+          </div>
         </div>
       );
   }
