@@ -116,7 +116,7 @@ const initialData: User[] = [
         country: 'US',
         city: 'San Francisco',
         legalName: 'Alice Johnson Inc.',
-        companyId: ['issuer-a-comp'],
+        companyId: ['issuer-a-comp', 'issuer-b-comp'],
     },
     {
         id: 'iss-b',
