@@ -19,7 +19,7 @@ import {
   MoreVertical,
 } from 'lucide-react';
 import { usePathname } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -104,6 +104,11 @@ export default function SidebarNav() {
   const [companies, setCompanies] = useState<Company[]>([]);
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
 
+  const companyAssets = useMemo(() => {
+    if (!selectedCompany) return [];
+    return allAssets.filter(asset => asset.companyId === selectedCompany.id);
+  }, [allAssets, selectedCompany]);
+
 
   const fetchData = React.useCallback(async () => {
     const role = localStorage.getItem('userRole');
@@ -173,7 +178,7 @@ export default function SidebarNav() {
       if (!currentCompany && companyList.length > 0) {
         currentCompany = companyList[0];
         localStorage.setItem('selectedCompanyId', currentCompany.id);
-      } else if (!currentCompany) {
+      } else if (companyList.length === 0) {
         localStorage.removeItem('selectedCompanyId');
       }
       
@@ -188,28 +193,29 @@ export default function SidebarNav() {
         network: Array.isArray(t.network) ? t.network : [t.network].filter(Boolean),
       }));
       setAllAssets(combinedAssets);
+      
+      const assetsForCompany = currentCompany
+        ? combinedAssets.filter(asset => asset.companyId === currentCompany.id)
+        : [];
 
       const storedAssetId = localStorage.getItem('selectedAssetId');
+      let newSelectedAsset: AssetDetails | null = null;
       if (storedAssetId) {
-        const foundAsset = combinedAssets.find((t) => t.id === storedAssetId);
-        if (foundAsset) {
-          setSelectedAsset(foundAsset);
-        } else if (combinedAssets.length > 0) {
-          const firstAsset = combinedAssets[0];
-          setSelectedAsset(firstAsset);
-          localStorage.setItem('selectedAssetId', firstAsset.id);
-        } else {
-          setSelectedAsset(null);
-          localStorage.removeItem('selectedAssetId');
-        }
-      } else if (combinedAssets.length > 0) {
-        const firstAsset = combinedAssets[0];
-        setSelectedAsset(firstAsset);
-        localStorage.setItem('selectedAssetId', firstAsset.id);
+        newSelectedAsset = assetsForCompany.find(asset => asset.id === storedAssetId) || null;
+      }
+      
+      if (!newSelectedAsset && assetsForCompany.length > 0) {
+        newSelectedAsset = assetsForCompany[0];
+      }
+      
+      setSelectedAsset(newSelectedAsset);
+
+      if (newSelectedAsset) {
+        localStorage.setItem('selectedAssetId', newSelectedAsset.id);
       } else {
-        setSelectedAsset(null);
         localStorage.removeItem('selectedAssetId');
       }
+
     } catch (error) {
       console.error('Error fetching sidebar data:', error);
     }
@@ -314,7 +320,7 @@ export default function SidebarNav() {
 
       {isClient && (userRole === 'issuer' || userRole === 'agent') && (
         <div className="px-3 pb-3">
-          {allAssets.length > 0 && selectedAsset ? (
+          {companyAssets.length > 0 && selectedAsset ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
@@ -338,7 +344,7 @@ export default function SidebarNav() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-[--radix-dropdown-menu-trigger-width]">
-                {allAssets.map((asset) => (
+                {companyAssets.map((asset) => (
                   <DropdownMenuItem
                     key={asset.id}
                     onSelect={() => handleAssetSelect(asset)}
