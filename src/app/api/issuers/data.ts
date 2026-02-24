@@ -7,25 +7,25 @@ declare global {
 
 const initialData: Issuer[] = [
     {
-        id: 'iss-001',
-        name: 'Prime Issuance',
-        email: 'contact@primeissuance.com',
-        walletAddress: 'spark1q...iss1pr',
+        id: 'iss-a',
+        name: 'Issuer A',
+        email: 'issuera@gmail.com',
+        walletAddress: 'spark1q...issuera',
         status: 'active',
     },
     {
-        id: 'iss-002',
-        name: 'Emisores de Activos Digitales',
-        email: 'issuer@gmail.com',
-        walletAddress: 'spark1q...user02',
+        id: 'iss-b',
+        name: 'Issuer B',
+        email: 'issuerb@gmail.com',
+        walletAddress: 'spark1q...issuerb',
         status: 'active',
     },
     {
-        id: 'iss-003',
-        name: 'Digital Assets Inc.',
-        email: 'admin@digitalassets.com',
-        walletAddress: 'spark1q...iss3da',
-        status: 'inactive',
+        id: 'iss-c',
+        name: 'Issuer C',
+        email: 'issuerc@gmail.com',
+        walletAddress: 'spark1q...issuerc',
+        status: 'active',
     },
 ];
 

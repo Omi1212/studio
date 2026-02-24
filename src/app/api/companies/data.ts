@@ -6,8 +6,8 @@ declare global {
 }
 
 const initialData: Company[] = [
-  { 
-    id: 'bstratus-securities', 
+  {
+    id: 'bstratus-securities',
     name: 'Bstratus Securities',
     legalName: 'Bstratus Securities LLC',
     address: '1 Wall Street, New York, NY',
@@ -20,8 +20,8 @@ const initialData: Company[] = [
     countryOfJurisdiction: 'US',
     complianceProviders: ['Sumsub', 'Onfido', 'Kyckr'],
   },
-  { 
-    id: 'neobank-sa-de-cv', 
+  {
+    id: 'neobank-sa-de-cv',
     name: 'NeoBank SA de CV',
     legalName: 'NeoBank, S.A. de C.V.',
     address: 'Plaza Futura, San Salvador, El Salvador',
@@ -33,6 +33,48 @@ const initialData: Company[] = [
     employeeRange: '1-10',
     countryOfJurisdiction: 'SV',
     complianceProviders: ['Didit', 'Sumsub'],
+  },
+  {
+    id: 'issuer-a-comp',
+    name: 'Issuer A',
+    legalName: 'Issuer A Inc.',
+    address: '123 Main Street, San Francisco, CA',
+    registrationId: 'IA-INC-11111',
+    industry: 'Technology',
+    kybStatus: 'verified',
+    kybLevel: 3,
+    website: 'https://issuera.com',
+    employeeRange: '11-50',
+    countryOfJurisdiction: 'US',
+    complianceProviders: ['Sumsub', 'Onfido', 'Chainalysis'],
+  },
+  {
+    id: 'issuer-b-comp',
+    name: 'Issuer B',
+    legalName: 'Issuer B Solutions',
+    address: '456 Oak Avenue, London, UK',
+    registrationId: 'IB-SOL-22222',
+    industry: 'Real Estate',
+    kybStatus: 'verified',
+    kybLevel: 3,
+    website: 'https://issuerb.co.uk',
+    employeeRange: '51-200',
+    countryOfJurisdiction: 'GB',
+    complianceProviders: ['Sumsub', 'Kyckr', 'TRM Labs'],
+  },
+  {
+    id: 'issuer-c-comp',
+    name: 'Issuer C',
+    legalName: 'Issuer C Holdings',
+    address: '789 Pine Road, Singapore',
+    registrationId: 'IC-HOL-33333',
+    industry: 'Venture Capital',
+    kybStatus: 'verified',
+    kybLevel: 3,
+    website: 'https://issuerc.sg',
+    employeeRange: '1-10',
+    countryOfJurisdiction: 'SG',
+    complianceProviders: ['Didit', 'Onfido', 'Scorechain'],
   },
 ];
 

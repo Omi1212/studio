@@ -42,38 +42,6 @@ export async function GET(request: Request) {
   // Deep copy to avoid mutating the original data source
   const investors: User[] = JSON.parse(JSON.stringify(investorsData));
 
-  // Dynamically compute holdings for investors where it's not pre-populated
-  investors.forEach(investor => {
-    if ((!investor.holdings || investor.holdings.length === 0) && investor.transactions && investor.transactions.length > 0) {
-      const holdingsMap = new Map<string, any>();
-
-      investor.transactions.forEach(tx => {
-        const { asset, type, amount, price } = tx;
-        if (!asset || !asset.id) return;
-
-        const currentHolding = holdingsMap.get(asset.id) || {
-          assetId: asset.id,
-          assetName: asset.assetName,
-          assetTicker: asset.assetTicker,
-          amount: 0,
-          value: price,
-        };
-        
-        if (type === 'Buy') {
-          currentHolding.amount += amount;
-        } else if (type === 'Sell') {
-          currentHolding.amount -= amount;
-        }
-        
-        currentHolding.value = price; // Use the latest transaction's price as value
-        holdingsMap.set(asset.id, currentHolding);
-      });
-      
-      investor.holdings = Array.from(holdingsMap.values()).filter(h => h.amount > 0);
-    }
-  });
-
-
   let filteredInvestors: User[] = investors;
 
   if (onlyVerified === 'true') {
