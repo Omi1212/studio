@@ -76,6 +76,10 @@ function AssetCard({ asset }: { asset: AssetDetails }) {
             <span className="text-muted-foreground">Status</span>
             {getStatusBadge(asset.status)}
         </div>
+         <div className="flex justify-between text-sm mt-2">
+            <span className="text-muted-foreground">Max Supply</span>
+            <span className="font-medium font-mono">{asset.maxSupply ? asset.maxSupply.toLocaleString() : '--'}</span>
+        </div>
         <div className="flex justify-between items-center text-sm mt-2">
             <span className="text-muted-foreground">Network</span>
             <div className="flex items-center gap-2">
@@ -85,10 +89,6 @@ function AssetCard({ asset }: { asset: AssetDetails }) {
                 </div>
               ))}
             </div>
-        </div>
-         <div className="flex justify-between text-sm mt-2">
-            <span className="text-muted-foreground">Max Supply</span>
-            <span className="font-medium font-mono">{asset.maxSupply ? asset.maxSupply.toLocaleString() : '--'}</span>
         </div>
       </CardContent>
       <CardFooter>
