@@ -1,6 +1,7 @@
+
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Sidebar,
@@ -17,6 +18,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
+import type { Company, User } from '@/lib/types';
 
 export default function InviteUserPage() {
   const router = useRouter();
@@ -25,12 +27,25 @@ export default function InviteUserPage() {
     email: '',
     role: '',
   });
+  const [company, setCompany] = useState<Company | null>(null);
+  const [inviter, setInviter] = useState<User | null>(null);
+
+  useEffect(() => {
+    const companyId = localStorage.getItem('selectedCompanyId');
+    const userJson = localStorage.getItem('currentUser');
+    if (companyId) {
+      fetch(`/api/companies/${companyId}`).then(res => res.json()).then(setCompany);
+    }
+    if (userJson) {
+      setInviter(JSON.parse(userJson));
+    }
+  }, []);
 
   const handleInvitationChange = (field: 'email' | 'role', value: string) => {
     setInvitation(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleSendInvitation = () => {
+  const handleSendInvitation = async () => {
     if (!invitation.email) {
       toast({
         variant: 'destructive',
@@ -38,6 +53,14 @@ export default function InviteUserPage() {
         description: 'Please enter an email address to send an invitation.',
       });
       return;
+    }
+    if (!/\S+@\S+\.\S+/.test(invitation.email)) {
+        toast({
+            variant: 'destructive',
+            title: 'Invalid Email',
+            description: 'Please enter a valid email address.',
+        });
+        return;
     }
     if (!invitation.role) {
       toast({
@@ -47,16 +70,33 @@ export default function InviteUserPage() {
       });
       return;
     }
-    // In a real app, you would send the invitation to your backend here.
-    const existingInvitations = JSON.parse(localStorage.getItem('pendingInvitations') || '[]');
-    const newInvitation = { ...invitation, id: Date.now() };
-    localStorage.setItem('pendingInvitations', JSON.stringify([...existingInvitations, newInvitation]));
+    
+    if (!company || !inviter) {
+       toast({ variant: 'destructive', title: 'Error', description: 'Could not identify company or inviter.' });
+       return;
+    }
 
-    toast({
-      title: 'Invitation Sent!',
-      description: 'Your team member has been invited.',
+    const payload = {
+        email: invitation.email,
+        role: invitation.role as any,
+        companyId: company.id,
+        companyName: company.name,
+        inviterName: inviter.name,
+    };
+
+    const response = await fetch('/api/invitations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
     });
-    router.push('/settings/users-and-access');
+
+    if (response.ok) {
+        toast({ title: 'Invitation Sent!', description: 'Your team member has been invited.' });
+        router.push('/settings/users-and-access');
+    } else {
+        const error = await response.json();
+        toast({ variant: 'destructive', title: 'Failed to send invitation', description: error.message || 'Please try again.' });
+    }
   };
 
   return (
@@ -106,10 +146,10 @@ export default function InviteUserPage() {
                                     <SelectValue placeholder="Select a role" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="admin">Admin</SelectItem>
-                                    <SelectItem value="operations">Operations</SelectItem>
-                                    <SelectItem value="sales">Sales</SelectItem>
-                                    <SelectItem value="support">Technical Support</SelectItem>
+                                    <SelectItem value="Admin">Admin</SelectItem>
+                                    <SelectItem value="Operations">Operations</SelectItem>
+                                    <SelectItem value="Sales">Sales</SelectItem>
+                                    <SelectItem value="Technical Support">Technical Support</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>

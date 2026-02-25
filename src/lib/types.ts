@@ -91,6 +91,7 @@ export type User = {
   address?: string;
   city?: string;
   companyId?: string[];
+  companyRoles?: { [companyId: string]: string };
   joinedDate?: string;
   totalInvested?: number;
   isFrozen?: boolean;
@@ -99,3 +100,13 @@ export type User = {
 };
 
 export type SubscriptionStatus = 'none' | 'pending' | 'approved' | 'rejected';
+
+export type Invitation = {
+  id: string;
+  email: string;
+  role: 'Admin' | 'Operations' | 'Sales' | 'Technical Support';
+  companyId: string;
+  companyName: string;
+  inviterName: string;
+  status: 'pending' | 'accepted' | 'rejected';
+}

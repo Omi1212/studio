@@ -117,6 +117,10 @@ const initialData: User[] = [
         city: 'San Francisco',
         legalName: 'Alice Johnson Inc.',
         companyId: ['issuer-a-comp', 'issuer-b-comp'],
+        companyRoles: {
+            'issuer-a-comp': 'Owner',
+            'issuer-b-comp': 'Owner'
+        }
     },
     {
         id: 'iss-b',
@@ -131,7 +135,11 @@ const initialData: User[] = [
         country: 'GB',
         city: 'London',
         legalName: 'Bob Williams Solutions',
-        companyId: ['issuer-b-comp'],
+        companyId: ['issuer-b-comp', 'issuer-a-comp'],
+        companyRoles: {
+            'issuer-b-comp': 'Owner',
+            'issuer-a-comp': 'Admin'
+        }
     },
     {
         id: 'iss-c',
@@ -147,6 +155,9 @@ const initialData: User[] = [
         city: 'Singapore',
         legalName: 'Carol Smith Holdings',
         companyId: ['issuer-c-comp'],
+         companyRoles: {
+            'issuer-c-comp': 'Owner'
+        }
     }
 ];
 
