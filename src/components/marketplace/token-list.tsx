@@ -194,7 +194,6 @@ export default function AssetList() {
           ...t,
           decimals: t.decimals ?? 0,
           isFreezable: t.isFreezable ?? false,
-          publicKey: t.publicKey ?? `02f...${t.id.slice(-10)}`,
           assetName: t.assetName || 'Untitled Asset',
           assetTicker: t.assetTicker || '---',
           network: Array.isArray(t.network) ? t.network : [t.network].filter(Boolean),

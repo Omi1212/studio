@@ -23,7 +23,6 @@ interface PortfolioAsset {
     price: number;
     balance: number;
     assetId: string;
-    publicKey: string;
     maxSupply: number;
     decimals: number;
     network: string;
@@ -125,11 +124,6 @@ function AssetRow({ asset }: { asset: PortfolioAsset }) {
               value={asset.assetId}
               onCopy={() => copyToClipboard(asset.assetId, 'Asset ID')}
             />
-            <InfoRow 
-              label="Asset Public Key" 
-              value={asset.publicKey}
-              onCopy={() => copyToClipboard(asset.publicKey, 'Asset Public Key')}
-            />
             <div className="space-y-1">
               <p className="text-muted-foreground">Max Supply</p>
               <p className="font-medium font-mono">{asset.maxSupply.toLocaleString()}</p>
@@ -209,7 +203,6 @@ export default function AssetsList() {
                     price: holding.value,
                     balance: holding.amount,
                     assetId: holding.assetId,
-                    publicKey: `03a...${holding.assetId.slice(-10)}`, // fake public key
                     maxSupply: assetDetail?.maxSupply || 0,
                     decimals: assetDetail?.decimals || 0,
                     network: assetDetail?.network || 'spark',

@@ -2,7 +2,6 @@ import type { AssetFormValues } from "@/components/issue-asset/issue-asset-form"
 
 export interface AssetDetails extends AssetFormValues {
   id: string;
-  publicKey: string;
   status: 'pending' | 'active' | 'frozen' | 'draft';
   price?: number;
   savedStep?: number;

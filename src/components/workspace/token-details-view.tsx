@@ -212,11 +212,6 @@ export default function AssetDetailsView({
 
             <div className="space-y-4">
               <InfoRow 
-                label="Asset Public Key" 
-                value={asset.publicKey} 
-                onCopy={() => copyToClipboard(asset.publicKey, 'Asset Public Key')} 
-              />
-              <InfoRow 
                 label="Asset ID" 
                 value={asset.id} 
                 onCopy={() => copyToClipboard(asset.id, 'Asset ID')}

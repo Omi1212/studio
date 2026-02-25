@@ -108,7 +108,6 @@ function DashboardRenderer() {
                             network: firstAsset.network,
                             status: firstAsset.status,
                             maxSupply: firstAsset.maxSupply,
-                            publicKey: `02f...${firstAsset.id.slice(-10)}`,
                             decimals: 0,
                             isFreezable: false,
                         };
