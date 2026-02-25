@@ -1,3 +1,4 @@
+
 import type { AssetFormValues } from "@/components/issue-asset/issue-asset-form";
 
 export interface AssetDetails extends AssetFormValues {

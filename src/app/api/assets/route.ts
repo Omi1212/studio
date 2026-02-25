@@ -15,7 +15,6 @@ const assetPostSchema = z.object({
   status: z.enum(['pending', 'active', 'frozen', 'draft']),
   companyId: z.string().optional(),
   assetType: z.string().min(1),
-  eligibleInvestors: z.array(z.string()).optional(),
   subscriptionTime: z.string().optional(),
   minInvestment: z.coerce.number().optional(),
   maxInvestment: z.coerce.number().optional(),

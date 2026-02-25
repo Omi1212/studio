@@ -15,7 +15,6 @@ const patchSchema = z.object({
   network: z.array(z.string()).min(1).optional(),
   companyId: z.string().optional(),
   assetType: z.string().min(1).optional(),
-  eligibleInvestors: z.array(z.string()).optional(),
   subscriptionTime: z.string().optional(),
   minInvestment: z.coerce.number().optional(),
   maxInvestment: z.coerce.number().optional(),

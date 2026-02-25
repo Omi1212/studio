@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useForm } from 'react-hook-form';
@@ -32,7 +33,6 @@ const step1Schema = z.object({
   assetTicker: z.string().min(1, 'Asset ticker is required').max(5, 'Ticker cannot exceed 5 characters'),
   assetIcon: z.any().optional(),
   assetType: z.string().min(1, 'Asset type is required'),
-  eligibleInvestors: z.string().optional(),
   subscriptionTime: z.string().optional(),
   minInvestment: z.coerce.number().optional(),
   maxInvestment: z.coerce.number().optional(),
@@ -58,13 +58,6 @@ const assetTypes = [
     { value: 'other', label: 'Other' },
 ];
 
-const eligibleInvestorTypes = [
-    { value: 'U.S. Qualified Purchaser', label: 'U.S. Qualified Purchaser' },
-    { value: 'Accredited Investor', label: 'Accredited Investor' },
-    { value: 'Retail Investor', label: 'Retail Investor' },
-    { value: 'Institutional Investor', label: 'Institutional Investor' },
-];
-
 export default function Step1AssetInfo({ onNext, defaultValues, formRef }: Step1AssetInfoProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   
@@ -75,7 +68,6 @@ export default function Step1AssetInfo({ onNext, defaultValues, formRef }: Step1
         assetTicker: defaultValues?.assetTicker || '',
         assetIcon: defaultValues?.assetIcon,
         assetType: defaultValues?.assetType || '',
-        eligibleInvestors: defaultValues?.eligibleInvestors?.join(', ') || 'U.S. Qualified Purchaser',
         subscriptionTime: defaultValues?.subscriptionTime || 'Daily',
         minInvestment: defaultValues?.minInvestment || 5000000,
         maxInvestment: defaultValues?.maxInvestment,
@@ -90,7 +82,6 @@ export default function Step1AssetInfo({ onNext, defaultValues, formRef }: Step1
     setIsSubmitting(true);
     const dataToSubmit = {
         ...data,
-        eligibleInvestors: data.eligibleInvestors?.split(',').map(s => s.trim()).filter(Boolean),
     };
     await new Promise((resolve) => setTimeout(resolve, 500)); // Simulate async validation/operation
     onNext(dataToSubmit);
@@ -190,43 +181,6 @@ export default function Step1AssetInfo({ onNext, defaultValues, formRef }: Step1
                 </AccordionTrigger>
                 <AccordionContent className="pt-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <FormField
-                      control={form.control}
-                      name="eligibleInvestors"
-                      render={({ field }) => (
-                        <FormItem>
-                            <div className="flex items-center gap-2">
-                                <FormLabel>Eligible Investors</FormLabel>
-                                <TooltipProvider>
-                                    <Tooltip>
-                                    <TooltipTrigger asChild>
-                                        <Info className="h-4 w-4 text-muted-foreground cursor-pointer" />
-                                    </TooltipTrigger>
-                                    <TooltipContent>
-                                        <p>Define the type of investor eligible for this asset.</p>
-                                    </TooltipContent>
-                                    </Tooltip>
-                                </TooltipProvider>
-                            </div>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                              <FormControl>
-                                  <SelectTrigger>
-                                      <SelectValue placeholder="Select investor type" />
-                                  </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                  {eligibleInvestorTypes.map(type => (
-                                      <SelectItem key={type.value} value={type.value}>
-                                          {type.label}
-                                      </SelectItem>
-                                  ))}
-                              </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
                     <FormField
                         control={form.control}
                         name="subscriptionTime"

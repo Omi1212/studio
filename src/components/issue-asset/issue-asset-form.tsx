@@ -62,7 +62,6 @@ export const formSchema = z.object({
       ".pdf and .doc files are accepted."
     ),
   
-  eligibleInvestors: z.array(z.string()).optional(),
   subscriptionTime: z.string().optional(),
   minInvestment: z.coerce.number().optional(),
   maxInvestment: z.coerce.number().optional(),
