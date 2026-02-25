@@ -95,12 +95,6 @@ function RequestTableRow({ request }: { request: WhitelistRequest }) {
           </div>
         </div>
       </TableCell>
-      <TableCell className="hidden md:table-cell">
-        <div className="flex items-center gap-2">
-            <AssetIcon asset={request.asset} className="h-6 w-6" />
-            <span className="font-medium">{request.asset.assetTicker}</span>
-        </div>
-      </TableCell>
        <TableCell className="hidden lg:table-cell">
         <span className="font-mono">{request.walletAddress.slice(0, 7)}...{request.walletAddress.slice(-4)}</span>
        </TableCell>
@@ -122,6 +116,8 @@ export default function RequestList({ view, setView }: { view: ViewMode, setView
   const [currentPage, setCurrentPage] = useState(1);
   const [userRole, setUserRole] = useState<string | null>(null);
   const [company, setCompany] = useState<Company | null>(null);
+  const [selectedAsset, setSelectedAsset] = useState<AssetDetails | null>(null);
+  const [assetCheckComplete, setAssetCheckComplete] = useState(false);
 
   const [allInvestors, setAllInvestors] = useState<User[]>([]);
   const [allSubscriptions, setAllSubscriptions] = useState<Record<string, Record<string, SubscriptionStatus>>>({});
@@ -162,11 +158,42 @@ export default function RequestList({ view, setView }: { view: ViewMode, setView
     };
   }, []);
 
+  useEffect(() => {
+    if (allAssets.length === 0 && assetCheckComplete) return;
+
+    const handleAssetChange = () => {
+        const storedAssetId = localStorage.getItem('selectedAssetId');
+        if (storedAssetId && allAssets.length > 0) {
+            const foundAsset = allAssets.find(t => t.id === storedAssetId);
+            setSelectedAsset(foundAsset || null);
+        } else {
+            setSelectedAsset(null);
+        }
+        setAssetCheckComplete(true);
+    };
+
+    handleAssetChange();
+    window.addEventListener('assetChanged', handleAssetChange);
+    
+    return () => {
+        window.removeEventListener('assetChanged', handleAssetChange);
+    };
+  }, [allAssets, assetCheckComplete]);
+
   const requests = useMemo(() => {
+    if ((userRole === 'issuer' || userRole === 'agent') && !selectedAsset) {
+        return [];
+    }
+      
     let allRequests: WhitelistRequest[] = [];
     
     Object.entries(allSubscriptions).forEach(([investorId, tokenSubs]) => {
         Object.entries(tokenSubs).forEach(([tokenId, status]) => {
+            
+            if (selectedAsset && tokenId !== selectedAsset.id) {
+                return; // Skip if asset is selected and this subscription is not for it
+            }
+
             const investor = allInvestors.find(inv => inv.id === investorId);
             const asset = allAssets.find(a => a.id === tokenId);
 
@@ -195,9 +222,7 @@ export default function RequestList({ view, setView }: { view: ViewMode, setView
         filtered = filtered.filter(req => 
             req.name.toLowerCase().includes(lowerQuery) ||
             req.email.toLowerCase().includes(lowerQuery) ||
-            req.walletAddress.toLowerCase().includes(lowerQuery) ||
-            req.asset.assetName.toLowerCase().includes(lowerQuery) ||
-            req.asset.assetTicker.toLowerCase().includes(lowerQuery)
+            req.walletAddress.toLowerCase().includes(lowerQuery)
         );
     }
     
@@ -210,7 +235,7 @@ export default function RequestList({ view, setView }: { view: ViewMode, setView
 
     return filtered;
 
-  }, [allSubscriptions, allInvestors, allAssets, statusFilter, searchQuery, userRole, company]);
+  }, [allSubscriptions, allInvestors, allAssets, statusFilter, searchQuery, userRole, company, selectedAsset]);
 
   const paginatedRequests = useMemo(() => {
       const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
@@ -264,6 +289,12 @@ export default function RequestList({ view, setView }: { view: ViewMode, setView
   }
   
     const noRequestsMessage = () => {
+      if ((userRole === 'issuer' || userRole === 'agent') && !selectedAsset) {
+          return {
+              title: "No Asset Selected",
+              description: "Please select an asset from the sidebar to view whitelisting requests."
+          }
+      }
       if (searchQuery || statusFilter !== 'all') {
           return {
               title: "No Requests Found",
@@ -287,7 +318,7 @@ export default function RequestList({ view, setView }: { view: ViewMode, setView
             <div className="relative w-full sm:w-auto flex-grow sm:flex-grow-0">
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
-                    placeholder="Search by name, email, asset..."
+                    placeholder="Search by name, email, wallet..."
                     className="pl-8 w-full sm:w-64"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
@@ -350,7 +381,6 @@ export default function RequestList({ view, setView }: { view: ViewMode, setView
             <TableHeader>
               <TableRow>
                 <TableHead>User</TableHead>
-                <TableHead className="hidden md:table-cell">Asset</TableHead>
                 <TableHead className="hidden lg:table-cell">Wallet</TableHead>
                 <TableHead className="hidden sm:table-cell">Status</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
