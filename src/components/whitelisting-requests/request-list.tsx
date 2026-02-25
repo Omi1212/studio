@@ -288,29 +288,31 @@ export default function RequestList({ view, setView }: { view: ViewMode, setView
     );
   }
   
-    const noRequestsMessage = () => {
-      if ((userRole === 'issuer' || userRole === 'agent') && !selectedAsset) {
-          return {
-              title: "No Asset Selected",
-              description: "Please select an asset from the sidebar to view whitelisting requests."
-          }
-      }
-      if (searchQuery || statusFilter !== 'all') {
-          return {
-              title: "No Requests Found",
-              description: "Try adjusting your search or filters."
-          }
-      }
-      return {
-          title: "No Whitelisting Requests",
-          description: "There are no pending requests at this time."
-      }
+  const noRequestsMessage = () => {
+    if ((userRole === 'issuer' || userRole === 'agent') && !selectedAsset) {
+        return {
+            title: "No Asset Selected",
+            description: "Please select an asset from the sidebar to view whitelisting requests."
+        }
     }
+    if (searchQuery || statusFilter !== 'all') {
+        return {
+            title: "No Requests Found",
+            description: "Try adjusting your search or filters."
+        }
+    }
+    return {
+        title: "No Whitelisting Requests",
+        description: "There are no pending requests at this time."
+    }
+  }
+
+  const pageTitle = `Whitelisting Requests ${selectedAsset ? `for ${selectedAsset.assetTicker}` : ''}`;
 
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-headline font-semibold">Whitelisting Requests</h1>
+        <h1 className="text-3xl font-headline font-semibold">{pageTitle}</h1>
       </div>
 
       <div className="space-y-4">
