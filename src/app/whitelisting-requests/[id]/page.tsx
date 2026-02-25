@@ -125,15 +125,46 @@ export default function RequestDetailsPage() {
   }, [params, searchParams]);
   
   const handleUpdateStatus = async (status: 'approved' | 'rejected') => {
-    if (!request || !assetId) return;
+    if (!request || !assetId || !asset) return;
 
     try {
-      const response = await fetch(`/api/investors/${request.id}/subscriptions`, {
+      // First, update subscription status
+      const subscriptionResponse = await fetch(`/api/investors/${request.id}/subscriptions`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ assetId, status }),
       });
-      if (!response.ok) throw new Error('Failed to update request');
+      if (!subscriptionResponse.ok) throw new Error('Failed to update request status');
+
+      // If approved, add the asset to the investor's holdings with 0 amount
+      if (status === 'approved') {
+        const existingHoldings = request.holdings || [];
+        const hasHolding = existingHoldings.some(h => h.assetId === asset.id);
+
+        if (!hasHolding) {
+            const newHolding = {
+                assetId: asset.id,
+                assetName: asset.assetName,
+                assetTicker: asset.assetTicker,
+                amount: 0,
+                value: asset.price || 0,
+            };
+            
+            const updatedHoldings = [...existingHoldings, newHolding];
+
+            const userUpdateResponse = await fetch(`/api/investors/${request.id}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ holdings: updatedHoldings }),
+            });
+            
+            if (!userUpdateResponse.ok) {
+                // If this fails, we should ideally roll back the subscription update.
+                // For now, we'll just log an error and show a more specific message.
+                throw new Error("Failed to add asset to investor's holdings.");
+            }
+        }
+      }
       
       toast({
           title: `Request ${status === 'approved' ? 'Approved' : 'Rejected'}`,
@@ -141,12 +172,12 @@ export default function RequestDetailsPage() {
       });
       router.push('/whitelisting-requests');
 
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
       toast({
           variant: 'destructive',
           title: 'Error',
-          description: 'Could not update the request.'
+          description: error.message || 'Could not update the request.'
       });
     }
   };
