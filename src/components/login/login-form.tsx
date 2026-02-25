@@ -26,7 +26,7 @@ const roleEmails: Record<Role, string> = {
   agent: 'agent@gmail.com',
   superadmin: 'superadmin@gmail.com',
   investor: 'investor1@gmail.com',
-  issuer: 'issuera@gmail.com',
+  issuer: 'ag.issuera@gmail.com',
 };
 
 export default function LoginForm() {
