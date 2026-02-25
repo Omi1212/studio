@@ -52,10 +52,28 @@ const initialData: User[] = [
         dob: '1990-01-01',
         idDoc: 'Passport, ***1111',
         address: '111 Investor St, New York, NY',
-        totalInvested: 0,
+        joinedDate: '2024-08-01',
+        totalInvested: 7260,
         isFrozen: false,
-        holdings: [],
-        transactions: [],
+        holdings: [
+            {
+                assetId: 'btkn1-utxo-asset',
+                assetName: 'UTXO',
+                assetTicker: 'UTXO',
+                amount: 1000,
+                value: 7.26
+            }
+        ],
+        transactions: [
+            {
+                id: 'txn-001',
+                type: 'Buy',
+                asset: { id: 'btkn1-utxo-asset', assetTicker: 'UTXO', assetName: 'UTXO' },
+                date: '2024-07-28',
+                amount: 1000,
+                price: 7.26
+            }
+        ],
         companyId: ['issuer-a-comp', 'issuer-b-comp'],
     },
     {
@@ -74,6 +92,7 @@ const initialData: User[] = [
         dob: '1985-02-02',
         idDoc: 'Passport, ***2222',
         address: '222 Investor Ave, London',
+        joinedDate: '2024-08-02',
         totalInvested: 0,
         isFrozen: false,
         holdings: [],
@@ -96,6 +115,7 @@ const initialData: User[] = [
         dob: '1995-03-03',
         idDoc: 'ID Card, ***3333',
         address: '333 Investor Rd, Singapore',
+        joinedDate: '2024-08-03',
         totalInvested: 0,
         isFrozen: false,
         holdings: [],

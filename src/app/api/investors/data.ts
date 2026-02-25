@@ -24,10 +24,27 @@ const initialData: User[] = [
         idDoc: 'Passport, ***1111',
         address: '111 Investor St, New York, NY',
         joinedDate: '2024-08-01',
-        totalInvested: 0,
+        totalInvested: 7260,
         isFrozen: false,
-        holdings: [],
-        transactions: []
+        holdings: [
+            {
+                assetId: 'btkn1-utxo-asset',
+                assetName: 'UTXO',
+                assetTicker: 'UTXO',
+                amount: 1000,
+                value: 7.26
+            }
+        ],
+        transactions: [
+            {
+                id: 'txn-001',
+                type: 'Buy',
+                asset: { id: 'btkn1-utxo-asset', assetTicker: 'UTXO', assetName: 'UTXO' },
+                date: '2024-07-28',
+                amount: 1000,
+                price: 7.26
+            }
+        ]
     },
     {
         id: 'inv-002',
