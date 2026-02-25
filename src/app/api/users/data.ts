@@ -105,7 +105,7 @@ const initialData: User[] = [
     // New Issuers
     {
         id: 'iss-a',
-        name: 'Alice Johnson',
+        name: 'Agent IssuerA',
         email: 'ag.issuera@gmail.com',
         role: 'issuer',
         walletAddress: 'spark1q...issuera',
@@ -124,7 +124,7 @@ const initialData: User[] = [
     },
     {
         id: 'iss-b',
-        name: 'Bob Williams',
+        name: 'Agent IssuerB',
         email: 'ag.issuerb@gmail.com',
         role: 'issuer',
         walletAddress: 'spark1q...issuerb',
@@ -143,7 +143,7 @@ const initialData: User[] = [
     },
     {
         id: 'iss-c',
-        name: 'Carol Smith',
+        name: 'Agent IssuerC',
         email: 'ag.issuerc@gmail.com',
         role: 'issuer',
         walletAddress: 'spark1q...issuerc',
