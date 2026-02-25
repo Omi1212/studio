@@ -106,7 +106,7 @@ const initialData: User[] = [
     {
         id: 'iss-a',
         name: 'Alice Johnson',
-        email: 'issuera@gmail.com',
+        email: 'ag.issuera@gmail.com',
         role: 'issuer',
         walletAddress: 'spark1q...issuera',
         kycStatus: 'verified',
@@ -121,7 +121,7 @@ const initialData: User[] = [
     {
         id: 'iss-b',
         name: 'Bob Williams',
-        email: 'issuerb@gmail.com',
+        email: 'ag.issuerb@gmail.com',
         role: 'issuer',
         walletAddress: 'spark1q...issuerb',
         kycStatus: 'verified',
@@ -136,7 +136,7 @@ const initialData: User[] = [
     {
         id: 'iss-c',
         name: 'Carol Smith',
-        email: 'issuerc@gmail.com',
+        email: 'ag.issuerc@gmail.com',
         role: 'issuer',
         walletAddress: 'spark1q...issuerc',
         kycStatus: 'verified',
