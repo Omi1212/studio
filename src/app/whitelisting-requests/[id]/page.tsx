@@ -27,10 +27,11 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import type { User, SubscriptionStatus } from '@/lib/types';
+import type { User, SubscriptionStatus, AssetDetails } from '@/lib/types';
 import { countries } from '@/lib/countries';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import AssetIcon from '@/components/ui/asset-icon';
 
 
 type WhitelistRequest = User & {
@@ -84,6 +85,7 @@ export default function RequestDetailsPage() {
   const router = useRouter();
   const { toast } = useToast();
   const [request, setRequest] = useState<WhitelistRequest | null>(null);
+  const [asset, setAsset] = useState<AssetDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [assetId, setAssetId] = useState<string | null>(null);
   const [subscriptionStatus, setSubscriptionStatus] = useState<SubscriptionStatus>('none');
@@ -101,8 +103,9 @@ export default function RequestDetailsPage() {
     setLoading(true);
     Promise.all([
         fetch(`/api/investors/${id}`),
-        fetch(`/api/investors/${id}/subscriptions`)
-    ]).then(async ([userRes, subsRes]) => {
+        fetch(`/api/investors/${id}/subscriptions`),
+        fetch(`/api/assets/${asset_id}`)
+    ]).then(async ([userRes, subsRes, assetRes]) => {
         if (!userRes.ok) throw new Error("Request not found");
         const userData = await userRes.json();
         setRequest({ ...userData, joinedDate: userData.joinedDate || new Date().toISOString() });
@@ -110,6 +113,11 @@ export default function RequestDetailsPage() {
         if(subsRes.ok) {
             const subsData = await subsRes.json();
             setSubscriptionStatus(subsData[asset_id] || 'none');
+        }
+
+        if (assetRes.ok) {
+            const assetData = await assetRes.json();
+            setAsset(assetData);
         }
     }).catch(console.error)
       .finally(() => setLoading(false));
@@ -215,6 +223,22 @@ export default function RequestDetailsPage() {
             </div>
             
             <div className="max-w-4xl mx-auto space-y-6">
+                {asset && (
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Asset Requested</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="flex items-center gap-4">
+                                <AssetIcon asset={asset} className="h-12 w-12" />
+                                <div>
+                                    <p className="font-semibold text-lg">{asset.assetName}</p>
+                                    <p className="text-primary font-bold">{asset.assetTicker}</p>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+                )}
                 <div className="grid grid-cols-1 lg:grid-cols-10 gap-6">
                     <Card className="lg:col-span-3">
                         <CardHeader className="items-center text-center">
