@@ -12,12 +12,12 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '.
 import Link from 'next/link';
 import { Input } from '../ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
-import KybBanner from '@/components/dashboard/kyb-banner';
-import IdentityProvidersBanner from '@/components/dashboard/identity-providers-banner';
+import AssetIcon from '../ui/asset-icon';
 
 type WhitelistRequest = User & {
   requestStatus: SubscriptionStatus;
   assetId: string;
+  asset: AssetDetails;
 };
 
 const ITEMS_PER_PAGE = 10;
@@ -52,6 +52,10 @@ function RequestCard({ request }: { request: WhitelistRequest }) {
         </div>
       </CardHeader>
       <CardContent>
+        <div className="flex justify-between text-sm mt-2">
+            <span className="text-muted-foreground">Asset</span>
+            <span className="font-medium">{request.asset.assetTicker}</span>
+        </div>
         <div className="flex justify-between text-sm mt-2">
             <span className="text-muted-foreground">Wallet</span>
             <span className="font-medium font-mono truncate">{request.walletAddress.slice(0, 7)}...{request.walletAddress.slice(-4)}</span>
@@ -91,11 +95,14 @@ function RequestTableRow({ request }: { request: WhitelistRequest }) {
           </div>
         </div>
       </TableCell>
+      <TableCell className="hidden md:table-cell">
+        <div className="flex items-center gap-2">
+            <AssetIcon asset={request.asset} className="h-6 w-6" />
+            <span className="font-medium">{request.asset.assetTicker}</span>
+        </div>
+      </TableCell>
        <TableCell className="hidden lg:table-cell">
         <span className="font-mono">{request.walletAddress.slice(0, 7)}...{request.walletAddress.slice(-4)}</span>
-       </TableCell>
-       <TableCell className="hidden md:table-cell">
-        {request.joinedDate ? new Date(request.joinedDate).toLocaleDateString() : 'N/A'}
        </TableCell>
        <TableCell className="hidden sm:table-cell">{getStatusBadge(request)}</TableCell>
       <TableCell className="text-right">
@@ -113,13 +120,12 @@ export default function RequestList({ view, setView }: { view: ViewMode, setView
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('pending');
   const [currentPage, setCurrentPage] = useState(1);
-  const [selectedAsset, setSelectedAsset] = useState<AssetDetails | null>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
   const [company, setCompany] = useState<Company | null>(null);
 
   const [allInvestors, setAllInvestors] = useState<User[]>([]);
   const [allSubscriptions, setAllSubscriptions] = useState<Record<string, Record<string, SubscriptionStatus>>>({});
-  const [assetCheckComplete, setAssetCheckComplete] = useState(false);
+  const [allAssets, setAllAssets] = useState<AssetDetails[]>([]);
 
   useEffect(() => {
     const role = localStorage.getItem('userRole');
@@ -133,73 +139,52 @@ export default function RequestList({ view, setView }: { view: ViewMode, setView
           setCompany(null);
       }
     };
+    loadCompany();
+    window.addEventListener('companyChanged', loadCompany);
+
 
     const initialFetch = async () => {
       setLoading(true);
       await Promise.all([
           fetch('/api/investors?perPage=999').then(res => res.json()),
-          fetch('/api/investors/subscriptions').then(res => res.json())
-      ]).then(([usersResponse, subscriptionsResponse]) => {
+          fetch('/api/investors/subscriptions').then(res => res.json()),
+          fetch('/api/assets?perPage=999').then(res => res.json())
+      ]).then(([usersResponse, subscriptionsResponse, assetsResponse]) => {
           setAllInvestors(usersResponse.data || []);
           setAllSubscriptions(subscriptionsResponse || {});
-      }).catch(console.error);
+          setAllAssets(assetsResponse.data || []);
+      }).catch(console.error).finally(() => setLoading(false));
     }
     initialFetch();
 
-    const handleAssetChange = async () => {
-        const storedAssetId = localStorage.getItem('selectedAssetId');
-        if (storedAssetId) {
-            try {
-                const response = await fetch(`/api/assets/${storedAssetId}`);
-                if (response.ok) {
-                    setSelectedAsset(await response.json());
-                } else {
-                    setSelectedAsset(null);
-                }
-            } catch (error) {
-                console.error("Failed to fetch selected asset:", error);
-                setSelectedAsset(null);
-            }
-        } else {
-            setSelectedAsset(null);
-        }
-        setAssetCheckComplete(true);
-        setLoading(false);
-    };
-
-    loadCompany();
-    handleAssetChange();
-    window.addEventListener('assetChanged', handleAssetChange);
-    window.addEventListener('companyChanged', loadCompany);
-
     return () => {
-        window.removeEventListener('assetChanged', handleAssetChange);
         window.removeEventListener('companyChanged', loadCompany);
     };
   }, []);
 
-  const pendingRequests = useMemo(() => {
-    if ((userRole !== 'issuer' && userRole !== 'agent') || !selectedAsset) {
-        return [];
-    }
-
-    const requests: WhitelistRequest[] = [];
+  const requests = useMemo(() => {
+    let allRequests: WhitelistRequest[] = [];
     
     Object.entries(allSubscriptions).forEach(([investorId, tokenSubs]) => {
         Object.entries(tokenSubs).forEach(([tokenId, status]) => {
-            if (tokenId === selectedAsset.id) {
-                const investor = allInvestors.find(inv => inv.id === investorId);
-                if (investor) {
-                    requests.push({ ...investor, requestStatus: status, assetId: tokenId });
+            const investor = allInvestors.find(inv => inv.id === investorId);
+            const asset = allAssets.find(a => a.id === tokenId);
+
+            if (investor && asset) {
+                if(userRole === 'issuer' && company && asset.companyId === company.id) {
+                    allRequests.push({ ...investor, requestStatus: status, assetId: tokenId, asset });
+                }
+                else if (userRole === 'agent' || userRole === 'superadmin') {
+                     allRequests.push({ ...investor, requestStatus: status, assetId: tokenId, asset });
                 }
             }
         });
     });
 
-    let filtered = requests;
+    let filtered = allRequests;
     if (statusFilter !== 'all') {
         const filterMap: Record<string, SubscriptionStatus> = { accepted: 'approved', pending: 'pending', rejected: 'rejected' };
-        const mappedStatus = filterMap[statusFilter];
+        const mappedStatus = filterMap[statusFilter as keyof typeof filterMap];
         if (mappedStatus) {
             filtered = filtered.filter(req => req.requestStatus === mappedStatus);
         }
@@ -210,20 +195,29 @@ export default function RequestList({ view, setView }: { view: ViewMode, setView
         filtered = filtered.filter(req => 
             req.name.toLowerCase().includes(lowerQuery) ||
             req.email.toLowerCase().includes(lowerQuery) ||
-            req.walletAddress.toLowerCase().includes(lowerQuery)
+            req.walletAddress.toLowerCase().includes(lowerQuery) ||
+            req.asset.assetName.toLowerCase().includes(lowerQuery) ||
+            req.asset.assetTicker.toLowerCase().includes(lowerQuery)
         );
     }
     
+    const statusOrder: Record<SubscriptionStatus, number> = { 'pending': 1, 'approved': 2, 'rejected': 3, 'none': 4 };
+    filtered.sort((a, b) => {
+        const orderA = statusOrder[a.requestStatus] || 5;
+        const orderB = statusOrder[b.requestStatus] || 5;
+        return orderA - orderB;
+    });
+
     return filtered;
 
-  }, [selectedAsset, allSubscriptions, allInvestors, statusFilter, searchQuery, userRole]);
+  }, [allSubscriptions, allInvestors, allAssets, statusFilter, searchQuery, userRole, company]);
 
   const paginatedRequests = useMemo(() => {
       const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-      return pendingRequests.slice(startIndex, startIndex + ITEMS_PER_PAGE);
-  }, [pendingRequests, currentPage]);
+      return requests.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  }, [requests, currentPage]);
   
-  const totalPages = Math.ceil(pendingRequests.length / ITEMS_PER_PAGE);
+  const totalPages = Math.ceil(requests.length / ITEMS_PER_PAGE);
 
   const handlePageChange = (page: number) => {
     if (page >= 1 && page <= totalPages) {
@@ -236,28 +230,6 @@ export default function RequestList({ view, setView }: { view: ViewMode, setView
       <div className="space-y-4">
         <h1 className="text-3xl font-headline font-semibold">Whitelisting Requests</h1>
         <Card className="h-64 animate-pulse bg-muted/50"></Card>
-      </div>
-    );
-  }
-  
-  if ((userRole === 'issuer' || userRole === 'agent') && !selectedAsset && assetCheckComplete) {
-    const showKybBanner = company && company.kybStatus !== 'verified';
-    const complianceProvidersCount = company?.complianceProviders?.length ?? 0;
-    const showComplianceBanner = company && company.kybStatus === 'verified' && complianceProvidersCount < 3;
-    return (
-      <div className="space-y-4">
-        <div className="flex justify-between items-center">
-            <h1 className="text-3xl font-headline font-semibold">Whitelisting Requests</h1>
-        </div>
-        <div className="space-y-8">
-            {showKybBanner && <KybBanner />}
-            {showComplianceBanner && <IdentityProvidersBanner />}
-        </div>
-        <div className="border-dashed border-2 border-muted-foreground/50 rounded-lg h-96 flex flex-col items-center justify-center text-center p-4 mt-8">
-            <FilePenLine className="h-16 w-16 text-muted-foreground mb-4" />
-            <h2 className="text-xl font-semibold mb-2">No asset selected or found</h2>
-            <p className="text-muted-foreground mb-4">Please select an asset from the sidebar to view whitelisting requests.</p>
-        </div>
       </div>
     );
   }
@@ -290,6 +262,19 @@ export default function RequestList({ view, setView }: { view: ViewMode, setView
       </div>
     );
   }
+  
+    const noRequestsMessage = () => {
+      if (searchQuery || statusFilter !== 'all') {
+          return {
+              title: "No Requests Found",
+              description: "Try adjusting your search or filters."
+          }
+      }
+      return {
+          title: "No Whitelisting Requests",
+          description: "There are no pending requests at this time."
+      }
+    }
 
   return (
     <div className="space-y-4">
@@ -302,7 +287,7 @@ export default function RequestList({ view, setView }: { view: ViewMode, setView
             <div className="relative w-full sm:w-auto flex-grow sm:flex-grow-0">
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
-                    placeholder="Search by name, email, wallet..."
+                    placeholder="Search by name, email, asset..."
                     className="pl-8 w-full sm:w-64"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
@@ -315,7 +300,7 @@ export default function RequestList({ view, setView }: { view: ViewMode, setView
                 <SelectContent>
                     <SelectItem value="all">All Requests</SelectItem>
                     <SelectItem value="pending">Pending</SelectItem>
-                    <SelectItem value="accepted">Accepted</SelectItem>
+                    <SelectItem value="approved">Accepted</SelectItem>
                     <SelectItem value="rejected">Rejected</SelectItem>
                 </SelectContent>
             </Select>
@@ -345,16 +330,16 @@ export default function RequestList({ view, setView }: { view: ViewMode, setView
        {paginatedRequests.length === 0 ? (
         <div className="border-dashed border-2 border-muted-foreground/50 rounded-lg h-96 flex flex-col items-center justify-center text-center p-4">
             <FilePenLine className="h-16 w-16 text-muted-foreground mb-4" />
-            <h2 className="text-xl font-semibold mb-2">No Requests Found</h2>
+            <h2 className="text-xl font-semibold mb-2">{noRequestsMessage().title}</h2>
             <p className="text-muted-foreground mb-4">
-                {searchQuery || statusFilter !== 'all' ? "Try adjusting your search or filter." : `There are no ${statusFilter} whitelisting requests at this time.`}
+                {noRequestsMessage().description}
             </p>
         </div>
       ) : view === 'card' ? (
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {paginatedRequests.map(request => (
-              <RequestCard key={request.id} request={request} />
+              <RequestCard key={`${request.id}-${request.assetId}`} request={request} />
             ))}
           </div>
           {renderPagination()}
@@ -365,15 +350,15 @@ export default function RequestList({ view, setView }: { view: ViewMode, setView
             <TableHeader>
               <TableRow>
                 <TableHead>User</TableHead>
+                <TableHead className="hidden md:table-cell">Asset</TableHead>
                 <TableHead className="hidden lg:table-cell">Wallet</TableHead>
-                <TableHead className="hidden md:table-cell">Request Date</TableHead>
                 <TableHead className="hidden sm:table-cell">Status</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {paginatedRequests.map(request => (
-                  <RequestTableRow key={request.id} request={request} />
+                  <RequestTableRow key={`${request.id}-${request.assetId}`} request={request} />
               ))}
             </TableBody>
           </Table>
