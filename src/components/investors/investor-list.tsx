@@ -68,15 +68,13 @@ function InvestorCard({ investor, onFreezeClick, onResetPassword, onDeleteClick 
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
                 <DropdownMenuItem onClick={onResetPassword}>
-                    <KeyRound className="mr-2 h-4 w-4" />
                     Reset Password
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={onFreezeClick}>
-                  <Snowflake className="mr-2 h-4 w-4" /> {investor.isFrozen ? 'Unfreeze' : 'Freeze'} Address
+                  {investor.isFrozen ? 'Unfreeze' : 'Freeze'} Address
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem className="text-red-500" onClick={onDeleteClick}>
-                  <Trash2 className="mr-2 h-4 w-4" />
                   Cancel Access
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -144,16 +142,13 @@ function InvestorTableRow({ investor, onFreezeClick, onResetPassword, onDeleteCl
               <Link href={`/investors/${investor.id}`}>View Details</Link>
             </DropdownMenuItem>
              <DropdownMenuItem onClick={onResetPassword}>
-                <KeyRound className="mr-2 h-4 w-4" />
                 Reset Password
             </DropdownMenuItem>
             <DropdownMenuItem onClick={onFreezeClick}>
-                <Snowflake className="mr-2 h-4 w-4" />
                 {investor.isFrozen ? 'Unfreeze' : 'Freeze'} Address
             </DropdownMenuItem>
              <DropdownMenuSeparator />
             <DropdownMenuItem className="text-red-500" onClick={onDeleteClick}>
-                <Trash2 className="mr-2 h-4 w-4" />
                 Cancel Access
             </DropdownMenuItem>
           </DropdownMenuContent>
