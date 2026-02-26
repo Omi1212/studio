@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
@@ -334,6 +335,12 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
       <div className="space-y-4">
         <div className="flex justify-between items-center">
           <h1 className="text-3xl font-headline font-semibold">{pageTitle}</h1>
+          <Button asChild>
+              <Link href="/investors/new">
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add Investor
+              </Link>
+          </Button>
         </div>
 
         <div className="space-y-4">

@@ -2,6 +2,7 @@
 
 import { NextResponse } from 'next/server';
 import { usersData } from '../users/data';
+import { investorsData } from './data';
 import type { User } from '@/lib/types';
 import { z } from 'zod';
 
@@ -107,6 +108,7 @@ export async function POST(request: Request) {
       status: 'active',
     };
     usersData.unshift(newUser);
+    investorsData.unshift(newUser);
     return NextResponse.json(newUser, { status: 201 });
   } catch (error) {
     if (error instanceof z.ZodError) {
