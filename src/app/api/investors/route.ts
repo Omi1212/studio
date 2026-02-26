@@ -1,7 +1,7 @@
 
 
 import { NextResponse } from 'next/server';
-import { investorsData } from './data';
+import { usersData } from '../users/data';
 import type { User } from '@/lib/types';
 import { z } from 'zod';
 
@@ -26,6 +26,7 @@ const querySchema = z.object({
     query: z.string().optional(),
     assetId: z.string().optional(),
     onlyVerified: z.string().optional(),
+    companyId: z.string().optional(),
 });
 
 
@@ -37,12 +38,17 @@ export async function GET(request: Request) {
       return NextResponse.json({ errors: validation.error.errors }, { status: 400 });
   }
 
-  const { page, perPage, status, kycStatus, query, assetId, onlyVerified } = validation.data;
+  const { page, perPage, status, kycStatus, query, assetId, onlyVerified, companyId } = validation.data;
 
   // Deep copy to avoid mutating the original data source
-  const investors: User[] = JSON.parse(JSON.stringify(investorsData));
+  const allUsers: User[] = JSON.parse(JSON.stringify(usersData));
+  let filteredInvestors: User[] = allUsers.filter(u => u.role === 'investor');
 
-  let filteredInvestors: User[] = investors;
+  if (companyId) {
+    filteredInvestors = filteredInvestors.filter(investor => 
+        investor.companyId?.includes(companyId)
+    );
+  }
 
   if (onlyVerified === 'true') {
     filteredInvestors = filteredInvestors.filter(investor => investor.kycStatus === 'verified');
@@ -100,7 +106,7 @@ export async function POST(request: Request) {
       id: `inv-${Math.random().toString(36).substring(2, 9)}`,
       status: 'active',
     };
-    investorsData.unshift(newUser);
+    usersData.unshift(newUser);
     return NextResponse.json(newUser, { status: 201 });
   } catch (error) {
     if (error instanceof z.ZodError) {

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import type { ViewMode, AssetDetails, User, Company } from '@/lib/types';
+import type { ViewMode, User, Company } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/card';
 import { Avatar, AvatarFallback } from '../ui/avatar';
 import { Badge } from '../ui/badge';
@@ -25,7 +25,6 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { Input } from '../ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
-import AssetIcon from '../ui/asset-icon';
 import KybBanner from '@/components/dashboard/kyb-banner';
 import IdentityProvidersBanner from '@/components/dashboard/identity-providers-banner';
 
@@ -101,7 +100,7 @@ function InvestorCard({ investor, onToggleFreeze }: { investor: Investor, onTogg
   );
 }
 
-function InvestorTableRow({ investor, selectedAsset, onToggleFreeze }: { investor: Investor, selectedAsset: AssetDetails | null, onToggleFreeze: () => void }) {
+function InvestorTableRow({ investor, onToggleFreeze }: { investor: Investor, onToggleFreeze: () => void }) {
   const router = useRouter();
 
   return (
@@ -119,14 +118,6 @@ function InvestorTableRow({ investor, selectedAsset, onToggleFreeze }: { investo
             <p className="text-sm text-muted-foreground">{investor.email}</p>
           </div>
         </div>
-      </TableCell>
-      <TableCell className="hidden sm:table-cell">
-        {selectedAsset && (
-             <div className="flex items-center gap-2">
-                <AssetIcon asset={selectedAsset} className="h-6 w-6" />
-                <span className="font-medium text-primary">{selectedAsset.assetTicker}</span>
-            </div>
-        )}
       </TableCell>
       <TableCell className="hidden md:table-cell">
         <span className="font-mono">${(investor.totalInvested || 0).toLocaleString()}</span>
@@ -167,17 +158,16 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
-  const [allAssets, setAllAssets] = useState<AssetDetails[]>([]);
-  const [selectedAsset, setSelectedAsset] = useState<AssetDetails | null>(null);
   const [dialogInvestor, setDialogInvestor] = useState<Investor | null>(null);
-  const [assetCheckComplete, setAssetCheckComplete] = useState(false);
   const [company, setCompany] = useState<Company | null>(null);
+  const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(null);
 
   useEffect(() => {
     const loadCompany = () => {
-        const selectedCompanyId = localStorage.getItem('selectedCompanyId');
-        if (selectedCompanyId) {
-            fetch(`/api/companies/${selectedCompanyId}`).then(res => res.json()).then(setCompany);
+        const companyId = localStorage.getItem('selectedCompanyId');
+        setSelectedCompanyId(companyId);
+        if (companyId) {
+            fetch(`/api/companies/${companyId}`).then(res => res.json()).then(setCompany);
         } else {
             setCompany(null);
         }
@@ -192,54 +182,26 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
   }, []);
 
   useEffect(() => {
-    fetch('/api/assets').then(res => res.json()).then(assetsData => {
-        setAllAssets(assetsData.data);
-    }).catch(console.error);
-  }, []);
+    const userRole = localStorage.getItem('userRole');
 
-  useEffect(() => {
-    if (allAssets.length === 0 && assetCheckComplete) return;
-
-    const handleAssetChange = () => {
-      if (allAssets.length > 0) {
-        const storedAssetId = localStorage.getItem('selectedAssetId');
-        if (storedAssetId) {
-            const foundAsset = allAssets.find(t => t.id === storedAssetId);
-            setSelectedAsset(foundAsset || null);
-        } else {
-            setSelectedAsset(null);
-        }
-      }
-      setAssetCheckComplete(true);
-    };
-
-    handleAssetChange();
-    window.addEventListener('assetChanged', handleAssetChange);
-    
-    return () => {
-        window.removeEventListener('assetChanged', handleAssetChange);
-    };
-  }, [allAssets, assetCheckComplete]);
-
-  useEffect(() => {
-    if (!assetCheckComplete) {
-        return;
-    }
-      
-    if (!selectedAsset) {
+    if (userRole === 'issuer' && !selectedCompanyId) {
         setInvestors([]);
         setTotalInvestors(0);
         setLoading(false);
         return;
-    };
+    }
     
     setLoading(true);
     const params = new URLSearchParams({
         page: currentPage.toString(),
         perPage: ITEMS_PER_PAGE.toString(),
-        assetId: selectedAsset.id,
         onlyVerified: 'true'
     });
+    
+    if (userRole === 'issuer' && selectedCompanyId) {
+        params.append('companyId', selectedCompanyId);
+    }
+
     if (statusFilter !== 'all') {
         params.append('status', statusFilter);
     }
@@ -264,7 +226,7 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
     };
     
     fetchInvestors();
-  }, [currentPage, searchQuery, statusFilter, selectedAsset, assetCheckComplete]);
+  }, [currentPage, searchQuery, statusFilter, selectedCompanyId]);
   
   const totalPages = Math.ceil(totalInvestors / ITEMS_PER_PAGE);
 
@@ -312,7 +274,7 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
     );
   }
 
-  if (!selectedAsset) {
+  if (!selectedCompanyId && localStorage.getItem('userRole') === 'issuer') {
     const showKybBanner = company && company.kybStatus !== 'verified';
     const complianceProvidersCount = company?.complianceProviders?.length ?? 0;
     const showComplianceBanner = company && company.kybStatus === 'verified' && complianceProvidersCount < 3;
@@ -327,9 +289,9 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
         </div>
         <div className="border-dashed border-2 border-muted-foreground/50 rounded-lg h-96 flex flex-col items-center justify-center text-center p-4 mt-8">
             <UserPlus className="h-16 w-16 text-muted-foreground mb-4" />
-            <h2 className="text-xl font-semibold mb-2">No asset selected or found</h2>
+            <h2 className="text-xl font-semibold mb-2">No company selected</h2>
             <p className="text-muted-foreground mb-4">
-                Please select an asset from the sidebar to view investors.
+                Please select a company from the sidebar to view investors.
             </p>
         </div>
       </div>
@@ -365,7 +327,7 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
     );
   }
   
-  const pageTitle = `Investors ${selectedAsset ? `for ${selectedAsset.assetTicker}` : ''}`;
+  const pageTitle = `Investors`;
 
   return (
     <AlertDialog onOpenChange={() => setDialogInvestor(null)}>
@@ -427,7 +389,7 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
               <UserPlus className="h-16 w-16 text-muted-foreground mb-4" />
               <h2 className="text-xl font-semibold mb-2">No investors found</h2>
               <p className="text-muted-foreground mb-4">
-                  {searchQuery || statusFilter !== 'all' ? "Try adjusting your search or filter." : `There are no whitelisted investors for ${selectedAsset?.assetTicker}.`}
+                  {searchQuery || statusFilter !== 'all' ? "Try adjusting your search or filter." : `There are no whitelisted investors for this company.`}
               </p>
           </div>
         ) : view === 'card' ? (
@@ -449,7 +411,6 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
               <TableHeader>
                 <TableRow>
                   <TableHead>Investor</TableHead>
-                  <TableHead className="hidden sm:table-cell">Asset</TableHead>
                   <TableHead className="hidden md:table-cell">Total Invested</TableHead>
                   <TableHead className="hidden lg:table-cell">Wallet</TableHead>
                   <TableHead className="hidden sm:table-cell">Status</TableHead>
@@ -461,7 +422,6 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
                     <InvestorTableRow 
                         key={investor.id} 
                         investor={investor} 
-                        selectedAsset={selectedAsset} 
                         onToggleFreeze={() => setDialogInvestor(investor)} 
                     />
                 ))}

@@ -1,4 +1,3 @@
-
 'use client';
 
 import {
@@ -78,12 +77,12 @@ const investorMenu = [
 const issuerMenu = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/issue-asset', label: 'Launchpad', icon: Rocket },
+  { href: '/investors', label: 'Investors', icon: Users },
   { 
     href: '/workspace', 
     label: 'Workspace', 
     icon: Briefcase,
     subItems: [
-        { href: '/investors', label: 'Investors', icon: Users },
         { href: '/whitelisting-requests', label: 'Whitelisting Requests', icon: ClipboardList },
         { href: '/orders', label: 'Orders', icon: ShoppingBag },
         { href: '/transfers', label: 'Transfers', icon: ArrowRightLeft },
