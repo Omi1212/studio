@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -112,7 +113,17 @@ export default function InvestorSubscriptions({ investor }: { investor: User }) 
                                     'N/A'
                                 )}
                             </TableCell>
-                            <TableCell className="font-mono">{investor.walletAddress.slice(0, 7)}...{investor.walletAddress.slice(-4)}</TableCell>
+                            <TableCell>
+                                <a 
+                                    href={`https://sparkscan.io/address/${investor.walletAddress}`} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer" 
+                                    className="font-mono text-primary hover:underline"
+                                    onClick={(e) => e.stopPropagation()}
+                                >
+                                    {investor.walletAddress.slice(0, 7)}...{investor.walletAddress.slice(-4)}
+                                </a>
+                            </TableCell>
                             <TableCell className="text-right">{getStatusBadge(status)}</TableCell>
                         </TableRow>
                     );

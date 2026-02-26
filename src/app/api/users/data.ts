@@ -41,7 +41,7 @@ const initialData: User[] = [
         name: 'Investor One',
         email: 'investor1@gmail.com',
         role: 'investor',
-        walletAddress: 'spark1q...inv001',
+        walletAddress: 'spark1pgssxrzp2fg2r0dt3p35j3exj4grv0wwpg3l5j0elzfxfv967fz5xwg2sasg4v',
         kycStatus: 'verified',
         status: 'active',
         phone: '+1 555-0111',
