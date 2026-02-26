@@ -8,6 +8,7 @@ declare global {
 
 const initialData: Record<string, Record<string, SubscriptionStatus>> = {
     "inv-001": {
+        "btkn1-utxo-asset": "approved",
         "btkn1-flashsparks-asset": "pending",
     },
 };
