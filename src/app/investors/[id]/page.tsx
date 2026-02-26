@@ -12,7 +12,7 @@ import {
 import SidebarNav from '@/components/dashboard/sidebar-nav';
 import HeaderDynamic from '@/components/dashboard/header-dynamic';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Snowflake, ArrowUpRight, ArrowDownLeft, ShieldCheck, User as UserIcon, Phone, MoreVertical, Edit, KeyRound, Trash2 } from 'lucide-react';
+import { ArrowLeft, Snowflake, ArrowUpRight, ArrowDownLeft, ShieldCheck, User as UserIcon, Phone, Edit, KeyRound, Trash2, ChevronDown } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -236,19 +236,19 @@ export default function InvestorDetailsPage() {
                     </h1>
                 </div>
                 <div className="flex gap-2">
-                    <Button variant="outline" asChild>
-                        <Link href={`/investors/${investor.id}/edit`}>
-                            <Edit className="mr-2 h-4 w-4" /> Edit
-                        </Link>
-                    </Button>
                     <AlertDialog>
                         <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon">
-                            <MoreVertical className="h-4 w-4" />
+                            <Button variant="outline">
+                                Actions <ChevronDown className="ml-2 h-4 w-4" />
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
+                            <DropdownMenuItem asChild>
+                                <Link href={`/investors/${investor.id}/edit`}>
+                                    <Edit className="mr-2 h-4 w-4" /> Edit
+                                </Link>
+                            </DropdownMenuItem>
                             <DropdownMenuItem onClick={handleToggleFreeze}>
                             <Snowflake className="mr-2 h-4 w-4" />
                             {investor.isFrozen ? 'Unfreeze' : 'Freeze'} Address
@@ -307,7 +307,7 @@ export default function InvestorDetailsPage() {
                             <CardTitle>Personal Information</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-1">
-                            <PersonalInfoRow label="Country of Residence" value={countryDisplay || 'Not set'} />
+                            <PersonalInfoRow label="Country of Residence" value={countryDisplay || 'Not set'} actionLabel="Change" />
                             <PersonalInfoRow label="City" value={investor.city || 'Not set'} />
                             <PersonalInfoRow label="Legal Name" value={investor.legalName || 'Not set'} />
                             <PersonalInfoRow label="Date of Birth" value={investor.dob || 'Not set'} />
