@@ -2,9 +2,11 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import AssetIcon from '@/components/ui/asset-icon';
 import type { User } from '@/lib/types';
+import { Separator } from '../ui/separator';
 
 export default function InvestorPortfolio({ investor }: { investor: User }) {
     const holdings = investor.holdings || [];
+    const totalHoldingsValue = holdings.reduce((acc, holding) => acc + (holding.amount * holding.value), 0);
 
     if (holdings.length === 0) {
         return (
@@ -15,6 +17,7 @@ export default function InvestorPortfolio({ investor }: { investor: User }) {
     }
 
     return (
+        <>
         <Table>
             <TableHeader>
                 <TableRow>
@@ -46,5 +49,19 @@ export default function InvestorPortfolio({ investor }: { investor: User }) {
                 ))}
             </TableBody>
         </Table>
+        <Separator className="my-4" />
+        <div className="px-4 pb-4">
+            <div className="grid grid-cols-2 gap-4">
+                 <div className="text-left">
+                    <p className="text-sm text-muted-foreground">Total Invested</p>
+                    <p className="font-bold font-mono text-lg">${(investor.totalInvested || 0).toLocaleString()}</p>
+                </div>
+                <div className="text-right">
+                    <p className="text-sm text-muted-foreground">Total Holdings Value</p>
+                    <p className="font-bold font-mono text-lg">${totalHoldingsValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                </div>
+            </div>
+        </div>
+        </>
     );
 }

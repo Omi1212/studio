@@ -321,7 +321,7 @@ export default function InvestorDetailsPage() {
                     </Card>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {investor.joinedDate && (
                         <Card>
                             <CardHeader className="pb-2">
@@ -340,16 +340,6 @@ export default function InvestorDetailsPage() {
                             <p className="text-xl font-bold font-mono truncate" title={investor.walletAddress}>{`${investor.walletAddress.slice(0, 7)}...${investor.walletAddress.slice(-4)}`}</p>
                         </CardContent>
                     </Card>
-                    {investor.totalInvested !== undefined && (
-                        <Card>
-                            <CardHeader className="pb-2">
-                                <CardTitle className="text-sm font-medium text-muted-foreground">Total Invested</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <p className="text-2xl font-bold font-mono">${investor.totalInvested.toLocaleString()}</p>
-                            </CardContent>
-                        </Card>
-                    )}
                 </div>
 
                 <Accordion type="single" collapsible className="w-full space-y-6" defaultValue="portfolio">
