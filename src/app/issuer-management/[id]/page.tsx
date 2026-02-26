@@ -178,7 +178,7 @@ export default function IssuerDetailsPage() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                     <InfoRow label="Email" value={issuer.email} />
-                    <InfoRow label="Wallet Address" value={<span className="font-mono">{issuer.walletAddress}</span>} />
+                    <InfoRow label="Wallet Address" value={<span className="font-mono" title={issuer.walletAddress}>{`${issuer.walletAddress.slice(0, 7)}...${issuer.walletAddress.slice(-4)}`}</span>} />
                 </CardContent>
             </Card>
 

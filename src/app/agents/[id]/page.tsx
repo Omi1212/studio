@@ -182,7 +182,7 @@ export default function AgentDetailsPage() {
                 <CardContent className="space-y-4">
                     <InfoRow label="Email" value={agent.email} />
                     <InfoRow label="Role" value={<span className="capitalize">{agent.role}</span>} />
-                    <InfoRow label="Wallet Address" value={<span className="font-mono">{agent.walletAddress}</span>} />
+                    <InfoRow label="Wallet Address" value={<span className="font-mono" title={agent.walletAddress}>{`${agent.walletAddress.slice(0, 7)}...${agent.walletAddress.slice(-4)}`}</span>} />
                 </CardContent>
             </Card>
             <AgentAssets agent={agent} />

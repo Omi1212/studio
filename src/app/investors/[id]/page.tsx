@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -336,7 +337,7 @@ export default function InvestorDetailsPage() {
                             <CardTitle className="text-sm font-medium text-muted-foreground">Wallet Address</CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <p className="text-xl font-bold font-mono truncate" title={investor.walletAddress}>{investor.walletAddress}</p>
+                            <p className="text-xl font-bold font-mono truncate" title={investor.walletAddress}>{`${investor.walletAddress.slice(0, 7)}...${investor.walletAddress.slice(-4)}`}</p>
                         </CardContent>
                     </Card>
                     {investor.totalInvested !== undefined && (
