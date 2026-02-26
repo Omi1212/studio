@@ -268,7 +268,7 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
       setInvestors(prev => prev.map(inv => (inv.id === dialogInvestor.id ? updatedInvestor : inv)));
 
       toast({
-          title: `Investor ${updatedInvestor.isFrozen ? 'Frozen' : 'Unfrozen'}`,
+          title: `Investor ${updatedInvestor.isFrozen ? 'Unfrozen' : 'Unfrozen'}`,
           description: `The investor "${updatedInvestor.name}" has been updated.`,
       });
     } catch (error) {
@@ -383,9 +383,9 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
         <div className="flex justify-between items-center">
           <h1 className="text-3xl font-headline font-semibold">{pageTitle}</h1>
           <Button asChild>
-              <Link href="/investors/new">
+              <Link href="/investors/invite">
                   <Plus className="mr-2 h-4 w-4" />
-                  Add Investor
+                  Invite Investor
               </Link>
           </Button>
         </div>
