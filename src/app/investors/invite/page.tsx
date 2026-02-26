@@ -9,25 +9,21 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
-import type { AssetDetails, Company, User } from '@/lib/types';
+import type { Company } from '@/lib/types';
 import { ArrowLeft } from 'lucide-react';
 
 export default function InviteInvestorPage() {
   const router = useRouter();
   const { toast } = useToast();
-  const [inviteScope, setInviteScope] = useState('company');
-  const [assets, setAssets] = useState<AssetDetails[]>([]);
   const [company, setCompany] = useState<Company | null>(null);
 
   useEffect(() => {
     const selectedCompanyId = localStorage.getItem('selectedCompanyId');
     if (selectedCompanyId) {
       fetch(`/api/companies/${selectedCompanyId}`).then(res => res.json()).then(setCompany);
-      fetch(`/api/assets?companyId=${selectedCompanyId}&perPage=999`).then(res => res.json()).then(data => setAssets(data.data || []));
     }
   }, []);
 
@@ -35,15 +31,9 @@ export default function InviteInvestorPage() {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
     const email = formData.get('email') as string;
-    const assetId = formData.get('assetId') as string | undefined;
 
     if (!email) {
       toast({ variant: 'destructive', title: 'Error', description: 'Email is required.' });
-      return;
-    }
-    
-    if (inviteScope === 'asset' && !assetId) {
-       toast({ variant: 'destructive', title: 'Error', description: 'Please select an asset.' });
       return;
     }
     
@@ -54,8 +44,7 @@ export default function InviteInvestorPage() {
 
     const payload = {
         email,
-        inviteScope,
-        assetId: inviteScope === 'asset' ? assetId : undefined,
+        inviteScope: 'company',
         companyId: company.id,
     };
     
@@ -70,7 +59,6 @@ export default function InviteInvestorPage() {
           throw new Error(errorData.message || 'Failed to send invitation');
         }
         
-        const result = await response.json();
         toast({
           title: 'Invitation Sent',
           description: `An invitation has been sent to ${email}.`,
@@ -109,7 +97,7 @@ export default function InviteInvestorPage() {
                         <CardHeader>
                             <CardTitle>Invite a new Investor</CardTitle>
                             <CardDescription>
-                                Invite an investor to your company or a specific asset offering.
+                                Invite an investor to your company.
                                 They will receive an email to create an account and complete their profile.
                             </CardDescription>
                         </CardHeader>
@@ -118,33 +106,6 @@ export default function InviteInvestorPage() {
                                 <Label htmlFor="email">Email Address</Label>
                                 <Input id="email" name="email" type="email" placeholder="e.g. john.doe@example.com" required />
                             </div>
-                             <div className="space-y-2">
-                                <Label htmlFor="inviteScope">Invite To</Label>
-                                <Select name="inviteScope" value={inviteScope} onValueChange={setInviteScope}>
-                                    <SelectTrigger id="inviteScope">
-                                        <SelectValue placeholder="Select scope" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="company">Entire Company Portfolio</SelectItem>
-                                        <SelectItem value="asset">Specific Asset</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                            {inviteScope === 'asset' && (
-                                <div className="space-y-2">
-                                    <Label htmlFor="assetId">Asset</Label>
-                                    <Select name="assetId">
-                                        <SelectTrigger id="assetId">
-                                            <SelectValue placeholder="Select an asset to subscribe to" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {assets.map(asset => (
-                                                <SelectItem key={asset.id} value={asset.id}>{asset.assetName} ({asset.assetTicker})</SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                            )}
                         </CardContent>
                         <CardContent className="flex justify-end gap-2">
                             <Button variant="outline" asChild>
