@@ -10,7 +10,7 @@ import {
 import SidebarNav from '@/components/dashboard/sidebar-nav';
 import HeaderDynamic from '@/components/dashboard/header-dynamic';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Snowflake, ArrowUpRight, ArrowDownLeft, ShieldCheck, User as UserIcon, Phone, Edit, KeyRound, Trash2, ChevronDown } from 'lucide-react';
+import { ArrowLeft, Snowflake, ShieldCheck, User as UserIcon, Phone, Edit, KeyRound, Trash2, ChevronDown } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -27,13 +27,15 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import Link from 'next/link';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import AssetIcon from '@/components/ui/asset-icon';
-import { cn } from '@/lib/utils';
-import type { AssetDetails, User } from '@/lib/types';
+import type { User } from '@/lib/types';
 import { countries } from '@/lib/countries';
 import { Skeleton } from '@/components/ui/skeleton';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import InvestorPortfolio from '@/components/investors/investor-portfolio';
+import InvestorOrders from '@/components/investors/investor-orders';
+import InvestorSubscriptions from '@/components/investors/investor-subscriptions';
+import InvestorTransactions from '@/components/investors/investor-transactions';
 
 function getStatusBadge(status: User['kycStatus']) {
   switch (status) {
@@ -48,7 +50,6 @@ function getStatusBadge(status: User['kycStatus']) {
   }
 }
 
-// from profile page
 function InfoRowWithIcon({ icon: Icon, label, value }: { icon: React.ElementType, label: string, value: string | undefined }) {
   return (
     <div className="flex items-center gap-4">
@@ -60,7 +61,7 @@ function InfoRowWithIcon({ icon: Icon, label, value }: { icon: React.ElementType
     </div>
   )
 }
-// from profile page
+
 function PersonalInfoRow({ label, value, actionLabel, onActionClick }: { label: string; value: React.ReactNode; actionLabel?: string; onActionClick?: () => void; }) {
     return (
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between py-2">
@@ -192,7 +193,7 @@ export default function InvestorDetailsPage() {
                     <Skeleton className="h-9 w-48" />
                     <Skeleton className="h-9 w-32" />
                 </div>
-                <div className="max-w-4xl mx-auto space-y-6">
+                <div className="max-w-6xl mx-auto space-y-6">
                     <div className="grid grid-cols-1 lg:grid-cols-10 gap-6">
                         <Skeleton className="lg:col-span-3 h-64" />
                         <Skeleton className="lg:col-span-7 h-64" />
@@ -212,8 +213,6 @@ export default function InvestorDetailsPage() {
   
   const countryObj = countries.find(c => c.value === investor.country || c.label === investor.country);
   const countryDisplay = countryObj ? countryObj.label : investor.country;
-  const transactions = investor?.transactions || [];
-
 
   return (
     <SidebarProvider>
@@ -277,7 +276,7 @@ export default function InvestorDetailsPage() {
                 </div>
             </div>
             
-            <div className="max-w-4xl mx-auto space-y-6">
+            <div className="max-w-6xl mx-auto space-y-6">
                 <div className="grid grid-cols-1 lg:grid-cols-10 gap-6">
                     <Card className="lg:col-span-3">
                         <CardHeader className="items-center text-center">
@@ -344,67 +343,58 @@ export default function InvestorDetailsPage() {
                     )}
                 </div>
 
-
-                <Card>
-                    <CardHeader>
-                        <CardTitle>
-                            Transaction History
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        {transactions.length > 0 ? (
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>Transaction</TableHead>
-                                    <TableHead>Asset</TableHead>
-                                    <TableHead className="hidden sm:table-cell">Date</TableHead>
-                                    <TableHead className="text-right">Amount</TableHead>
-                                    <TableHead className="text-right hidden md:table-cell">Total</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {transactions.map(tx => (
-                                    <TableRow key={tx.id}>
-                                        <TableCell>
-                                            <div className="flex items-center gap-3">
-                                                <div
-                                                    className={cn(
-                                                    'flex-center h-8 w-8 rounded-full bg-muted shrink-0',
-                                                    tx.type === 'Buy' ? 'text-green-500' : 'text-red-500'
-                                                    )}
-                                                >
-                                                    {tx.type === 'Buy' ? <ArrowDownLeft className="h-4 w-4" /> : <ArrowUpRight className="h-4 w-4" />}
-                                                </div>
-                                                <span className="font-medium">{tx.type}</span>
-                                            </div>
-                                        </TableCell>
-                                        <TableCell>
-                                            <div className="flex items-center gap-2">
-                                                <AssetIcon asset={tx.asset} className="h-6 w-6" />
-                                                <span className="font-medium text-primary">{tx.asset.assetTicker}</span>
-                                            </div>
-                                        </TableCell>
-                                        <TableCell className="hidden sm:table-cell text-muted-foreground">
-                                            {new Date(tx.date).toLocaleDateString()}
-                                        </TableCell>
-                                        <TableCell className="text-right font-mono">
-                                            {tx.amount.toLocaleString()}
-                                        </TableCell>
-                                        <TableCell className={cn("text-right font-mono hidden md:table-cell", tx.type === 'Buy' ? 'text-green-500' : 'text-red-500')}>
-                                        {tx.type === 'Buy' ? '+' : '-'} ${(tx.amount * tx.price).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                        ) : (
-                            <div className="text-center text-muted-foreground py-8">
-                                This investor has no transaction history.
-                            </div>
-                        )}
-                    </CardContent>
-                </Card>
+                <Tabs defaultValue="portfolio" className="w-full">
+                    <TabsList className="grid w-full grid-cols-4">
+                        <TabsTrigger value="portfolio">Portfolio</TabsTrigger>
+                        <TabsTrigger value="subscriptions">Subscriptions</TabsTrigger>
+                        <TabsTrigger value="orders">Orders</TabsTrigger>
+                        <TabsTrigger value="transactions">Transactions</TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="portfolio" className="mt-6">
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Portfolio</CardTitle>
+                                <CardDescription>Current asset holdings for this investor.</CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                <InvestorPortfolio investor={investor} />
+                            </CardContent>
+                        </Card>
+                    </TabsContent>
+                    <TabsContent value="subscriptions" className="mt-6">
+                            <Card>
+                            <CardHeader>
+                                <CardTitle>Asset Subscriptions</CardTitle>
+                                <CardDescription>Assets this investor is subscribed to or has pending requests for.</CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                <InvestorSubscriptions investor={investor} />
+                            </CardContent>
+                        </Card>
+                    </TabsContent>
+                    <TabsContent value="orders" className="mt-6">
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Order History</CardTitle>
+                                <CardDescription>All buy and sell orders placed by this investor.</CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                <InvestorOrders investorId={investor.id} />
+                            </CardContent>
+                        </Card>
+                    </TabsContent>
+                    <TabsContent value="transactions" className="mt-6">
+                            <Card>
+                            <CardHeader>
+                                <CardTitle>Transaction History</CardTitle>
+                                <CardDescription>All transactions associated with this investor.</CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                <InvestorTransactions investor={investor} />
+                            </CardContent>
+                        </Card>
+                    </TabsContent>
+                </Tabs>
             </div>
           </main>
         </div>
