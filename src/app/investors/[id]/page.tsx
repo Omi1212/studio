@@ -84,55 +84,23 @@ export default function InvestorDetailsPage() {
   const { toast } = useToast();
   const [investor, setInvestor] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [allAssets, setAllAssets] = useState<AssetDetails[]>([]);
-  const [selectedAsset, setSelectedAsset] = useState<AssetDetails | null>(null);
-  const [filteredTransactions, setFilteredTransactions] = useState<User['transactions']>([]);
 
   useEffect(() => {
     const { id } = params;
     if (!id) return;
 
-    Promise.all([
-        fetch(`/api/investors/${id}`).then(res => res.ok ? res.json() : null),
-        fetch(`/api/assets?perPage=999`).then(res => res.ok ? res.json() : { data: [] })
-    ]).then(([investorData, assetsResponse]) => {
+    setLoading(true);
+    fetch(`/api/investors/${id}`)
+      .then(res => (res.ok ? res.json() : null))
+      .then((investorData) => {
         setInvestor(investorData);
-        setAllAssets(assetsResponse.data || []);
-        setLoading(false);
-    }).catch(err => {
+      })
+      .catch(err => {
         console.error(err);
-        setLoading(false);
-    });
-
-    const handleAssetChange = () => {
-        const storedAssetId = localStorage.getItem('selectedAssetId');
-        if (storedAssetId && allAssets.length > 0) {
-            const foundAsset = allAssets.find(t => t.id === storedAssetId);
-            setSelectedAsset(foundAsset || null);
-        } else {
-            setSelectedAsset(null);
-        }
-    };
-
-    handleAssetChange();
-    window.addEventListener('assetChanged', handleAssetChange);
-
-    return () => {
-        window.removeEventListener('assetChanged', handleAssetChange);
-    };
-
-  }, [params, allAssets]);
-
-  useEffect(() => {
-    if (selectedAsset && investor?.transactions) {
-      const filtered = investor.transactions.filter(tx => tx.asset.id === selectedAsset.id);
-      setFilteredTransactions(filtered);
-    } else if (investor?.transactions) {
-      setFilteredTransactions(investor.transactions);
-    } else {
-      setFilteredTransactions([]);
-    }
-  }, [investor, selectedAsset]);
+        setInvestor(null);
+      })
+      .finally(() => setLoading(false));
+  }, [params]);
 
 
   const handleToggleFreeze = async () => {
@@ -214,6 +182,7 @@ export default function InvestorDetailsPage() {
   
   const countryObj = countries.find(c => c.value === investor.country || c.label === investor.country);
   const countryDisplay = countryObj ? countryObj.label : investor.country;
+  const transactions = investor?.transactions || [];
 
 
   return (
@@ -312,11 +281,11 @@ export default function InvestorDetailsPage() {
                 <Card>
                     <CardHeader>
                         <CardTitle>
-                            Transaction History {selectedAsset && `for ${selectedAsset.assetTicker}`}
+                            Transaction History
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
-                        {filteredTransactions.length > 0 ? (
+                        {transactions.length > 0 ? (
                         <Table>
                             <TableHeader>
                                 <TableRow>
@@ -328,7 +297,7 @@ export default function InvestorDetailsPage() {
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {filteredTransactions.map(tx => (
+                                {transactions.map(tx => (
                                     <TableRow key={tx.id}>
                                         <TableCell>
                                             <div className="flex items-center gap-3">
@@ -364,7 +333,7 @@ export default function InvestorDetailsPage() {
                         </Table>
                         ) : (
                             <div className="text-center text-muted-foreground py-8">
-                                This investor has no transaction history for the selected asset.
+                                This investor has no transaction history.
                             </div>
                         )}
                     </CardContent>
