@@ -1,5 +1,3 @@
-
-
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -246,21 +244,18 @@ export default function InvestorDetailsPage() {
                         <DropdownMenuContent align="end">
                             <DropdownMenuItem asChild>
                                 <Link href={`/investors/${investor.id}/edit`}>
-                                    <Edit className="mr-2 h-4 w-4" /> Edit
+                                    Edit
                                 </Link>
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={handleToggleFreeze}>
-                            <Snowflake className="mr-2 h-4 w-4" />
                             {investor.isFrozen ? 'Unfreeze' : 'Freeze'} Address
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={handleResetPassword}>
-                            <KeyRound className="mr-2 h-4 w-4" />
                             Reset Password
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <AlertDialogTrigger asChild>
                                 <DropdownMenuItem className="text-red-500" onSelect={(e) => e.preventDefault()}>
-                                    <Trash2 className="mr-2 h-4 w-4" />
                                     Cancel Access
                                 </DropdownMenuItem>
                             </AlertDialogTrigger>
