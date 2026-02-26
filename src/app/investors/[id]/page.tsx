@@ -120,8 +120,8 @@ export default function InvestorDetailsPage() {
       setInvestor(updatedInvestor);
 
       toast({
-          title: `Address ${updatedInvestor.isFrozen ? 'Unfrozen' : 'Frozen'}`,
-          description: `The wallet address for "${investor.name}" has been updated.`,
+          title: `Investor ${updatedInvestor.isFrozen ? 'Frozen' : 'Unfrozen'}`,
+          description: `The investor "${investor.name}" has been updated.`,
       });
 
     } catch (error) {
@@ -247,7 +247,7 @@ export default function InvestorDetailsPage() {
                                 </Link>
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={handleToggleFreeze}>
-                            {investor.isFrozen ? 'Unfreeze' : 'Freeze'} Address
+                            {investor.isFrozen ? 'Unfreeze Investor' : 'Freeze Investor'}
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={handleResetPassword}>
                             Reset Password

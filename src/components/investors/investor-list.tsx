@@ -7,9 +7,9 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Avatar, AvatarFallback } from '../ui/avatar';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
-import { MoreVertical, LayoutGrid, List, UserPlus, Snowflake, Search, Plus, KeyRound, Trash2 } from 'lucide-react';
+import { MoreVertical, LayoutGrid, List, UserPlus, Snowflake, Search, Plus } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '../ui/dropdown-menu';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '../ui/dropdown-menu';
 import Link from 'next/link';
 import {
   AlertDialog,
@@ -71,7 +71,7 @@ function InvestorCard({ investor, onFreezeClick, onResetPassword, onDeleteClick 
                     Reset Password
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={onFreezeClick}>
-                  {investor.isFrozen ? 'Unfreeze' : 'Freeze'} Address
+                  {investor.isFrozen ? 'Unfreeze Investor' : 'Freeze Investor'}
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem className="text-red-500" onClick={onDeleteClick}>
@@ -145,7 +145,7 @@ function InvestorTableRow({ investor, onFreezeClick, onResetPassword, onDeleteCl
                 Reset Password
             </DropdownMenuItem>
             <DropdownMenuItem onClick={onFreezeClick}>
-                {investor.isFrozen ? 'Unfreeze' : 'Freeze'} Address
+                {investor.isFrozen ? 'Unfreeze Investor' : 'Freeze Investor'}
             </DropdownMenuItem>
              <DropdownMenuSeparator />
             <DropdownMenuItem className="text-red-500" onClick={onDeleteClick}>
@@ -268,8 +268,8 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
       setInvestors(prev => prev.map(inv => (inv.id === dialogInvestor.id ? updatedInvestor : inv)));
 
       toast({
-          title: `Address ${updatedInvestor.isFrozen ? 'Frozen' : 'Unfrozen'}`,
-          description: `The wallet address for "${updatedInvestor.name}" has been updated.`,
+          title: `Investor ${updatedInvestor.isFrozen ? 'Frozen' : 'Unfrozen'}`,
+          description: `The investor "${updatedInvestor.name}" has been updated.`,
       });
     } catch (error) {
       console.error(error);
@@ -495,7 +495,7 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
                     <AlertDialogHeader>
                         <AlertDialogTitle>Are you sure?</AlertDialogTitle>
                         <AlertDialogDescription>
-                            This will {dialogInvestor?.isFrozen ? 'unfreeze' : 'freeze'} the wallet address for &quot;{dialogInvestor?.name}&quot;.
+                            This will {dialogInvestor?.isFrozen ? 'unfreeze' : 'freeze'} the investor &quot;{dialogInvestor?.name}&quot;.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
