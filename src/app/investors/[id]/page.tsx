@@ -10,7 +10,7 @@ import {
 import SidebarNav from '@/components/dashboard/sidebar-nav';
 import HeaderDynamic from '@/components/dashboard/header-dynamic';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Snowflake, ShieldCheck, User as UserIcon, Phone, Edit, KeyRound, Trash2, ChevronDown } from 'lucide-react';
+import { ArrowLeft, Snowflake, ShieldCheck, User as UserIcon, Phone, KeyRound, Trash2, ChevronDown, Briefcase, ClipboardList, ShoppingBag, ArrowRightLeft } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -241,7 +241,7 @@ export default function InvestorDetailsPage() {
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                            <DropdownMenuItem asChild>
+                            <DropdownMenuItem>
                                 <Link href={`/investors/${investor.id}/edit`}>
                                     Edit
                                 </Link>
@@ -347,9 +347,12 @@ export default function InvestorDetailsPage() {
                     <AccordionItem value="portfolio" className="border-b-0">
                         <Card>
                             <AccordionTrigger className="p-6 hover:no-underline text-left">
-                                <div className="flex-1 text-left">
-                                    <h3 className="text-lg font-semibold leading-none tracking-tight">Portfolio</h3>
-                                    <p className="text-sm text-muted-foreground mt-1">Current asset holdings for this investor.</p>
+                                <div className="flex items-center gap-4">
+                                    <Briefcase className="h-6 w-6" />
+                                    <div className="space-y-1 text-left">
+                                        <h3 className="text-lg font-semibold leading-none tracking-tight">Portfolio</h3>
+                                        <p className="text-sm text-muted-foreground">Current asset holdings for this investor.</p>
+                                    </div>
                                 </div>
                             </AccordionTrigger>
                             <AccordionContent className="p-6 pt-0">
@@ -360,9 +363,12 @@ export default function InvestorDetailsPage() {
                     <AccordionItem value="subscriptions" className="border-b-0">
                         <Card>
                             <AccordionTrigger className="p-6 hover:no-underline text-left">
-                                 <div className="flex-1 text-left">
-                                    <h3 className="text-lg font-semibold leading-none tracking-tight">Asset Subscriptions</h3>
-                                    <p className="text-sm text-muted-foreground mt-1">Assets this investor is subscribed to or has pending requests for.</p>
+                                 <div className="flex items-center gap-4">
+                                    <ClipboardList className="h-6 w-6" />
+                                    <div className="space-y-1 text-left">
+                                        <h3 className="text-lg font-semibold leading-none tracking-tight">Asset Subscriptions</h3>
+                                        <p className="text-sm text-muted-foreground">Assets this investor is subscribed to or has pending requests for.</p>
+                                    </div>
                                 </div>
                             </AccordionTrigger>
                             <AccordionContent className="p-6 pt-0">
@@ -373,9 +379,12 @@ export default function InvestorDetailsPage() {
                     <AccordionItem value="orders" className="border-b-0">
                         <Card>
                             <AccordionTrigger className="p-6 hover:no-underline text-left">
-                                 <div className="flex-1 text-left">
-                                    <h3 className="text-lg font-semibold leading-none tracking-tight">Order History</h3>
-                                    <p className="text-sm text-muted-foreground mt-1">All buy and sell orders placed by this investor.</p>
+                                 <div className="flex items-center gap-4">
+                                    <ShoppingBag className="h-6 w-6" />
+                                    <div className="space-y-1 text-left">
+                                        <h3 className="text-lg font-semibold leading-none tracking-tight">Order History</h3>
+                                        <p className="text-sm text-muted-foreground">All buy and sell orders placed by this investor.</p>
+                                    </div>
                                 </div>
                             </AccordionTrigger>
                             <AccordionContent className="p-6 pt-0">
@@ -386,9 +395,12 @@ export default function InvestorDetailsPage() {
                     <AccordionItem value="transactions" className="border-b-0">
                         <Card>
                             <AccordionTrigger className="p-6 hover:no-underline text-left">
-                                 <div className="flex-1 text-left">
-                                    <h3 className="text-lg font-semibold leading-none tracking-tight">Transaction History</h3>
-                                    <p className="text-sm text-muted-foreground mt-1">All transactions associated with this investor.</p>
+                                <div className="flex items-center gap-4">
+                                    <ArrowRightLeft className="h-6 w-6" />
+                                    <div className="space-y-1 text-left">
+                                        <h3 className="text-lg font-semibold leading-none tracking-tight">Transaction History</h3>
+                                        <p className="text-sm text-muted-foreground">All transactions associated with this investor.</p>
+                                    </div>
                                 </div>
                             </AccordionTrigger>
                             <AccordionContent className="p-6 pt-0">
