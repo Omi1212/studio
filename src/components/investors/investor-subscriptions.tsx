@@ -7,6 +7,26 @@ import type { SubscriptionStatus, AssetDetails, User } from '@/lib/types';
 import AssetIcon from '../ui/asset-icon';
 import { Badge } from '../ui/badge';
 import Image from 'next/image';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
+import { Button } from '../ui/button';
+import { MoreVertical, Snowflake } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 const networkMap: { [key: string]: string } = {
     spark: 'Spark',
@@ -43,6 +63,12 @@ function getStatusBadge(status: SubscriptionStatus) {
 export default function InvestorSubscriptions({ investor }: { investor: User }) {
     const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
     const [loading, setLoading] = useState(true);
+    const [localInvestor, setLocalInvestor] = useState(investor);
+    const { toast } = useToast();
+
+    useEffect(() => {
+        setLocalInvestor(investor);
+    }, [investor]);
     
     useEffect(() => {
         setLoading(true);
@@ -65,6 +91,32 @@ export default function InvestorSubscriptions({ investor }: { investor: User }) 
 
     }, [investor.id]);
 
+    const handleToggleFreeze = async () => {
+        const newFrozenState = !localInvestor.isFrozen;
+
+        try {
+          const response = await fetch(`/api/investors/${localInvestor.id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ isFrozen: newFrozenState }),
+          });
+          if (!response.ok) throw new Error('Failed to update status');
+
+          const updatedInvestor = await response.json();
+          setLocalInvestor(updatedInvestor);
+
+          toast({
+              title: `Investor ${updatedInvestor.isFrozen ? 'Frozen' : 'Unfrozen'}`,
+              description: `The investor's address has been ${updatedInvestor.isFrozen ? 'frozen' : 'unfrozen'}.`,
+          });
+
+        } catch (error) {
+          console.error(error);
+          toast({ variant: 'destructive', title: 'Error', description: 'Could not update status.' });
+        }
+    };
+
+
     if (loading) {
         return <p className="text-center text-muted-foreground py-8">Loading subscriptions...</p>;
     }
@@ -85,6 +137,7 @@ export default function InvestorSubscriptions({ investor }: { investor: User }) 
                     <TableHead>Network</TableHead>
                     <TableHead>Wallet</TableHead>
                     <TableHead className="text-right">Status</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
             </TableHeader>
             <TableBody>
@@ -125,6 +178,35 @@ export default function InvestorSubscriptions({ investor }: { investor: User }) 
                                 </a>
                             </TableCell>
                             <TableCell className="text-right">{getStatusBadge(status)}</TableCell>
+                            <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
+                                <AlertDialog>
+                                    <DropdownMenu>
+                                        <DropdownMenuTrigger asChild>
+                                            <Button variant="ghost" size="icon"><MoreVertical className="h-4 w-4" /></Button>
+                                        </DropdownMenuTrigger>
+                                        <DropdownMenuContent>
+                                            <AlertDialogTrigger asChild>
+                                                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                                                    <Snowflake className="mr-2 h-4 w-4" />
+                                                    {localInvestor.isFrozen ? 'Unfreeze Address' : 'Freeze Address'}
+                                                </DropdownMenuItem>
+                                            </AlertDialogTrigger>
+                                        </DropdownMenuContent>
+                                    </DropdownMenu>
+                                    <AlertDialogContent>
+                                      <AlertDialogHeader>
+                                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                        <AlertDialogDescription>
+                                            This will {localInvestor.isFrozen ? 'unfreeze' : 'freeze'} the investor &quot;{localInvestor.name}&quot;. They will {localInvestor.isFrozen ? 'be able to' : 'not be able to'} perform transactions.
+                                        </AlertDialogDescription>
+                                      </AlertDialogHeader>
+                                      <AlertDialogFooter>
+                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                        <AlertDialogAction onClick={handleToggleFreeze}>Confirm</AlertDialogAction>
+                                      </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                </AlertDialog>
+                            </TableCell>
                         </TableRow>
                     );
                 })}
