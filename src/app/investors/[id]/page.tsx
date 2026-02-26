@@ -300,7 +300,6 @@ export default function InvestorDetailsPage() {
                         </CardHeader>
                         <CardContent className="space-y-4">
                             <InfoRowWithIcon icon={UserIcon} label="Username" value={investor.name.toLowerCase().replace(/\s+/g, '')} />
-                            <InfoRowWithIcon icon={Phone} label="Phone Number" value={investor.phone} />
                         </CardContent>
                     </Card>
 
@@ -316,6 +315,7 @@ export default function InvestorDetailsPage() {
                             <PersonalInfoRow label="Identification Documents" value={investor.idDoc || 'Not set'} />
                             <PersonalInfoRow label="Address" value={investor.address || 'Not set'} />
                             <PersonalInfoRow label="Email Address" value={maskEmail(investor.email)} />
+                            <PersonalInfoRow label="Phone Number" value={investor.phone || 'Not provided'} />
                         </CardContent>
                     </Card>
                 </div>
