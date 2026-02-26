@@ -101,13 +101,16 @@ export default function InvestorSubscriptions({ investor }: { investor: User }) 
                                 </div>
                             </TableCell>
                             <TableCell>
-                                <div className="flex items-center gap-2">
-                                    {networks.map(net => (
-                                        <div key={net} className="h-6 w-6 flex items-center justify-center" title={networkMap[net] || net}>
-                                            {networkIconMap[net] || <span>{net}</span>}
+                                {networks.length > 0 ? (
+                                    <div className="flex items-center gap-2">
+                                        <div className="h-6 w-6 flex items-center justify-center" title={networkMap[networks[0]] || networks[0]}>
+                                            {networkIconMap[networks[0]] || null}
                                         </div>
-                                    ))}
-                                </div>
+                                        <span>{networkMap[networks[0]] || networks[0]}</span>
+                                    </div>
+                                ) : (
+                                    'N/A'
+                                )}
                             </TableCell>
                             <TableCell className="font-mono">{investor.walletAddress.slice(0, 7)}...{investor.walletAddress.slice(-4)}</TableCell>
                             <TableCell className="text-right">{getStatusBadge(status)}</TableCell>
