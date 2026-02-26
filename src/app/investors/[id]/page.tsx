@@ -10,7 +10,7 @@ import {
 import SidebarNav from '@/components/dashboard/sidebar-nav';
 import HeaderDynamic from '@/components/dashboard/header-dynamic';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Snowflake, ShieldCheck, User as UserIcon, Phone, KeyRound, Trash2, ChevronDown, Briefcase, ClipboardList, ShoppingBag, ArrowRightLeft } from 'lucide-react';
+import { ArrowLeft, Snowflake, ShieldCheck, User as UserIcon, Phone, KeyRound, Trash2, ChevronDown, Briefcase, ClipboardList, ShoppingBag, ArrowRightLeft, ExternalLink } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -285,9 +285,17 @@ export default function InvestorDetailsPage() {
                             </Avatar>
                             <CardTitle className="text-2xl pt-2">{investor.name}</CardTitle>
                             <CardDescription>User Level {investor.kycLevel || 0}</CardDescription>
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2 pt-2">
                                 {getStatusBadge(investor.kycStatus)}
                                 {investor.isFrozen && <Badge variant="secondary" className="bg-sky-600/20 text-sky-400 border-sky-400/50">Frozen</Badge>}
+                            </div>
+                            <div className="pt-4">
+                                <Button asChild variant="outline">
+                                    <a href={`https://kyc-platform.example.com/user/${investor.id}`} target="_blank" rel="noopener noreferrer">
+                                        View KYC Platform
+                                        <ExternalLink className="ml-2 h-4 w-4" />
+                                    </a>
+                                </Button>
                             </div>
                         </CardHeader>
                         <CardContent className="space-y-4">
