@@ -91,7 +91,6 @@ const issuerMenu = [
 ];
 
 const helpMenuItems = [
-  { href: '/security', label: 'Security', icon: ShieldCheck },
   { href: '/help', label: 'Help', icon: LifeBuoy },
 ];
 
