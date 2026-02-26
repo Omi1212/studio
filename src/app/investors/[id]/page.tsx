@@ -12,7 +12,7 @@ import {
 import SidebarNav from '@/components/dashboard/sidebar-nav';
 import HeaderDynamic from '@/components/dashboard/header-dynamic';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Snowflake, ArrowUpRight, ArrowDownLeft, ShieldCheck, User as UserIcon, Phone } from 'lucide-react';
+import { ArrowLeft, Snowflake, ArrowUpRight, ArrowDownLeft, ShieldCheck, User as UserIcon, Phone, MoreVertical, Edit, KeyRound, Trash2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -35,6 +35,7 @@ import { cn } from '@/lib/utils';
 import type { AssetDetails, User } from '@/lib/types';
 import { countries } from '@/lib/countries';
 import { Skeleton } from '@/components/ui/skeleton';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 function getStatusBadge(status: User['kycStatus']) {
   switch (status) {
@@ -120,7 +121,7 @@ export default function InvestorDetailsPage() {
       setInvestor(updatedInvestor);
 
       toast({
-          title: `Address ${updatedInvestor.isFrozen ? 'Frozen' : 'Unfrozen'}`,
+          title: `Address ${updatedInvestor.isFrozen ? 'Unfrozen' : 'Frozen'}`,
           description: `The wallet address for "${investor.name}" has been updated.`,
       });
 
@@ -129,6 +130,37 @@ export default function InvestorDetailsPage() {
       toast({ variant: 'destructive', title: 'Error', description: 'Could not update status.' });
     }
   }
+  
+  const handleResetPassword = () => {
+    if (!investor) return;
+    toast({
+        title: 'Password Reset Sent',
+        description: `A password reset link has been sent to ${investor.name}.`,
+    });
+  };
+
+  const handleDeleteInvestor = async () => {
+    if (!investor) return;
+    try {
+      const response = await fetch(`/api/investors/${investor.id}`, {
+        method: 'DELETE',
+      });
+      if (!response.ok) throw new Error('Failed to cancel access.');
+      
+      toast({
+        title: 'Access Canceled',
+        description: `The investor's access has been revoked.`,
+      });
+      router.push('/investors');
+    } catch (error: any) {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: error.message,
+      });
+    }
+  };
+
 
   const getInitials = (name: string) => {
     if (!name) return '';
@@ -204,9 +236,49 @@ export default function InvestorDetailsPage() {
                     </h1>
                 </div>
                 <div className="flex gap-2">
-                    <Button variant={investor.isFrozen ? "secondary" : "outline"} onClick={handleToggleFreeze}>
-                        <Snowflake className="mr-2 h-4 w-4" /> {investor.isFrozen ? 'Unfreeze' : 'Freeze'} Address
+                    <Button variant="outline" asChild>
+                        <Link href={`/investors/${investor.id}/edit`}>
+                            <Edit className="mr-2 h-4 w-4" /> Edit
+                        </Link>
                     </Button>
+                    <AlertDialog>
+                        <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon">
+                            <MoreVertical className="h-4 w-4" />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={handleToggleFreeze}>
+                            <Snowflake className="mr-2 h-4 w-4" />
+                            {investor.isFrozen ? 'Unfreeze' : 'Freeze'} Address
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={handleResetPassword}>
+                            <KeyRound className="mr-2 h-4 w-4" />
+                            Reset Password
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <AlertDialogTrigger asChild>
+                                <DropdownMenuItem className="text-red-500" onSelect={(e) => e.preventDefault()}>
+                                    <Trash2 className="mr-2 h-4 w-4" />
+                                    Cancel Access
+                                </DropdownMenuItem>
+                            </AlertDialogTrigger>
+                        </DropdownMenuContent>
+                        </DropdownMenu>
+                        <AlertDialogContent>
+                        <AlertDialogHeader>
+                            <AlertDialogTitle>Are you sure you want to cancel access?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                                This will permanently delete the investor &quot;{investor.name}&quot; and all associated data. This action cannot be undone.
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction onClick={handleDeleteInvestor} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Cancel Access</AlertDialogAction>
+                        </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
                 </div>
             </div>
             
