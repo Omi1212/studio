@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -42,7 +41,7 @@ export default function AccessList() {
         fetch(`/api/users?perPage=999`).then(res => res.json()),
         fetch(`/api/invitations?companyId=${companyId}`).then(res => res.json())
     ]).then(([usersResponse, invitationsResponse]) => {
-        const companyUsers = (usersResponse.data || []).filter((u: User) => u.companyId?.includes(companyId));
+        const companyUsers = (usersResponse.data || []).filter((u: User) => u.companyId?.includes(companyId) && u.role !== 'investor');
 
         const processedTeam = companyUsers.map((user: User) => {
             const displayRole = user.companyRoles?.[companyId] || user.role;
