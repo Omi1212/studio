@@ -31,7 +31,7 @@ import type { User } from '@/lib/types';
 import { countries } from '@/lib/countries';
 import { Skeleton } from '@/components/ui/skeleton';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import InvestorPortfolio from '@/components/investors/investor-portfolio';
 import InvestorOrders from '@/components/investors/investor-orders';
 import InvestorSubscriptions from '@/components/investors/investor-subscriptions';
@@ -343,58 +343,60 @@ export default function InvestorDetailsPage() {
                     )}
                 </div>
 
-                <Tabs defaultValue="portfolio" className="w-full">
-                    <TabsList className="grid w-full grid-cols-4">
-                        <TabsTrigger value="portfolio">Portfolio</TabsTrigger>
-                        <TabsTrigger value="subscriptions">Subscriptions</TabsTrigger>
-                        <TabsTrigger value="orders">Orders</TabsTrigger>
-                        <TabsTrigger value="transactions">Transactions</TabsTrigger>
-                    </TabsList>
-                    <TabsContent value="portfolio" className="mt-6">
+                <Accordion type="single" collapsible className="w-full space-y-6" defaultValue="portfolio">
+                    <AccordionItem value="portfolio" className="border-b-0">
                         <Card>
-                            <CardHeader>
-                                <CardTitle>Portfolio</CardTitle>
-                                <CardDescription>Current asset holdings for this investor.</CardDescription>
-                            </CardHeader>
-                            <CardContent>
+                            <AccordionTrigger className="p-6 hover:no-underline text-left">
+                                <div className="flex-1 text-left">
+                                    <h3 className="text-lg font-semibold leading-none tracking-tight">Portfolio</h3>
+                                    <p className="text-sm text-muted-foreground mt-1">Current asset holdings for this investor.</p>
+                                </div>
+                            </AccordionTrigger>
+                            <AccordionContent className="p-6 pt-0">
                                 <InvestorPortfolio investor={investor} />
-                            </CardContent>
+                            </AccordionContent>
                         </Card>
-                    </TabsContent>
-                    <TabsContent value="subscriptions" className="mt-6">
-                            <Card>
-                            <CardHeader>
-                                <CardTitle>Asset Subscriptions</CardTitle>
-                                <CardDescription>Assets this investor is subscribed to or has pending requests for.</CardDescription>
-                            </CardHeader>
-                            <CardContent>
-                                <InvestorSubscriptions investor={investor} />
-                            </CardContent>
-                        </Card>
-                    </TabsContent>
-                    <TabsContent value="orders" className="mt-6">
+                    </AccordionItem>
+                    <AccordionItem value="subscriptions" className="border-b-0">
                         <Card>
-                            <CardHeader>
-                                <CardTitle>Order History</CardTitle>
-                                <CardDescription>All buy and sell orders placed by this investor.</CardDescription>
-                            </CardHeader>
-                            <CardContent>
+                            <AccordionTrigger className="p-6 hover:no-underline text-left">
+                                 <div className="flex-1 text-left">
+                                    <h3 className="text-lg font-semibold leading-none tracking-tight">Asset Subscriptions</h3>
+                                    <p className="text-sm text-muted-foreground mt-1">Assets this investor is subscribed to or has pending requests for.</p>
+                                </div>
+                            </AccordionTrigger>
+                            <AccordionContent className="p-6 pt-0">
+                                <InvestorSubscriptions investor={investor} />
+                            </AccordionContent>
+                        </Card>
+                    </AccordionItem>
+                    <AccordionItem value="orders" className="border-b-0">
+                        <Card>
+                            <AccordionTrigger className="p-6 hover:no-underline text-left">
+                                 <div className="flex-1 text-left">
+                                    <h3 className="text-lg font-semibold leading-none tracking-tight">Order History</h3>
+                                    <p className="text-sm text-muted-foreground mt-1">All buy and sell orders placed by this investor.</p>
+                                </div>
+                            </AccordionTrigger>
+                            <AccordionContent className="p-6 pt-0">
                                 <InvestorOrders investorId={investor.id} />
-                            </CardContent>
+                            </AccordionContent>
                         </Card>
-                    </TabsContent>
-                    <TabsContent value="transactions" className="mt-6">
-                            <Card>
-                            <CardHeader>
-                                <CardTitle>Transaction History</CardTitle>
-                                <CardDescription>All transactions associated with this investor.</CardDescription>
-                            </CardHeader>
-                            <CardContent>
+                    </AccordionItem>
+                    <AccordionItem value="transactions" className="border-b-0">
+                        <Card>
+                            <AccordionTrigger className="p-6 hover:no-underline text-left">
+                                 <div className="flex-1 text-left">
+                                    <h3 className="text-lg font-semibold leading-none tracking-tight">Transaction History</h3>
+                                    <p className="text-sm text-muted-foreground mt-1">All transactions associated with this investor.</p>
+                                </div>
+                            </AccordionTrigger>
+                            <AccordionContent className="p-6 pt-0">
                                 <InvestorTransactions investor={investor} />
-                            </CardContent>
+                            </AccordionContent>
                         </Card>
-                    </TabsContent>
-                </Tabs>
+                    </AccordionItem>
+                </Accordion>
             </div>
           </main>
         </div>
