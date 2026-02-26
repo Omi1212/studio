@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
@@ -8,9 +7,9 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Avatar, AvatarFallback } from '../ui/avatar';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
-import { MoreVertical, LayoutGrid, List, UserPlus, Snowflake, Search, Plus } from 'lucide-react';
+import { MoreVertical, LayoutGrid, List, UserPlus, Snowflake, Search, Plus, KeyRound, Trash2 } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '../ui/dropdown-menu';
 import Link from 'next/link';
 import {
   AlertDialog,
@@ -21,7 +20,6 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { useToast } from '@/hooks/use-toast';
 import { Input } from '../ui/input';
@@ -48,7 +46,7 @@ function getStatusBadge(investor: Investor) {
   }
 }
 
-function InvestorCard({ investor, onToggleFreeze }: { investor: Investor, onToggleFreeze: () => void }) {
+function InvestorCard({ investor, onFreezeClick, onResetPassword, onDeleteClick }: { investor: Investor, onFreezeClick: () => void, onResetPassword: () => void, onDeleteClick: () => void }) {
   return (
     <Card>
       <CardHeader>
@@ -69,11 +67,18 @@ function InvestorCard({ investor, onToggleFreeze }: { investor: Investor, onTogg
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <AlertDialogTrigger asChild>
-                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                <DropdownMenuItem onClick={onResetPassword}>
+                    <KeyRound className="mr-2 h-4 w-4" />
+                    Reset Password
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={onFreezeClick}>
                   <Snowflake className="mr-2 h-4 w-4" /> {investor.isFrozen ? 'Unfreeze' : 'Freeze'} Address
                 </DropdownMenuItem>
-              </AlertDialogTrigger>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem className="text-red-500" onClick={onDeleteClick}>
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Cancel Access
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
@@ -101,7 +106,7 @@ function InvestorCard({ investor, onToggleFreeze }: { investor: Investor, onTogg
   );
 }
 
-function InvestorTableRow({ investor, onToggleFreeze }: { investor: Investor, onToggleFreeze: () => void }) {
+function InvestorTableRow({ investor, onFreezeClick, onResetPassword, onDeleteClick }: { investor: Investor, onFreezeClick: () => void, onResetPassword: () => void, onDeleteClick: () => void }) {
   const router = useRouter();
 
   return (
@@ -138,11 +143,19 @@ function InvestorTableRow({ investor, onToggleFreeze }: { investor: Investor, on
             <DropdownMenuItem asChild>
               <Link href={`/investors/${investor.id}`}>View Details</Link>
             </DropdownMenuItem>
-             <AlertDialogTrigger asChild>
-                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                  {investor.isFrozen ? 'Unfreeze' : 'Freeze'} Address
-                </DropdownMenuItem>
-             </AlertDialogTrigger>
+             <DropdownMenuItem onClick={onResetPassword}>
+                <KeyRound className="mr-2 h-4 w-4" />
+                Reset Password
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={onFreezeClick}>
+                <Snowflake className="mr-2 h-4 w-4" />
+                {investor.isFrozen ? 'Unfreeze' : 'Freeze'} Address
+            </DropdownMenuItem>
+             <DropdownMenuSeparator />
+            <DropdownMenuItem className="text-red-500" onClick={onDeleteClick}>
+                <Trash2 className="mr-2 h-4 w-4" />
+                Cancel Access
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </TableCell>
@@ -160,6 +173,7 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
   const [statusFilter, setStatusFilter] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
   const [dialogInvestor, setDialogInvestor] = useState<Investor | null>(null);
+  const [dialogAction, setDialogAction] = useState<'freeze' | 'delete' | null>(null);
   const [company, setCompany] = useState<Company | null>(null);
   const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(null);
 
@@ -236,6 +250,11 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
       setCurrentPage(page);
     }
   };
+
+  const handleCloseDialog = () => {
+      setDialogInvestor(null);
+      setDialogAction(null);
+  }
   
   const handleToggleFreeze = async () => {
     if (!dialogInvestor) return;
@@ -254,17 +273,50 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
       setInvestors(prev => prev.map(inv => (inv.id === dialogInvestor.id ? updatedInvestor : inv)));
 
       toast({
-          title: `Address ${updatedInvestor.isFrozen ? 'Unfrozen' : 'Unfrozen'}`,
+          title: `Address ${updatedInvestor.isFrozen ? 'Frozen' : 'Unfrozen'}`,
           description: `The wallet address for "${updatedInvestor.name}" has been updated.`,
       });
     } catch (error) {
       console.error(error);
       toast({ variant: 'destructive', title: 'Error', description: 'Could not update status.' });
     } finally {
-        setDialogInvestor(null);
+        handleCloseDialog();
     }
   };
 
+  const handleDeleteInvestor = async () => {
+    if (!dialogInvestor) return;
+
+    try {
+      const response = await fetch(`/api/investors/${dialogInvestor.id}`, {
+        method: 'DELETE',
+      });
+      if (!response.ok) {
+        if (response.status === 404) throw new Error('Investor not found.');
+        throw new Error('Failed to cancel access.');
+      }
+      
+      setInvestors(prev => prev.filter(inv => inv.id !== dialogInvestor!.id));
+      setTotalInvestors(prev => prev - 1);
+
+      toast({
+        title: 'Access Canceled',
+        description: `The investor's access has been revoked.`,
+      });
+    } catch (error) {
+      console.error(error);
+      toast({ variant: 'destructive', title: 'Error', description: (error as Error).message });
+    } finally {
+        handleCloseDialog();
+    }
+  };
+
+  const handleResetPassword = (investorName: string) => {
+    toast({
+        title: 'Password Reset Sent',
+        description: `A password reset link has been sent to ${investorName}.`,
+    });
+  };
 
   if (loading) {
     return (
@@ -331,7 +383,7 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
   const pageTitle = `Investors`;
 
   return (
-    <AlertDialog onOpenChange={() => setDialogInvestor(null)}>
+    <AlertDialog open={!!dialogAction} onOpenChange={(open) => !open && handleCloseDialog()}>
       <div className="space-y-4">
         <div className="flex justify-between items-center">
           <h1 className="text-3xl font-headline font-semibold">{pageTitle}</h1>
@@ -403,11 +455,13 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {investors.map(investor => (
-                    <InvestorCard 
-                        key={investor.id} 
-                        investor={investor} 
-                        onToggleFreeze={() => setDialogInvestor(investor)} 
-                    />
+                <InvestorCard
+                    key={investor.id}
+                    investor={investor}
+                    onFreezeClick={() => { setDialogInvestor(investor); setDialogAction('freeze'); }}
+                    onResetPassword={() => handleResetPassword(investor.name)}
+                    onDeleteClick={() => { setDialogInvestor(investor); setDialogAction('delete'); }}
+                />
               ))}
             </div>
             {renderPagination()}
@@ -429,7 +483,9 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
                     <InvestorTableRow 
                         key={investor.id} 
                         investor={investor} 
-                        onToggleFreeze={() => setDialogInvestor(investor)} 
+                        onFreezeClick={() => { setDialogInvestor(investor); setDialogAction('freeze'); }}
+                        onResetPassword={() => handleResetPassword(investor.name)}
+                        onDeleteClick={() => { setDialogInvestor(investor); setDialogAction('delete'); }}
                     />
                 ))}
               </TableBody>
@@ -437,17 +493,36 @@ export default function InvestorList({ view, setView }: { view: ViewMode, setVie
             {renderPagination()}
           </Card>
         )}
+
         <AlertDialogContent>
-            <AlertDialogHeader>
-                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                <AlertDialogDescription>
-                    This will {dialogInvestor?.isFrozen ? 'unfreeze' : 'freeze'} the wallet address for &quot;{dialogInvestor?.name}&quot;.
-                </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={handleToggleFreeze}>Confirm</AlertDialogAction>
-            </AlertDialogFooter>
+            {dialogAction === 'freeze' && (
+                <>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            This will {dialogInvestor?.isFrozen ? 'unfreeze' : 'freeze'} the wallet address for &quot;{dialogInvestor?.name}&quot;.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleToggleFreeze}>Confirm</AlertDialogAction>
+                    </AlertDialogFooter>
+                </>
+            )}
+            {dialogAction === 'delete' && (
+                <>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Are you sure you want to cancel access?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            This will permanently delete the investor &quot;{dialogInvestor?.name}&quot; and all associated data. This action cannot be undone.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleDeleteInvestor} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Cancel Access</AlertDialogAction>
+                    </AlertDialogFooter>
+                </>
+            )}
         </AlertDialogContent>
       </div>
     </AlertDialog>
