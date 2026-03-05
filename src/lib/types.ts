@@ -62,14 +62,6 @@ export interface Company {
 }
 
 
-export type Issuer = {
-  id: string;
-  name: string;
-  email: string;
-  walletAddress: string;
-  status: 'active' | 'inactive';
-};
-
 export type User = {
   id: string;
   name: string;
@@ -109,4 +101,10 @@ export type Invitation = {
   companyName: string;
   inviterName: string;
   status: 'pending' | 'accepted' | 'rejected';
+}
+
+export interface Option {
+  label: string
+  value: string
+  icon?: React.ComponentType<{ className?: string }>
 }
