@@ -10,7 +10,7 @@ import {
 import SidebarNav from '@/components/dashboard/sidebar-nav';
 import HeaderDynamic from '@/components/dashboard/header-dynamic';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Edit, KeyRound, Trash2, User as UserIcon, Snowflake, ShieldCheck } from 'lucide-react';
+import { ArrowLeft, Edit, KeyRound, Trash2, User as UserIcon, Snowflake, ShieldCheck, ExternalLink } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -36,6 +36,7 @@ import InvestorPortfolio from '@/components/investors/investor-portfolio';
 import InvestorSubscriptions from '@/components/investors/investor-subscriptions';
 import InvestorOrders from '@/components/investors/investor-orders';
 import InvestorTransactions from '@/components/investors/investor-transactions';
+import { cn } from '@/lib/utils';
 
 
 function getStatusBadge(status: User['kycStatus']) {
@@ -219,6 +220,13 @@ export default function InvestorDetailsPage() {
                         {getStatusBadge(investor.kycStatus)}
                         {investor.isFrozen && <Badge variant="secondary" className="bg-sky-600/20 text-sky-400 border-sky-400/50">Frozen</Badge>}
                     </div>
+                </div>
+
+                <div className="px-4">
+                    <Button variant="outline" className="w-full justify-center gap-2">
+                        <ExternalLink className="h-4 w-4" />
+                        View KYC Platform
+                    </Button>
                 </div>
                 
                 <Separator />
