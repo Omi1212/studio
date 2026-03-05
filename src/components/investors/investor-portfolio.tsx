@@ -10,7 +10,7 @@ export default function InvestorPortfolio({ investor }: { investor: User }) {
 
     if (holdings.length === 0) {
         return (
-            <div className="text-center text-muted-foreground py-8">
+            <div className="text-center text-muted-foreground p-6">
                 This investor has no holdings.
             </div>
         );
@@ -49,8 +49,8 @@ export default function InvestorPortfolio({ investor }: { investor: User }) {
                 ))}
             </TableBody>
         </Table>
-        <Separator className="my-4" />
-        <div className="px-4 pb-4">
+        <div className="p-6">
+            <Separator className="mb-6" />
             <div className="grid grid-cols-2 gap-4">
                  <div className="text-left">
                     <p className="text-sm text-muted-foreground">Total Invested</p>

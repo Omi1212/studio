@@ -257,13 +257,15 @@ export default function InvestorDetailsPage() {
 
               <div className="lg:col-span-3">
                 <Tabs defaultValue="details">
-                  <TabsList>
-                    <TabsTrigger value="details">User Details</TabsTrigger>
-                    <TabsTrigger value="portfolio">Portfolio</TabsTrigger>
-                    <TabsTrigger value="subscriptions">Subscriptions</TabsTrigger>
-                    <TabsTrigger value="orders">Orders</TabsTrigger>
-                    <TabsTrigger value="transactions">Transactions</TabsTrigger>
-                  </TabsList>
+                  <div className="w-full overflow-x-auto">
+                    <TabsList className="inline-flex">
+                      <TabsTrigger value="details">User Details</TabsTrigger>
+                      <TabsTrigger value="portfolio">Portfolio</TabsTrigger>
+                      <TabsTrigger value="subscriptions">Subscriptions</TabsTrigger>
+                      <TabsTrigger value="orders">Orders</TabsTrigger>
+                      <TabsTrigger value="transactions">Transactions</TabsTrigger>
+                    </TabsList>
+                  </div>
                   <TabsContent value="details" className="mt-6">
                     <Card>
                         <CardHeader><CardTitle>User Information</CardTitle></CardHeader>
@@ -282,16 +284,48 @@ export default function InvestorDetailsPage() {
                     </Card>
                   </TabsContent>
                   <TabsContent value="portfolio" className="mt-6">
-                     <InvestorPortfolio investor={investor} />
+                     <Card>
+                        <CardHeader>
+                            <CardTitle>Portfolio</CardTitle>
+                            <CardDescription>An overview of the investor's holdings and total investment.</CardDescription>
+                        </CardHeader>
+                        <CardContent className="p-0">
+                            <InvestorPortfolio investor={investor} />
+                        </CardContent>
+                    </Card>
                   </TabsContent>
                   <TabsContent value="subscriptions" className="mt-6">
-                    <InvestorSubscriptions investor={investor} />
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Subscriptions</CardTitle>
+                            <CardDescription>All asset subscriptions for this investor.</CardDescription>
+                        </CardHeader>
+                        <CardContent className="p-0">
+                            <InvestorSubscriptions investor={investor} />
+                        </CardContent>
+                    </Card>
                   </TabsContent>
                   <TabsContent value="orders" className="mt-6">
-                    <InvestorOrders investorId={investor.id} />
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Orders</CardTitle>
+                            <CardDescription>Order history for this investor.</CardDescription>
+                        </CardHeader>
+                        <CardContent className="p-0">
+                            <InvestorOrders investorId={investor.id} />
+                        </CardContent>
+                    </Card>
                   </TabsContent>
                    <TabsContent value="transactions" className="mt-6">
-                    <InvestorTransactions investor={investor} />
+                     <Card>
+                        <CardHeader>
+                            <CardTitle>Transactions</CardTitle>
+                            <CardDescription>Transaction history for this investor.</CardDescription>
+                        </CardHeader>
+                        <CardContent className="p-0">
+                            <InvestorTransactions investor={investor} />
+                        </CardContent>
+                    </Card>
                   </TabsContent>
                 </Tabs>
               </div>
