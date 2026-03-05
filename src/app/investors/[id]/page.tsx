@@ -185,7 +185,7 @@ export default function InvestorDetailsPage() {
   const countryDisplay = countryObj ? countryObj.label : investor.country;
   
   const ActionButton = ({ icon: Icon, label, onClick, className }: { icon: React.ElementType, label: string, onClick?: () => void, className?: string }) => (
-    <Button variant="ghost" className={cn("w-full justify-start text-muted-foreground", className)} onClick={onClick}>
+    <Button variant="ghost" className={cn("w-full justify-center text-muted-foreground", className)} onClick={onClick}>
         <Icon className="mr-2 h-4 w-4" /> {label}
     </Button>
   );
@@ -209,50 +209,49 @@ export default function InvestorDetailsPage() {
             </div>
             
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-              <div className="lg:col-span-1 space-y-6">
-                <div className="p-4 flex flex-col items-center text-center">
-                    <Avatar className="h-24 w-24 text-4xl mb-4">
-                        <AvatarFallback>{getInitials(investor.name)}</AvatarFallback>
-                    </Avatar>
-                    <h2 className="text-xl font-semibold">{investor.name}</h2>
-                    <p className="text-sm text-muted-foreground">{investor.email}</p>
-                    <div className="flex items-center gap-2 pt-2">
-                        {getStatusBadge(investor.kycStatus)}
-                        {investor.isFrozen && <Badge variant="secondary" className="bg-sky-600/20 text-sky-400 border-sky-400/50">Frozen</Badge>}
+              <div className="lg:col-span-1">
+                <Card>
+                  <CardContent className="p-6 space-y-6 text-center">
+                    <div className="flex flex-col items-center">
+                      <Avatar className="h-24 w-24 text-4xl mb-4">
+                          <AvatarFallback>{getInitials(investor.name)}</AvatarFallback>
+                      </Avatar>
+                      <h2 className="text-xl font-semibold">{investor.name}</h2>
+                      <p className="text-sm text-muted-foreground">{investor.email}</p>
+                      <div className="flex items-center gap-2 pt-2">
+                          {getStatusBadge(investor.kycStatus)}
+                          {investor.isFrozen && <Badge variant="secondary" className="bg-sky-600/20 text-sky-400 border-sky-400/50">Frozen</Badge>}
+                      </div>
                     </div>
-                </div>
-
-                <div className="px-4">
                     <Button variant="outline" className="w-full justify-center gap-2">
                         <ExternalLink className="h-4 w-4" />
                         View KYC Platform
                     </Button>
-                </div>
-                
-                <Separator />
-
-                <div className="space-y-1">
-                    <ActionButton icon={Edit} label="Update User" onClick={() => router.push(`/investors/${investor.id}/edit`)} />
-                    <ActionButton icon={KeyRound} label="Reset Password" onClick={handleResetPassword} />
-                    <ActionButton icon={Snowflake} label={investor.isFrozen ? 'Unfreeze Investor' : 'Freeze Investor'} onClick={handleToggleFreeze} />
-                    <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                             <ActionButton icon={Trash2} label="Cancel Access" className="text-red-500 hover:text-red-500" />
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                            <AlertDialogHeader>
-                                <AlertDialogTitle>Are you sure you want to cancel access?</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                    This will permanently delete the investor &quot;{investor.name}&quot; and all associated data. This action cannot be undone.
-                                </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction onClick={handleDeleteInvestor} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Cancel Access</AlertDialogAction>
-                            </AlertDialogFooter>
-                        </AlertDialogContent>
-                    </AlertDialog>
-                </div>
+                    <Separator />
+                    <div className="space-y-1">
+                      <ActionButton icon={Edit} label="Update User" onClick={() => router.push(`/investors/${investor.id}/edit`)} />
+                      <ActionButton icon={KeyRound} label="Reset Password" onClick={handleResetPassword} />
+                      <ActionButton icon={Snowflake} label={investor.isFrozen ? 'Unfreeze Investor' : 'Freeze Investor'} onClick={handleToggleFreeze} />
+                      <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                              <ActionButton icon={Trash2} label="Cancel Access" className="text-red-500 hover:text-red-500" />
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                              <AlertDialogHeader>
+                                  <AlertDialogTitle>Are you sure you want to cancel access?</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                      This will permanently delete the investor &quot;{investor.name}&quot; and all associated data. This action cannot be undone.
+                                  </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                  <AlertDialogAction onClick={handleDeleteInvestor} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Cancel Access</AlertDialogAction>
+                              </AlertDialogFooter>
+                          </AlertDialogContent>
+                      </AlertDialog>
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
 
               <div className="lg:col-span-3">
