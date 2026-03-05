@@ -33,7 +33,7 @@ import {
 import { Card } from '../ui/card';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import InvestorForm from './investor-form';
-import { columns as createColumns } from './columns';
+import { createColumns } from './columns';
 import { DataTableToolbar } from './data-table-toolbar';
 import { DataTablePagination } from '../ui/data-table-pagination';
 import { DataTableFacetedFilter } from './data-table-faceted-filter';
