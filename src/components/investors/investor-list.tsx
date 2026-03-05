@@ -30,7 +30,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { Card } from '../ui/card';
+import { Card, CardContent } from '../ui/card';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import InvestorForm from './investor-form';
 import { createColumns } from './columns';
@@ -50,6 +50,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Skeleton } from '../ui/skeleton';
+import { Input } from '../ui/input';
 
 const KYC_STATUS_OPTIONS = [
   { value: 'verified', label: 'Whitelisted' },
