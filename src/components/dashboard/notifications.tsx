@@ -1,4 +1,3 @@
-
 'use client';
 import { useState, useEffect } from 'react';
 import type { Invitation, User } from '@/lib/types';
@@ -18,11 +17,17 @@ export default function Notifications() {
         if (userJson) {
             const user = JSON.parse(userJson);
             fetch('/api/invitations')
-                .then(res => res.json())
+                .then(res => {
+                    if (res.ok) {
+                        return res.json();
+                    }
+                    return [];
+                })
                 .then((allInvitations: Invitation[]) => {
                     const userInvitations = allInvitations.filter(inv => inv.email === user.email && inv.status === 'pending');
                     setInvitations(userInvitations);
                 })
+                .catch(console.error)
                 .finally(() => setLoading(false));
         } else {
             setLoading(false);

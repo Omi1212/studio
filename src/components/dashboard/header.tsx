@@ -1,4 +1,3 @@
-
 'use client';
 
 import {
@@ -44,11 +43,17 @@ export default function Header() {
         const user = JSON.parse(userJson);
         const fetchNotifs = () => {
             fetch('/api/invitations')
-                .then(res => res.json())
+                .then(res => {
+                    if (res.ok) {
+                        return res.json();
+                    }
+                    return [];
+                })
                 .then(allInvitations => {
                     const userInvitations = (allInvitations || []).filter((inv: Invitation) => inv.email === user.email && inv.status === 'pending');
                     setNotificationCount(userInvitations.length);
-                });
+                })
+                .catch(console.error);
         }
         fetchNotifs();
         window.addEventListener('companyChanged', fetchNotifs); // Re-use event
