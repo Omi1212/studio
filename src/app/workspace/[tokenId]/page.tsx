@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useEffect, useState, use } from 'react';
@@ -16,7 +15,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 
-function AssetDetailsComponent({ params }: { params: { assetId: string } }) {
+function AssetDetailsComponent({ params }: { params: { tokenId: string } }) {
   const [asset, setAsset] = useState<AssetDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [userRole, setUserRole] = useState<User['role'] | null>(null);
@@ -26,9 +25,9 @@ function AssetDetailsComponent({ params }: { params: { assetId: string } }) {
     setUserRole(role);
     setLoading(true);
 
-    const { assetId } = params;
+    const { tokenId } = params;
     
-    fetch(`/api/assets/${assetId}`)
+    fetch(`/api/assets/${tokenId}`)
       .then(res => {
         if(res.ok) return res.json();
         throw new Error('Asset not found');
@@ -98,7 +97,7 @@ function AssetDetailsComponent({ params }: { params: { assetId: string } }) {
   );
 }
 
-export default function AssetDetailsPage({ params }: { params: Promise<{ assetId: string }> }) {
+export default function AssetDetailsPage({ params }: { params: Promise<{ tokenId: string }> }) {
   const resolvedParams = use(params);
   return <AssetDetailsComponent params={resolvedParams} />;
 }
