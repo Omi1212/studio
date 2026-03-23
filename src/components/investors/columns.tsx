@@ -91,6 +91,28 @@ export const createColumns = ({ onEdit, onArchive, onDelete }: ColumnsProps): Co
     ),
   },
   {
+    accessorKey: 'holdings',
+    header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Investments" />
+    ),
+    cell: ({ row }) => {
+        const holdings = row.original.holdings || [];
+        if (holdings.length === 0) {
+            return <span className="text-sm text-muted-foreground">No investments</span>;
+        }
+        return (
+            <div className="flex flex-wrap gap-1">
+                {holdings.slice(0, 3).map((holding: any) => (
+                    <Badge key={holding.assetId} variant="secondary">{holding.assetTicker}</Badge>
+                ))}
+                {holdings.length > 3 && (
+                    <Badge variant="outline">+{holdings.length - 3}</Badge>
+                )}
+            </div>
+        );
+    },
+  },
+  {
     accessorKey: 'walletAddress',
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Wallet" />
