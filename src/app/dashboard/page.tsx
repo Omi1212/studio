@@ -147,7 +147,7 @@ function DashboardRenderer() {
         const complianceProvidersCount = company?.complianceProviders?.length ?? 0;
         
         const showKybBanner = user && !isKybVerified;
-        const showComplianceBanner = user && isKybVerified && complianceProvidersCount < 3;
+        const showComplianceBanner = user && complianceProvidersCount < 3;
 
         const canShowAssetDetails = !showKybBanner && !showComplianceBanner && selectedAsset;
         
