@@ -77,7 +77,6 @@ const investorMenu = [
 const issuerMenu = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/issue-asset', label: 'Launchpad', icon: Rocket },
-  { href: '/investors', label: 'Investors', icon: Users },
   { 
     href: '/workspace', 
     label: 'Workspace', 
@@ -88,6 +87,7 @@ const issuerMenu = [
         { href: '/transfers', label: 'Transfers', icon: ArrowRightLeft },
     ]
   },
+  { href: '/investors', label: 'Investors', icon: Users },
 ];
 
 const helpMenuItems = [
@@ -270,7 +270,7 @@ export default function SidebarNav() {
     spark: 'Spark',
     liquid: 'Liquid',
     rgb: 'RGB',
-    ark: 'Ark',
+    ark: 'Arkade Assets',
     taproot: 'Taproot Assets',
   };
 
