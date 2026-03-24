@@ -17,7 +17,6 @@ import { Badge } from '../ui/badge';
 import { Separator } from '../ui/separator';
 import { Progress } from '../ui/progress';
 import { useState, useEffect } from 'react';
-import AssignedAgents from './assigned-agents';
 import {
   Table,
   TableBody,
@@ -126,11 +125,7 @@ export default function AssetDetailsView({
   }
   
   const renderConditionalContent = () => {
-    if (userRole === 'superadmin') {
-      return <AssignedAgents assetId={asset.id} />;
-    }
-
-    if (view === 'workspace') {
+    if (userRole === 'superadmin' || view === 'workspace') {
       return (
         <Card>
           <CardHeader>
