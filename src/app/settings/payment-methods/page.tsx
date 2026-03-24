@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Sidebar,
   SidebarInset,
@@ -79,6 +79,7 @@ export default function PaymentMethodsPage() {
   const [btcAddresses, setBtcAddresses] = useState<BtcAddress[]>(initialBtcAddresses);
   const [sparkAddresses, setSparkAddresses] = useState<SparkAddress[]>(initialSparkAddresses);
   const [stablecoinAddresses, setStablecoinAddresses] = useState<StablecoinAddress[]>(initialStablecoinAddresses);
+  const [userRole, setUserRole] = useState<string | null>(null);
   
   const [dialogOpen, setDialogOpen] = useState<string | null>(null);
 
@@ -87,6 +88,11 @@ export default function PaymentMethodsPage() {
   const [btcForm, setBtcForm] = useState({ address: '', alias: '', type: 'On-chain' as const });
   const [sparkForm, setSparkForm] = useState({ address: '', alias: '' });
   const [stablecoinForm, setStablecoinForm] = useState({ coin: 'USDT' as const, network: 'Tron' as const, address: '', alias: '' });
+
+  useEffect(() => {
+    const role = localStorage.getItem('userRole');
+    setUserRole(role);
+  }, []);
 
   const handleAddBankAccount = () => {
     if (!bankForm.accountHolder || !bankForm.accountNumber) {
@@ -161,7 +167,9 @@ export default function PaymentMethodsPage() {
     if (type === 'stablecoin') setStablecoinAddresses(prev => prev.filter(item => item.id !== id));
     toast({ title: "Item removed successfully." });
   };
-
+  
+  const pageTitle = userRole === 'issuer' ? 'Payment Methods' : 'Withdrawal Methods';
+  const descriptionText = userRole === 'issuer' ? 'payments' : 'withdrawals';
 
   return (
     <SidebarProvider>
@@ -177,7 +185,7 @@ export default function PaymentMethodsPage() {
                     <Link href="/settings"><ArrowLeft /></Link>
                 </Button>
                 <h1 className="text-3xl font-headline font-semibold">
-                    Withdrawal Methods
+                    {pageTitle}
                 </h1>
             </div>
             
@@ -190,7 +198,7 @@ export default function PaymentMethodsPage() {
                             <Banknote className="h-6 w-6" />
                             <div className="space-y-1">
                                 <h3 className="text-lg font-semibold leading-none tracking-tight">Bank Accounts</h3>
-                                <p className="text-sm text-muted-foreground">Manage bank accounts for fiat currency withdrawals.</p>
+                                <p className="text-sm text-muted-foreground">Manage bank accounts for fiat currency {descriptionText}.</p>
                             </div>
                         </div>
                     </AccordionTrigger>
@@ -309,7 +317,7 @@ export default function PaymentMethodsPage() {
                             <Bitcoin className="h-6 w-6" />
                             <div className="space-y-1">
                                 <h3 className="text-lg font-semibold leading-none tracking-tight">Bitcoin</h3>
-                                <p className="text-sm text-muted-foreground">Manage addresses for withdrawing Bitcoin.</p>
+                                <p className="text-sm text-muted-foreground">Manage addresses for {descriptionText} with Bitcoin.</p>
                             </div>
                         </div>
                     </AccordionTrigger>
@@ -371,7 +379,7 @@ export default function PaymentMethodsPage() {
                             <Dialog open={dialogOpen === 'btc'} onOpenChange={(open) => setDialogOpen(open ? 'btc' : null)}>
                                 <DialogTrigger asChild><Button><Plus className="mr-2 h-4 w-4" /> Add Bitcoin Address</Button></DialogTrigger>
                                 <DialogContent>
-                                    <DialogHeader><DialogTitle>Add Bitcoin Withdrawal Address</DialogTitle></DialogHeader>
+                                    <DialogHeader><DialogTitle>Add Bitcoin {userRole === 'issuer' ? 'Payment' : 'Withdrawal'} Address</DialogTitle></DialogHeader>
                                     <div className="grid gap-4 py-4">
                                         <div className="space-y-2">
                                             <Label htmlFor="btc-alias">Alias</Label>
@@ -410,7 +418,7 @@ export default function PaymentMethodsPage() {
                             <SparkIcon />
                             <div className="space-y-1">
                                 <h3 className="text-lg font-semibold leading-none tracking-tight">Bitcoin Spark</h3>
-                                <p className="text-sm text-muted-foreground">Manage your addresses for withdrawing via Spark.</p>
+                                <p className="text-sm text-muted-foreground">Manage your addresses for {descriptionText} via Spark.</p>
                             </div>
                         </div>
                     </AccordionTrigger>
@@ -470,7 +478,7 @@ export default function PaymentMethodsPage() {
                             <Dialog open={dialogOpen === 'spark'} onOpenChange={(open) => setDialogOpen(open ? 'spark' : null)}>
                                 <DialogTrigger asChild><Button><Plus className="mr-2 h-4 w-4" /> Add Spark Address</Button></DialogTrigger>
                                 <DialogContent>
-                                    <DialogHeader><DialogTitle>Add Spark Withdrawal Address</DialogTitle></DialogHeader>
+                                    <DialogHeader><DialogTitle>Add Spark {userRole === 'issuer' ? 'Payment' : 'Withdrawal'} Address</DialogTitle></DialogHeader>
                                     <div className="grid gap-4 py-4">
                                         <div className="space-y-2">
                                             <Label htmlFor="spark-alias">Alias</Label>
@@ -499,7 +507,7 @@ export default function PaymentMethodsPage() {
                                 <DollarSign className="h-6 w-6" />
                                 <div className="space-y-1">
                                     <h3 className="text-lg font-semibold leading-none tracking-tight">Stablecoins</h3>
-                                    <p className="text-sm text-muted-foreground">Manage your addresses for withdrawing stablecoins.</p>
+                                    <p className="text-sm text-muted-foreground">Manage your addresses for {descriptionText} with stablecoins.</p>
                                 </div>
                             </div>
                         </AccordionTrigger>
@@ -559,7 +567,7 @@ export default function PaymentMethodsPage() {
                                 <Dialog open={dialogOpen === 'stablecoin'} onOpenChange={(open) => setDialogOpen(open ? 'stablecoin' : null)}>
                                     <DialogTrigger asChild><Button><Plus className="mr-2 h-4 w-4" /> Add Stablecoin Address</Button></DialogTrigger>
                                     <DialogContent>
-                                        <DialogHeader><DialogTitle>Add Stablecoin Withdrawal Address</DialogTitle></DialogHeader>
+                                        <DialogHeader><DialogTitle>Add Stablecoin {userRole === 'issuer' ? 'Payment' : 'Withdrawal'} Address</DialogTitle></DialogHeader>
                                         <div className="grid gap-4 py-4">
                                             <div className="space-y-2">
                                                 <Label htmlFor="sc-alias">Alias</Label>

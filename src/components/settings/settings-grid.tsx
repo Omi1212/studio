@@ -18,42 +18,49 @@ import { useEffect, useState } from 'react';
 
 const allSettingsItems = [
   {
+    id: 'general',
     icon: Settings,
     title: 'General',
     description: 'Manage your business information.',
     href: '/settings/general',
   },
   {
+    id: 'users',
     icon: Users,
     title: 'Users & Access',
     description: 'Define roles and permissions for your team.',
     href: '/settings/users-and-access',
   },
   {
+    id: 'compliance',
     icon: ShieldCheck,
     title: 'Compliance',
     description: 'View and manage your KYC, KYB & KYT verification status.',
     href: '/settings/compliance',
   },
   {
+    id: 'payment-methods',
     icon: CreditCard,
     title: 'Withdrawal Methods',
     description: 'Add and manage your bank accounts and crypto addresses for withdrawals.',
     href: '/settings/payment-methods',
   },
   {
+    id: 'integrations',
     icon: Puzzle,
     title: 'Third Party Integrations',
     description: 'Connect and manage third-party applications.',
     href: '/settings/integrations',
   },
   {
+    id: 'notifications',
     icon: Bell,
     title: 'Notifications & Alerts',
     description: 'Customize how and when you receive notifications.',
     href: '/settings/notifications',
   },
   {
+    id: 'data-management',
     icon: FileText,
     title: 'Data Management',
     description: 'Download your transaction reports and data.',
@@ -97,22 +104,33 @@ export default function SettingsGrid() {
     setUserRole(role);
   }, []);
 
-  const investorSettings = [
-    'General',
-    'Withdrawal Methods',
-    'Notifications & Alerts',
-    'Data Management',
+  const investorSettingsIds = [
+    'general',
+    'payment-methods',
+    'notifications',
+    'data-management',
   ];
 
-  const settingsItems =
-    userRole === 'investor'
-      ? allSettingsItems.filter((item) => investorSettings.includes(item.title))
-      : allSettingsItems;
+  const filteredItems = userRole === 'investor' 
+    ? allSettingsItems.filter(item => investorSettingsIds.includes(item.id))
+    : allSettingsItems;
+
+  const settingsItems = filteredItems.map(item => {
+      if (item.id === 'payment-methods' && userRole === 'issuer') {
+        return {
+          ...item,
+          title: 'Payment Methods',
+          description: 'Add and manage your bank accounts and crypto addresses for payments.',
+        };
+      }
+      return item;
+    });
+
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
       {settingsItems.map((item) => (
-        <SettingCard key={item.title} {...item} />
+        <SettingCard key={item.id} {...item} />
       ))}
     </div>
   );
