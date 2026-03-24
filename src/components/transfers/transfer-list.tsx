@@ -20,7 +20,7 @@ const networkMap: { [key: string]: string } = {
     spark: 'Spark',
     liquid: 'Liquid',
     rgb: 'RGB',
-    ark: 'Ark',
+    ark: 'Arkade Assets',
     taproot: 'Taproot Assets',
 };
 
@@ -207,7 +207,7 @@ export default function TransferList() {
                   <SelectItem value="spark">Spark</SelectItem>
                   <SelectItem value="liquid">Liquid</SelectItem>
                   <SelectItem value="rgb">RGB</SelectItem>
-                  <SelectItem value="ark">Ark</SelectItem>
+                  <SelectItem value="ark">Arkade Assets</SelectItem>
                   <SelectItem value="taproot">Taproot Assets</SelectItem>
               </SelectContent>
           </Select>

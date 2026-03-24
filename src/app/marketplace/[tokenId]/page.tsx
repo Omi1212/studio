@@ -56,7 +56,7 @@ function AssetOfferingPage({ params }: { params: { tokenId: string } }) {
     spark: 'Spark',
     liquid: 'Liquid',
     rgb: 'RGB',
-    ark: 'Ark',
+    ark: 'Arkade Assets',
     taproot: 'Taproot Assets',
   };
 
@@ -64,7 +64,7 @@ function AssetOfferingPage({ params }: { params: { tokenId: string } }) {
     spark: { name: 'Sparkscan', url: 'https://sparkscan.io' },
     liquid: { name: 'Liquid Explorer', url: 'https://mempool.space/liquid' },
     rgb: { name: 'RGB Explorer', url: 'https://rgb.tech' },
-    ark: { name: 'Ark Explorer', url: '#' },
+    ark: { name: 'Arkade Assets', url: '#' },
     taproot: { name: 'Taproot Explorer', url: 'https://mempool.space' },
   };
 
