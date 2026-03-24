@@ -8,6 +8,27 @@ declare global {
 
 const initialData: Omit<AssetDetails, 'assetIcon' | 'whitepaper' | 'legalAssetizationDoc' | 'assetIssuanceLegalDoc' | 'publicKey'>[] = [
   {
+    id: 'btkn1-arkspark-asset',
+    assetName: 'ArkSpark Token',
+    assetTicker: 'AST',
+    status: 'active' as const,
+    network: ['spark', 'ark'],
+    maxSupply: 500000000,
+    price: 2.50,
+    decimals: 8,
+    isFreezable: true,
+    companyId: 'issuer-a-comp',
+    destinationAddress: 'btkn1arkspark...dest',
+    assetType: 'utility_token',
+    subscriptionTime: 'Daily',
+    minInvestment: 500,
+    maxInvestment: 50000,
+    subscriptionFees: 0.15,
+    redemptionTime: 'Daily',
+    minRedemptionAmount: 500,
+    redemptionFees: 0.25,
+  },
+  {
     id: 'example-5',
     assetName: 'Tether Gold',
     assetTicker: 'XAUT',
