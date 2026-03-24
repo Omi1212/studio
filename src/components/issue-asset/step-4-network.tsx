@@ -25,6 +25,7 @@ import type { AssetFormValues } from './issue-asset-form';
 import { cn } from '@/lib/utils';
 import { Separator } from '../ui/separator';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
+import Image from 'next/image';
 
 const step4Schema = z.object({
   network: z.array(z.string()).min(1, 'Please select at least one network'),
@@ -57,7 +58,7 @@ const networks = [
     { 
         id: 'liquid', 
         name: 'Liquid Network', 
-        icon: <img src="https://liquid.net/_next/static/media/logo.28b5ba97.svg" alt="Liquid Network Logo" className="h-6 w-6" />,
+        icon: <Image src="https://liquid.net/_next/static/media/logo.28b5ba97.svg" alt="Liquid Network Logo" width={24} height={24} />,
         description: {
             whatIsIt: 'A Bitcoin sidechain designed for high-performance asset issuance. It offers faster settlement than the main chain (2 minutes) and "Confidential Transactions," which hide asset amounts and types from the public eye.',
             bestFor: [
@@ -70,7 +71,7 @@ const networks = [
     { 
         id: 'rgb', 
         name: 'RGB Protocol', 
-        icon: <img src="https://rgb.tech/logo/rgb-symbol-color.svg" alt="RGB Protocol Logo" className="h-6 w-6" />,
+        icon: <Image src="https://rgb.tech/logo/rgb-symbol-color.svg" alt="RGB Protocol Logo" width={24} height={24} />,
         description: {
             whatIsIt: 'A client-side validation protocol for smart contracts. RGB keeps asset data off-chain (stored locally on your device) while using the Bitcoin blockchain only for commitment. It offers the highest level of privacy and scalability.',
             bestFor: [
@@ -83,7 +84,7 @@ const networks = [
     { 
         id: 'ark', 
         name: 'Arkade Assets', 
-        icon: <img src="https://i.ibb.co/sdg2tRxK/imagen-2026-03-24-075321289.png" alt="Arkade Assets Logo" className="h-6 w-6" />,
+        icon: <Image src="https://i.ibb.co/sdg2tRxK/imagen-2026-03-24-075321289.png" alt="Arkade Assets Logo" width={24} height={24} />,
         description: {
             whatIsIt: 'A second-layer protocol for off-chain transactions. It allows users to make payments without requiring a direct or indirect channel with the payee.',
             bestFor: [
@@ -96,7 +97,7 @@ const networks = [
     {
         id: 'taproot',
         name: 'Taproot Assets',
-        icon: <img src="https://docs.lightning.engineering/~gitbook/image?url=https%3A%2F%2F2545062540-files.gitbook.io%2F~%2Ffiles%2Fv0%2Fb%2Fgitbook-legacy-files%2Fo%2Fspaces%252F-MIzyiDsFtJBYVyhr1nT%252Favatar-1602260100761.png%3Fgeneration%3D1602260100982225%26alt%3Dmedia&width=32&dpr=2&quality=100&sign=15d20b51&sv=2" alt="Taproot Assets Logo" className="h-6 w-6" />,
+        icon: <Image src="https://docs.lightning.engineering/~gitbook/image?url=https%3A%2F%2F2545062540-files.gitbook.io%2F~%2Ffiles%2Fv0%2Fb%2Fgitbook-legacy-files%2Fo%2Fspaces%252F-MIzyiDsFtJBYVyhr1nT%252Favatar-1602260100761.png%3Fgeneration%3D1602260100982225%26alt%3Dmedia&width=32&dpr=2&quality=100&sign=15d20b51&sv=2" alt="Taproot Assets Logo" width={24} height={24} />,
         description: {
             whatIsIt: 'A standard for minting assets on Bitcoin using Taproot. It embeds asset data efficiently and acts as a bridge to move assets to the Lightning Network.',
             bestFor: [
@@ -166,7 +167,7 @@ export default function Step4Network({ onNext, onBack, defaultValues, formRef }:
                     >
                       {networks.map((network) => (
                         <AccordionItem key={network.id} value={network.id} className="border-b-0">
-                            <Card className={cn("overflow-hidden", field.value?.includes(network.id) && "border-2 border-primary")}>
+                            <Card className={cn("overflow-hidden", (field.value?.includes(network.id) || network.id === 'spark') && "border-2 border-primary")}>
                                 <AccordionTrigger className="p-6 hover:no-underline">
                                     <div className="flex items-center gap-4">
                                         {network.icon}
