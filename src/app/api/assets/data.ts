@@ -8,9 +8,9 @@ declare global {
 
 const initialData: Omit<AssetDetails, 'assetIcon' | 'whitepaper' | 'legalAssetizationDoc' | 'assetIssuanceLegalDoc' | 'publicKey'>[] = [
   {
-    id: 'btkn1-arkspark-asset',
-    assetName: 'ArkSpark Token',
-    assetTicker: 'AST',
+    id: 'innovatech-growth-fund',
+    assetName: 'Innovatech Growth Fund',
+    assetTicker: 'IGF',
     status: 'active' as const,
     network: ['spark', 'ark'],
     maxSupply: 500000000,
@@ -18,8 +18,8 @@ const initialData: Omit<AssetDetails, 'assetIcon' | 'whitepaper' | 'legalAssetiz
     decimals: 8,
     isFreezable: true,
     companyId: 'issuer-a-comp',
-    destinationAddress: 'btkn1arkspark...dest',
-    assetType: 'utility_token',
+    destinationAddress: 'btkn1igf...dest',
+    assetType: 'security_token',
     subscriptionTime: 'Daily',
     minInvestment: 500,
     maxInvestment: 50000,
