@@ -16,6 +16,7 @@ const networkMap: { [key: string]: string } = {
     spark: 'Spark',
     liquid: 'Liquid',
     rgb: 'RGB',
+    ark: 'Ark',
     taproot: 'Taproot Assets',
 };
 
@@ -68,7 +69,7 @@ export default function AgentAssets({ agent }: AgentAssetsProps) {
                                             </div>
                                         </div>
                                     </TableCell>
-                                    <TableCell>{networkMap[asset.network] || asset.network}</TableCell>
+                                    <TableCell>{(Array.isArray(asset.network) ? asset.network : [asset.network]).map(n => networkMap[n] || n).join(', ')}</TableCell>
                                     <TableCell className="text-right font-mono">
                                         {asset.maxSupply ? asset.maxSupply.toLocaleString() : '--'}
                                     </TableCell>

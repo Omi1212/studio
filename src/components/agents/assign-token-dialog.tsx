@@ -42,6 +42,7 @@ const networkMap: { [key: string]: string } = {
     spark: 'Spark',
     liquid: 'Liquid',
     rgb: 'RGB',
+    ark: 'Ark',
     taproot: 'Taproot Assets',
 };
 
@@ -111,7 +112,7 @@ export function AssignTokenDialog({ agent, allAssets, assignedAssetIds, onUpdate
                                     <AssetIcon asset={asset} className="h-8 w-8" />
                                     <div>
                                         <p className="font-semibold">{asset.assetName}</p>
-                                        <p className="text-sm text-muted-foreground">{asset.assetTicker} on {networkMap[asset.network] || asset.network}</p>
+                                        <p className="text-sm text-muted-foreground">{asset.assetTicker} on {(Array.isArray(asset.network) ? asset.network : [asset.network]).map(n => networkMap[n] || n).join(', ')}</p>
                                     </div>
                                 </div>
                                 <AlertDialog>

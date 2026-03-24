@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useForm } from 'react-hook-form';
@@ -78,6 +77,19 @@ const networks = [
                 'Maximum Privacy: Assets that leave no trace on the blockchain.',
                 'Complex Smart Contracts: DAOs and programmable assets.',
                 'Digital Collectibles: Unique assets with private metadata.',
+            ]
+        }
+    },
+    { 
+        id: 'ark', 
+        name: 'Ark Protocol', 
+        icon: <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>,
+        description: {
+            whatIsIt: 'A second-layer protocol for off-chain transactions. It allows users to make payments without requiring a direct or indirect channel with the payee.',
+            bestFor: [
+                'Scalable Payments: Serving a large user base without on-chain congestion.',
+                'Enhanced Privacy: Transactions are settled off-chain, providing better privacy.',
+                'Uninterrupted Service: Users can receive payments even when they are offline.',
             ]
         }
     },

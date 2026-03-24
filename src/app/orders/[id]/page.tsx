@@ -1,5 +1,3 @@
-
-
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -40,6 +38,7 @@ const networkMap: { [key: string]: string } = {
     spark: 'Spark',
     liquid: 'Liquid',
     rgb: 'RGB',
+    ark: 'Ark',
     taproot: 'Taproot Assets',
 };
 

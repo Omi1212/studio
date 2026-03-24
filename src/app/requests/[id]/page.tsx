@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useEffect, useState, use } from 'react';
@@ -100,6 +99,7 @@ function RequestDetailsPage({ params }: { params: { id: string } }) {
     spark: 'Spark',
     liquid: 'Liquid',
     rgb: 'RGB',
+    ark: 'Ark',
     taproot: 'Taproot Assets',
   };
 
@@ -278,7 +278,7 @@ function RequestDetailsPage({ params }: { params: { id: string } }) {
                     <ReviewRow icon={Hash} label="Decimals" value={request.decimals} />
                     <ReviewRow icon={Hash} label="Max Supply" value={request.maxSupply.toLocaleString()} />
                     <ReviewRow icon={ToggleRight} label="Is Freezable" value={request.isFreezable ? 'Yes' : 'No'} />
-                     <ReviewRow icon={Network} label="Network" value={networkMap[request.network] || request.network} />
+                     <ReviewRow icon={Network} label="Network" value={(Array.isArray(request.network) ? request.network : [request.network]).map(n => networkMap[n] || n).join(', ')} />
                 </ReviewSection>
               )}
 
