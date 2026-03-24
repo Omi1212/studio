@@ -9,7 +9,7 @@ declare global {
 const initialData: Omit<AssetDetails, 'assetIcon' | 'whitepaper' | 'legalAssetizationDoc' | 'assetIssuanceLegalDoc' | 'publicKey'>[] = [
   {
     id: 'innovatech-growth-fund',
-    assetName: 'Innovatech Growth Fund',
+    assetName: 'Innovatech Fund',
     assetTicker: 'IGF',
     status: 'active' as const,
     network: ['spark', 'ark'],
