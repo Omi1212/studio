@@ -9,8 +9,8 @@ declare global {
 const initialData: Omit<AssetDetails, 'assetIcon' | 'whitepaper' | 'legalAssetizationDoc' | 'assetIssuanceLegalDoc' | 'publicKey'>[] = [
   {
     id: 'innovatech-growth-fund',
-    assetName: 'Bitcoin USD',
-    assetTicker: 'USDB',
+    assetName: 'Sooncoin',
+    assetTicker: 'SOON',
     status: 'active' as const,
     network: ['spark', 'ark'],
     maxSupply: 500000000,
@@ -18,8 +18,8 @@ const initialData: Omit<AssetDetails, 'assetIcon' | 'whitepaper' | 'legalAssetiz
     decimals: 2,
     isFreezable: true,
     companyId: 'issuer-a-comp',
-    destinationAddress: 'btkn1xgrvjwey5ngcagvap2dzzvsy4uk8ua9x69k82dwvt5e7ef9drm9qztux87',
-    assetType: 'stablecoin',
+    destinationAddress: 'btkn16w9v5shwtv78xwsc0dt00sx9g8r8fdtpnhtxfzpfzz8sl9mzt4ts7zh0dl',
+    assetType: 'utility_token',
     subscriptionTime: 'Daily',
     minInvestment: 10,
     maxInvestment: 100000,
