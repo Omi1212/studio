@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useEffect, useState, use } from 'react';
@@ -80,6 +79,9 @@ function AssetOfferingPage({ params }: { params: { tokenId: string } }) {
   const [priceHistory, setPriceHistory] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [userRole, setUserRole] = useState<User['role'] | null>(null);
+  const [subscriptionStatus, setSubscriptionStatus] = useState<SubscriptionStatus>('none');
+  const [isInvestModalOpen, setIsInvestModalOpen] = React.useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     const role = localStorage.getItem('userRole') as User['role'] | null;
@@ -90,7 +92,8 @@ function AssetOfferingPage({ params }: { params: { tokenId: string } }) {
     Promise.all([
       fetch(`/api/assets/${assetId}`).then(res => res.ok ? res.json() : null),
       fetch('/api/asset-price-history').then(res => res.ok ? res.json() : { data: [] }),
-    ]).then(([assetData, priceHistoryData]) => {
+      fetch('/api/investors/inv-001/subscriptions').then(res => res.ok ? res.json() : {})
+    ]).then(([assetData, priceHistoryData, subsData]) => {
       if (assetData) {
         setAsset({
           ...assetData,
@@ -100,6 +103,11 @@ function AssetOfferingPage({ params }: { params: { tokenId: string } }) {
         });
       }
       setPriceHistory(priceHistoryData.data || []);
+      if (subsData && subsData[assetId]) {
+        setSubscriptionStatus(subsData[assetId]);
+      } else {
+        setSubscriptionStatus('none');
+      }
     }).catch(err => {
       console.error("Failed to fetch page data:", err);
       setAsset(null);
@@ -108,6 +116,39 @@ function AssetOfferingPage({ params }: { params: { tokenId: string } }) {
     });
 
   }, [params]);
+
+  const handleSubscribe = async () => {
+    if (!asset) return;
+
+    // Optimistic update
+    setSubscriptionStatus('pending');
+
+    try {
+        const response = await fetch('/api/investors/inv-001/subscriptions', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ assetId: asset.id, status: 'pending' }),
+        });
+        if (!response.ok) throw new Error('Failed to update subscription');
+
+        toast({ title: 'Whitelisting Request Sent!', description: "Your request is now pending approval." });
+    } catch (error) {
+        console.error(error);
+        toast({ variant: 'destructive', title: 'Error', description: 'Could not send request.' });
+        // Revert state on error
+        setSubscriptionStatus('none');
+    }
+  };
+  
+  const getActionButton = () => {
+    if (subscriptionStatus === 'approved') {
+        return <Button onClick={() => setIsInvestModalOpen(true)}>Invest</Button>
+    } else if (subscriptionStatus === 'pending') {
+        return <Button variant="outline" disabled>Pending</Button>;
+    } else {
+        return <Button variant="outline" onClick={handleSubscribe}>Subscribe</Button>;
+    }
+  };
 
 
   if (loading) {
@@ -123,168 +164,184 @@ function AssetOfferingPage({ params }: { params: { tokenId: string } }) {
   }
 
   return (
-    <SidebarProvider>
-      <Sidebar className="border-r">
-        <SidebarNav />
-      </Sidebar>
-      <SidebarInset>
-        <div className="flex flex-col min-h-dvh">
-          <HeaderDynamic />
-          <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-8 bg-background">
-            <div className="flex items-center gap-4">
-                <Button variant="outline" size="icon" asChild>
-                    <Link href="/marketplace"><ArrowLeft /></Link>
-                </Button>
-                <h1 className="text-3xl font-headline font-semibold">
-                  {asset.assetTicker} Offering
-                </h1>
-            </div>
-            
-            <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-                <div className="lg:col-span-2">
-                    <Card>
-                        <CardHeader>
-                            <div className="flex items-center gap-4">
-                                <AssetIcon asset={asset} className="h-12 w-12" />
-                                <div>
-                                    <CardTitle>{asset.assetName}</CardTitle>
-                                    <CardDescription className="text-primary font-bold">{asset.assetTicker}</CardDescription>
+    <Dialog open={isInvestModalOpen} onOpenChange={setIsInvestModalOpen}>
+        <SidebarProvider>
+        <Sidebar className="border-r">
+            <SidebarNav />
+        </Sidebar>
+        <SidebarInset>
+            <div className="flex flex-col min-h-dvh">
+            <HeaderDynamic />
+            <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-8 bg-background">
+                <div className="flex justify-between items-center">
+                    <div className="flex items-center gap-4">
+                        <Button variant="outline" size="icon" asChild>
+                            <Link href="/marketplace"><ArrowLeft /></Link>
+                        </Button>
+                        <h1 className="text-3xl font-headline font-semibold">
+                        {asset.assetTicker} Offering
+                        </h1>
+                    </div>
+                    {getActionButton()}
+                </div>
+                
+                <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+                    <div className="lg:col-span-2">
+                        <Card>
+                            <CardHeader>
+                                <div className="flex items-center gap-4">
+                                    <AssetIcon asset={asset} className="h-12 w-12" />
+                                    <div>
+                                        <CardTitle>{asset.assetName}</CardTitle>
+                                        <CardDescription className="text-primary font-bold">{asset.assetTicker}</CardDescription>
+                                    </div>
                                 </div>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                            <div className="grid grid-cols-2 gap-4">
+                                <KpiCard title="Market Cap" value="$5.74M" icon={<BtcIcon />} />
+                                <KpiCard title="24h Volume" value="$0.00" icon={<BtcIcon />} />
+                                <KpiCard title="Floor Price" value="8 sats" />
+                                <KpiCard title="Holders" value="966" />
+                                <KpiCard title="Total Trades" value="54" />
+                                <KpiCard title="Networks" value={
+                                    <div className="flex items-center gap-2">
+                                        {(asset.network || []).map(net => (
+                                            <div key={net} className="h-6 w-6 flex items-center justify-center" title={networkMap[net] || net}>
+                                                {networkIconMap[net] || null}
+                                            </div>
+                                        ))}
+                                    </div>
+                                } />
                             </div>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                           <div className="grid grid-cols-2 gap-4">
-                             <KpiCard title="Market Cap" value="$5.74M" icon={<BtcIcon />} />
-                             <KpiCard title="24h Volume" value="$0.00" icon={<BtcIcon />} />
-                             <KpiCard title="Floor Price" value="8 sats" />
-                             <KpiCard title="Holders" value="966" />
-                             <KpiCard title="Total Trades" value="54" />
-                             <KpiCard title="Networks" value={
-                                <div className="flex items-center gap-2">
-                                    {(asset.network || []).map(net => (
-                                        <div key={net} className="h-6 w-6 flex items-center justify-center" title={networkMap[net] || net}>
-                                            {networkIconMap[net] || null}
-                                        </div>
-                                    ))}
-                                </div>
-                             } />
-                           </div>
+                            </CardContent>
+                        </Card>
+                    </div>
+
+                    <Card className="lg:col-span-3">
+                    <CardHeader>
+                        <div className="flex justify-between items-start">
+                            <div>
+                                <p className="text-2xl font-bold">0.0 sats/{asset.assetTicker}</p>
+                                <p className="text-sm text-muted-foreground">$0.0000 <span className="text-green-500">+0.00%</span></p>
+                            </div>
+                            <div className="flex gap-1">
+                                <Tabs defaultValue="candles">
+                                    <TabsList>
+                                        <TabsTrigger value="candles">Candles</TabsTrigger>
+                                        <TabsTrigger value="line">Line</TabsTrigger>
+                                    </TabsList>
+                                </Tabs>
+                                <Tabs defaultValue="24h">
+                                    <TabsList>
+                                        <TabsTrigger value="24h">24h</TabsTrigger>
+                                        <TabsTrigger value="7d">7d</TabsTrigger>
+                                        <TabsTrigger value="30d">30d</TabsTrigger>
+                                    </TabsList>
+                                </Tabs>
+                            </div>
+                        </div>
+                    </CardHeader>
+                    <CardContent className="h-[250px] w-full">
+                        <ChartContainer config={chartConfig} className="h-full w-full">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <LineChart
+                                    data={priceHistory}
+                                    margin={{ top: 5, right: 20, left: -10, bottom: 5 }}
+                                >
+                                    <CartesianGrid vertical={false} strokeDasharray="3 3" />
+                                    <XAxis
+                                        dataKey="month"
+                                        tickLine={false}
+                                        axisLine={false}
+                                        tickMargin={8}
+                                    />
+                                    <YAxis
+                                        tickLine={false}
+                                        axisLine={false}
+                                        tickMargin={8}
+                                        tickFormatter={(value) => `$${value.toFixed(2)}`}
+                                        domain={['dataMin - 10 > 0 ? dataMin - 10 : 0', 'dataMax + 10']}
+                                    />
+                                    <Tooltip
+                                        cursor={{
+                                            stroke: 'hsl(var(--border))',
+                                            strokeWidth: 2,
+                                            strokeDasharray: '3 3',
+                                        }}
+                                        content={<ChartTooltipContent />}
+                                    />
+                                    <Line
+                                        dataKey="price"
+                                        type="monotone"
+                                        stroke="hsl(var(--chart-1))"
+                                        strokeWidth={2}
+                                        dot={true}
+                                    />
+                                </LineChart>
+                            </ResponsiveContainer>
+                        </ChartContainer>
+                    </CardContent>
+                </Card>
+
+                </div>
+                
+                <Tabs defaultValue="overview" className="w-full">
+                    <TabsList className="grid w-full grid-cols-6">
+                    <TabsTrigger value="overview">Overview</TabsTrigger>
+                    <TabsTrigger value="tokens">Tokens</TabsTrigger>
+                    <TabsTrigger value="liquidity">Liquidity</TabsTrigger>
+                    <TabsTrigger value="reports">Reports</TabsTrigger>
+                    <TabsTrigger value="data">Data</TabsTrigger>
+                    <TabsTrigger value="fees">Fees</TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="overview" className="mt-6">
+                    <AssetDetailsView asset={asset} view="workspace" userRole={userRole} />
+                    </TabsContent>
+                    <TabsContent value="tokens" className="mt-6">
+                    <TokensTable asset={asset} />
+                    </TabsContent>
+                    <TabsContent value="liquidity" className="mt-6">
+                    <Card>
+                        <CardContent className="p-6">
+                        <p>Liquidity content goes here.</p>
                         </CardContent>
                     </Card>
-                </div>
-
-                 <Card className="lg:col-span-3">
-                  <CardHeader>
-                    <div className="flex justify-between items-start">
-                        <div>
-                            <p className="text-2xl font-bold">0.0 sats/{asset.assetTicker}</p>
-                            <p className="text-sm text-muted-foreground">$0.0000 <span className="text-green-500">+0.00%</span></p>
-                        </div>
-                        <div className="flex gap-1">
-                            <Tabs defaultValue="candles">
-                                <TabsList>
-                                    <TabsTrigger value="candles">Candles</TabsTrigger>
-                                    <TabsTrigger value="line">Line</TabsTrigger>
-                                </TabsList>
-                            </Tabs>
-                             <Tabs defaultValue="24h">
-                                <TabsList>
-                                    <TabsTrigger value="24h">24h</TabsTrigger>
-                                    <TabsTrigger value="7d">7d</TabsTrigger>
-                                    <TabsTrigger value="30d">30d</TabsTrigger>
-                                </TabsList>
-                            </Tabs>
-                        </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="h-[250px] w-full">
-                      <ChartContainer config={chartConfig} className="h-full w-full">
-                        <ResponsiveContainer width="100%" height="100%">
-                            <LineChart
-                                data={priceHistory}
-                                margin={{ top: 5, right: 20, left: -10, bottom: 5 }}
-                            >
-                                <CartesianGrid vertical={false} strokeDasharray="3 3" />
-                                <XAxis
-                                    dataKey="month"
-                                    tickLine={false}
-                                    axisLine={false}
-                                    tickMargin={8}
-                                />
-                                <YAxis
-                                    tickLine={false}
-                                    axisLine={false}
-                                    tickMargin={8}
-                                    tickFormatter={(value) => `$${value.toFixed(2)}`}
-                                    domain={['dataMin - 10 > 0 ? dataMin - 10 : 0', 'dataMax + 10']}
-                                />
-                                <Tooltip
-                                    cursor={{
-                                        stroke: 'hsl(var(--border))',
-                                        strokeWidth: 2,
-                                        strokeDasharray: '3 3',
-                                    }}
-                                    content={<ChartTooltipContent />}
-                                />
-                                <Line
-                                    dataKey="price"
-                                    type="monotone"
-                                    stroke="hsl(var(--chart-1))"
-                                    strokeWidth={2}
-                                    dot={true}
-                                />
-                            </LineChart>
-                        </ResponsiveContainer>
-                    </ChartContainer>
-                </CardContent>
-            </Card>
-
+                    </TabsContent>
+                    <TabsContent value="reports" className="mt-6">
+                    <Card>
+                        <CardContent className="p-6">
+                        <p>Reports content goes here.</p>
+                        </CardContent>
+                    </Card>
+                    </TabsContent>
+                    <TabsContent value="data" className="mt-6">
+                    <AssetDocuments asset={asset} />
+                    </TabsContent>
+                    <TabsContent value="fees" className="mt-6">
+                    <Card>
+                        <CardContent className="p-6">
+                        <p>Fees content goes here.</p>
+                        </CardContent>
+                    </Card>
+                    </TabsContent>
+                </Tabs>
+            </main>
             </div>
-            
-            <Tabs defaultValue="overview" className="w-full">
-                <TabsList className="grid w-full grid-cols-6">
-                <TabsTrigger value="overview">Overview</TabsTrigger>
-                <TabsTrigger value="tokens">Tokens</TabsTrigger>
-                <TabsTrigger value="liquidity">Liquidity</TabsTrigger>
-                <TabsTrigger value="reports">Reports</TabsTrigger>
-                <TabsTrigger value="data">Data</TabsTrigger>
-                <TabsTrigger value="fees">Fees</TabsTrigger>
-                </TabsList>
-                <TabsContent value="overview" className="mt-6">
-                <AssetDetailsView asset={asset} view="workspace" userRole={userRole} />
-                </TabsContent>
-                <TabsContent value="tokens" className="mt-6">
-                <TokensTable asset={asset} />
-                </TabsContent>
-                <TabsContent value="liquidity" className="mt-6">
-                <Card>
-                    <CardContent className="p-6">
-                    <p>Liquidity content goes here.</p>
-                    </CardContent>
-                </Card>
-                </TabsContent>
-                <TabsContent value="reports" className="mt-6">
-                <Card>
-                    <CardContent className="p-6">
-                    <p>Reports content goes here.</p>
-                    </CardContent>
-                </Card>
-                </TabsContent>
-                <TabsContent value="data" className="mt-6">
-                <AssetDocuments asset={asset} />
-                </TabsContent>
-                <TabsContent value="fees" className="mt-6">
-                <Card>
-                    <CardContent className="p-6">
-                    <p>Fees content goes here.</p>
-                    </CardContent>
-                </Card>
-                </TabsContent>
-            </Tabs>
-          </main>
-        </div>
-      </SidebarInset>
-    </SidebarProvider>
+        </SidebarInset>
+        </SidebarProvider>
+        {asset && (
+            <DialogContent>
+                <PlaceOrder 
+                    asset={asset}
+                    price={asset.price || 0}
+                    isSubscribed={subscriptionStatus === 'approved'}
+                    onOrderPlaced={() => setIsInvestModalOpen(false)}
+                    assetName={asset.assetName}
+                />
+            </DialogContent>
+        )}
+    </Dialog>
   );
 }
 
