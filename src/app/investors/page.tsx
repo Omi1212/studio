@@ -1,24 +1,31 @@
-
 'use client';
 
-import { useState } from 'react';
+import { Suspense } from 'react';
 import {
   Sidebar,
   SidebarInset,
   SidebarProvider,
 } from '@/components/ui/sidebar';
 import SidebarNav from '@/components/dashboard/sidebar-nav';
-import type { Metadata } from 'next';
 import HeaderDynamic from '@/components/dashboard/header-dynamic';
-import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
-import Link from 'next/link';
 import InvestorList from '@/components/investors/investor-list';
-import type { ViewMode } from '@/lib/types';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Card } from '@/components/ui/card';
+
+function Loading() {
+    return (
+         <div className="space-y-4">
+            <h1 className="text-3xl font-headline font-semibold">Investors</h1>
+            <div className="flex items-center justify-between">
+                <Skeleton className="h-8 w-[250px]" />
+                <Skeleton className="h-8 w-[150px]" />
+            </div>
+            <Card className="h-[400px]" />
+        </div>
+    );
+}
 
 export default function InvestorsPage() {
-  const [viewMode, setViewMode] = useState<ViewMode>('table');
-
   return (
     <SidebarProvider>
       <Sidebar className="border-r">
@@ -28,7 +35,9 @@ export default function InvestorsPage() {
         <div className="flex flex-col min-h-dvh">
           <HeaderDynamic />
           <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-8 bg-background">
-            <InvestorList view={viewMode} setView={setViewMode} />
+            <Suspense fallback={<Loading />}>
+              <InvestorList />
+            </Suspense>
           </main>
         </div>
       </SidebarInset>

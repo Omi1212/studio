@@ -31,13 +31,13 @@ const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const ACCEPTED_FILE_TYPES = ["application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"];
 
 export const formSchema = z.object({
-  tokenName: z.string().min(1, 'Token name is required'),
-  tokenTicker: z.string().min(1, 'Token ticker is required').max(5, 'Ticker cannot exceed 5 characters'),
+  assetName: z.string().min(1, 'Asset name is required'),
+  assetTicker: z.string().min(1, 'Asset ticker is required').max(5, 'Ticker cannot exceed 5 characters'),
   destinationAddress: z.string().min(1, 'Destination address is required'),
   decimals: z.coerce.number().int().min(0).max(18),
   maxSupply: z.coerce.number().positive('Max supply must be a positive number'),
   isFreezable: z.boolean(),
-  tokenIcon: z.any().optional(),
+  assetIcon: z.any().optional(),
   network: z.string().min(1, 'Network selection is required'),
   whitepaper: z.any()
     .optional()
@@ -46,14 +46,14 @@ export const formSchema = z.object({
       (files) => !files || files.length === 0 || ACCEPTED_FILE_TYPES.includes(files?.[0]?.type),
       ".pdf and .doc files are accepted."
     ),
-  legalTokenizationDoc: z.any()
+  legalAssetizationDoc: z.any()
     .optional()
     .refine((files) => !files || files.length === 0 || files?.[0]?.size <= MAX_FILE_SIZE, `Max file size is 5MB.`)
     .refine(
       (files) => !files || files.length === 0 || ACCEPTED_FILE_TYPES.includes(files?.[0]?.type),
       ".pdf and .doc files are accepted."
     ),
-  tokenIssuanceLegalDoc: z.any()
+  assetIssuanceLegalDoc: z.any()
     .optional()
     .refine((files) => !files || files.length === 0 || files?.[0]?.size <= MAX_FILE_SIZE, `Max file size is 5MB.`)
     .refine(
@@ -62,20 +62,20 @@ export const formSchema = z.object({
     ),
 });
 
-export type TokenFormValues = z.infer<typeof formSchema>;
+export type AssetFormValues = z.infer<typeof formSchema>;
 
-interface IssueTokenFormProps {
-  onSubmit: (data: TokenFormValues) => void;
+interface IssueAssetFormProps {
+  onSubmit: (data: AssetFormValues) => void;
 }
 
-export default function IssueTokenForm({ onSubmit }: IssueTokenFormProps) {
+export default function IssueAssetForm({ onSubmit }: IssueAssetFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   
-  const form = useForm<TokenFormValues>({
+  const form = useForm<AssetFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      tokenName: 'Ingeniería Coin',
-      tokenTicker: 'ING',
+      assetName: 'Ingeniería Coin',
+      assetTicker: 'ING',
       destinationAddress: 'spark1pgssyd5f0685tu3v2hpqv2rx9cxu6vskyzjulwepzq79kd583gyw4z0gp92kjc',
       decimals: 6,
       maxSupply: 1_000_000_000000,
@@ -83,7 +83,7 @@ export default function IssueTokenForm({ onSubmit }: IssueTokenFormProps) {
     },
   });
 
-  const handleSubmit = async (data: TokenFormValues) => {
+  const handleSubmit = async (data: AssetFormValues) => {
     setIsSubmitting(true);
     await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate async operation
     onSubmit(data);
@@ -95,20 +95,20 @@ export default function IssueTokenForm({ onSubmit }: IssueTokenFormProps) {
       <form onSubmit={form.handleSubmit(handleSubmit)}>
         <Card>
           <CardHeader>
-            <CardTitle>Create a New Token</CardTitle>
+            <CardTitle>Create a New Asset</CardTitle>
             <CardDescription>
-              Fill out the details below to issue a new token on the network.
+              Fill out the details below to issue a new asset on the network.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             <FormField
               control={form.control}
-              name="tokenName"
+              name="assetName"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Token Name</FormLabel>
+                  <FormLabel>Asset Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="e.g. My Awesome Token" {...field} />
+                    <Input placeholder="e.g. My Awesome Asset" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -116,12 +116,12 @@ export default function IssueTokenForm({ onSubmit }: IssueTokenFormProps) {
             />
             <FormField
               control={form.control}
-              name="tokenTicker"
+              name="assetTicker"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Token Ticker</FormLabel>
+                  <FormLabel>Asset Ticker</FormLabel>
                   <FormControl>
-                    <Input placeholder="e.g. MAT" {...field} />
+                    <Input placeholder="e.g. MAA" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -129,10 +129,10 @@ export default function IssueTokenForm({ onSubmit }: IssueTokenFormProps) {
             />
              <FormField
               control={form.control}
-              name="tokenIcon"
+              name="assetIcon"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Token Icon</FormLabel>
+                  <FormLabel>Asset Icon</FormLabel>
                   <FormControl>
                     <div className="flex items-center gap-4">
                       <div className="w-full">
@@ -146,7 +146,7 @@ export default function IssueTokenForm({ onSubmit }: IssueTokenFormProps) {
                     </div>
                   </FormControl>
                   <FormDescription>
-                    Upload an image for your token (e.g., PNG, JPG, SVG).
+                    Upload an image for your asset (e.g., PNG, JPG, SVG).
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -175,7 +175,7 @@ export default function IssueTokenForm({ onSubmit }: IssueTokenFormProps) {
                     <Input type="number" {...field} />
                   </FormControl>
                   <FormDescription>
-                    The number of decimal places the token can have (0-18).
+                    The number of decimal places the asset can have (0-18).
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -191,7 +191,7 @@ export default function IssueTokenForm({ onSubmit }: IssueTokenFormProps) {
                     <Input type="number" {...field} />
                   </FormControl>
                   <FormDescription>
-                    The maximum number of tokens that can be minted.
+                    The maximum number of asset units that can be minted.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -205,7 +205,7 @@ export default function IssueTokenForm({ onSubmit }: IssueTokenFormProps) {
                   <div className="space-y-0.5">
                     <FormLabel>Is Freezable?</FormLabel>
                     <FormDescription>
-                      Can the token supply be frozen by the issuer?
+                      Can the asset supply be frozen by the issuer?
                     </FormDescription>
                   </div>
                   <FormControl>
@@ -223,10 +223,10 @@ export default function IssueTokenForm({ onSubmit }: IssueTokenFormProps) {
               {isSubmitting ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Issuing Token...
+                  Issuing Asset...
                 </>
               ) : (
-                'Issue Token'
+                'Issue Asset'
               )}
             </Button>
           </CardFooter>

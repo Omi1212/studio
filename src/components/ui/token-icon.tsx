@@ -1,16 +1,22 @@
+'use client';
 
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback } from './avatar';
-import type { TokenDetails } from '@/lib/types';
+import type { AssetDetails } from '@/lib/types';
 
-type WorkspaceToken = Partial<TokenDetails> & { tokenName: string; tokenTicker: string };
-
-interface TokenIconProps extends React.HTMLAttributes<HTMLElement> {
-    token: WorkspaceToken;
+interface AssetIconProps extends React.HTMLAttributes<HTMLElement> {
+    asset?: Partial<AssetDetails>;
 }
 
-export default function TokenIcon({ token, className }: TokenIconProps) {
-    const initial = token.tokenTicker ? token.tokenTicker.charAt(0) : token.tokenName.charAt(0);
+export default function TokenIcon({ asset, className }: AssetIconProps) {
+    if (!asset) {
+        return (
+            <Avatar className={cn("flex items-center justify-center bg-muted text-muted-foreground", className)}>
+                <AvatarFallback>?</AvatarFallback>
+            </Avatar>
+        );
+    }
+    const initial = (asset.assetTicker || asset.assetName || '?').charAt(0);
 
     return (
         <Avatar className={cn("flex items-center justify-center bg-sidebar-primary text-sidebar-primary-foreground", className)}>

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import type { User } from '@/lib/types';
+import type { User, Invitation, Company } from '@/lib/types';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -10,112 +10,57 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Link from 'next/link';
 
-type Invitation = {
-  id: number;
-  email: string;
-  role: string;
-};
-
-// Mock user data to simulate a team
-const mockTeamMembers: (Partial<User> & { displayRole: string })[] = [
-    {
-        id: 'team-member-1',
-        name: 'Admin User',
-        email: 'admin.user@example.com',
-        role: 'agent',
-        displayRole: 'Admin'
-    },
-    {
-        id: 'team-member-2',
-        name: 'Operations User',
-        email: 'operations.user@example.com',
-        role: 'agent',
-        displayRole: 'Operations'
-    },
-    {
-        id: 'team-member-3',
-        name: 'Sales User',
-        email: 'sales.user@example.com',
-        role: 'agent',
-        displayRole: 'Sales'
-    },
-    {
-        id: 'team-member-4',
-        name: 'Support User',
-        email: 'support.user@example.com',
-        role: 'agent',
-        displayRole: 'Technical Support'
-    }
-];
-
-function RoleBadge({ role, isOwner }: { role: string, isOwner?: boolean }) {
-    let roleText: string;
-    if (isOwner) {
-        roleText = 'OWNER';
-    } else {
-        switch(role.toLowerCase()) {
-            case 'admin':
-                roleText = 'Admin';
-                break;
-            case 'operations':
-                roleText = 'Operations';
-                break;
-            case 'sales':
-                roleText = 'Sales';
-                break;
-            case 'support':
-                roleText = 'Technical Support';
-                break;
-            case 'technical support':
-                roleText = 'Technical Support';
-                break;
-            case 'collaborator': // for old data
-                 roleText = 'Collaborator';
-                 break;
-            default:
-                roleText = role.charAt(0).toUpperCase() + role.slice(1);
-        }
-    }
-
+function RoleBadge({ role }: { role: string }) {
     let badgeClass = "text-primary border-primary bg-primary/10";
-    
+    if (role === 'Owner') {
+        badgeClass = "text-amber-500 border-amber-500 bg-amber-500/10";
+    }
+
     return (
         <Badge variant="outline" className={badgeClass}>
-            {roleText}
+            {role}
         </Badge>
     );
 }
 
 export default function AccessList() {
-  const [user, setUser] = useState<User | null>(null);
-  const [team, setTeam] = useState<(Partial<User> & { displayRole: string })[]>([]);
+  const [team, setTeam] = useState<(User & { displayRole: string })[]>([]);
   const [pendingInvitations, setPendingInvitations] = useState<Invitation[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setLoading(true);
-    const storedUser = localStorage.getItem('currentUser');
-    const storedInvitations = JSON.parse(localStorage.getItem('pendingInvitations') || '[]');
-    setPendingInvitations(storedInvitations);
+    const companyId = localStorage.getItem('selectedCompanyId');
 
-    if (storedUser) {
-        const parsedUser = JSON.parse(storedUser);
-        setUser(parsedUser);
-        
-        const fullTeam = [
-            { ...parsedUser, displayRole: 'Owner' },
-            ...mockTeamMembers,
-        ];
-        setTeam(fullTeam);
-
-    } else {
-        // Fallback for when no user is logged in
-        const fullTeam = [
-            ...mockTeamMembers
-        ];
-         setTeam(fullTeam);
+    if (!companyId) {
+        setLoading(false);
+        return;
     }
-    setLoading(false);
+
+    setLoading(true);
+    Promise.all([
+        fetch(`/api/users?perPage=999`).then(res => res.json()),
+        fetch(`/api/invitations?companyId=${companyId}`).then(res => res.json())
+    ]).then(([usersResponse, invitationsResponse]) => {
+        const companyUsers = (usersResponse.data || []).filter((u: User) => u.companyId?.includes(companyId) && u.role !== 'investor');
+
+        const processedTeam = companyUsers.map((user: User) => {
+            const displayRole = user.companyRoles?.[companyId] || user.role;
+            return { ...user, displayRole };
+        });
+
+        processedTeam.sort((a, b) => {
+            if (a.displayRole === 'Owner') return -1;
+            if (b.displayRole === 'Owner') return 1;
+            if (a.displayRole === 'Admin') return -1;
+            if (b.displayRole === 'Admin') return 1;
+            return a.name.localeCompare(b.name);
+        });
+
+        setTeam(processedTeam);
+        setPendingInvitations(invitationsResponse || []);
+
+    }).catch(console.error).finally(() => setLoading(false));
+
   }, []);
 
   if (loading) {
@@ -156,12 +101,12 @@ export default function AccessList() {
                     </TableHeader>
                     <TableBody>
                     {team.length > 0 ? (
-                        team.map((member, index) => (
+                        team.map((member) => (
                              <TableRow key={member.id}>
                                 <TableCell className="font-medium">{member.name}</TableCell>
                                 <TableCell>{member.email}</TableCell>
                                 <TableCell>
-                                    <RoleBadge role={member.displayRole} isOwner={member.displayRole === 'Owner'} />
+                                    <RoleBadge role={member.displayRole} />
                                 </TableCell>
                                 <TableCell className="text-right">
                                     {member.displayRole !== 'Owner' && (
@@ -175,7 +120,7 @@ export default function AccessList() {
                     ) : (
                          <TableRow>
                             <TableCell colSpan={4} className="h-24 text-center">
-                                No users found.
+                                No users found for this company.
                             </TableCell>
                         </TableRow>
                     )}

@@ -17,11 +17,16 @@ import {
 import WalletOptions from './wallet-options';
 import { useState, useEffect } from 'react';
 import NavUser from './nav-user';
+import Notifications from './notifications';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '../ui/dropdown-menu';
+import { Badge } from '../ui/badge';
+import type { Invitation } from '@/lib/types';
 
 export default function Header() {
   const [isConnected, setIsConnected] = useState(false);
   const [userRole, setUserRole] = useState<string | null>(null);
   const [isClient, setIsClient] = useState(false);
+  const [notificationCount, setNotificationCount] = useState(0);
 
 
   useEffect(() => {
@@ -32,6 +37,28 @@ export default function Header() {
     }
     const role = localStorage.getItem('userRole');
     setUserRole(role);
+    
+    const userJson = localStorage.getItem('currentUser');
+    if (userJson) {
+        const user = JSON.parse(userJson);
+        const fetchNotifs = () => {
+            fetch('/api/invitations')
+                .then(res => {
+                    if (res.ok) {
+                        return res.json();
+                    }
+                    return [];
+                })
+                .then(allInvitations => {
+                    const userInvitations = (allInvitations || []).filter((inv: Invitation) => inv.email === user.email && inv.status === 'pending');
+                    setNotificationCount(userInvitations.length);
+                })
+                .catch(console.error);
+        }
+        fetchNotifs();
+        window.addEventListener('companyChanged', fetchNotifs); // Re-use event
+        return () => window.removeEventListener('companyChanged', fetchNotifs);
+    }
   }, []);
 
   const handleConnect = () => {
@@ -54,10 +81,21 @@ export default function Header() {
       <SidebarTrigger />
 
       <div className="flex items-center gap-4 ml-auto">
-        <Button variant="ghost" size="icon" className="rounded-full">
-          <Bell />
-          <span className="sr-only">Notifications</span>
-        </Button>
+        <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="rounded-full relative">
+                    <Bell />
+                    {notificationCount > 0 && (
+                        <Badge variant="destructive" className="absolute -top-1 -right-1 h-5 w-5 justify-center p-0 text-xs">{notificationCount}</Badge>
+                    )}
+                    <span className="sr-only">Notifications</span>
+                </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-80">
+                <Notifications />
+            </DropdownMenuContent>
+        </DropdownMenu>
+
         <Sheet>
           <SheetTrigger asChild>
              <Button 

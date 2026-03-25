@@ -2,12 +2,13 @@ import { NextResponse } from 'next/server';
 import { ordersData } from './data';
 import type { Order } from '@/lib/types';
 import { z } from 'zod';
+import { exampleAssets } from '../assets/data';
 
 const orderPostSchema = z.object({
     investorId: z.string(),
     investorName: z.string(),
-    tokenId: z.string(),
-    tokenTicker: z.string(),
+    assetId: z.string(),
+    assetTicker: z.string(),
     type: z.enum(['Buy', 'Sell']),
     amount: z.number().positive(),
     price: z.number(),
@@ -20,8 +21,10 @@ const querySchema = z.object({
     perPage: z.coerce.number().int().min(1).max(1000).default(10),
     status: z.enum(['pending', 'completed', 'rejected', 'waiting payment', 'all']).optional(),
     query: z.string().optional(),
-    tokenId: z.string().optional(),
+    assetId: z.string().optional(),
     investorId: z.string().optional(),
+    network: z.string().optional(),
+    companyId: z.string().optional(),
 });
 
 export async function GET(request: Request) {
@@ -32,12 +35,30 @@ export async function GET(request: Request) {
       return NextResponse.json({ errors: validation.error.errors }, { status: 400 });
   }
 
-  const { page, perPage, status, query, tokenId, investorId } = validation.data;
+  const { page, perPage, status, query, assetId, investorId, network, companyId } = validation.data;
 
-  let filteredOrders = ordersData;
+  const augmentedOrders = ordersData.map(order => {
+      const asset = exampleAssets.find(a => a.id === order.assetId);
+      const assetNetworks = asset ? (Array.isArray(asset.network) ? asset.network : [asset.network]) : [];
+      return {
+          ...order,
+          networks: assetNetworks,
+          companyId: asset?.companyId
+      };
+  });
 
-  if (tokenId) {
-    filteredOrders = filteredOrders.filter(order => order.tokenId === tokenId);
+  let filteredOrders = augmentedOrders;
+
+  if (companyId) {
+    filteredOrders = filteredOrders.filter(order => order.companyId === companyId);
+  }
+
+  if (network && network !== 'all') {
+    filteredOrders = filteredOrders.filter(order => order.networks.includes(network));
+  }
+
+  if (assetId) {
+    filteredOrders = filteredOrders.filter(order => order.assetId === assetId);
   }
 
   if (investorId) {
@@ -52,7 +73,7 @@ export async function GET(request: Request) {
     const lowercasedQuery = query.toLowerCase();
     filteredOrders = filteredOrders.filter(order =>
       order.investorName.toLowerCase().includes(lowercasedQuery) ||
-      order.tokenTicker.toLowerCase().includes(lowercasedQuery) ||
+      order.assetTicker.toLowerCase().includes(lowercasedQuery) ||
       order.id.toLowerCase().includes(lowercasedQuery)
     );
   }

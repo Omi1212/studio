@@ -2,21 +2,20 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import type { TokenDetails, User, Issuer } from '@/lib/types';
+import type { AssetDetails, User, Issuer, ViewMode } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/card';
-import TokenIcon from '../ui/token-icon';
+import AssetIcon from '../ui/asset-icon';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
 import { Rocket, LayoutGrid, List } from 'lucide-react';
 import Link from 'next/link';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
-import type { ViewMode } from '@/app/issue-token/page';
 import KybBanner from '@/components/dashboard/kyb-banner';
 import IdentityProvidersBanner from '@/components/dashboard/identity-providers-banner';
 
 const ITEMS_PER_PAGE = 6;
 
-function getStatusBadge(status: TokenDetails['status']) {
+function getStatusBadge(status: AssetDetails['status']) {
   switch (status) {
     case 'active':
       return <Badge variant="outline" className="text-green-400 border-green-400">Active</Badge>;
@@ -38,15 +37,15 @@ const networkMap: { [key: string]: string } = {
     taproot: 'Taproot Assets',
 };
 
-function TokenCard({ token }: { token: TokenDetails }) {
+function AssetCard({ asset }: { asset: AssetDetails }) {
   const router = useRouter();
   
   const handleView = () => {
-    if (token.status === 'draft') {
-        router.push(`/issue-token/new?draft_id=${token.id}`);
+    if (asset.status === 'draft') {
+        router.push(`/issue-asset/new?draft_id=${asset.id}`);
     } else {
-        localStorage.setItem('selectedTokenId', token.id);
-        window.dispatchEvent(new Event('tokenChanged'));
+        localStorage.setItem('selectedAssetId', asset.id);
+        window.dispatchEvent(new Event('assetChanged'));
         router.push('/workspace');
     }
   };
@@ -55,45 +54,45 @@ function TokenCard({ token }: { token: TokenDetails }) {
     <Card>
       <CardHeader>
         <div className="flex items-center gap-4">
-          <TokenIcon token={token} className="h-10 w-10" />
+          <AssetIcon asset={asset} className="h-10 w-10" />
           <div>
-            <CardTitle className="text-lg">{token.tokenName}</CardTitle>
-            <CardDescription className="text-primary font-bold">{token.tokenTicker}</CardDescription>
+            <CardTitle className="text-lg">{asset.assetName}</CardTitle>
+            <CardDescription className="text-primary font-bold">{asset.assetTicker}</CardDescription>
           </div>
         </div>
       </CardHeader>
       <CardContent>
         <div className="flex justify-between text-sm">
             <span className="text-muted-foreground">Status</span>
-            {getStatusBadge(token.status)}
+            {getStatusBadge(asset.status)}
         </div>
         <div className="flex justify-between text-sm mt-2">
             <span className="text-muted-foreground">Network</span>
-            <span className="font-medium">{networkMap[token.network] || token.network}</span>
+            <span className="font-medium">{networkMap[asset.network] || asset.network}</span>
         </div>
          <div className="flex justify-between text-sm mt-2">
             <span className="text-muted-foreground">Max Supply</span>
-            <span className="font-medium font-mono">{token.maxSupply ? token.maxSupply.toLocaleString() : '--'}</span>
+            <span className="font-medium font-mono">{asset.maxSupply ? asset.maxSupply.toLocaleString() : '--'}</span>
         </div>
       </CardContent>
       <CardFooter>
         <Button variant="outline" className="w-full" onClick={handleView}>
-          {token.status === 'draft' ? 'Continue' : 'View'}
+          {asset.status === 'draft' ? 'Continue' : 'View'}
         </Button>
       </CardFooter>
     </Card>
   );
 }
 
-function TokenTable({ tokens }: { tokens: TokenDetails[] }) {
+function AssetTable({ assets }: { assets: AssetDetails[] }) {
     const router = useRouter();
 
-    const handleView = (token: TokenDetails) => {
-        if (token.status === 'draft') {
-            router.push(`/issue-token/new?draft_id=${token.id}`);
+    const handleView = (asset: AssetDetails) => {
+        if (asset.status === 'draft') {
+            router.push(`/issue-asset/new?draft_id=${asset.id}`);
         } else {
-            localStorage.setItem('selectedTokenId', token.id);
-            window.dispatchEvent(new Event('tokenChanged'));
+            localStorage.setItem('selectedAssetId', asset.id);
+            window.dispatchEvent(new Event('assetChanged'));
             router.push('/workspace');
         }
     };
@@ -103,7 +102,7 @@ function TokenTable({ tokens }: { tokens: TokenDetails[] }) {
             <Table>
                 <TableHeader>
                     <TableRow>
-                        <TableHead className="w-[40%]">Token</TableHead>
+                        <TableHead className="w-[40%]">Asset</TableHead>
                         <TableHead>Network</TableHead>
                         <TableHead>Max Supply</TableHead>
                         <TableHead>Status</TableHead>
@@ -111,23 +110,23 @@ function TokenTable({ tokens }: { tokens: TokenDetails[] }) {
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {tokens.map(token => (
-                        <TableRow key={token.id}>
+                    {assets.map(asset => (
+                        <TableRow key={asset.id}>
                             <TableCell>
                                 <div className="flex items-center gap-3">
-                                    <TokenIcon token={token} className="h-8 w-8" />
+                                    <AssetIcon asset={asset} className="h-8 w-8" />
                                     <div>
-                                        <p className="font-medium">{token.tokenName}</p>
-                                        <p className="text-sm text-primary">{token.tokenTicker}</p>
+                                        <p className="font-medium">{asset.assetName}</p>
+                                        <p className="text-sm text-primary">{asset.assetTicker}</p>
                                     </div>
                                 </div>
                             </TableCell>
-                            <TableCell>{networkMap[token.network] || token.network}</TableCell>
-                            <TableCell className="font-mono">{token.maxSupply ? token.maxSupply.toLocaleString() : '--'}</TableCell>
-                            <TableCell>{getStatusBadge(token.status)}</TableCell>
+                            <TableCell>{networkMap[asset.network] || asset.network}</TableCell>
+                            <TableCell className="font-mono">{asset.maxSupply ? asset.maxSupply.toLocaleString() : '--'}</TableCell>
+                            <TableCell>{getStatusBadge(asset.status)}</TableCell>
                             <TableCell className="text-right">
-                                <Button variant="outline" size="sm" onClick={() => handleView(token)}>
-                                    {token.status === 'draft' ? 'Continue' : 'View'}
+                                <Button variant="outline" size="sm" onClick={() => handleView(asset)}>
+                                    {asset.status === 'draft' ? 'Continue' : 'View'}
                                 </Button>
                             </TableCell>
                         </TableRow>
@@ -138,16 +137,16 @@ function TokenTable({ tokens }: { tokens: TokenDetails[] }) {
     )
 }
 
-export default function ExistingTokens({ view, setView }: { view: ViewMode, setView: (mode: ViewMode) => void }) {
-  const [tokens, setTokens] = useState<TokenDetails[]>([]);
-  const [totalTokens, setTotalTokens] = useState(0);
+export default function ExistingAssets({ view, setView }: { view: ViewMode, setView: (mode: ViewMode) => void }) {
+  const [assets, setAssets] = useState<AssetDetails[]>([]);
+  const [totalAssets, setTotalAssets] = useState(0);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     setLoading(true);
 
-    const fetchIssuerAndTokens = async () => {
+    const fetchIssuerAndAssets = async () => {
         const userStr = localStorage.getItem('currentUser');
         if (!userStr) {
             setLoading(false);
@@ -156,8 +155,8 @@ export default function ExistingTokens({ view, setView }: { view: ViewMode, setV
         const currentUser: User = JSON.parse(userStr);
 
         if (currentUser.role !== 'issuer') {
-            setTokens([]);
-            setTotalTokens(0);
+            setAssets([]);
+            setTotalAssets(0);
             setLoading(false);
             return;
         }
@@ -169,8 +168,8 @@ export default function ExistingTokens({ view, setView }: { view: ViewMode, setV
             const currentIssuer = (issuersData.data || []).find((i: Issuer) => i.email === currentUser.email);
             
             if (!currentIssuer) {
-                setTokens([]);
-                setTotalTokens(0);
+                setAssets([]);
+                setTotalAssets(0);
                 return;
             }
 
@@ -179,36 +178,36 @@ export default function ExistingTokens({ view, setView }: { view: ViewMode, setV
                 perPage: ITEMS_PER_PAGE.toString(),
                 issuerId: currentIssuer.id
             });
-            const tokensResponse = await fetch(`/api/tokens?${params.toString()}`);
-            if (!tokensResponse.ok) throw new Error("Failed to fetch tokens");
-            const tokensData = await tokensResponse.json();
+            const assetsResponse = await fetch(`/api/assets?${params.toString()}`);
+            if (!assetsResponse.ok) throw new Error("Failed to fetch assets");
+            const assetsData = await assetsResponse.json();
             
-            const mappedTokens = (tokensData.data || []).map((t: any) => ({
+            const mappedAssets = (assetsData.data || []).map((t: any) => ({
                 ...t,
                 decimals: t.decimals ?? 0,
                 isFreezable: t.isFreezable ?? false,
                 publicKey: t.publicKey ?? `02f...${t.id.slice(-10)}`,
-                tokenName: t.tokenName || 'Untitled Token',
-                tokenTicker: t.tokenTicker || '---',
+                assetName: t.assetName || 'Untitled Asset',
+                assetTicker: t.assetTicker || '---',
                 network: t.network || 'unknown',
                 maxSupply: t.maxSupply || 0,
             }));
-            setTokens(mappedTokens);
-            setTotalTokens(tokensData.meta.total);
+            setAssets(mappedAssets);
+            setTotalAssets(assetsData.meta.total);
 
         } catch (error) {
             console.error("Failed to fetch data:", error);
-            setTokens([]);
-            setTotalTokens(0);
+            setAssets([]);
+            setTotalAssets(0);
         } finally {
             setLoading(false);
         }
     };
 
-    fetchIssuerAndTokens();
+    fetchIssuerAndAssets();
   }, [currentPage]);
   
-  const totalPages = Math.ceil(totalTokens / ITEMS_PER_PAGE);
+  const totalPages = Math.ceil(totalAssets / ITEMS_PER_PAGE);
 
   const handlePageChange = (page: number) => {
     if (page >= 1 && page <= totalPages) {
@@ -248,7 +247,7 @@ export default function ExistingTokens({ view, setView }: { view: ViewMode, setV
   if (loading) {
     return (
         <div className="mb-12">
-            <h2 className="text-2xl font-headline font-semibold mb-4">Your Tokens</h2>
+            <h2 className="text-2xl font-headline font-semibold mb-4">Your Assets</h2>
              {view === 'card' ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     <Card className="h-64 animate-pulse bg-muted/50"></Card>
@@ -262,17 +261,17 @@ export default function ExistingTokens({ view, setView }: { view: ViewMode, setV
     );
   }
   
-  if (tokens.length === 0) {
+  if (assets.length === 0) {
       return (
         <div className="space-y-8">
           <KybBanner />
           <IdentityProvidersBanner />
           <div className="border-dashed border-2 border-muted-foreground/50 rounded-lg h-96 flex flex-col items-center justify-center text-center p-4">
               <Rocket className="h-16 w-16 text-muted-foreground mb-4" />
-              <h2 className="text-xl font-semibold mb-2">No tokens found</h2>
-              <p className="text-muted-foreground mb-4">Get started by launching your first token.</p>
+              <h2 className="text-xl font-semibold mb-2">No assets found</h2>
+              <p className="text-muted-foreground mb-4">Get started by launching your first asset.</p>
               <Button asChild>
-                  <Link href="/issue-token/new">Create New Token</Link>
+                  <Link href="/issue-asset/new">Create New Asset</Link>
               </Button>
           </div>
         </div>
@@ -282,7 +281,7 @@ export default function ExistingTokens({ view, setView }: { view: ViewMode, setV
   return (
     <div className="mb-12">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl font-headline font-semibold">Your Tokens</h2>
+        <h2 className="text-2xl font-headline font-semibold">Your Assets</h2>
         <div className="hidden sm:flex items-center gap-1 bg-muted p-1 rounded-lg">
               <Button 
                 variant={view === 'card' ? 'secondary' : 'ghost'} 
@@ -305,15 +304,15 @@ export default function ExistingTokens({ view, setView }: { view: ViewMode, setV
         {view === 'card' ? (
             <>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {tokens.map(token => (
-                        <TokenCard key={token.id} token={token} />
+                    {assets.map(asset => (
+                        <AssetCard key={asset.id} asset={asset} />
                     ))}
                 </div>
                  {renderPagination()}
             </>
         ) : (
             <>
-                <TokenTable tokens={tokens} />
+                <AssetTable assets={assets} />
                 {renderPagination()}
             </>
         )}

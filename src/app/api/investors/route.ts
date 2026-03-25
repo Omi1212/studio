@@ -1,4 +1,7 @@
+
+
 import { NextResponse } from 'next/server';
+import { usersData } from '../users/data';
 import { investorsData } from './data';
 import type { User } from '@/lib/types';
 import { z } from 'zod';
@@ -22,8 +25,9 @@ const querySchema = z.object({
     status: z.enum(['frozen', 'whitelisted', 'all']).optional(),
     kycStatus: z.enum(['verified', 'pending', 'rejected']).optional(),
     query: z.string().optional(),
-    tokenId: z.string().optional(),
+    assetId: z.string().optional(),
     onlyVerified: z.string().optional(),
+    companyId: z.string().optional(),
 });
 
 
@@ -35,17 +39,25 @@ export async function GET(request: Request) {
       return NextResponse.json({ errors: validation.error.errors }, { status: 400 });
   }
 
-  const { page, perPage, status, kycStatus, query, tokenId, onlyVerified } = validation.data;
+  const { page, perPage, status, kycStatus, query, assetId, onlyVerified, companyId } = validation.data;
 
-  let filteredInvestors: User[] = investorsData;
+  // Deep copy to avoid mutating the original data source
+  const allUsers: User[] = JSON.parse(JSON.stringify(usersData));
+  let filteredInvestors: User[] = allUsers.filter(u => u.role === 'investor');
+
+  if (companyId) {
+    filteredInvestors = filteredInvestors.filter(investor => 
+        investor.companyId?.includes(companyId)
+    );
+  }
 
   if (onlyVerified === 'true') {
     filteredInvestors = filteredInvestors.filter(investor => investor.kycStatus === 'verified');
   }
   
-  if (tokenId) {
+  if (assetId) {
     filteredInvestors = filteredInvestors.filter(investor => 
-        investor.transactions?.some(tx => tx.token.id === tokenId)
+        investor.holdings?.some(holding => holding && holding.assetId === assetId)
     );
   }
 
@@ -95,6 +107,7 @@ export async function POST(request: Request) {
       id: `inv-${Math.random().toString(36).substring(2, 9)}`,
       status: 'active',
     };
+    usersData.unshift(newUser);
     investorsData.unshift(newUser);
     return NextResponse.json(newUser, { status: 201 });
   } catch (error) {

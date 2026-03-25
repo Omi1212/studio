@@ -45,6 +45,24 @@ const nextConfig: NextConfig = {
         hostname: 'i.ibb.co',
         port: '',
         pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'docs.lightning.engineering',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'liquid.net',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'rgb.tech',
+        port: '',
+        pathname: '/**',
       }
     ],
   },

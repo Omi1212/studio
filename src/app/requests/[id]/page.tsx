@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useEffect, useState, use } from 'react';
@@ -10,7 +9,7 @@ import {
 } from '@/components/ui/sidebar';
 import SidebarNav from '@/components/dashboard/sidebar-nav';
 import HeaderDynamic from '@/components/dashboard/header-dynamic';
-import type { TokenDetails, Issuer } from '@/lib/types';
+import type { AssetDetails, Issuer } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Check, FileText, HardDrive, Hash, Image as ImageIcon, Info, Network, ToggleRight, User, X, Download, Eye, Tag, MessageSquare } from 'lucide-react';
 import Link from 'next/link';
@@ -32,7 +31,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 
-type CombinedRequest = TokenDetails & { issuer?: Issuer };
+type CombinedRequest = AssetDetails & { issuer?: Issuer };
 
 function ReviewSection({ title, children }: { title: string, children: React.ReactNode }) {
     return (
@@ -82,8 +81,8 @@ function FilePreview({ file, fileName }: { file: any, fileName: string }) {
 }
 
 const steps = [
-    { id: 1, label: 'Token Info' },
-    { id: 2, label: 'Token Details' },
+    { id: 1, label: 'Asset Info' },
+    { id: 2, label: 'Asset Details' },
     { id: 3, label: 'Documents' },
     { id: 4, label: 'Issuer & Action' },
 ];
@@ -100,6 +99,7 @@ function RequestDetailsPage({ params }: { params: { id: string } }) {
     spark: 'Spark',
     liquid: 'Liquid',
     rgb: 'RGB',
+    ark: 'Ark',
     taproot: 'Taproot Assets',
   };
 
@@ -108,47 +108,47 @@ function RequestDetailsPage({ params }: { params: { id: string } }) {
     if (!id) return;
 
     setLoading(true);
-    fetch(`/api/tokens/${id}`)
+    fetch(`/api/assets/${id}`)
       .then(res => {
         if(res.ok) return res.json();
-        throw new Error('Token not found');
+        throw new Error('Asset not found');
       })
-      .then((foundToken: TokenDetails) => {
-        if (foundToken.issuerId) {
-            return fetch(`/api/issuers/${foundToken.issuerId}`)
+      .then((foundAsset: AssetDetails) => {
+        if (foundAsset.issuerId) {
+            return fetch(`/api/issuers/${foundAsset.issuerId}`)
                 .then(res => res.json())
-                .then(issuer => ({ ...foundToken, issuer }));
+                .then(issuer => ({ ...foundAsset, issuer }));
         }
-        return foundToken;
+        return foundAsset;
       })
       .then((combinedData: CombinedRequest) => {
           // Add fake documents if they don't exist for review purposes
           if (!combinedData.whitepaper) {
-            const fakeFile = new File(["fake content"], `${combinedData.tokenTicker}_Whitepaper.pdf`, { type: "application/pdf" });
+            const fakeFile = new File(["fake content"], `${combinedData.assetTicker}_Whitepaper.pdf`, { type: "application/pdf" });
             combinedData.whitepaper = [fakeFile] as any;
           }
-          if (!combinedData.legalTokenizationDoc) {
-            const fakeFile = new File(["fake content"], `Legal_Tokenization.pdf`, { type: "application/pdf" });
-            combinedData.legalTokenizationDoc = [fakeFile] as any;
+          if (!combinedData.legalAssetizationDoc) {
+            const fakeFile = new File(["fake content"], `Legal_Assetization.pdf`, { type: "application/pdf" });
+            combinedData.legalAssetizationDoc = [fakeFile] as any;
           }
-          if (!combinedData.tokenIssuanceLegalDoc) {
-            const fakeFile = new File(["fake content"], `Token_Issuance_Agreement.pdf`, { type: "application/pdf" });
-            combinedData.tokenIssuanceLegalDoc = [fakeFile] as any;
+          if (!combinedData.assetIssuanceLegalDoc) {
+            const fakeFile = new File(["fake content"], `Asset_Issuance_Agreement.pdf`, { type: "application/pdf" });
+            combinedData.assetIssuanceLegalDoc = [fakeFile] as any;
           }
 
           setRequest(combinedData);
 
-          const tokenIcon = combinedData.tokenIcon;
+          const assetIcon = combinedData.assetIcon;
 
-          if (tokenIcon) {
-            if (typeof tokenIcon === 'string') {
-              setIconPreview(tokenIcon);
-            } else if (tokenIcon instanceof File || (typeof tokenIcon === 'object' && 'name' in tokenIcon)) {
+          if (assetIcon) {
+            if (typeof assetIcon === 'string') {
+              setIconPreview(assetIcon);
+            } else if (assetIcon instanceof File || (typeof assetIcon === 'object' && 'name' in assetIcon)) {
               const reader = new FileReader();
               reader.onloadend = () => {
                 setIconPreview(reader.result as string);
               }
-              reader.readAsDataURL(tokenIcon as File);
+              reader.readAsDataURL(assetIcon as File);
             }
           } else {
             // Fake icon
@@ -163,7 +163,7 @@ function RequestDetailsPage({ params }: { params: { id: string } }) {
     if (!request) return;
 
     try {
-        const response = await fetch(`/api/tokens/${id}`, {
+        const response = await fetch(`/api/assets/${id}`, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ status }),
@@ -172,7 +172,7 @@ function RequestDetailsPage({ params }: { params: { id: string } }) {
 
         toast({
             title: `Request ${status === 'active' ? 'Approved' : 'Rejected'}`,
-            description: `The token "${request.tokenName}" has been updated.`
+            description: `The asset "${request.assetName}" has been updated.`
         });
         router.push('/requests');
 
@@ -199,7 +199,7 @@ function RequestDetailsPage({ params }: { params: { id: string } }) {
     // In a real app, you would save this observation to your backend.
     toast({
         title: "Observation Saved",
-        description: `Your observation for "${request?.tokenName}" has been noted.`,
+        description: `Your observation for "${request?.assetName}" has been noted.`,
     });
   };
 
@@ -233,7 +233,7 @@ function RequestDetailsPage({ params }: { params: { id: string } }) {
                     <Link href="/requests"><ArrowLeft /></Link>
                 </Button>
                 <h1 className="text-3xl font-headline font-semibold">
-                    Token Request Review
+                    Asset Request Review
                 </h1>
             </div>
             
@@ -258,14 +258,14 @@ function RequestDetailsPage({ params }: { params: { id: string } }) {
                     </div>
 
               {currentStep === 1 && (
-                <ReviewSection title="Token Information">
-                    <ReviewRow icon={Info} label="Token Name" value={request.tokenName} />
-                    <ReviewRow icon={Tag} label="Token Ticker" value={request.tokenTicker} />
-                    <ReviewRow icon={ImageIcon} label="Token Icon" value={
+                <ReviewSection title="Asset Information">
+                    <ReviewRow icon={Info} label="Asset Name" value={request.assetName} />
+                    <ReviewRow icon={Tag} label="Asset Ticker" value={request.assetTicker} />
+                    <ReviewRow icon={ImageIcon} label="Asset Icon" value={
                       iconPreview ? (
                           <Avatar className="h-6 w-6">
-                              <AvatarImage src={iconPreview} alt="Token Icon Preview" />
-                              <AvatarFallback>{request.tokenTicker.charAt(0)}</AvatarFallback>
+                              <AvatarImage src={iconPreview} alt="Asset Icon Preview" />
+                              <AvatarFallback>{request.assetTicker.charAt(0)}</AvatarFallback>
                           </Avatar>
                       ) : <span className="text-muted-foreground">Not provided</span>
                     } />
@@ -274,19 +274,19 @@ function RequestDetailsPage({ params }: { params: { id: string } }) {
               )}
 
               {currentStep === 2 && (
-                <ReviewSection title="Token Details">
+                <ReviewSection title="Asset Details">
                     <ReviewRow icon={Hash} label="Decimals" value={request.decimals} />
                     <ReviewRow icon={Hash} label="Max Supply" value={request.maxSupply.toLocaleString()} />
                     <ReviewRow icon={ToggleRight} label="Is Freezable" value={request.isFreezable ? 'Yes' : 'No'} />
-                     <ReviewRow icon={Network} label="Network" value={networkMap[request.network] || request.network} />
+                     <ReviewRow icon={Network} label="Network" value={(Array.isArray(request.network) ? request.network : [request.network]).map(n => networkMap[n] || n).join(', ')} />
                 </ReviewSection>
               )}
 
               {currentStep === 3 && (
                 <ReviewSection title="Documents">
-                    <ReviewRow icon={FileText} label="Whitepaper" value={<FilePreview file={request.whitepaper} fileName={`${request.tokenTicker}_Whitepaper.pdf`} />} />
-                    <ReviewRow icon={FileText} label="Legal Tokenization Doc" value={<FilePreview file={request.legalTokenizationDoc} fileName="Legal_Tokenization.pdf" />} />
-                    <ReviewRow icon={FileText} label="Token Issuance Legal Doc" value={<FilePreview file={request.tokenIssuanceLegalDoc} fileName="Token_Issuance_Agreement.pdf" />} />
+                    <ReviewRow icon={FileText} label="Whitepaper" value={<FilePreview file={request.whitepaper} fileName={`${request.assetTicker}_Whitepaper.pdf`} />} />
+                    <ReviewRow icon={FileText} label="Legal Assetization Doc" value={<FilePreview file={request.legalAssetizationDoc} fileName="Legal_Assetization.pdf" />} />
+                    <ReviewRow icon={FileText} label="Asset Issuance Legal Doc" value={<FilePreview file={request.assetIssuanceLegalDoc} fileName="Asset_Issuance_Agreement.pdf" />} />
                 </ReviewSection>
               )}
 
@@ -304,7 +304,7 @@ function RequestDetailsPage({ params }: { params: { id: string } }) {
                     <Card>
                       <CardHeader>
                           <CardTitle>Actions</CardTitle>
-                          <CardDescription>Approve or reject this token issuance request. You can add an optional observation.</CardDescription>
+                          <CardDescription>Approve or reject this asset issuance request. You can add an optional observation.</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
                            <div className="space-y-2">
@@ -326,7 +326,7 @@ function RequestDetailsPage({ params }: { params: { id: string } }) {
                                   <AlertDialogHeader>
                                     <AlertDialogTitle>Are you sure?</AlertDialogTitle>
                                     <AlertDialogDescription>
-                                      This will reject the token request for &quot;{request.tokenName}&quot;. This action cannot be undone.
+                                      This will reject the asset request for &quot;{request.assetName}&quot;. This action cannot be undone.
                                     </AlertDialogDescription>
                                   </AlertDialogHeader>
                                   <AlertDialogFooter>

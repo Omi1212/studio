@@ -12,9 +12,9 @@ import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
-import type { Order, TokenDetails, PaymentDetails } from "@/lib/types";
+import type { Order, AssetDetails, PaymentDetails } from "@/lib/types";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import TokenIcon from '../ui/token-icon';
+import AssetIcon from '../ui/asset-icon';
 import { ArrowLeft, Landmark, Copy, Eye } from 'lucide-react';
 import React from 'react';
 
@@ -465,7 +465,7 @@ function StablecoinPaymentDetails({ orderReference, amount, onPay }: { orderRefe
     );
 }
 
-function InvestmentSummary({ order, token }: { order: Order; token: TokenDetails }) {
+function InvestmentSummary({ order, asset }: { order: Order; asset: AssetDetails }) {
     const investmentAmount = order.amount * order.price;
     const platformFee = 0; // As per image
     const finalAmount = investmentAmount + platformFee;
@@ -478,14 +478,14 @@ function InvestmentSummary({ order, token }: { order: Order; token: TokenDetails
                 </CardHeader>
                 <CardContent className="space-y-4 text-sm">
                     <div className="flex justify-between items-center">
-                        <span className="text-muted-foreground">Token</span>
+                        <span className="text-muted-foreground">Asset</span>
                         <div className="flex items-center gap-2">
-                            <TokenIcon token={token} className="h-5 w-5" />
-                            <span className="font-medium">{token.tokenTicker}</span>
+                            <AssetIcon asset={asset} className="h-5 w-5" />
+                            <span className="font-medium">{asset.assetTicker}</span>
                         </div>
                     </div>
                     <div className="flex justify-between items-center">
-                        <span className="text-muted-foreground">Token price</span>
+                        <span className="text-muted-foreground">Asset price</span>
                         <span className="font-mono">${order.price.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between items-center">
@@ -500,8 +500,8 @@ function InvestmentSummary({ order, token }: { order: Order; token: TokenDetails
                 </CardHeader>
                 <CardContent className="space-y-4 text-sm">
                     <div className="flex justify-between items-center">
-                        <span className="text-muted-foreground">Tokens to be minted</span>
-                        <span className="font-mono">{order.amount} {token.tokenTicker}</span>
+                        <span className="text-muted-foreground">Assets to be minted</span>
+                        <span className="font-mono">{order.amount} {asset.assetTicker}</span>
                     </div>
                     <div className="flex justify-between items-center">
                         <span className="text-muted-foreground">Total amount</span>
@@ -524,7 +524,7 @@ function InvestmentSummary({ order, token }: { order: Order; token: TokenDetails
 
 interface PaymentMethodsProps {
     order: Order;
-    token: TokenDetails;
+    asset: AssetDetails;
     onPaymentConfirmed: () => void;
 }
 
@@ -543,7 +543,7 @@ const generateTxId = (method: string, network?: string): string => {
     return randomHex;
 };
 
-export default function PaymentMethods({ order, token, onPaymentConfirmed }: PaymentMethodsProps) {
+export default function PaymentMethods({ order, asset, onPaymentConfirmed }: PaymentMethodsProps) {
     const { toast } = useToast();
     const router = useRouter();
     const [step, setStep] = useState(1);
@@ -615,7 +615,7 @@ export default function PaymentMethods({ order, token, onPaymentConfirmed }: Pay
 
     const renderRightColumn = () => {
         if (step === 1) {
-            return <InvestmentSummary order={order} token={token} />;
+            return <InvestmentSummary order={order} asset={asset} />;
         }
 
         switch (activePaymentMethod) {
@@ -628,7 +628,7 @@ export default function PaymentMethods({ order, token, onPaymentConfirmed }: Pay
             case 'usdt':
                 return <StablecoinPaymentDetails orderReference={order.id} amount={investmentAmount} onPay={handlePaymentMade} />;
             default:
-                 return <InvestmentSummary order={order} token={token} />;
+                 return <InvestmentSummary order={order} asset={asset} />;
         }
     };
     

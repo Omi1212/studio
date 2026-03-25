@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import { investorsData } from '../data';
 import type { User } from '@/lib/types';
 import { z } from 'zod';
+import { usersData } from '../../users/data';
 
 const patchSchema = z.object({
   name: z.string().min(1, "Name is required").optional(),
@@ -10,6 +11,7 @@ const patchSchema = z.object({
   kycStatus: z.enum(['verified', 'pending', 'rejected']).optional(),
   walletAddress: z.string().min(1, "Wallet address is required").optional(),
   isFrozen: z.boolean().optional(),
+  holdings: z.array(z.any()).optional(),
 });
 
 
@@ -38,6 +40,12 @@ export async function PATCH(
     const validatedData = patchSchema.parse(body);
 
     investorsData[investorIndex] = { ...investorsData[investorIndex], ...validatedData };
+
+    // Also update usersData to keep it consistent
+    const userIndex = usersData.findIndex((u) => u.id === params.id);
+    if (userIndex !== -1) {
+      usersData[userIndex] = { ...usersData[userIndex], ...validatedData };
+    }
     
     return NextResponse.json(investorsData[investorIndex]);
   } catch (error) {
@@ -58,5 +66,12 @@ export async function DELETE(
   }
   
   (investorsData as User[]).splice(investorIndex, 1);
+
+  // Also delete from usersData
+  const userIndex = usersData.findIndex((u) => u.id === params.id);
+  if (userIndex !== -1) {
+    usersData.splice(userIndex, 1);
+  }
+
   return new Response(null, { status: 204 });
 }

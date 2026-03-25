@@ -28,7 +28,7 @@ function VerificationStep({ level, title, description, isCompleted, isCurrent }:
   );
 }
 
-function VerificationCallToAction({ kybLevel }: { kybLevel: number }) {
+function VerificationCallToAction({ kybLevel, onVerify }: { kybLevel: number; onVerify?: () => void; }) {
   const levelsInfo = [
     // kybLevel 0
     { 
@@ -74,13 +74,13 @@ function VerificationCallToAction({ kybLevel }: { kybLevel: number }) {
           {nextStepInfo.requirements.map(req => <li key={req}>{req}</li>)}
         </ul>
       )}
-      <Button className="w-full mt-auto">{nextStepInfo.buttonText}</Button>
+      <Button className="w-full mt-auto" onClick={onVerify}>{nextStepInfo.buttonText}</Button>
     </div>
   );
 }
 
 
-export default function BusinessVerification({ kybLevel }: { kybLevel: number }) {
+export default function BusinessVerification({ kybLevel, onVerify }: { kybLevel: number; onVerify?: () => void; }) {
   const steps = [
     { level: 1, title: "Basic Information", description: "Basic business information provided." },
     { level: 2, title: "Business Documents", description: "Business registration documents submitted." },
@@ -102,7 +102,7 @@ export default function BusinessVerification({ kybLevel }: { kybLevel: number })
         ))}
         </div>
         <div>
-        <VerificationCallToAction kybLevel={kybLevel} />
+        <VerificationCallToAction kybLevel={kybLevel} onVerify={onVerify} />
         </div>
     </div>
   );

@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server';
-import { exampleTokens } from './data';
-import type { TokenDetails } from '@/lib/types';
+import { exampleAssets } from './data';
+import type { AssetDetails } from '@/lib/types';
 import { z } from 'zod';
 
-const tokenPostSchema = z.object({
-  tokenName: z.string().min(1),
-  tokenTicker: z.string().min(1).max(5),
+const assetPostSchema = z.object({
+  assetName: z.string().min(1),
+  assetTicker: z.string().min(1).max(5),
   destinationAddress: z.string().min(1),
   decimals: z.number().int().min(0).max(18),
   maxSupply: z.number().positive(),
@@ -35,34 +35,34 @@ export async function GET(request: Request) {
 
   const { page, perPage, status, query, excludeStatus, issuerId } = validation.data;
 
-  let filteredTokens = exampleTokens;
+  let filteredAssets = exampleAssets;
 
   if (issuerId) {
-    filteredTokens = filteredTokens.filter(token => token.issuerId === issuerId);
+    filteredAssets = filteredAssets.filter(asset => asset.issuerId === issuerId);
   }
 
   if (excludeStatus) {
-    filteredTokens = filteredTokens.filter(token => token.status !== excludeStatus);
+    filteredAssets = filteredAssets.filter(asset => asset.status !== excludeStatus);
   }
 
   if (status && status !== 'all') {
-    filteredTokens = filteredTokens.filter(token => token.status === status);
+    filteredAssets = filteredAssets.filter(asset => asset.status === status);
   }
 
   if (query) {
     const lowercasedQuery = query.toLowerCase();
-    filteredTokens = filteredTokens.filter(token =>
-        (token.tokenName || '').toLowerCase().includes(lowercasedQuery) ||
-        (token.tokenTicker || '').toLowerCase().includes(lowercasedQuery)
+    filteredAssets = filteredAssets.filter(asset =>
+        (asset.assetName || '').toLowerCase().includes(lowercasedQuery) ||
+        (asset.assetTicker || '').toLowerCase().includes(lowercasedQuery)
     );
   }
   
-  const total = filteredTokens.length;
+  const total = filteredAssets.length;
   const startIndex = (page - 1) * perPage;
-  const paginatedTokens = filteredTokens.slice(startIndex, startIndex + perPage);
+  const paginatedAssets = filteredAssets.slice(startIndex, startIndex + perPage);
 
   return NextResponse.json({
-    data: paginatedTokens,
+    data: paginatedAssets,
     meta: {
       page,
       perPage,
@@ -76,14 +76,14 @@ export async function POST(request: Request) {
     try {
         const body = await request.json();
         // We don't validate file-related fields here as they are not sent in the JSON body
-        const newTokenData = tokenPostSchema.parse(body);
+        const newAssetData = assetPostSchema.parse(body);
 
-        const newToken: Omit<TokenDetails, 'tokenIcon' | 'whitepaper' | 'legalTokenizationDoc' | 'tokenIssuanceLegalDoc' | 'publicKey'> = {
-            ...newTokenData,
+        const newAsset: Omit<AssetDetails, 'assetIcon' | 'whitepaper' | 'legalAssetizationDoc' | 'assetIssuanceLegalDoc' | 'publicKey'> = {
+            ...newAssetData,
             id: `btkn1...${Math.random().toString(36).substring(2, 10)}`, // Simulate new ID
         };
-        (exampleTokens as any[]).unshift(newToken);
-        return NextResponse.json(newToken, { status: 201 });
+        (exampleAssets as any[]).unshift(newAsset);
+        return NextResponse.json(newAsset, { status: 201 });
     } catch (error) {
         if (error instanceof z.ZodError) {
             return NextResponse.json({ errors: error.errors }, { status: 400 });

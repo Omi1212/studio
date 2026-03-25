@@ -1,13 +1,15 @@
 import { NextResponse } from 'next/server';
 import { transfersData } from './data';
 import { z } from 'zod';
+import { exampleAssets } from '../assets/data';
 
 const querySchema = z.object({
     page: z.coerce.number().int().min(1).default(1),
     perPage: z.coerce.number().int().min(1).max(1000).default(10),
     type: z.enum(['Transfer', 'Mint', 'Burn', 'all']).optional(),
     query: z.string().optional(),
-    tokenTicker: z.string().optional(),
+    assetTicker: z.string().optional(),
+    network: z.string().optional(),
 });
 
 
@@ -19,12 +21,26 @@ export async function GET(request: Request) {
       return NextResponse.json({ errors: validation.error.errors }, { status: 400 });
   }
   
-  const { page, perPage, type, query, tokenTicker } = validation.data;
+  const { page, perPage, type, query, assetTicker, network } = validation.data;
 
-  let filteredTransfers = transfersData;
+  const augmentedTransfers = transfersData.map(transfer => {
+    const asset = exampleAssets.find(a => a.assetTicker === transfer.assetTicker);
+    const assetNetworks = asset ? (Array.isArray(asset.network) ? asset.network : [asset.network]) : [];
+    return {
+        ...transfer,
+        networks: assetNetworks
+    };
+  });
 
-  if (tokenTicker) {
-      filteredTransfers = filteredTransfers.filter(t => t.tokenTicker === tokenTicker);
+
+  let filteredTransfers = augmentedTransfers;
+
+  if (network && network !== 'all') {
+    filteredTransfers = filteredTransfers.filter(t => t.networks.includes(network));
+  }
+
+  if (assetTicker) {
+      filteredTransfers = filteredTransfers.filter(t => t.assetTicker === assetTicker);
   }
 
   if (type && type !== 'all') {

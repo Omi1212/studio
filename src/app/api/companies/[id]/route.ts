@@ -12,6 +12,7 @@ const patchSchema = z.object({
   countryOfJurisdiction: z.string().optional(),
   kybLevel: z.number().int().optional(),
   kybStatus: z.enum(['verified', 'pending', 'rejected']).optional(),
+  complianceProviders: z.array(z.string()).optional(),
 }).partial();
 
 export async function GET(

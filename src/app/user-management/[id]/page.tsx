@@ -194,7 +194,7 @@ export default function UserDetailsPage() {
                 <CardContent className="space-y-4">
                     <InfoRow label="Email" value={user.email} />
                     <InfoRow label="Role" value={<span className="capitalize">{user.role}</span>} />
-                    <InfoRow label="Wallet Address" value={<span className="font-mono">{user.walletAddress}</span>} />
+                    <InfoRow label="Wallet Address" value={<span className="font-mono" title={user.walletAddress}>{`${user.walletAddress.slice(0, 7)}...${user.walletAddress.slice(-4)}`}</span>} />
                     <InfoRow label="KYC Status" value={getKycBadge(user.kycStatus)} />
                 </CardContent>
             </Card>

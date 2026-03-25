@@ -11,22 +11,22 @@ import SidebarNav from '@/components/dashboard/sidebar-nav';
 import HeaderDynamic from '@/components/dashboard/header-dynamic';
 import { useToast } from '@/hooks/use-toast';
 import { Stepper, StepperItem } from '@/components/ui/stepper';
-import Step1TokenInfo from '@/components/issue-token/step-1-token-info';
-import { TokenFormValues } from '@/components/issue-token/issue-token-form';
-import Step2TokenDetails from '@/components/issue-token/step-2-token-details';
-import Step3Documents from '@/components/issue-token/step-3-documents';
-import Step4Network from '@/components/issue-token/step-4-network';
-import Step5Review from '@/components/issue-token/step-5-review';
+import Step1AssetInfo from '@/components/issue-asset/step-1-asset-info';
+import { AssetFormValues } from '@/components/issue-asset/issue-asset-form';
+import Step2AssetDetails from '@/components/issue-asset/step-2-asset-details';
+import Step3Documents from '@/components/issue-asset/step-3-documents';
+import Step4Network from '@/components/issue-asset/step-4-network';
+import Step5Review from '@/components/issue-asset/step-5-asset-review';
 import { Button } from '@/components/ui/button';
 import type { Issuer } from '@/lib/types';
 import Link from 'next/link';
 
-export default function NewTokenPage() {
+export default function NewAssetPage() {
   const [currentStep, setCurrentStep] = useState(1);
   const [issuers, setIssuers] = useState<Issuer[]>([]);
-  const [formData, setFormData] = useState<Partial<TokenFormValues>>({
-    tokenName: 'Ingeniería Coin',
-    tokenTicker: 'ING',
+  const [formData, setFormData] = useState<Partial<AssetFormValues>>({
+    assetName: 'Ingeniería Coin',
+    assetTicker: 'ING',
     destinationAddress: 'spark1pgssyd5f0685tu3v2hpqv2rx9cxu6vskyzjulwepzq79kd583gyw4z0gp92kjc',
     decimals: 6,
     maxSupply: 1_000_000_000000,
@@ -43,14 +43,14 @@ export default function NewTokenPage() {
   }, []);
 
   const steps = [
-    { id: 1, label: 'Token Information' },
-    { id: 2, label: 'Token Details' },
+    { id: 1, label: 'Asset Information' },
+    { id: 2, label: 'Asset Details' },
     { id: 3, label: 'Documents' },
     { id: 4, label: 'Network' },
     { id: 5, label: 'Review' },
   ];
 
-  const handleNext = (data: Partial<TokenFormValues>) => {
+  const handleNext = (data: Partial<AssetFormValues>) => {
     setFormData((prev) => ({ ...prev, ...data }));
     setCurrentStep((prev) => prev + 1);
   };
@@ -66,45 +66,45 @@ export default function NewTokenPage() {
     });
   };
 
-  const handleFinalSubmit = async (data: Partial<TokenFormValues>) => {
-    const finalData = { ...formData, ...data } as TokenFormValues;
+  const handleFinalSubmit = async (data: Partial<AssetFormValues>) => {
+    const finalData = { ...formData, ...data } as AssetFormValues;
     
     if (issuers.length < 2) {
         toast({ title: 'Error', description: 'Not enough issuer data to submit.'});
         return;
     }
 
-    const newTokenData = { 
+    const newAssetData = { 
       ...finalData, 
       status: 'pending',
-      issuerId: issuers[1].id, // For demo purposes, assign to TokenForge
+      issuerId: issuers[1].id, // For demo purposes, assign to AssetForge
     };
     
     // Remove file objects before sending to API
-    delete (newTokenData as any).tokenIcon;
-    delete (newTokenData as any).whitepaper;
-    delete (newTokenData as any).legalTokenizationDoc;
-    delete (newTokenData as any).tokenIssuanceLegalDoc;
+    delete (newAssetData as any).assetIcon;
+    delete (newAssetData as any).whitepaper;
+    delete (newAssetData as any).legalAssetizationDoc;
+    delete (newAssetData as any).assetIssuanceLegalDoc;
 
     try {
-        const response = await fetch('/api/tokens', {
+        const response = await fetch('/api/assets', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(newTokenData),
+            body: JSON.stringify(newAssetData),
         });
-        if (!response.ok) throw new Error('Failed to submit token request');
+        if (!response.ok) throw new Error('Failed to submit asset request');
         
-        const createdToken = await response.json();
+        const createdAsset = await response.json();
 
         toast({
           title: 'Request Submitted!',
-          description: `Your new token "${createdToken.tokenName}" has been submitted for review.`,
+          description: `Your new asset "${createdAsset.assetName}" has been submitted for review.`,
         });
-        router.push('/issue-token');
+        router.push('/issue-asset');
 
     } catch (error) {
         console.error(error);
-        toast({ variant: 'destructive', title: 'Error', description: 'Could not submit token request.' });
+        toast({ variant: 'destructive', title: 'Error', description: 'Could not submit asset request.' });
     }
   };
 
@@ -122,18 +122,18 @@ export default function NewTokenPage() {
                 <>
                   <div className="flex justify-between items-center mb-8">
                       <h1 className="text-3xl font-headline font-semibold">
-                        Create a New Token
+                        Create a New Asset
                       </h1>
                       <div className="flex items-center gap-2">
                           <Button variant="outline" onClick={handleSaveDraft}>Save as Draft</Button>
                           <Button variant="outline" asChild>
-                              <Link href="/issue-token">Cancel</Link>
+                              <Link href="/issue-asset">Cancel</Link>
                           </Button>
                       </div>
                   </div>
 
                   <p className="text-muted-foreground mb-8">
-                    Create and issue a new token on the network.
+                    Create and issue a new asset on the network.
                   </p>
                   <div className="mb-8 hidden sm:block">
                     <Stepper totalSteps={steps.length}>
@@ -157,14 +157,14 @@ export default function NewTokenPage() {
                   <div className="flex justify-center pb-8">
                     <div className="w-full max-w-2xl">
                       {currentStep === 1 && (
-                        <Step1TokenInfo
+                        <Step1AssetInfo
                           formRef={stepFormRef}
                           onNext={handleNext}
                           defaultValues={formData}
                         />
                       )}
                       {currentStep === 2 && (
-                        <Step2TokenDetails
+                        <Step2AssetDetails
                           formRef={stepFormRef}
                           onBack={handleBack}
                           onNext={handleNext}
@@ -191,7 +191,7 @@ export default function NewTokenPage() {
                         <Step5Review
                           onBack={handleBack}
                           onSubmit={handleFinalSubmit}
-                          formData={formData as TokenFormValues}
+                          formData={formData as AssetFormValues}
                           onSaveDraft={handleSaveDraft}
                         />
                       )}

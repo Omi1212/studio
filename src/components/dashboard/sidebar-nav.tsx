@@ -19,7 +19,7 @@ import {
   MoreVertical,
 } from 'lucide-react';
 import { usePathname } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -27,9 +27,9 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '../ui/button';
-import TokenIcon from '../ui/token-icon';
+import AssetIcon from '../ui/asset-icon';
 import { cn } from '@/lib/utils';
-import type { TokenDetails, User, Issuer } from '@/lib/types';
+import type { AssetDetails, User, Issuer, Company } from '@/lib/types';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../ui/collapsible';
 import Image from 'next/image';
 import {
@@ -40,11 +40,12 @@ import {
   SidebarMenuButton,
   SidebarFooter,
 } from '@/components/ui/sidebar';
+import * as React from 'react';
 
 
 const superAdminMenu = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/assets', label: 'Tokens', icon: CircleDollarSign },
+  { href: '/assets', label: 'Assets', icon: CircleDollarSign },
   { href: '/issuer-management', label: 'Issuers', icon: Building },
   { href: '/user-management', label: 'Users', icon: Users },
   { href: '/agents', label: 'Agents', icon: ClipboardList },
@@ -61,7 +62,7 @@ const agentMenu = [
             { href: '/transfers', label: 'Transfers', icon: ArrowRightLeft },
         ]
     },
-    { href: '/requests', label: 'Token Requests', icon: ClipboardList },
+    { href: '/requests', label: 'Asset Requests', icon: ClipboardList },
     { href: '/issuer-management', label: 'Issuers', icon: Building },
     { href: '/user-management', label: 'Users', icon: Users },
 ];
@@ -70,27 +71,26 @@ const investorMenu = [
     { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { href: '/marketplace', label: 'Marketplace', icon: ShoppingBag },
     { href: '/orders', label: 'Orders', icon: ClipboardList },
-    { href: '/my-tokens', label: 'Portfolio', icon: Briefcase },
+    { href: '/my-assets', label: 'Portfolio', icon: Briefcase },
 ];
 
 const issuerMenu = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/issue-token', label: 'Launchpad', icon: Rocket },
+  { href: '/issue-asset', label: 'Launchpad', icon: Rocket },
   { 
     href: '/workspace', 
     label: 'Workspace', 
     icon: Briefcase,
     subItems: [
-        { href: '/investors', label: 'Investors', icon: Users },
         { href: '/whitelisting-requests', label: 'Whitelisting Requests', icon: ClipboardList },
         { href: '/orders', label: 'Orders', icon: ShoppingBag },
         { href: '/transfers', label: 'Transfers', icon: ArrowRightLeft },
     ]
   },
+  { href: '/investors', label: 'Investors', icon: Users },
 ];
 
 const helpMenuItems = [
-  { href: '/security', label: 'Security', icon: ShieldCheck },
   { href: '/help', label: 'Help', icon: LifeBuoy },
 ];
 
@@ -98,87 +98,153 @@ export default function SidebarNav() {
   const pathname = usePathname();
   const [userRole, setUserRole] = useState<string | null>(null);
   const [isClient, setIsClient] = useState(false);
-  const [allTokens, setAllTokens] = useState<TokenDetails[]>([]);
-  const [selectedToken, setSelectedToken] = useState<TokenDetails | null>(null);
-  const [companies, setCompanies] = useState<{ id: string; name: string }[]>([]);
-  const [selectedCompany, setSelectedCompany] = useState<{ id: string; name: string } | null>(null);
+  const [allAssets, setAllAssets] = useState<AssetDetails[]>([]);
+  const [selectedAsset, setSelectedAsset] = useState<AssetDetails | null>(null);
+  const [companies, setCompanies] = useState<Company[]>([]);
+  const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
+
+  const companyAssets = useMemo(() => {
+    if (!selectedCompany) return [];
+    return allAssets.filter(asset => asset.companyId === selectedCompany.id);
+  }, [allAssets, selectedCompany]);
 
 
-  useEffect(() => {
-    setIsClient(true);
+  const fetchData = React.useCallback(async () => {
     const role = localStorage.getItem('userRole');
-    let currentUser: User | null = JSON.parse(localStorage.getItem('currentUser') || 'null');
+    const currentUser: User | null = JSON.parse(localStorage.getItem('currentUser') || 'null');
     setUserRole(role);
 
     if (!currentUser) {
-        return;
+      setAllAssets([]);
+      setSelectedAsset(null);
+      setCompanies([]);
+      setSelectedCompany(null);
+      return;
     }
 
-    const fetchData = async () => {
-        try {
-            const userRes = await fetch(`/api/users/${currentUser!.id}`);
-            const freshUser = userRes.ok ? await userRes.json() : currentUser;
-            currentUser = freshUser; // Update currentUser with fresh data
-
-            if (freshUser && freshUser.companyId) {
-                const companyRes = await fetch(`/api/companies/${freshUser.companyId}`);
-                if (companyRes.ok) {
-                    const companyData = await companyRes.json();
-                    setCompanies([companyData]); // Set an array with just the user's company
-                    setSelectedCompany(companyData);
-                    localStorage.setItem('selectedCompanyId', companyData.id);
-                }
-            } else {
-                setCompanies([]);
-                setSelectedCompany(null);
-                localStorage.removeItem('selectedCompanyId');
-            }
-            
-            const tokensResponse = await fetch('/api/tokens?perPage=999');
-            const tokensData = await tokensResponse.json();
-            const combinedTokens: TokenDetails[] = (tokensData.data || []).map((t: any) => ({
-                ...t,
-                decimals: t.decimals ?? 0,
-                isFreezable: t.isFreezable ?? false,
-                publicKey: t.publicKey ?? `02f...${t.id.slice(-10)}`,
-            }));
-            setAllTokens(combinedTokens);
-
-            const storedTokenId = localStorage.getItem('selectedTokenId');
-            if (storedTokenId) {
-                const foundToken = combinedTokens.find(t => t.id === storedTokenId);
-                if (foundToken) {
-                    setSelectedToken(foundToken);
-                } else if (combinedTokens.length > 0) {
-                    const firstToken = combinedTokens[0];
-                    setSelectedToken(firstToken);
-                    localStorage.setItem('selectedTokenId', firstToken.id);
-                } else {
-                    setSelectedToken(null);
-                    localStorage.removeItem('selectedTokenId');
-                }
-            } else if (combinedTokens.length > 0) {
-                const firstToken = combinedTokens[0];
-                setSelectedToken(firstToken);
-                localStorage.setItem('selectedTokenId', firstToken.id);
-            }
-
-        } catch (error) {
-            console.error('Error fetching sidebar data:', error);
+    try {
+      const getCompaniesPromise = async () => {
+        if (role === 'investor') {
+          if (currentUser.companyId && Array.isArray(currentUser.companyId) && currentUser.companyId.length > 0) {
+            const companyPromises = currentUser.companyId.filter(id => !!id).map(id =>
+              fetch(`/api/companies/${id}`).then(res => (res.ok ? res.json() : null))
+            );
+            const companiesResult = await Promise.all(companyPromises);
+            return { data: companiesResult.filter(c => c) };
+          }
+          return { data: [] };
         }
-    };
+        if (currentUser.companyId && Array.isArray(currentUser.companyId) && currentUser.companyId.length > 0) {
+            const companyPromises = currentUser.companyId.filter(id => !!id).map(id =>
+              fetch(`/api/companies/${id}`).then(res => (res.ok ? res.json() : null))
+            );
+            const companiesResult = await Promise.all(companyPromises);
+            return { data: companiesResult.filter(c => c) };
+        }
+        return { data: [] };
+      };
 
-    fetchData();
+      const getAssetsPromise = async (): Promise<{ data: AssetDetails[] }> => {
+          if (currentUser.role === 'issuer') {
+              if (currentUser.companyId && currentUser.companyId.length > 0) {
+                const assetPromises = currentUser.companyId.map(cId => 
+                    fetch(`/api/assets?perPage=999&companyId=${cId}`).then(res => res.ok ? res.json() : { data: [] })
+                );
+                const assetResponses = await Promise.all(assetPromises);
+                const allCompanyAssets = assetResponses.flatMap(res => res.data);
+                return { data: allCompanyAssets };
+              }
+              return { data: [] };
+          } else if (currentUser.role === 'agent') {
+              const [allAssignments, allAssetsRes] = await Promise.all([
+                  fetch(`/api/agents/assignments`).then(res => res.ok ? res.json() : {}),
+                  fetch('/api/assets?perPage=999').then(res => res.ok ? res.json() : { data: [] })
+              ]);
+              const assignedAssetIds = allAssignments[currentUser.id] || [];
+              const agentAssets = (allAssetsRes.data || []).filter((asset: AssetDetails) => assignedAssetIds.includes(asset.id));
+              return { data: agentAssets };
+          } else { // for superadmin and any other case
+              const assetsResponse = await fetch('/api/assets?perPage=999');
+              return assetsResponse.ok ? assetsResponse.json() : { data: [] };
+          }
+      };
+      
+      const [companiesResponse, assetsData] = await Promise.all([getCompaniesPromise(), getAssetsPromise()]);
 
+      const companyList: Company[] = companiesResponse.data || [];
+      setCompanies(companyList);
+
+      const storedCompanyId = localStorage.getItem('selectedCompanyId');
+      let currentCompany: Company | null = null;
+      if (storedCompanyId) {
+        currentCompany = companyList.find((c: any) => c.id === storedCompanyId);
+      }
+      
+      if (!currentCompany && companyList.length > 0) {
+        currentCompany = companyList[0];
+        localStorage.setItem('selectedCompanyId', currentCompany.id);
+      } else if (companyList.length === 0) {
+        localStorage.removeItem('selectedCompanyId');
+      }
+      
+      setSelectedCompany(currentCompany);
+
+
+      const combinedAssets: AssetDetails[] = (assetsData.data || []).map((t: any) => ({
+        ...t,
+        decimals: t.decimals ?? 0,
+        isFreezable: t.isFreezable ?? false,
+        publicKey: t.publicKey ?? `02f...${t.id.slice(-10)}`,
+        network: Array.isArray(t.network) ? t.network : [t.network].filter(Boolean),
+      }));
+      setAllAssets(combinedAssets);
+      
+      const assetsForCompany = currentCompany
+        ? combinedAssets.filter(asset => asset.companyId === currentCompany.id)
+        : [];
+
+      const storedAssetId = localStorage.getItem('selectedAssetId');
+      let newSelectedAsset: AssetDetails | null = null;
+      if (storedAssetId) {
+        newSelectedAsset = assetsForCompany.find(asset => asset.id === storedAssetId) || null;
+      }
+      
+      if (!newSelectedAsset && assetsForCompany.length > 0) {
+        newSelectedAsset = assetsForCompany[0];
+      }
+      
+      setSelectedAsset(newSelectedAsset);
+
+      if (newSelectedAsset) {
+        localStorage.setItem('selectedAssetId', newSelectedAsset.id);
+      } else {
+        localStorage.removeItem('selectedAssetId');
+      }
+
+    } catch (error) {
+      console.error('Error fetching sidebar data:', error);
+    }
   }, []);
 
-  const handleTokenSelect = (token: TokenDetails) => {
-    setSelectedToken(token);
-    localStorage.setItem('selectedTokenId', token.id);
-    window.dispatchEvent(new Event('tokenChanged'));
+  useEffect(() => {
+    setIsClient(true);
+    fetchData();
+
+    window.addEventListener('assetChanged', fetchData);
+    window.addEventListener('companyChanged', fetchData);
+    return () => {
+      window.removeEventListener('assetChanged', fetchData);
+      window.removeEventListener('companyChanged', fetchData);
+    };
+  }, [fetchData]);
+
+  const handleAssetSelect = (asset: AssetDetails) => {
+    setSelectedAsset(asset);
+    localStorage.setItem('selectedAssetId', asset.id);
+    window.dispatchEvent(new Event('assetChanged'));
   }
 
-  const handleCompanySelect = (company: { id: string; name: string }) => {
+  const handleCompanySelect = (company: Company) => {
     setSelectedCompany(company);
     localStorage.setItem('selectedCompanyId', company.id);
     window.dispatchEvent(new Event('companyChanged'));
@@ -204,6 +270,7 @@ export default function SidebarNav() {
     spark: 'Spark',
     liquid: 'Liquid',
     rgb: 'RGB',
+    ark: 'Arkade Assets',
     taproot: 'Taproot Assets',
   };
 
@@ -213,11 +280,11 @@ export default function SidebarNav() {
       <SidebarHeader className="p-4">
         <div className="w-full h-auto relative" style={{ aspectRatio: '170/41' }}>
           <Image src="https://i.ibb.co/dsx2xgVc/image-69.png" alt="BlockStratus Logo" fill style={{objectFit: 'contain'}} sizes="14rem" className="block dark:hidden" />
-          <Image src="https://i.wpfc.ml/35/8gtsxa.png" alt="BlockStratus Logo" fill style={{objectFit: 'contain'}} sizes="14rem" className="hidden dark:block" />
+          <Image src="https://i.ibb.co/pBzFXyhT/imagen-2026-03-23-103520188.png" alt="BlockStratus Logo" fill style={{objectFit: 'contain'}} sizes="14rem" className="hidden dark:block" />
         </div>
       </SidebarHeader>
       
-      {isClient && (userRole === 'investor' || userRole === 'issuer') && (
+      {isClient && (userRole === 'issuer' || userRole === 'investor') && (
         <div className="px-3 pb-3">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -259,7 +326,7 @@ export default function SidebarNav() {
 
       {isClient && (userRole === 'issuer' || userRole === 'agent') && (
         <div className="px-3 pb-3">
-          {allTokens.length > 0 && selectedToken ? (
+          {companyAssets.length > 0 && selectedAsset ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
@@ -267,20 +334,14 @@ export default function SidebarNav() {
                   className="w-full h-auto justify-between items-center p-2 text-left bg-sidebar-accent border-sidebar-border hover:bg-sidebar-accent/80"
                 >
                   <div className="flex items-center gap-3">
-                    <TokenIcon token={selectedToken} className="h-8 w-8" />
+                    <AssetIcon asset={selectedAsset} className="h-8 w-8" />
                     <div className="flex-1 flex flex-col gap-0.5 leading-none">
                       <span className="font-medium text-sm">
-                        {selectedToken.tokenName}
+                        {selectedAsset.assetName}
                       </span>
                       <div className="flex items-center gap-2">
                         <span className="text-primary font-semibold text-xs">
-                          {selectedToken.tokenTicker}
-                        </span>
-                        <span className="text-xs text-muted-foreground">
-                          (
-                          {networkMap[selectedToken.network as string] ||
-                            selectedToken.network}
-                          )
+                          {selectedAsset.assetTicker}
                         </span>
                       </div>
                     </div>
@@ -289,31 +350,25 @@ export default function SidebarNav() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-[--radix-dropdown-menu-trigger-width]">
-                {allTokens.map((token) => (
+                {companyAssets.map((asset) => (
                   <DropdownMenuItem
-                    key={token.id}
-                    onSelect={() => handleTokenSelect(token)}
+                    key={asset.id}
+                    onSelect={() => handleAssetSelect(asset)}
                     className="p-2"
                   >
                     <div className="flex items-center gap-3 w-full">
-                      <TokenIcon token={token} className="h-8 w-8" />
+                      <AssetIcon asset={asset} className="h-8 w-8" />
                       <div className="flex-1 flex flex-col gap-0.5 leading-none">
                         <span className="font-medium text-sm">
-                          {token.tokenName}
+                          {asset.assetName}
                         </span>
                         <div className="flex items-center gap-2">
                           <span className="text-primary font-semibold text-xs">
-                            {token.tokenTicker}
-                          </span>
-                          <span className="text-xs text-muted-foreground">
-                            (
-                            {networkMap[token.network as string] ||
-                              token.network}
-                            )
+                            {asset.assetTicker}
                           </span>
                         </div>
                       </div>
-                      {selectedToken.id === token.id && (
+                      {selectedAsset.id === asset.id && (
                         <Check className="h-4 w-4" />
                       )}
                     </div>

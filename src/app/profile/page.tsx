@@ -16,7 +16,6 @@ import { Button } from '@/components/ui/button';
 import { ShieldCheck, User as UserIcon, Phone, Building, Settings, Edit, KeyRound, Shield, Monitor, CheckCircle2 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { countries } from '@/lib/countries';
-import IdentityVerification from '@/components/profile/identity-verification';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -210,7 +209,6 @@ export default function ProfilePage() {
     );
   }
 
-  const isBusinessRole = user.role === 'issuer' || user.role === 'agent' || user.role === 'superadmin';
   const currentVerificationStatus = user.kycStatus;
   // @ts-ignore
   const currentStatusBadge = verificationStatusMap[currentVerificationStatus || 'pending'];
@@ -281,205 +279,201 @@ export default function ProfilePage() {
                 </Card>
               </div>
               
-              {isBusinessRole ? (
-                <Accordion type="single" collapsible className="w-full space-y-6">
-                    <AccordionItem value="user-preferences">
-                        <Card>
-                            <AccordionTrigger className="p-6 hover:no-underline text-left">
-                                <div className="flex items-center gap-4">
-                                    <Settings className="h-6 w-6" />
-                                    <div className="space-y-1 text-left">
-                                        <h3 className="text-lg font-semibold leading-none tracking-tight">User Preferences</h3>
-                                        <p className="text-sm text-muted-foreground">Manage your language, currency, and theme settings.</p>
-                                    </div>
-                                </div>
-                            </AccordionTrigger>
-                            <AccordionContent className="p-6 pt-0">
-                                <div className="space-y-6">
-                                    <div className="flex items-center justify-between">
-                                        <Label>Theme</Label>
-                                        <Tabs value={theme} onValueChange={setTheme} className="w-auto">
-                                            <TabsList className="h-auto">
-                                                <TabsTrigger value="light" className="px-6 py-2">Light</TabsTrigger>
-                                                <TabsTrigger value="dark" className="px-6 py-2">Dark</TabsTrigger>
-                                                <TabsTrigger value="system" className="px-6 py-2">System</TabsTrigger>
-                                            </TabsList>
-                                        </Tabs>
-                                    </div>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        <div className="space-y-2">
-                                            <Label htmlFor="language">Language</Label>
-                                            <Select defaultValue="en">
-                                                <SelectTrigger id="language">
-                                                    <SelectValue placeholder="Select language" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    <SelectItem value="en">English</SelectItem>
-                                                    <SelectItem value="es">Español</SelectItem>
-                                                    <SelectItem value="fr">Français</SelectItem>
-                                                </SelectContent>
-                                            </Select>
-                                        </div>
-                                        <div className="space-y-2">
-                                            <Label htmlFor="currency">Currency</Label>
-                                            <Select defaultValue="usd">
-                                                <SelectTrigger id="currency">
-                                                    <SelectValue placeholder="Select currency" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    <SelectItem value="usd">USD - US Dollar</SelectItem>
-                                                    <SelectItem value="eur">EUR - Euro</SelectItem>
-                                                    <SelectItem value="btc">BTC - Bitcoin</SelectItem>
-                                                </SelectContent>
-                                            </Select>
-                                        </div>
-                                    </div>
-                                </div>
-                            </AccordionContent>
-                        </Card>
-                    </AccordionItem>
-                    <AccordionItem value="kyc-verification">
-                        <Card>
-                            <AccordionTrigger className="p-6 hover:no-underline text-left">
-                                <div className="flex items-center gap-4">
-                                    <ShieldCheck className="h-6 w-6" />
-                                    <div className="space-y-1 text-left">
-                                        <h3 className="text-lg font-semibold leading-none tracking-tight">Identity Verification (KYC)</h3>
-                                        <p className="text-sm text-muted-foreground">Complete your personal identity verification.</p>
-                                    </div>
-                                </div>
-                            </AccordionTrigger>
-                            <AccordionContent className="p-6 pt-0">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
-                                    <div className="pt-1 space-y-8">
-                                        {kycSteps.map((step) => (
-                                        <VerificationStep
-                                            key={step.level}
-                                            level={step.level}
-                                            title={step.title}
-                                            description={step.description}
-                                            isCompleted={(user.kycLevel || 0) >= step.level}
-                                            isCurrent={(user.kycLevel || 0) + 1 === step.level}
-                                        />
-                                        ))}
-                                    </div>
-                                    <div>
-                                        <VerificationCallToAction kycLevel={user.kycLevel || 0} />
-                                    </div>
-                                </div>
-                            </AccordionContent>
-                        </Card>
-                    </AccordionItem>
-                    <AccordionItem value="change-password">
-                        <Card>
-                            <AccordionTrigger className="p-6 hover:no-underline text-left">
-                                <div className="flex items-center gap-4">
-                                    <KeyRound className="h-6 w-6" />
-                                    <div className="space-y-1 text-left">
-                                        <h3 className="text-lg font-semibold leading-none tracking-tight">Change Password</h3>
-                                        <p className="text-sm text-muted-foreground">For your security, we recommend choosing a password that you don't use for any other online account.</p>
-                                    </div>
-                                </div>
-                            </AccordionTrigger>
-                            <AccordionContent className="p-6 pt-0">
-                                <form>
-                                    <div className="space-y-4 max-w-md">
-                                        <div className="space-y-2">
-                                            <Label htmlFor="current-password">Current Password</Label>
-                                            <Input id="current-password" type="password" />
-                                        </div>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <div className="space-y-2">
-                                                <Label htmlFor="new-password">New Password</Label>
-                                                <Input id="new-password" type="password" />
-                                            </div>
-                                            <div className="space-y-2">
-                                                <Label htmlFor="confirm-password">Confirm New Password</Label>
-                                                <Input id="confirm-password" type="password" />
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className="mt-6 flex justify-end">
-                                        <Button>Update Password</Button>
-                                    </div>
-                                </form>
-                            </AccordionContent>
-                        </Card>
-                    </AccordionItem>
-                    <AccordionItem value="2fa">
-                        <Card>
-                            <AccordionTrigger className="p-6 hover:no-underline text-left">
-                                <div className="flex items-center gap-4">
-                                    <Shield className="h-6 w-6" />
-                                    <div className="space-y-1 text-left">
-                                        <h3 className="text-lg font-semibold leading-none tracking-tight">Two-Factor Authentication</h3>
-                                        <p className="text-sm text-muted-foreground">Add an extra layer of security to your account by enabling two-factor authentication.</p>
-                                    </div>
-                                </div>
-                            </AccordionTrigger>
-                            <AccordionContent className="p-6 pt-0">
-                                <div className="flex items-center justify-between rounded-lg border p-4">
-                                    <div className="space-y-0.5">
-                                        <Label htmlFor="2fa-switch" className="text-base font-medium">Enable Two-Factor Authentication</Label>
-                                        <p className="text-sm text-muted-foreground">Secure your account with an extra layer of protection.</p>
-                                    </div>
-                                    <Switch id="2fa-switch" />
-                                </div>
-                            </AccordionContent>
-                        </Card>
-                    </AccordionItem>
-                    <AccordionItem value="devices-sessions" className="border-b-0">
-                        <Card>
-                            <AccordionTrigger className="p-6 hover:no-underline text-left">
-                                <div className="flex items-center gap-4">
-                                    <Monitor className="h-6 w-6" />
-                                    <div className="space-y-1 text-left">
-                                        <h3 className="text-lg font-semibold leading-none tracking-tight">Devices &amp; Sessions</h3>
-                                        <p className="text-sm text-muted-foreground">This is a list of devices that have logged into your account. Revoke any sessions that you do not recognize.</p>
-                                    </div>
-                                </div>
-                            </AccordionTrigger>
-                            <AccordionContent className="p-6 pt-0">
-                                <Table>
-                                    <TableHeader>
-                                        <TableRow>
-                                            <TableHead>Device</TableHead>
-                                            <TableHead>Location</TableHead>
-                                            <TableHead>Last Login</TableHead>
-                                            <TableHead className="text-right">Action</TableHead>
-                                        </TableRow>
-                                    </TableHeader>
-                                    <TableBody>
-                                        <TableRow>
-                                            <TableCell>
-                                                <div className="font-medium">Chrome on macOS</div>
-                                                <div className="text-sm text-muted-foreground">Current session</div>
-                                            </TableCell>
-                                            <TableCell>San Salvador, ES</TableCell>
-                                            <TableCell>2 minutes ago</TableCell>
-                                            <TableCell className="text-right">
-                                                <Button variant="link" className="p-0 h-auto text-primary" disabled>Current</Button>
-                                            </TableCell>
-                                        </TableRow>
-                                        <TableRow>
-                                            <TableCell>
-                                                <div className="font-medium">iPhone 15 Pro</div>
-                                            </TableCell>
-                                            <TableCell>New York, US</TableCell>
-                                            <TableCell>July 28, 2024</TableCell>
-                                            <TableCell className="text-right">
-                                                <Button variant="outline">Revoke</Button>
-                                            </TableCell>
-                                        </TableRow>
-                                    </TableBody>
-                                </Table>
-                            </AccordionContent>
-                        </Card>
-                    </AccordionItem>
-                </Accordion>
-              ) : (
-                 <IdentityVerification kycLevel={user.kycLevel || 0} />
-              )}
+              <Accordion type="single" collapsible className="w-full space-y-6">
+                  <AccordionItem value="user-preferences">
+                      <Card>
+                          <AccordionTrigger className="p-6 hover:no-underline text-left">
+                              <div className="flex items-center gap-4">
+                                  <Settings className="h-6 w-6" />
+                                  <div className="space-y-1 text-left">
+                                      <h3 className="text-lg font-semibold leading-none tracking-tight">User Preferences</h3>
+                                      <p className="text-sm text-muted-foreground">Manage your language, currency, and theme settings.</p>
+                                  </div>
+                              </div>
+                          </AccordionTrigger>
+                          <AccordionContent className="p-6 pt-0">
+                              <div className="space-y-6">
+                                  <div className="flex items-center justify-between">
+                                      <Label>Theme</Label>
+                                      <Tabs value={theme} onValueChange={setTheme} className="w-auto">
+                                          <TabsList className="h-auto">
+                                              <TabsTrigger value="light" className="px-6 py-2">Light</TabsTrigger>
+                                              <TabsTrigger value="dark" className="px-6 py-2">Dark</TabsTrigger>
+                                              <TabsTrigger value="system" className="px-6 py-2">System</TabsTrigger>
+                                          </TabsList>
+                                      </Tabs>
+                                  </div>
+                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                      <div className="space-y-2">
+                                          <Label htmlFor="language">Language</Label>
+                                          <Select defaultValue="en">
+                                              <SelectTrigger id="language">
+                                                  <SelectValue placeholder="Select language" />
+                                              </SelectTrigger>
+                                              <SelectContent>
+                                                  <SelectItem value="en">English</SelectItem>
+                                                  <SelectItem value="es">Español</SelectItem>
+                                                  <SelectItem value="fr">Français</SelectItem>
+                                              </SelectContent>
+                                          </Select>
+                                      </div>
+                                      <div className="space-y-2">
+                                          <Label htmlFor="currency">Currency</Label>
+                                          <Select defaultValue="usd">
+                                              <SelectTrigger id="currency">
+                                                  <SelectValue placeholder="Select currency" />
+                                              </SelectTrigger>
+                                              <SelectContent>
+                                                  <SelectItem value="usd">USD - US Dollar</SelectItem>
+                                                  <SelectItem value="eur">EUR - Euro</SelectItem>
+                                                  <SelectItem value="btc">BTC - Bitcoin</SelectItem>
+                                              </SelectContent>
+                                          </Select>
+                                      </div>
+                                  </div>
+                              </div>
+                          </AccordionContent>
+                      </Card>
+                  </AccordionItem>
+                  <AccordionItem value="kyc-verification">
+                      <Card>
+                          <AccordionTrigger className="p-6 hover:no-underline text-left">
+                              <div className="flex items-center gap-4">
+                                  <ShieldCheck className="h-6 w-6" />
+                                  <div className="space-y-1 text-left">
+                                      <h3 className="text-lg font-semibold leading-none tracking-tight">Identity Verification (KYC)</h3>
+                                      <p className="text-sm text-muted-foreground">Complete your personal identity verification.</p>
+                                  </div>
+                              </div>
+                          </AccordionTrigger>
+                          <AccordionContent className="p-6 pt-0">
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+                                  <div className="pt-1 space-y-8">
+                                      {kycSteps.map((step) => (
+                                      <VerificationStep
+                                          key={step.level}
+                                          level={step.level}
+                                          title={step.title}
+                                          description={step.description}
+                                          isCompleted={(user.kycLevel || 0) >= step.level}
+                                          isCurrent={(user.kycLevel || 0) + 1 === step.level}
+                                      />
+                                      ))}
+                                  </div>
+                                  <div>
+                                      <VerificationCallToAction kycLevel={user.kycLevel || 0} />
+                                  </div>
+                              </div>
+                          </AccordionContent>
+                      </Card>
+                  </AccordionItem>
+                  <AccordionItem value="change-password">
+                      <Card>
+                          <AccordionTrigger className="p-6 hover:no-underline text-left">
+                              <div className="flex items-center gap-4">
+                                  <KeyRound className="h-6 w-6" />
+                                  <div className="space-y-1 text-left">
+                                      <h3 className="text-lg font-semibold leading-none tracking-tight">Change Password</h3>
+                                      <p className="text-sm text-muted-foreground">For your security, we recommend choosing a password that you don't use for any other online account.</p>
+                                  </div>
+                              </div>
+                          </AccordionTrigger>
+                          <AccordionContent className="p-6 pt-0">
+                              <form>
+                                  <div className="space-y-4 max-w-md">
+                                      <div className="space-y-2">
+                                          <Label htmlFor="current-password">Current Password</Label>
+                                          <Input id="current-password" type="password" />
+                                      </div>
+                                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                          <div className="space-y-2">
+                                              <Label htmlFor="new-password">New Password</Label>
+                                              <Input id="new-password" type="password" />
+                                          </div>
+                                          <div className="space-y-2">
+                                              <Label htmlFor="confirm-password">Confirm New Password</Label>
+                                              <Input id="confirm-password" type="password" />
+                                          </div>
+                                      </div>
+                                  </div>
+                                  <div className="mt-6 flex justify-end">
+                                      <Button>Update Password</Button>
+                                  </div>
+                              </form>
+                          </AccordionContent>
+                      </Card>
+                  </AccordionItem>
+                  <AccordionItem value="2fa">
+                      <Card>
+                          <AccordionTrigger className="p-6 hover:no-underline text-left">
+                              <div className="flex items-center gap-4">
+                                  <Shield className="h-6 w-6" />
+                                  <div className="space-y-1 text-left">
+                                      <h3 className="text-lg font-semibold leading-none tracking-tight">Two-Factor Authentication</h3>
+                                      <p className="text-sm text-muted-foreground">Add an extra layer of security to your account by enabling two-factor authentication.</p>
+                                  </div>
+                              </div>
+                          </AccordionTrigger>
+                          <AccordionContent className="p-6 pt-0">
+                              <div className="flex items-center justify-between rounded-lg border p-4">
+                                  <div className="space-y-0.5">
+                                      <Label htmlFor="2fa-switch" className="text-base font-medium">Enable Two-Factor Authentication</Label>
+                                      <p className="text-sm text-muted-foreground">Secure your account with an extra layer of protection.</p>
+                                  </div>
+                                  <Switch id="2fa-switch" />
+                              </div>
+                          </AccordionContent>
+                      </Card>
+                  </AccordionItem>
+                  <AccordionItem value="devices-sessions" className="border-b-0">
+                      <Card>
+                          <AccordionTrigger className="p-6 hover:no-underline text-left">
+                              <div className="flex items-center gap-4">
+                                  <Monitor className="h-6 w-6" />
+                                  <div className="space-y-1 text-left">
+                                      <h3 className="text-lg font-semibold leading-none tracking-tight">Devices &amp; Sessions</h3>
+                                      <p className="text-sm text-muted-foreground">This is a list of devices that have logged into your account. Revoke any sessions that you do not recognize.</p>
+                                  </div>
+                              </div>
+                          </AccordionTrigger>
+                          <AccordionContent className="p-6 pt-0">
+                              <Table>
+                                  <TableHeader>
+                                      <TableRow>
+                                          <TableHead>Device</TableHead>
+                                          <TableHead>Location</TableHead>
+                                          <TableHead>Last Login</TableHead>
+                                          <TableHead className="text-right">Action</TableHead>
+                                      </TableRow>
+                                  </TableHeader>
+                                  <TableBody>
+                                      <TableRow>
+                                          <TableCell>
+                                              <div className="font-medium">Chrome on macOS</div>
+                                              <div className="text-sm text-muted-foreground">Current session</div>
+                                          </TableCell>
+                                          <TableCell>San Salvador, ES</TableCell>
+                                          <TableCell>2 minutes ago</TableCell>
+                                          <TableCell className="text-right">
+                                              <Button variant="link" className="p-0 h-auto text-primary" disabled>Current</Button>
+                                          </TableCell>
+                                      </TableRow>
+                                      <TableRow>
+                                          <TableCell>
+                                              <div className="font-medium">iPhone 15 Pro</div>
+                                          </TableCell>
+                                          <TableCell>New York, US</TableCell>
+                                          <TableCell>July 28, 2024</TableCell>
+                                          <TableCell className="text-right">
+                                              <Button variant="outline">Revoke</Button>
+                                          </TableCell>
+                                      </TableRow>
+                                  </TableBody>
+                              </Table>
+                          </AccordionContent>
+                      </Card>
+                  </AccordionItem>
+              </Accordion>
 
             </div>
           </main>

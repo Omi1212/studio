@@ -2,24 +2,43 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import type { Order, TokenDetails, User } from '@/lib/types';
+import type { Order, AssetDetails, User, Company } from '@/lib/types';
 import { Card } from '../ui/card';
 import { Avatar, AvatarFallback } from '../ui/avatar';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
-import { MoreVertical, Search, ShoppingBag, ArrowUpRight, ArrowDownLeft } from 'lucide-react';
+import { MoreVertical, Search, ShoppingBag, ArrowUpRight, ArrowDownLeft, Check, X } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '../ui/dropdown-menu';
 import Link from 'next/link';
 import { useToast } from '@/hooks/use-toast';
 import { Input } from '../ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { cn } from '@/lib/utils';
-import TokenIcon from '../ui/token-icon';
+import AssetIcon from '../ui/asset-icon';
 import KybBanner from '@/components/dashboard/kyb-banner';
 import IdentityProvidersBanner from '@/components/dashboard/identity-providers-banner';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 const ITEMS_PER_PAGE = 10;
+
+const networkMap: { [key: string]: string } = {
+    spark: 'Spark',
+    liquid: 'Liquid',
+    rgb: 'RGB',
+    ark: 'Arkade Assets',
+    taproot: 'Taproot Assets',
+};
 
 function getStatusBadge(status: Order['status']) {
   switch (status) {
@@ -36,13 +55,18 @@ function getStatusBadge(status: Order['status']) {
   }
 }
 
-function OrderTableRow({ order, tokens, investors, onApprove, onReject, userRole }: { order: Order, tokens: TokenDetails[], investors: User[], onApprove: (id: string) => void, onReject: (id: string) => void, userRole: string | null }) {
+function OrderTableRow({ order, assets, investors, onApprove, onReject, userRole }: { order: Order, assets: AssetDetails[], investors: User[], onApprove: (id: string) => void, onReject: (id: string) => void, userRole: string | null }) {
   const router = useRouter();
-  const token = tokens.find(t => t.id === order.tokenId);
+  const asset = assets.find(t => t.id === order.assetId);
   const investor = investors.find(i => i.id === order.investorId);
   const total = order.amount * order.price;
 
   const targetUrl = order.status === 'waiting payment' ? `/orders/${order.id}/pay` : `/orders/${order.id}`;
+
+  const networks = asset?.network ? (Array.isArray(asset.network) ? asset.network : [asset.network]) : [];
+  const displayNetwork = networks.length > 0 ? networkMap[networks[0]] || networks[0] : 'N/A';
+  const remainingCount = networks.length - 1;
+
 
   return (
     <TableRow onClick={() => router.push(targetUrl)} className="cursor-pointer">
@@ -76,12 +100,18 @@ function OrderTableRow({ order, tokens, investors, onApprove, onReject, userRole
             </div>
       </TableCell>
       <TableCell className="hidden lg:table-cell">
-        {token && (
+        {asset && (
             <div className="flex items-center gap-2">
-                <TokenIcon token={token} className="h-6 w-6" />
-                <span className="font-medium text-primary">{token.tokenTicker}</span>
+                <AssetIcon asset={asset} className="h-6 w-6" />
+                <span className="font-medium text-primary">{asset.assetTicker}</span>
             </div>
         )}
+      </TableCell>
+      <TableCell className="hidden lg:table-cell">
+          <div className="flex items-center gap-2">
+            <span>{displayNetwork}</span>
+            {remainingCount > 0 && <Badge variant="secondary">+{remainingCount}</Badge>}
+          </div>
       </TableCell>
       <TableCell className="hidden sm:table-cell text-right">
         <p className="font-mono">{order.amount.toLocaleString()}</p>
@@ -93,15 +123,8 @@ function OrderTableRow({ order, tokens, investors, onApprove, onReject, userRole
         </p>
       </TableCell>
        <TableCell className="hidden sm:table-cell">{getStatusBadge(order.status)}</TableCell>
-      <TableCell className="text-right">
-        <div className="flex items-center justify-end gap-2" onClick={(e) => e.stopPropagation()}>
-            {order.status === 'pending' && (userRole === 'issuer' || userRole === 'agent') && (
-                <>
-                    <Button size="sm" variant="outline" onClick={() => onReject(order.id)}>Reject</Button>
-                    <Button size="sm" onClick={() => onApprove(order.id)}>Accept</Button>
-                </>
-            )}
-            <DropdownMenu>
+      <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
+        <DropdownMenu>
             <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="h-8 w-8">
                 <MoreVertical className="h-4 w-4" />
@@ -111,9 +134,47 @@ function OrderTableRow({ order, tokens, investors, onApprove, onReject, userRole
                 <DropdownMenuItem asChild>
                     <Link href={targetUrl}>View Details</Link>
                 </DropdownMenuItem>
+                {order.status === 'pending' && (userRole === 'issuer' || userRole === 'agent') && (
+                    <>
+                        <DropdownMenuSeparator />
+                        <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                                    <Check className="mr-2 h-4 w-4" /> Accept
+                                </DropdownMenuItem>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                                <AlertDialogHeader>
+                                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                    <AlertDialogDescription>This will mark the order as complete.</AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction onClick={() => onApprove(order.id)}>Accept</AlertDialogAction>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
+                        <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                                <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-red-500">
+                                    <X className="mr-2 h-4 w-4" /> Reject
+                                </DropdownMenuItem>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                                <AlertDialogHeader>
+                                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                    <AlertDialogDescription>This action cannot be undone.</AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction onClick={() => onReject(order.id)}>Reject</AlertDialogAction>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
+                    </>
+                )}
             </DropdownMenuContent>
-            </DropdownMenu>
-        </div>
+        </DropdownMenu>
       </TableCell>
     </TableRow>
   );
@@ -123,54 +184,74 @@ function OrderTableRow({ order, tokens, investors, onApprove, onReject, userRole
 export default function OrderList() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [totalOrders, setTotalOrders] = useState(0);
-  const [tokens, setTokens] = useState<TokenDetails[]>([]);
+  const [assets, setAssets] = useState<AssetDetails[]>([]);
   const [investors, setInvestors] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
-  const [selectedToken, setSelectedToken] = useState<TokenDetails | null>(null);
+  const [networkFilter, setNetworkFilter] = useState('all');
+  const [selectedAsset, setSelectedAsset] = useState<AssetDetails | null>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [tokenCheckComplete, setTokenCheckComplete] = useState(false);
+  const [assetCheckComplete, setAssetCheckComplete] = useState(false);
+  const [company, setCompany] = useState<Company | null>(null);
+  const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(null);
 
   useEffect(() => {
     const role = localStorage.getItem('userRole');
     setUserRole(role);
     
     Promise.all([
-      fetch('/api/tokens').then(res => res.json()),
-      fetch('/api/investors').then(res => res.json())
-    ]).then(([tokensData, investorsData]) => {
-      setTokens(tokensData.data || []);
+      fetch('/api/assets?perPage=999').then(res => res.json()),
+      fetch('/api/investors?perPage=999').then(res => res.json())
+    ]).then(([assetsData, investorsData]) => {
+      setAssets(assetsData.data || []);
       setInvestors(investorsData.data || []);
     }).catch(console.error);
+
+    const loadCompany = () => {
+      const companyId = localStorage.getItem('selectedCompanyId');
+      setSelectedCompanyId(companyId);
+      if (companyId) {
+          fetch(`/api/companies/${companyId}`).then(res => res.json()).then(setCompany);
+      } else {
+          setCompany(null);
+      }
+    };
+
+    loadCompany();
+    window.addEventListener('companyChanged', loadCompany);
+
+    return () => {
+        window.removeEventListener('companyChanged', loadCompany);
+    };
   }, []);
 
   useEffect(() => {
-    if (tokens.length === 0 && tokenCheckComplete) return;
+    if (assets.length === 0 && assetCheckComplete) return;
 
-    const handleTokenChange = () => {
-        const storedTokenId = localStorage.getItem('selectedTokenId');
-        if (storedTokenId && tokens.length > 0) {
-            const foundToken = tokens.find(t => t.id === storedTokenId);
-            setSelectedToken(foundToken || null);
+    const handleAssetChange = () => {
+        const storedAssetId = localStorage.getItem('selectedAssetId');
+        if (storedAssetId && assets.length > 0) {
+            const foundAsset = assets.find(t => t.id === storedAssetId);
+            setSelectedAsset(foundAsset || null);
         } else {
-            setSelectedToken(null);
+            setSelectedAsset(null);
         }
-        setTokenCheckComplete(true);
+        setAssetCheckComplete(true);
     };
 
-    handleTokenChange();
-    window.addEventListener('tokenChanged', handleTokenChange);
+    handleAssetChange();
+    window.addEventListener('assetChanged', handleAssetChange);
 
      return () => {
-        window.removeEventListener('tokenChanged', handleTokenChange);
+        window.removeEventListener('assetChanged', handleAssetChange);
     };
-  }, [tokens, tokenCheckComplete]);
+  }, [assets, assetCheckComplete]);
 
   useEffect(() => {
-    if (!tokenCheckComplete) {
+    if (!assetCheckComplete) {
         return;
     }
     setLoading(true);
@@ -181,9 +262,17 @@ export default function OrderList() {
 
     if (userRole === 'investor') {
         params.append('investorId', 'inv-001'); // Hardcoded for demo
-    } else if ((userRole === 'issuer' || userRole === 'agent') && selectedToken) {
-        params.append('tokenId', selectedToken.id);
-    } else if ((userRole === 'issuer' || userRole === 'agent') && !selectedToken) {
+        if (selectedCompanyId) {
+            params.append('companyId', selectedCompanyId);
+        } else {
+             setOrders([]);
+             setTotalOrders(0);
+             setLoading(false);
+             return;
+        }
+    } else if ((userRole === 'issuer' || userRole === 'agent') && selectedAsset) {
+        params.append('assetId', selectedAsset.id);
+    } else if ((userRole === 'issuer' || userRole === 'agent') && !selectedAsset) {
         setOrders([]);
         setTotalOrders(0);
         setLoading(false);
@@ -192,6 +281,9 @@ export default function OrderList() {
 
     if (statusFilter !== 'all') {
       params.append('status', statusFilter);
+    }
+    if (networkFilter !== 'all') {
+      params.append('network', networkFilter);
     }
     if (searchQuery) {
       params.append('query', searchQuery);
@@ -210,7 +302,7 @@ export default function OrderList() {
         }
     };
     fetchOrders();
-  }, [currentPage, searchQuery, statusFilter, selectedToken, userRole, tokenCheckComplete]);
+  }, [currentPage, searchQuery, statusFilter, networkFilter, selectedAsset, userRole, assetCheckComplete, selectedCompanyId]);
   
   const totalPages = Math.ceil(totalOrders / ITEMS_PER_PAGE);
 
@@ -265,21 +357,38 @@ export default function OrderList() {
       </div>
     );
   }
+  
+  if (userRole === 'investor' && !selectedCompanyId) {
+    return (
+      <div className="space-y-4">
+        <h1 className="text-3xl font-headline font-semibold">My Orders</h1>
+        <div className="border-dashed border-2 border-muted-foreground/50 rounded-lg h-96 flex flex-col items-center justify-center text-center p-4">
+            <ShoppingBag className="h-16 w-16 text-muted-foreground mb-4" />
+            <h2 className="text-xl font-semibold mb-2">No Company Selected</h2>
+            <p className="text-muted-foreground mb-4">Please select a company from the sidebar to view your orders.</p>
+        </div>
+      </div>
+    );
+  }
 
-  if ((userRole === 'issuer' || userRole === 'agent') && !selectedToken && tokenCheckComplete) {
+
+  if ((userRole === 'issuer' || userRole === 'agent') && !selectedAsset && assetCheckComplete) {
+    const showKybBanner = company && company.kybStatus !== 'verified';
+    const complianceProvidersCount = company?.complianceProviders?.length ?? 0;
+    const showComplianceBanner = company && company.kybStatus === 'verified' && complianceProvidersCount < 3;
     return (
       <div className="space-y-4">
         <div className="flex justify-between items-center">
           <h1 className="text-3xl font-headline font-semibold">Orders</h1>
         </div>
         <div className="space-y-8">
-            <KybBanner />
-            <IdentityProvidersBanner />
+            {showKybBanner && <KybBanner />}
+            {showComplianceBanner && <IdentityProvidersBanner />}
         </div>
         <div className="border-dashed border-2 border-muted-foreground/50 rounded-lg h-96 flex flex-col items-center justify-center text-center p-4 mt-8">
           <ShoppingBag className="h-16 w-16 text-muted-foreground mb-4" />
-          <h2 className="text-xl font-semibold mb-2">No token selected</h2>
-          <p className="text-muted-foreground mb-4">Please select a token from the sidebar to view orders.</p>
+          <h2 className="text-xl font-semibold mb-2">No asset selected</h2>
+          <p className="text-muted-foreground mb-4">Please select an asset from the sidebar to view orders.</p>
         </div>
       </div>
     );
@@ -316,20 +425,20 @@ export default function OrderList() {
 
   const pageTitle = userRole === 'investor' 
     ? "My Orders" 
-    : `Orders ${selectedToken ? `for ${selectedToken.tokenTicker}` : ''}`;
+    : `Orders ${selectedAsset ? `for ${selectedAsset.assetTicker}` : ''}`;
 
 
   const noOrdersMessage = () => {
-      if ((userRole === 'issuer' || userRole === 'agent') && !selectedToken) {
+      if ((userRole === 'issuer' || userRole === 'agent') && !selectedAsset) {
           return {
-              title: "No token selected or found",
-              description: "Please select a token from the sidebar to view its orders."
+              title: "No asset selected or found",
+              description: "Please select an asset from the sidebar to view its orders."
           }
       }
-      if (searchQuery || statusFilter !== 'all') {
+      if (searchQuery || statusFilter !== 'all' || networkFilter !== 'all') {
           return {
               title: "No Orders Found",
-              description: "Try adjusting your search or filter."
+              description: "Try adjusting your search or filters."
           }
       }
       if (userRole === 'investor') {
@@ -340,7 +449,7 @@ export default function OrderList() {
       }
       return {
           title: "No Orders Found",
-          description: `There are no orders for ${selectedToken?.tokenTicker} at this time.`
+          description: `There are no orders for ${selectedAsset?.assetTicker} at this time.`
       }
   }
 
@@ -373,6 +482,33 @@ export default function OrderList() {
                     <SelectItem value="rejected">Rejected</SelectItem>
                 </SelectContent>
             </Select>
+            { (userRole === 'issuer' || userRole === 'agent') && selectedAsset && Array.isArray(selectedAsset.network) && selectedAsset.network.length > 1 ? (
+              <Select value={networkFilter} onValueChange={setNetworkFilter}>
+                  <SelectTrigger className="w-full sm:w-[180px]">
+                      <SelectValue placeholder="Filter by network" />
+                  </SelectTrigger>
+                  <SelectContent>
+                      <SelectItem value="all">All Networks</SelectItem>
+                      {selectedAsset.network.map(net => (
+                          <SelectItem key={net} value={net}>{networkMap[net] || net}</SelectItem>
+                      ))}
+                  </SelectContent>
+              </Select>
+            ) : (userRole !== 'issuer' && userRole !== 'agent') ? (
+              <Select value={networkFilter} onValueChange={setNetworkFilter}>
+                  <SelectTrigger className="w-full sm:w-[180px]">
+                      <SelectValue placeholder="Filter by network" />
+                  </SelectTrigger>
+                  <SelectContent>
+                      <SelectItem value="all">All Networks</SelectItem>
+                      <SelectItem value="spark">Spark</SelectItem>
+                      <SelectItem value="liquid">Liquid</SelectItem>
+                      <SelectItem value="rgb">RGB</SelectItem>
+                      <SelectItem value="ark">Arkade Assets</SelectItem>
+                      <SelectItem value="taproot">Taproot Assets</SelectItem>
+                  </SelectContent>
+              </Select>
+            ) : null }
         </div>
       </div>
 
@@ -391,7 +527,8 @@ export default function OrderList() {
               <TableRow>
                 <TableHead>Investor</TableHead>
                 <TableHead>Order</TableHead>
-                <TableHead className="hidden lg:table-cell">Token</TableHead>
+                <TableHead className="hidden lg:table-cell">Asset</TableHead>
+                <TableHead className="hidden lg:table-cell">Network</TableHead>
                 <TableHead className="hidden sm:table-cell text-right">Amount</TableHead>
                 <TableHead className="hidden md:table-cell text-right">Total</TableHead>
                 <TableHead className="hidden sm:table-cell">Status</TableHead>
@@ -400,7 +537,7 @@ export default function OrderList() {
             </TableHeader>
             <TableBody>
               {orders.map(order => (
-                  <OrderTableRow key={order.id} order={order} tokens={tokens} investors={investors} onApprove={handleApprove} onReject={handleReject} userRole={userRole} />
+                  <OrderTableRow key={order.id} order={order} assets={assets} investors={investors} onApprove={handleApprove} onReject={handleReject} userRole={userRole} />
               ))}
             </TableBody>
           </Table>

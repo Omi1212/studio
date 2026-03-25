@@ -60,8 +60,8 @@ function IssuerTableRow({ issuer, onToggleStatus, onCopy }: { issuer: Issuer, on
             </Button>
         </div>
       </TableCell>
-      <TableCell className="hidden md:table-cell text-center">{issuer.issuedTokens}</TableCell>
-      <TableCell className="hidden md:table-cell text-center">{issuer.pendingTokens}</TableCell>
+      <TableCell className="hidden md:table-cell text-center">{issuer.issuedAssets}</TableCell>
+      <TableCell className="hidden md:table-cell text-center">{issuer.pendingAssets}</TableCell>
       <TableCell className="hidden sm:table-cell">{getStatusBadge(issuer.status)}</TableCell>
       <TableCell className="text-right">
         <DropdownMenu>
@@ -271,8 +271,8 @@ export default function IssuerList() {
               <TableRow>
                 <TableHead>Issuer</TableHead>
                 <TableHead className="hidden lg:table-cell">Wallet</TableHead>
-                <TableHead className="hidden md:table-cell text-center">Issued Tokens</TableHead>
-                 <TableHead className="hidden md:table-cell text-center">Pending Tokens</TableHead>
+                <TableHead className="hidden md:table-cell text-center">Issued Assets</TableHead>
+                 <TableHead className="hidden md:table-cell text-center">Pending Assets</TableHead>
                 <TableHead className="hidden sm:table-cell">Status</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>

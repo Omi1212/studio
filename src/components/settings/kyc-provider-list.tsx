@@ -1,10 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '../ui/button';
 import { Card, CardTitle, CardHeader, CardContent, CardFooter, CardDescription } from '../ui/card';
 import { Switch } from '../ui/switch';
 import Image from 'next/image';
+import type { Company } from '@/lib/types';
+import { useToast } from '@/hooks/use-toast';
 
 const providers = [
   { name: 'Didit', logo: 'https://i.ibb.co/XrPTRgRf/Dise-o-sin-t-tulo-15.png', description: 'Verify user identities with Didit.' },
@@ -14,9 +16,7 @@ const providers = [
   { name: 'Persona', logo: 'https://i.ibb.co/xkfbNB6/6.png', description: 'Identity infrastructure for businesses.' },
 ];
 
-function ProviderCard({ name, logo, description }: { name: string; logo: string; description: string; }) {
-  const [isConnected, setIsConnected] = useState(false);
-
+function ProviderCard({ name, logo, description, isConnected, onToggle }: { name: string; logo: string; description: string; isConnected: boolean; onToggle: (checked: boolean) => void; }) {
   return (
     <Card className="flex flex-col">
       <CardHeader>
@@ -43,10 +43,10 @@ function ProviderCard({ name, logo, description }: { name: string; logo: string;
             <span className="text-sm font-medium text-green-500">
               Connected
             </span>
-            <Switch checked={isConnected} onCheckedChange={setIsConnected} />
+            <Switch checked={isConnected} onCheckedChange={onToggle} />
           </div>
         ) : (
-          <Button variant="outline" className="w-full" onClick={() => setIsConnected(true)}>
+          <Button variant="outline" className="w-full" onClick={() => onToggle(true)}>
             Connect
           </Button>
         )}
@@ -57,6 +57,57 @@ function ProviderCard({ name, logo, description }: { name: string; logo: string;
 
 
 export default function KycProviderList() {
+  const [company, setCompany] = useState<Company | null>(null);
+  const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    const selectedCompanyId = localStorage.getItem('selectedCompanyId');
+    if(selectedCompanyId) {
+      setLoading(true);
+      fetch(`/api/companies/${selectedCompanyId}`)
+        .then(res => res.ok ? res.json() : null)
+        .then(data => {
+          setCompany(data);
+        }).finally(() => setLoading(false));
+    } else {
+      setLoading(false);
+    }
+  }, []);
+
+  const handleToggle = async (providerName: string, checked: boolean) => {
+    if (!company) {
+      toast({ variant: 'destructive', title: 'Error', description: 'No company selected.' });
+      return;
+    };
+
+    let updatedProviders: string[];
+    if (checked) {
+        updatedProviders = [...(company.complianceProviders || []), providerName];
+    } else {
+        updatedProviders = (company.complianceProviders || []).filter(p => p !== providerName);
+    }
+    
+    const response = await fetch(`/api/companies/${company.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ complianceProviders: updatedProviders }),
+    });
+    
+    if (response.ok) {
+        const updatedCompany = await response.json();
+        setCompany(updatedCompany);
+        window.dispatchEvent(new Event('companyChanged'));
+        toast({ title: 'Providers updated' });
+    } else {
+        toast({ variant: 'destructive', title: 'Error', description: 'Failed to update providers.' });
+    }
+  };
+  
+  if (loading) return <p>Loading providers...</p>
+
+  const connectedProviders = company?.complianceProviders || [];
+  
   return (
     <div className="space-y-6">
       <p className="text-sm text-center text-muted-foreground">
@@ -64,7 +115,12 @@ export default function KycProviderList() {
       </p>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {providers.map((provider) => (
-          <ProviderCard key={provider.name} {...provider} />
+          <ProviderCard 
+            key={provider.name} 
+            {...provider}
+            isConnected={connectedProviders.includes(provider.name)}
+            onToggle={(checked) => handleToggle(provider.name, checked)}
+          />
         ))}
       </div>
     </div>

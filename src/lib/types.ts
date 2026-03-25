@@ -1,12 +1,12 @@
-import type { TokenFormValues } from "@/components/issue-token/issue-token-form";
 
-export interface TokenDetails extends TokenFormValues {
+import type { AssetFormValues } from "@/components/issue-asset/issue-asset-form";
+
+export interface AssetDetails extends AssetFormValues {
   id: string;
-  publicKey: string;
   status: 'pending' | 'active' | 'frozen' | 'draft';
   price?: number;
   savedStep?: number;
-  issuerId?: string;
+  companyId?: string;
 }
 
 export type ViewMode = 'card' | 'table';
@@ -26,8 +26,8 @@ export type Order = {
   id: string;
   investorId: string;
   investorName: string;
-  tokenId: string;
-  tokenTicker: string;
+  assetId: string;
+  assetTicker: string;
   type: 'Buy' | 'Sell';
   amount: number;
   price: number;
@@ -42,7 +42,7 @@ export type Transfer = {
     from: string;
     to: string;
     amount: number;
-    tokenTicker: string;
+    assetTicker: string;
     date: string;
 }
 
@@ -58,18 +58,9 @@ export interface Company {
   employeeRange?: string;
   kybLevel?: number;
   kybStatus?: 'verified' | 'pending' | 'rejected';
+  complianceProviders?: string[];
 }
 
-
-export type Issuer = {
-  id: string;
-  name: string;
-  email: string;
-  walletAddress: string;
-  issuedTokens: number;
-  pendingTokens: number;
-  status: 'active' | 'inactive';
-};
 
 export type User = {
   id: string;
@@ -91,7 +82,8 @@ export type User = {
   idDoc?: string;
   address?: string;
   city?: string;
-  companyId?: string;
+  companyId?: string[];
+  companyRoles?: { [companyId: string]: string };
   joinedDate?: string;
   totalInvested?: number;
   isFrozen?: boolean;
@@ -99,4 +91,20 @@ export type User = {
   transactions?: any[];
 };
 
-export type SubscriptionStatus = 'none' | 'pending' | 'approved';
+export type SubscriptionStatus = 'none' | 'pending' | 'approved' | 'rejected';
+
+export type Invitation = {
+  id: string;
+  email: string;
+  role: 'Admin' | 'Operations' | 'Sales' | 'Technical Support';
+  companyId: string;
+  companyName: string;
+  inviterName: string;
+  status: 'pending' | 'accepted' | 'rejected';
+}
+
+export interface Option {
+  label: string
+  value: string
+  icon?: React.ComponentType<{ className?: string }>
+}

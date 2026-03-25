@@ -1,0 +1,5 @@
+# Directories to exclude from AI analysis
+node_modules/
+.next/
+dist/
+out/

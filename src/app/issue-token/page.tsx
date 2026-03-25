@@ -1,4 +1,3 @@
-
 'use client';
 
 import {
@@ -8,7 +7,7 @@ import {
 } from '@/components/ui/sidebar';
 import SidebarNav from '@/components/dashboard/sidebar-nav';
 import HeaderDynamic from '@/components/dashboard/header-dynamic';
-import ExistingTokens from '@/components/issue-token/existing-tokens';
+import ExistingAssets from '@/components/issue-asset/existing-assets';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { Plus } from 'lucide-react';
@@ -16,7 +15,7 @@ import { useState } from 'react';
 
 export type ViewMode = 'card' | 'table';
 
-export default function IssueTokenPage() {
+export default function IssueAssetPage() {
   const [viewMode, setViewMode] = useState<ViewMode>('card');
   return (
     <SidebarProvider>
@@ -34,13 +33,13 @@ export default function IssueTokenPage() {
                     Launchpad
                     </h1>
                     <Button asChild>
-                        <Link href="/issue-token/new">
+                        <Link href="/issue-asset/new">
                             <Plus className="mr-2 h-4 w-4" />
-                            Create New Token
+                            Create New Asset
                         </Link>
                     </Button>
                 </div>
-                <ExistingTokens view={viewMode} setView={setViewMode} />
+                <ExistingAssets view={viewMode} setView={setViewMode} />
               </div>
             </div>
           </main>

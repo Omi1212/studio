@@ -43,7 +43,7 @@ const networks = [
         name: 'Spark Network', 
         icon: <svg width="24" height="24" viewBox="0 0 68 64" fill="none" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" clipRule="evenodd" d="M39.68 24.656L40.836 0H26.398l1.156 24.656-23.092-8.718L0 29.668l23.807 6.52L8.38 55.457l11.68 8.487 13.558-20.628 13.558 20.627 11.68-8.486L43.43 36.188l23.804-6.52-4.461-13.73-23.092 8.718zM33.617 33v.001z" fill="currentColor"></path></svg>,
         description: {
-            whatIsIt: 'High-speed tokens built on the Bitcoin Lightning Network. They enable instant, low-fee peer-to-peer transactions without waiting for block confirmations.',
+            whatIsIt: 'High-speed assets built on the Bitcoin Lightning Network. They enable instant, low-fee peer-to-peer transactions without waiting for block confirmations.',
             bestFor: [
                 'Micro-payments: Paying for coffee, content, or tips.',
                 'Gaming: In-game currency and rewards.',
@@ -59,7 +59,7 @@ const networks = [
             whatIsIt: 'A Bitcoin sidechain designed for high-performance asset issuance. It offers faster settlement than the main chain (2 minutes) and "Confidential Transactions," which hide asset amounts and types from the public eye.',
             bestFor: [
                 'Stablecoins: Digital fiat currencies (USD/EUR).',
-                'Security Tokens: Tokenized stocks, bonds, or real estate.',
+                'Security Assets: Tokenized stocks, bonds, or real estate.',
                 'Trading: Moving funds between exchanges quickly and privately.',
             ]
         }
@@ -69,7 +69,7 @@ const networks = [
         name: 'RGB Protocol', 
         icon: <img src="https://rgb.tech/logo/rgb-symbol-color.svg" alt="RGB Protocol Logo" className="h-6 w-6" />,
         description: {
-            whatIsIt: 'A client-side validation protocol for smart contracts. RGB keeps token data off-chain (stored locally on your device) while using the Bitcoin blockchain only for commitment. It offers the highest level of privacy and scalability.',
+            whatIsIt: 'A client-side validation protocol for smart contracts. RGB keeps asset data off-chain (stored locally on your device) while using the Bitcoin blockchain only for commitment. It offers the highest level of privacy and scalability.',
             bestFor: [
                 'Maximum Privacy: Assets that leave no trace on the blockchain.',
                 'Complex Smart Contracts: DAOs and programmable assets.',
@@ -84,7 +84,7 @@ const networks = [
         description: {
             whatIsIt: 'A standard for minting assets on Bitcoin using Taproot. It embeds asset data efficiently and acts as a bridge to move assets to the Lightning Network.',
             bestFor: [
-                'Asset Minting: The initial creation and issuance of tokens.',
+                'Asset Minting: The initial creation and issuance of assets.',
                 'On-Chain Storage: Holding assets securely on the main Bitcoin blockchain.',
                 'Bridging: Developers building custom solutions to move assets between Layer 1 and Layer 2.',
             ]

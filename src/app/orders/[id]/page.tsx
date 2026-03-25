@@ -1,5 +1,3 @@
-
-
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -18,9 +16,9 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
-import type { Order, User, TokenDetails } from '@/lib/types';
+import type { Order, User, AssetDetails } from '@/lib/types';
 import { Separator } from '@/components/ui/separator';
-import TokenIcon from '@/components/ui/token-icon';
+import AssetIcon from '@/components/ui/asset-icon';
 import { cn } from '@/lib/utils';
 import {
   AlertDialog,
@@ -35,6 +33,14 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+
+const networkMap: { [key: string]: string } = {
+    spark: 'Spark',
+    liquid: 'Liquid',
+    rgb: 'RGB',
+    ark: 'Ark',
+    taproot: 'Taproot Assets',
+};
 
 function getStatusBadge(status: Order['status']) {
   switch (status) {
@@ -126,7 +132,7 @@ export default function OrderDetailsPage() {
   const { toast } = useToast();
   const [order, setOrder] = useState<Order | null>(null);
   const [investor, setInvestor] = useState<User | null>(null);
-  const [token, setToken] = useState<TokenDetails | null>(null);
+  const [asset, setAsset] = useState<AssetDetails | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -143,12 +149,12 @@ export default function OrderDetailsPage() {
         setOrder(orderData);
         return Promise.all([
           fetch(`/api/investors/${orderData.investorId}`).then(res => res.json()),
-          fetch(`/api/tokens/${orderData.tokenId}`).then(res => res.json())
+          fetch(`/api/assets/${orderData.assetId}`).then(res => res.json())
         ]);
       })
-      .then(([investorData, tokenData]) => {
+      .then(([investorData, assetData]) => {
         setInvestor(investorData);
-        setToken(tokenData);
+        setAsset(assetData);
       })
       .catch(err => {
         console.error(err);
@@ -214,7 +220,7 @@ export default function OrderDetailsPage() {
     );
   }
 
-  if (!order || !investor || !token) {
+  if (!order || !investor || !asset) {
     notFound();
   }
 
@@ -274,17 +280,27 @@ export default function OrderDetailsPage() {
                                 </Link>
                              } />
                         )}
-                        {token && (
-                             <InfoRow label="Token" value={
+                        {asset && (
+                             <>
+                             <InfoRow label="Asset" value={
                                 <div className="flex items-center gap-2 justify-end">
-                                    <span className="font-medium">{token.tokenName} ({token.tokenTicker})</span>
-                                    <TokenIcon token={token} className="h-6 w-6" />
+                                    <span className="font-medium">{asset.assetName} ({asset.assetTicker})</span>
+                                    <AssetIcon asset={asset} className="h-6 w-6" />
                                 </div>
                              } />
+                              <InfoRow 
+                                label="Network" 
+                                value={
+                                    (Array.isArray(asset.network) ? asset.network : [asset.network])
+                                    .map(n => networkMap[n] || n)
+                                    .join(', ')
+                                } 
+                              />
+                            </>
                         )}
                         <Separator />
                         <InfoRow label="Amount" value={<span className="font-mono">{order.amount.toLocaleString()}</span>} />
-                        <InfoRow label="Price per Token" value={<span className="font-mono">${order.price.toFixed(2)}</span>} />
+                        <InfoRow label="Price per Asset" value={<span className="font-mono">${order.price.toFixed(2)}</span>} />
                          <InfoRow label="Total Value" value={
                             <span className={cn("font-mono font-semibold", order.type === 'Buy' ? 'text-green-500' : 'text-red-500')}>
                                 {order.type === 'Buy' ? '+' : '-'}${total.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}

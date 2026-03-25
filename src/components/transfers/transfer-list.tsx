@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import type { Transfer, TokenDetails } from '@/lib/types';
+import type { Transfer, AssetDetails, User, Company } from '@/lib/types';
 import { Card, CardContent } from '../ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
-import { ArrowRight, ArrowRightLeft, Search } from 'lucide-react';
+import { ArrowRightLeft, Search } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
@@ -15,6 +15,14 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const ITEMS_PER_PAGE = 10;
+
+const networkMap: { [key: string]: string } = {
+    spark: 'Spark',
+    liquid: 'Liquid',
+    rgb: 'RGB',
+    ark: 'Arkade Assets',
+    taproot: 'Taproot Assets',
+};
 
 function getAmountClass(type: Transfer['type']) {
     switch (type) {
@@ -46,49 +54,63 @@ export default function TransferList() {
   const [totalTransfers, setTotalTransfers] = useState(0);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
-  const [selectedToken, setSelectedToken] = useState<TokenDetails | null>(null);
+  const [selectedAsset, setSelectedAsset] = useState<AssetDetails | null>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
-  const [tokenCheckComplete, setTokenCheckComplete] = useState(false);
+  const [assetCheckComplete, setAssetCheckComplete] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState('all');
+  const [networkFilter, setNetworkFilter] = useState('all');
+  const [company, setCompany] = useState<Company | null>(null);
 
 
   useEffect(() => {
     const role = localStorage.getItem('userRole');
     setUserRole(role);
     
-    const handleTokenChange = async () => {
-        const storedTokenId = localStorage.getItem('selectedTokenId');
-        if (storedTokenId) {
-            try {
-                const response = await fetch(`/api/tokens/${storedTokenId}`);
-                if (response.ok) {
-                    const data = await response.json();
-                    setSelectedToken(data);
-                } else {
-                    setSelectedToken(null);
-                }
-            } catch (error) {
-                console.error("Failed to fetch token:", error);
-                setSelectedToken(null);
-            }
+    const loadCompany = () => {
+        const selectedCompanyId = localStorage.getItem('selectedCompanyId');
+        if (selectedCompanyId) {
+            fetch(`/api/companies/${selectedCompanyId}`).then(res => res.json()).then(setCompany);
         } else {
-            setSelectedToken(null);
+            setCompany(null);
         }
-        setTokenCheckComplete(true);
     };
 
-    handleTokenChange();
-    window.addEventListener('tokenChanged', handleTokenChange);
+    const handleAssetChange = async () => {
+        const storedAssetId = localStorage.getItem('selectedAssetId');
+        if (storedAssetId) {
+            try {
+                const response = await fetch(`/api/assets/${storedAssetId}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    setSelectedAsset(data);
+                } else {
+                    setSelectedAsset(null);
+                }
+            } catch (error) {
+                console.error("Failed to fetch asset:", error);
+                setSelectedAsset(null);
+            }
+        } else {
+            setSelectedAsset(null);
+        }
+        setAssetCheckComplete(true);
+    };
+
+    loadCompany();
+    handleAssetChange();
+    window.addEventListener('assetChanged', handleAssetChange);
+    window.addEventListener('companyChanged', loadCompany);
 
     return () => {
-        window.removeEventListener('tokenChanged', handleTokenChange);
+        window.removeEventListener('assetChanged', handleAssetChange);
+        window.removeEventListener('companyChanged', loadCompany);
     };
 
   }, []);
 
   useEffect(() => {
-    if (!tokenCheckComplete) {
+    if (!assetCheckComplete) {
         return;
     }
       
@@ -99,9 +121,9 @@ export default function TransferList() {
         perPage: ITEMS_PER_PAGE.toString(),
       });
 
-      if ((userRole === 'issuer' || userRole === 'agent') && selectedToken) {
-        params.append('tokenTicker', selectedToken.tokenTicker);
-      } else if ((userRole === 'issuer' || userRole === 'agent') && !selectedToken) {
+      if ((userRole === 'issuer' || userRole === 'agent') && selectedAsset) {
+        params.append('assetTicker', selectedAsset.assetTicker);
+      } else if ((userRole === 'issuer' || userRole === 'agent') && !selectedAsset) {
         setTransfers([]);
         setTotalTransfers(0);
         setLoading(false);
@@ -110,6 +132,9 @@ export default function TransferList() {
       
       if (typeFilter !== 'all') {
           params.append('type', typeFilter);
+      }
+      if (networkFilter !== 'all') {
+        params.append('network', networkFilter);
       }
       if (searchQuery) {
           params.append('query', searchQuery);
@@ -127,7 +152,7 @@ export default function TransferList() {
       }
     };
     fetchTransfers();
-  }, [currentPage, searchQuery, typeFilter, selectedToken, userRole, tokenCheckComplete]);
+  }, [currentPage, searchQuery, typeFilter, networkFilter, selectedAsset, userRole, assetCheckComplete]);
 
 
   const totalPages = Math.ceil(totalTransfers / ITEMS_PER_PAGE);
@@ -160,6 +185,33 @@ export default function TransferList() {
                 <SelectItem value="Burn">Burn</SelectItem>
             </SelectContent>
         </Select>
+        { (userRole === 'issuer' || userRole === 'agent') && selectedAsset && Array.isArray(selectedAsset.network) && selectedAsset.network.length > 1 ? (
+          <Select value={networkFilter} onValueChange={setNetworkFilter}>
+              <SelectTrigger className="w-full sm:w-[180px]">
+                  <SelectValue placeholder="Filter by network" />
+              </SelectTrigger>
+              <SelectContent>
+                  <SelectItem value="all">All Networks</SelectItem>
+                  {selectedAsset.network.map(net => (
+                      <SelectItem key={net} value={net}>{networkMap[net] || net}</SelectItem>
+                  ))}
+              </SelectContent>
+          </Select>
+        ) : (userRole !== 'issuer' && userRole !== 'agent') ? (
+          <Select value={networkFilter} onValueChange={setNetworkFilter}>
+              <SelectTrigger className="w-full sm:w-[180px]">
+                  <SelectValue placeholder="Filter by network" />
+              </SelectTrigger>
+              <SelectContent>
+                  <SelectItem value="all">All Networks</SelectItem>
+                  <SelectItem value="spark">Spark</SelectItem>
+                  <SelectItem value="liquid">Liquid</SelectItem>
+                  <SelectItem value="rgb">RGB</SelectItem>
+                  <SelectItem value="ark">Arkade Assets</SelectItem>
+                  <SelectItem value="taproot">Taproot Assets</SelectItem>
+              </SelectContent>
+          </Select>
+        ) : null }
     </div>
   );
 
@@ -170,15 +222,18 @@ export default function TransferList() {
     );
   }
 
-  if ((userRole === 'issuer' || userRole === 'agent') && !selectedToken && tokenCheckComplete) {
+  if ((userRole === 'issuer' || userRole === 'agent') && !selectedAsset && assetCheckComplete) {
+      const showKybBanner = company && company.kybStatus !== 'verified';
+      const complianceProvidersCount = company?.complianceProviders?.length ?? 0;
+      const showComplianceBanner = company && company.kybStatus === 'verified' && complianceProvidersCount < 3;
       return (
         <div className="space-y-8">
-          <KybBanner />
-          <IdentityProvidersBanner />
+          {showKybBanner && <KybBanner />}
+          {showComplianceBanner && <IdentityProvidersBanner />}
           <div className="border-dashed border-2 border-muted-foreground/50 rounded-lg h-96 flex flex-col items-center justify-center text-center p-4">
             <ArrowRightLeft className="h-16 w-16 text-muted-foreground mb-4" />
-            <h2 className="text-xl font-semibold mb-2">No token selected</h2>
-            <p className="text-muted-foreground mb-4">Please select a token from the sidebar to view transfers.</p>
+            <h2 className="text-xl font-semibold mb-2">No asset selected</h2>
+            <p className="text-muted-foreground mb-4">Please select an asset from the sidebar to view transfers.</p>
           </div>
         </div>
       )
@@ -186,21 +241,21 @@ export default function TransferList() {
 
   if (transfers.length === 0) {
       const noTransfersMessage = () => {
-          if ((userRole === 'issuer' || userRole === 'agent') && !selectedToken) {
+          if ((userRole === 'issuer' || userRole === 'agent') && !selectedAsset) {
               return {
-                  title: "No token selected or found",
-                  description: "Please select a token from the sidebar to view its transfers."
+                  title: "No asset selected or found",
+                  description: "Please select an asset from the sidebar to view its transfers."
               }
           }
-          if (searchQuery || typeFilter !== 'all') {
+          if (searchQuery || typeFilter !== 'all' || networkFilter !== 'all') {
               return {
                   title: "No Transfers Found",
-                  description: "Try adjusting your search or filter."
+                  description: "Try adjusting your search or filters."
               }
           }
           return {
               title: "No Transfers Found",
-              description: `There are no transfers for ${selectedToken?.tokenTicker} at this time.`
+              description: `There are no transfers for ${selectedAsset?.assetTicker} at this time.`
           }
       }
       return (
@@ -228,29 +283,39 @@ export default function TransferList() {
                 <TableRow>
                     <TableHead>Type</TableHead>
                     <TableHead>From</TableHead>
-                    <TableHead></TableHead>
                     <TableHead>To</TableHead>
+                    <TableHead>Network</TableHead>
                     <TableHead className="text-right">Amount</TableHead>
                     <TableHead className="text-right">Date</TableHead>
                 </TableRow>
                 </TableHeader>
                 <TableBody>
-                {transfers.map((transfer) => (
-                    <TableRow 
-                    key={transfer.txId} 
-                    onClick={() => router.push(`/transfers/${transfer.txId}`)}
-                    className="cursor-pointer"
-                    >
-                    <TableCell>{getTypeBadge(transfer.type)}</TableCell>
-                    <TableCell className="font-mono">{transfer.from.startsWith('spark1') ? `${transfer.from.slice(0, 7)}...${transfer.from.slice(-4)}` : transfer.from}</TableCell>
-                    <TableCell className="px-0 text-muted-foreground"><ArrowRight className="h-4 w-4" /></TableCell>
-                    <TableCell className={cn("font-mono", transfer.type === 'Burn' && 'text-red-500')}>{transfer.to.startsWith('spark1') ? `${transfer.to.slice(0, 7)}...${transfer.to.slice(-4)}` : transfer.to}</TableCell>
-                    <TableCell className={cn("font-mono text-right", getAmountClass(transfer.type))}>
-                        {transfer.amount.toLocaleString()} {transfer.tokenTicker}
-                    </TableCell>
-                    <TableCell className="text-right text-muted-foreground">{new Date(transfer.date).toLocaleDateString()}</TableCell>
-                    </TableRow>
-                ))}
+                {transfers.map((transfer) => {
+                    const networks = (transfer as any).networks || [];
+                    const displayNetwork = networks.length > 0 ? networkMap[networks[0]] || networks[0] : 'N/A';
+                    const remainingCount = networks.length - 1;
+                    return (
+                        <TableRow 
+                        key={transfer.txId} 
+                        onClick={() => router.push(`/transfers/${transfer.txId}`)}
+                        className="cursor-pointer"
+                        >
+                        <TableCell>{getTypeBadge(transfer.type)}</TableCell>
+                        <TableCell className="font-mono">{transfer.from.startsWith('spark1') ? `${transfer.from.slice(0, 7)}...${transfer.from.slice(-4)}` : transfer.from}</TableCell>
+                        <TableCell className={cn("font-mono", transfer.type === 'Burn' && 'text-red-500')}>{transfer.to.startsWith('spark1') ? `${transfer.to.slice(0, 7)}...${transfer.to.slice(-4)}` : transfer.to}</TableCell>
+                        <TableCell>
+                            <div className="flex items-center gap-2">
+                                <span>{displayNetwork}</span>
+                                {remainingCount > 0 && <Badge variant="secondary">+{remainingCount}</Badge>}
+                            </div>
+                        </TableCell>
+                        <TableCell className={cn("font-mono text-right", getAmountClass(transfer.type))}>
+                            {transfer.amount.toLocaleString()} {transfer.assetTicker}
+                        </TableCell>
+                        <TableCell className="text-right text-muted-foreground">{new Date(transfer.date).toLocaleDateString()}</TableCell>
+                        </TableRow>
+                    )
+                })}
                 </TableBody>
             </Table>
             </div>

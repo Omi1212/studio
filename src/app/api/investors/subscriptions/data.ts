@@ -1,3 +1,4 @@
+
 import type { SubscriptionStatus } from '@/lib/types';
 
 // Use a global variable in development to preserve data across HMR
@@ -6,9 +7,10 @@ declare global {
 }
 
 const initialData: Record<string, Record<string, SubscriptionStatus>> = {
-    'inv-001': { // Hardcoded investor ID for demo
-        'example-1': 'approved',
-    }
+    "inv-001": {
+        "btkn1-utxo-asset": "approved",
+        "btkn1-flashsparks-asset": "pending",
+    },
 };
 
 // To prevent the data from being lost on hot-reloads in development

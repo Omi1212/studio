@@ -4,23 +4,30 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Copy, Globe, Coins, Flame, Snowflake, TrendingUp, BarChart, CircleDollarSign } from 'lucide-react';
+import { Copy, Coins, Flame, Snowflake, TrendingUp, BarChart, CircleDollarSign } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import type { TokenDetails, User } from '@/lib/types';
+import type { AssetDetails, User } from '@/lib/types';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Badge } from '../ui/badge';
 import { Separator } from '../ui/separator';
 import { Progress } from '../ui/progress';
 import { useState, useEffect } from 'react';
-import AssignedAgents from './assigned-agents';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import Image from 'next/image';
 
-interface TokenDetailsViewProps {
-  token: TokenDetails;
+interface AssetDetailsViewProps {
+  asset: AssetDetails;
   view?: 'dashboard' | 'workspace';
   userRole?: User['role'] | null;
 }
@@ -39,36 +46,61 @@ function KpiCard({ title, value, icon: Icon }: { title: string; value: string; i
     );
 }
 
+const assetTypes = [
+    { value: 'security_token', label: 'Security Token' },
+    { value: 'utility_token', label: 'Utility Token' },
+    { value: 'stablecoin', label: 'Stablecoin' },
+    { value: 'real_estate', label: 'Real Estate' },
+    { value: 'other', label: 'Other' },
+];
 
-export default function TokenDetailsView({
-  token,
+const networkIconMap: { [key: string]: React.ReactNode } = {
+    spark: <svg width="24" height="24" viewBox="0 0 68 64" fill="none" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" clipRule="evenodd" d="M39.68 24.656L40.836 0H26.398l1.156 24.656-23.092-8.718L0 29.668l23.807 6.52L8.38 55.457l11.68 8.487 13.558-20.628 13.558 20.627 11.68-8.486L43.43 36.188l23.804-6.52-4.461-13.73-23.092 8.718zM33.617 33v.001z" fill="currentColor"></path></svg>,
+    liquid: <Image src="https://liquid.net/_next/static/media/logo.28b5ba97.svg" alt="Liquid Network Logo" width={24} height={24} />,
+    rgb: <Image src="https://rgb.tech/logo/rgb-symbol-color.svg" alt="RGB Protocol Logo" width={24} height={24} />,
+    ark: <Image src="https://i.ibb.co/sdg2tRxK/imagen-2026-03-24-075321289.png" alt="Arkade Assets Logo" width={24} height={24} />,
+    taproot: <Image src="https://docs.lightning.engineering/~gitbook/image?url=https%3A%2F%2F2545062540-files.gitbook.io%2F~%2Ffiles%2Fv0%2Fb%2Fgitbook-legacy-files%2Fo%2Fspaces%252F-MIzyiDsFtJBYVyhr1nT%252Favatar-1602260100761.png%3Fgeneration%3D1602260100982225%26alt%3Dmedia&width=32&dpr=2&quality=100&sign=15d20b51&sv=2" alt="Taproot Assets Logo" width={24} height={24} />,
+};
+
+const NetworkIcons = ({ networks }: { networks: string[] }) => (
+    <div className="flex items-center gap-2">
+        {networks.map(net => (
+            <div key={net} className="h-6 w-6 flex items-center justify-center" title={net}>
+                {networkIconMap[net] || <span>{net}</span>}
+            </div>
+        ))}
+    </div>
+);
+
+function OverviewRow({ label, value }: { label: string; value: React.ReactNode }) {
+  return (
+    <div className="flex items-center justify-between text-sm">
+      <p className="text-muted-foreground">{label}</p>
+      <div className="font-medium">{value}</div>
+    </div>
+  );
+}
+
+
+export default function AssetDetailsView({
+  asset,
   view = 'workspace',
   userRole,
-}: TokenDetailsViewProps) {
+}: AssetDetailsViewProps) {
   const { toast } = useToast();
   const [iconPreview, setIconPreview] = useState<string | null>(null);
 
-  const networkExplorerMap: { [key: string]: { name: string; url: string } } = {
-    spark: { name: 'Sparkscan', url: 'https://sparkscan.io' },
-    liquid: { name: 'Liquid Explorer', url: 'https://mempool.space/liquid' },
-    rgb: { name: 'RGB Explorer', url: 'https://rgb.tech' },
-    taproot: { name: 'Taproot Explorer', url: 'https://mempool.space' },
-  };
-
-  const explorer = networkExplorerMap[token.network] || { name: 'Explorer', url: '#'};
-
-
   useEffect(() => {
-    if (token.tokenIcon && typeof token.tokenIcon !== 'string' && 'size' in token.tokenIcon) {
+    if (asset.assetIcon && typeof asset.assetIcon !== 'string' && 'size' in asset.assetIcon) {
       const reader = new FileReader();
       reader.onloadend = () => {
         setIconPreview(reader.result as string);
       }
-      reader.readAsDataURL(token.tokenIcon as File);
+      reader.readAsDataURL(asset.assetIcon as File);
     } else {
         setIconPreview(null);
     }
-  }, [token.tokenIcon]);
+  }, [asset.assetIcon]);
 
 
   const copyToClipboard = (text: string, fieldName: string) => {
@@ -80,7 +112,7 @@ export default function TokenDetailsView({
   };
 
   const getStatusBadge = () => {
-    switch (token.status) {
+    switch (asset.status) {
       case 'active':
         return <Badge variant="outline" className="text-green-400 border-green-400">Active</Badge>;
       case 'pending':
@@ -93,27 +125,23 @@ export default function TokenDetailsView({
   }
   
   const renderConditionalContent = () => {
-    if (userRole === 'superadmin') {
-      return <AssignedAgents tokenId={token.id} />;
-    }
-
-    if (view === 'dashboard' || view === 'workspace') {
+    if (userRole === 'superadmin' || view === 'workspace') {
       return (
         <Card>
           <CardHeader>
-            <CardTitle>Token Actions</CardTitle>
-            <CardDescription>Perform actions on this token. (Available after approval)</CardDescription>
+            <CardTitle>Asset Actions</CardTitle>
+            <CardDescription>Perform actions on this asset. (Available after approval)</CardDescription>
           </CardHeader>
           <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Button variant="outline" disabled={token.status !== 'active'}>
+            <Button variant="outline" disabled={asset.status !== 'active'}>
               <Coins className="mr-2 h-4 w-4" />
               Mint Tokens
             </Button>
-            <Button variant="outline" disabled={token.status !== 'active'}>
+            <Button variant="outline" disabled={asset.status !== 'active'}>
               <Flame className="mr-2 h-4 w-4" />
               Burn Tokens
             </Button>
-            <Button variant="outline" disabled={token.status !== 'active'}>
+            <Button variant="outline" disabled={asset.status !== 'active'}>
               <Snowflake className="mr-2 h-4 w-4" />
               Freeze Address
             </Button>
@@ -124,6 +152,8 @@ export default function TokenDetailsView({
 
     return null;
   }
+  
+  const assetTypeLabel = assetTypes.find(t => t.value === asset.assetType)?.label || asset.assetType;
 
 
   return (
@@ -135,6 +165,26 @@ export default function TokenDetailsView({
           <KpiCard title="Market Cap" value="$0.00" icon={CircleDollarSign} />
         </div>
       )}
+       <Card>
+        <CardHeader>
+            <div className="flex justify-between items-center">
+                <CardTitle>Overview</CardTitle>
+                <Badge variant="outline" className="text-yellow-400 border-yellow-400">Open for investments</Badge>
+            </div>
+        </CardHeader>
+        <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
+            <OverviewRow label="Asset type" value={assetTypeLabel} />
+            <OverviewRow label="Subscription Time" value={asset.subscriptionTime || 'N/A'} />
+            <OverviewRow label="Min. Investment" value={asset.minInvestment ? `$${asset.minInvestment.toLocaleString('en-US')} USD` : 'N/A'} />
+            <OverviewRow label="Max. Investment" value={asset.maxInvestment ? `$${asset.maxInvestment.toLocaleString('en-US')} USD` : 'Not set'} />
+            <OverviewRow label="Order Fee" value={asset.subscriptionFees !== undefined ? `${asset.subscriptionFees}%` : 'N/A'} />
+            <OverviewRow label="Redemption Time" value={asset.redemptionTime || 'N/A'} />
+            <OverviewRow label="Min. Redemption Amount" value={asset.minRedemptionAmount ? `$${asset.minRedemptionAmount.toLocaleString('en-US')} USD` : 'N/A'} />
+            <OverviewRow label="Redemption Fees" value={asset.redemptionFees !== undefined ? `${asset.redemptionFees}%` : 'N/A'} />
+            <OverviewRow label="Available networks" value={<NetworkIcons networks={asset.network} />} />
+        </CardContent>
+    </Card>
+    
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <Card className="lg:col-span-2">
           <CardContent className="p-6 space-y-6">
@@ -142,14 +192,14 @@ export default function TokenDetailsView({
               <div className="flex items-center gap-4">
                  <Avatar className="h-12 w-12 text-xl font-bold">
                     {iconPreview ? (
-                      <AvatarImage src={iconPreview} alt={token.tokenName} />
+                      <AvatarImage src={iconPreview} alt={asset.assetName} />
                     ) : (
-                      <AvatarFallback>{token.tokenName.charAt(0)}</AvatarFallback>
+                      <AvatarFallback>{asset.assetName.charAt(0)}</AvatarFallback>
                     )}
                 </Avatar>
                 <div>
-                  <h2 className="text-xl font-bold">{token.tokenName}</h2>
-                  <p className="text-primary">{token.tokenTicker}</p>
+                  <h2 className="text-xl font-bold">{asset.assetName}</h2>
+                  <p className="text-primary">{asset.assetTicker}</p>
                 </div>
               </div>
               {getStatusBadge()}
@@ -157,14 +207,9 @@ export default function TokenDetailsView({
 
             <div className="space-y-4">
               <InfoRow 
-                label="Token Public Key" 
-                value={token.publicKey} 
-                onCopy={() => copyToClipboard(token.publicKey, 'Token Public Key')} 
-              />
-              <InfoRow 
-                label="Token ID" 
-                value={token.id} 
-                onCopy={() => copyToClipboard(token.id, 'Token ID')}
+                label="Asset ID" 
+                value={asset.id} 
+                onCopy={() => copyToClipboard(asset.id, 'Asset ID')}
               />
             </div>
             
@@ -173,11 +218,11 @@ export default function TokenDetailsView({
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
                 <div className="space-y-1">
                     <p className="text-muted-foreground">Decimals</p>
-                    <p className="font-medium">{token.decimals}</p>
+                    <p className="font-medium">{asset.decimals}</p>
                 </div>
                 <div className="space-y-1">
                     <p className="text-muted-foreground">Is Freezable</p>
-                    <p className="font-medium">{token.isFreezable ? 'Yes' : 'No'}</p>
+                    <p className="font-medium">{asset.isFreezable ? 'Yes' : 'No'}</p>
                 </div>
                 <div className="space-y-1">
                     <p className="text-muted-foreground">Holders</p>
@@ -195,23 +240,15 @@ export default function TokenDetailsView({
           <CardContent className="space-y-4">
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">Max Supply</span>
-              <span className="font-medium">{token.maxSupply.toLocaleString()}</span>
+              <span className="font-medium">{asset.maxSupply.toLocaleString()}</span>
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">Current Total Supply</span>
-              <span className="font-medium">0 / {token.maxSupply.toLocaleString()}</span>
+              <span className="font-medium">0 / {asset.maxSupply.toLocaleString()}</span>
             </div>
             <Progress value={0} />
              <div className="text-right text-sm text-muted-foreground">0%</div>
           </CardContent>
-          <CardFooter>
-             <Button variant="outline" className="w-full" asChild>
-              <a href={explorer.url} target="_blank" rel="noopener noreferrer">
-                <Globe className="mr-2 h-4 w-4" />
-                View on {explorer.name}
-              </a>
-            </Button>
-          </CardFooter>
         </Card>
       </div>
 

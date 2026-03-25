@@ -7,14 +7,19 @@ import {
 import SidebarNav from '@/components/dashboard/sidebar-nav';
 import HeaderDynamic from '@/components/dashboard/header-dynamic';
 import { useEffect, useState } from 'react';
-import type { TokenDetails, User } from '@/lib/types';
+import type { AssetDetails, User } from '@/lib/types';
 import { Rocket } from 'lucide-react';
-import TokenDetailsView from '@/components/workspace/token-details-view';
+import AssetDetailsView from '@/components/workspace/token-details-view';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card, CardContent } from '@/components/ui/card';
+import AssetIcon from '@/components/ui/asset-icon';
+import TokensTable from '@/components/workspace/tokens-table';
+import AssetDocuments from '@/components/workspace/AssetDocuments';
 
 export default function WorkspacePage() {
-  const [selectedToken, setSelectedToken] = useState<TokenDetails | null>(null);
+  const [selectedAsset, setSelectedAsset] = useState<AssetDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [userRole, setUserRole] = useState<User['role'] | null>(null);
 
@@ -22,37 +27,52 @@ export default function WorkspacePage() {
     const role = localStorage.getItem('userRole') as User['role'] | null;
     setUserRole(role);
 
-    const handleTokenChange = async () => {
-        const storedTokenId = localStorage.getItem('selectedTokenId');
-        if (storedTokenId) {
+    const handleAssetChange = async () => {
+        const storedAssetId = localStorage.getItem('selectedAssetId');
+        if (storedAssetId) {
             try {
-              const response = await fetch(`/api/tokens/${storedTokenId}`);
+              const response = await fetch(`/api/assets/${storedAssetId}`);
               if (response.ok) {
-                const tokenData = await response.json();
-                 setSelectedToken({
-                    ...tokenData,
-                    decimals: tokenData.decimals ?? 0,
-                    isFreezable: tokenData.isFreezable ?? false,
-                    publicKey: tokenData.publicKey ?? `02f...${tokenData.id.slice(-10)}`,
+                const assetData = await response.json();
+
+                // Add fake documents if they don't exist for review purposes
+                if (!assetData.whitepaper) {
+                    const fakeFile = new File(["fake content"], `${assetData.assetTicker}_Whitepaper.pdf`, { type: "application/pdf" });
+                    assetData.whitepaper = [fakeFile];
+                }
+                if (!assetData.legalAssetizationDoc) {
+                    const fakeFile = new File(["fake content"], `Legal_Assetization.pdf`, { type: "application/pdf" });
+                    assetData.legalAssetizationDoc = [fakeFile];
+                }
+                if (!assetData.assetIssuanceLegalDoc) {
+                    const fakeFile = new File(["fake content"], `Asset_Issuance_Agreement.pdf`, { type: "application/pdf" });
+                    assetData.assetIssuanceLegalDoc = [fakeFile];
+                }
+
+                 setSelectedAsset({
+                    ...assetData,
+                    network: Array.isArray(assetData.network) ? assetData.network : [assetData.network].filter(Boolean),
+                    decimals: assetData.decimals ?? 0,
+                    isFreezable: assetData.isFreezable ?? false,
                 });
               } else {
-                 setSelectedToken(null);
+                 setSelectedAsset(null);
               }
             } catch (error) {
-               console.error("Failed to fetch selected token:", error);
-               setSelectedToken(null);
+               console.error("Failed to fetch selected asset:", error);
+               setSelectedAsset(null);
             }
         } else {
-            setSelectedToken(null);
+            setSelectedAsset(null);
         }
         setLoading(false);
     };
 
-    handleTokenChange();
-    window.addEventListener('tokenChanged', handleTokenChange);
+    handleAssetChange();
+    window.addEventListener('assetChanged', handleAssetChange);
 
     return () => {
-        window.removeEventListener('tokenChanged', handleTokenChange);
+        window.removeEventListener('assetChanged', handleAssetChange);
     };
   }, []);
 
@@ -65,21 +85,64 @@ export default function WorkspacePage() {
         <div className="flex flex-col min-h-dvh">
           <HeaderDynamic />
           <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-8 bg-background">
-            <h1 className="text-3xl font-headline font-semibold">Workspace</h1>
-            
             {loading ? (
                 <div className="border-dashed border-2 border-muted-foreground/50 rounded-lg h-96 flex flex-col items-center justify-center text-center">
-                   <p className="text-muted-foreground">Loading token details...</p>
+                   <p className="text-muted-foreground">Loading asset details...</p>
                 </div>
-            ) : selectedToken ? (
-               <TokenDetailsView token={selectedToken} view="workspace" userRole={userRole} />
+            ) : selectedAsset ? (
+              <div>
+                <div className="flex items-center gap-4 mb-8">
+                  <AssetIcon asset={selectedAsset} className="h-10 w-10" />
+                  <h1 className="text-3xl font-headline font-semibold">{selectedAsset.assetName}</h1>
+                </div>
+                <Tabs defaultValue="overview" className="w-full">
+                  <TabsList className="grid w-full grid-cols-6">
+                    <TabsTrigger value="overview">Overview</TabsTrigger>
+                    <TabsTrigger value="tokens">Tokens</TabsTrigger>
+                    <TabsTrigger value="liquidity">Liquidity</TabsTrigger>
+                    <TabsTrigger value="reports">Reports</TabsTrigger>
+                    <TabsTrigger value="data">Data</TabsTrigger>
+                    <TabsTrigger value="fees">Fees</TabsTrigger>
+                  </TabsList>
+                  <TabsContent value="overview" className="mt-6">
+                    <AssetDetailsView asset={selectedAsset} view="workspace" userRole={userRole} />
+                  </TabsContent>
+                   <TabsContent value="tokens" className="mt-6">
+                    <TokensTable asset={selectedAsset} />
+                  </TabsContent>
+                  <TabsContent value="liquidity" className="mt-6">
+                    <Card>
+                      <CardContent className="p-6">
+                        <p>Liquidity content goes here.</p>
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+                  <TabsContent value="reports" className="mt-6">
+                    <Card>
+                      <CardContent className="p-6">
+                        <p>Reports content goes here.</p>
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+                   <TabsContent value="data" className="mt-6">
+                    <AssetDocuments asset={selectedAsset} />
+                  </TabsContent>
+                   <TabsContent value="fees" className="mt-6">
+                    <Card>
+                      <CardContent className="p-6">
+                        <p>Fees content goes here.</p>
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+                </Tabs>
+              </div>
             ) : (
               <div className="border-dashed border-2 border-muted-foreground/50 rounded-lg h-96 flex flex-col items-center justify-center text-center p-4">
                   <Rocket className="h-16 w-16 text-muted-foreground mb-4" />
-                  <h2 className="text-xl font-semibold mb-2">No token selected or found</h2>
-                  <p className="text-muted-foreground mb-4">Get started by launching your first token from the Launchpad.</p>
+                  <h2 className="text-xl font-semibold mb-2">No asset selected or found</h2>
+                  <p className="text-muted-foreground mb-4">Get started by launching your first asset from the Launchpad.</p>
                   <Button asChild>
-                    <Link href="/issue-token">Go to Launchpad</Link>
+                    <Link href="/issue-asset">Go to Launchpad</Link>
                   </Button>
               </div>
             )}

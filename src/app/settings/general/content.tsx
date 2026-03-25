@@ -38,13 +38,13 @@ export default function GeneralSettingsContent() {
   const defaultAccordionValue = openSection === 'kyb' ? 'kyb-verification' : 'business-info';
 
   useEffect(() => {
-    setLoading(true);
-    const storedUser = localStorage.getItem('currentUser');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
+    const loadData = () => {
+      setLoading(true);
+      const storedUser = localStorage.getItem('currentUser');
+      if (storedUser) {
+        setUser(JSON.parse(storedUser));
+      }
 
-    const handleCompanyChange = () => {
       const selectedCompanyId = localStorage.getItem('selectedCompanyId');
       if (selectedCompanyId) {
         fetch(`/api/companies/${selectedCompanyId}`)
@@ -57,12 +57,12 @@ export default function GeneralSettingsContent() {
       }
     };
 
-    handleCompanyChange(); // Initial load
+    loadData(); // Initial load
 
-    window.addEventListener('companyChanged', handleCompanyChange);
+    window.addEventListener('companyChanged', loadData);
 
     return () => {
-      window.removeEventListener('companyChanged', handleCompanyChange);
+      window.removeEventListener('companyChanged', loadData);
     };
   }, []);
   
@@ -73,6 +73,36 @@ export default function GeneralSettingsContent() {
       title: 'Copied to clipboard!',
       description: `${fieldName} has been copied.`,
     });
+  };
+
+  const handleVerifyBusiness = async () => {
+    if (!selectedCompany) return;
+
+    const newLevel = 3;
+    const newStatus = 'verified';
+
+    try {
+        const response = await fetch(`/api/companies/${selectedCompany.id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ kybLevel: newLevel, kybStatus: newStatus }),
+        });
+
+        if (!response.ok) throw new Error('Failed to update verification status.');
+
+        const updatedCompany = await response.json();
+        setSelectedCompany(updatedCompany);
+
+        window.dispatchEvent(new Event('companyChanged'));
+
+        toast({
+            title: `Business Verified!`,
+            description: "Your business verification has been updated."
+        });
+
+    } catch (error: any) {
+        toast({ variant: 'destructive', title: "Verification Failed", description: error.message });
+    }
   };
 
 
@@ -200,7 +230,10 @@ export default function GeneralSettingsContent() {
                           </div>
                       </AccordionTrigger>
                       <AccordionContent className="p-6 pt-0">
-                          <BusinessVerification kybLevel={selectedCompany?.kybLevel || 0} />
+                          <BusinessVerification
+                            kybLevel={selectedCompany?.kybLevel || 0}
+                            onVerify={handleVerifyBusiness}
+                          />
                       </AccordionContent>
                   </Card>
               </AccordionItem>

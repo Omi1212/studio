@@ -141,7 +141,7 @@ export default function BusinessDetailsPage() {
                             name="country"
                             render={({ field }) => (
                                 <FormItem>
-                                <FormLabel>Country of Operation</FormLabel>
+                                <FormLabel>Country</FormLabel>
                                 <Select onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
                                     <FormControl>
                                         <SelectTrigger>

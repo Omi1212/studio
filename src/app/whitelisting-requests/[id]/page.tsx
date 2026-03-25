@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { notFound, useParams, useRouter } from 'next/navigation';
+import { notFound, useParams, useRouter, useSearchParams } from 'next/navigation';
 import {
   Sidebar,
   SidebarInset,
@@ -27,10 +27,11 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import type { User } from '@/lib/types';
+import type { User, SubscriptionStatus, AssetDetails } from '@/lib/types';
 import { countries } from '@/lib/countries';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import AssetIcon from '@/components/ui/asset-icon';
 
 
 type WhitelistRequest = User & {
@@ -65,9 +66,9 @@ function PersonalInfoRow({ label, value, actionLabel, onActionClick }: { label: 
     );
 }
 
-function getStatusBadge(status: WhitelistRequest['kycStatus']) {
+function getStatusBadge(status: SubscriptionStatus) {
   switch (status) {
-    case 'verified':
+    case 'approved':
       return <Badge variant="outline" className="text-green-400 border-green-400"><ShieldCheck className="mr-2 h-4 w-4" /> Accepted</Badge>;
     case 'pending':
       return <Badge variant="outline" className="text-yellow-400 border-yellow-400"><ShieldCheck className="mr-2 h-4 w-4" /> Pending</Badge>;
@@ -80,53 +81,103 @@ function getStatusBadge(status: WhitelistRequest['kycStatus']) {
 
 export default function RequestDetailsPage() {
   const params = useParams();
+  const searchParams = useSearchParams();
   const router = useRouter();
   const { toast } = useToast();
   const [request, setRequest] = useState<WhitelistRequest | null>(null);
+  const [asset, setAsset] = useState<AssetDetails | null>(null);
   const [loading, setLoading] = useState(true);
+  const [assetId, setAssetId] = useState<string | null>(null);
+  const [subscriptionStatus, setSubscriptionStatus] = useState<SubscriptionStatus>('none');
 
   useEffect(() => {
     const { id } = params;
-    if (!id) return;
+    const asset_id = searchParams.get('assetId');
+    setAssetId(asset_id);
+
+    if (!id || !asset_id) {
+        setLoading(false);
+        return;
+    };
+    
     setLoading(true);
-    fetch(`/api/investors/${id}`)
-        .then(res => {
-            if (res.ok) return res.json();
-            throw new Error("Request not found");
-        })
-        .then(data => {
-            setRequest({ ...data, joinedDate: data.joinedDate || new Date().toISOString() });
-        })
-        .catch(console.error)
-        .finally(() => setLoading(false));
-  }, [params]);
+    Promise.all([
+        fetch(`/api/investors/${id}`),
+        fetch(`/api/investors/${id}/subscriptions`),
+        fetch(`/api/assets/${asset_id}`)
+    ]).then(async ([userRes, subsRes, assetRes]) => {
+        if (!userRes.ok) throw new Error("Request not found");
+        const userData = await userRes.json();
+        setRequest({ ...userData, joinedDate: userData.joinedDate || new Date().toISOString() });
+
+        if(subsRes.ok) {
+            const subsData = await subsRes.json();
+            setSubscriptionStatus(subsData[asset_id] || 'none');
+        }
+
+        if (assetRes.ok) {
+            const assetData = await assetRes.json();
+            setAsset(assetData);
+        }
+    }).catch(console.error)
+      .finally(() => setLoading(false));
+
+  }, [params, searchParams]);
   
-  const handleUpdateStatus = async (status: 'verified' | 'rejected') => {
-    if (!request) return;
+  const handleUpdateStatus = async (status: 'approved' | 'rejected') => {
+    if (!request || !assetId || !asset) return;
 
     try {
-      const response = await fetch(`/api/investors/${request.id}`, {
-        method: 'PATCH',
+      // First, update subscription status
+      const subscriptionResponse = await fetch(`/api/investors/${request.id}/subscriptions`, {
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ kycStatus: status }),
+        body: JSON.stringify({ assetId, status }),
       });
-      if (!response.ok) throw new Error('Failed to update request');
-      
-      const updatedRequest = await response.json();
-      setRequest(updatedRequest);
+      if (!subscriptionResponse.ok) throw new Error('Failed to update request status');
 
+      // If approved, add the asset to the investor's holdings with 0 amount
+      if (status === 'approved') {
+        const existingHoldings = request.holdings || [];
+        const hasHolding = existingHoldings.some(h => h.assetId === asset.id);
+
+        if (!hasHolding) {
+            const newHolding = {
+                assetId: asset.id,
+                assetName: asset.assetName,
+                assetTicker: asset.assetTicker,
+                amount: 0,
+                value: asset.price || 0,
+            };
+            
+            const updatedHoldings = [...existingHoldings, newHolding];
+
+            const userUpdateResponse = await fetch(`/api/investors/${request.id}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ holdings: updatedHoldings }),
+            });
+            
+            if (!userUpdateResponse.ok) {
+                // If this fails, we should ideally roll back the subscription update.
+                // For now, we'll just log an error and show a more specific message.
+                throw new Error("Failed to add asset to investor's holdings.");
+            }
+        }
+      }
+      
       toast({
-          title: `Request ${status === 'verified' ? 'Approved' : 'Rejected'}`,
+          title: `Request ${status === 'approved' ? 'Approved' : 'Rejected'}`,
           description: `The request for "${request.name}" has been updated.`
       });
       router.push('/whitelisting-requests');
 
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
       toast({
           variant: 'destructive',
           title: 'Error',
-          description: 'Could not update the request.'
+          description: error.message || 'Could not update the request.'
       });
     }
   };
@@ -203,6 +254,22 @@ export default function RequestDetailsPage() {
             </div>
             
             <div className="max-w-4xl mx-auto space-y-6">
+                {asset && (
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Asset Requested</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="flex items-center gap-4">
+                                <AssetIcon asset={asset} className="h-12 w-12" />
+                                <div>
+                                    <p className="font-semibold text-lg">{asset.assetName}</p>
+                                    <p className="text-primary font-bold">{asset.assetTicker}</p>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+                )}
                 <div className="grid grid-cols-1 lg:grid-cols-10 gap-6">
                     <Card className="lg:col-span-3">
                         <CardHeader className="items-center text-center">
@@ -212,7 +279,7 @@ export default function RequestDetailsPage() {
                             <CardTitle className="text-2xl pt-2">{request.name}</CardTitle>
                             <CardDescription>User Level {request.kycLevel || 0}</CardDescription>
                             <div className="flex items-center gap-2">
-                                {getStatusBadge(request.kycStatus)}
+                                {getStatusBadge(subscriptionStatus)}
                             </div>
                         </CardHeader>
                         <CardContent className="space-y-4">
@@ -259,7 +326,7 @@ export default function RequestDetailsPage() {
                 </div>
 
 
-            {request.kycStatus === 'pending' && (
+            {subscriptionStatus === 'pending' && (
              <Card>
                 <CardHeader>
                     <CardTitle>Actions</CardTitle>
@@ -294,7 +361,7 @@ export default function RequestDetailsPage() {
                                 </AlertDialogFooter>
                             </AlertDialogContent>
                         </AlertDialog>
-                        <Button className="w-full" onClick={() => handleUpdateStatus('verified')}>
+                        <Button className="w-full" onClick={() => handleUpdateStatus('approved')}>
                             <Check className="mr-2 h-4 w-4" /> Approve Request
                         </Button>
                     </div>

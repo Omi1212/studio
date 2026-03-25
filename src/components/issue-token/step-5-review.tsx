@@ -1,18 +1,17 @@
-
 'use client';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import type { TokenFormValues } from './issue-token-form';
+import type { AssetFormValues } from '../issue-asset/issue-asset-form';
 import { useState, useEffect } from 'react';
 import { FileText, HardDrive, Hash, Image as ImageIcon, Info, Loader2, Network, Tag, ToggleRight } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 
 interface Step5ReviewProps {
-  onSubmit: (data: Partial<TokenFormValues>) => void;
+  onSubmit: (data: Partial<AssetFormValues>) => void;
   onBack: () => void;
-  onSaveDraft: (data: Partial<TokenFormValues>) => void;
-  formData: TokenFormValues;
+  onSaveDraft: (data: Partial<AssetFormValues>) => void;
+  formData: AssetFormValues;
 }
 
 function ReviewSection({ title, children }: { title: string, children: React.ReactNode }) {
@@ -57,23 +56,23 @@ export default function Step5Review({ onSubmit, onBack, onSaveDraft, formData }:
   const [iconPreview, setIconPreview] = useState<string | null>(null);
 
   useEffect(() => {
-    if (formData.tokenIcon && formData.tokenIcon instanceof File) {
+    if (formData.assetIcon && formData.assetIcon instanceof File) {
       const reader = new FileReader();
       reader.onloadend = () => {
         setIconPreview(reader.result as string);
       }
-      reader.readAsDataURL(formData.tokenIcon);
-    } else if (typeof formData.tokenIcon === 'object' && formData.tokenIcon && 'name' in formData.tokenIcon) { // Handle File object from draft
+      reader.readAsDataURL(formData.assetIcon);
+    } else if (typeof formData.assetIcon === 'object' && formData.assetIcon && 'name' in formData.assetIcon) { // Handle File object from draft
       const reader = new FileReader();
       reader.onloadend = () => {
         setIconPreview(reader.result as string);
       }
-      reader.readAsDataURL(formData.tokenIcon as File);
+      reader.readAsDataURL(formData.assetIcon as File);
     }
     else {
         setIconPreview(null);
     }
-  }, [formData.tokenIcon]);
+  }, [formData.assetIcon]);
 
 
   const handleSubmit = async () => {
@@ -93,26 +92,26 @@ export default function Step5Review({ onSubmit, onBack, onSaveDraft, formData }:
   return (
     <Card>
         <CardHeader>
-            <CardTitle>Review Your Token</CardTitle>
-            <CardDescription>Please review the details below before issuing the token.</CardDescription>
+            <CardTitle>Review Your Asset</CardTitle>
+            <CardDescription>Please review the details below before issuing the asset.</CardDescription>
         </CardHeader>
       <CardContent className="space-y-6">
         
-        <ReviewSection title="Token Information">
-            <ReviewRow icon={Info} label="Token Name" value={formData.tokenName} />
-            <ReviewRow icon={Tag} label="Token Ticker" value={formData.tokenTicker} />
-            <ReviewRow icon={ImageIcon} label="Token Icon" value={
+        <ReviewSection title="Asset Information">
+            <ReviewRow icon={Info} label="Asset Name" value={formData.assetName} />
+            <ReviewRow icon={Tag} label="Asset Ticker" value={formData.assetTicker} />
+            <ReviewRow icon={ImageIcon} label="Asset Icon" value={
               iconPreview ? (
                   <Avatar className="h-6 w-6">
-                      <AvatarImage src={iconPreview} alt="Token Icon Preview" />
-                      <AvatarFallback>{formData.tokenTicker.charAt(0)}</AvatarFallback>
+                      <AvatarImage src={iconPreview} alt="Asset Icon Preview" />
+                      <AvatarFallback>{formData.assetTicker.charAt(0)}</AvatarFallback>
                   </Avatar>
               ) : <span className="text-muted-foreground">Not provided</span>
             } />
             <ReviewRow icon={HardDrive} label="Destination Address" value={<span className="font-mono">{formData.destinationAddress}</span>} />
         </ReviewSection>
 
-        <ReviewSection title="Token Details">
+        <ReviewSection title="Asset Details">
             <ReviewRow icon={Hash} label="Decimals" value={formData.decimals} />
             <ReviewRow icon={Hash} label="Max Supply" value={formData.maxSupply.toLocaleString()} />
             <ReviewRow icon={ToggleRight} label="Is Freezable" value={formData.isFreezable ? 'Yes' : 'No'} />
@@ -120,8 +119,8 @@ export default function Step5Review({ onSubmit, onBack, onSaveDraft, formData }:
         
         <ReviewSection title="Documents">
             <ReviewRow icon={FileText} label="Whitepaper" value={<FilePreview fileList={formData.whitepaper as FileList | undefined} />} />
-            <ReviewRow icon={FileText} label="Legal Tokenization Doc" value={<FilePreview fileList={formData.legalTokenizationDoc as FileList | undefined} />} />
-            <ReviewRow icon={FileText} label="Token Issuance Legal Doc" value={<FilePreview fileList={formData.tokenIssuanceLegalDoc as FileList | undefined} />} />
+            <ReviewRow icon={FileText} label="Legal Assetization Doc" value={<FilePreview fileList={formData.legalAssetizationDoc as FileList | undefined} />} />
+            <ReviewRow icon={FileText} label="Asset Issuance Legal Doc" value={<FilePreview fileList={formData.assetIssuanceLegalDoc as FileList | undefined} />} />
         </ReviewSection>
         
         <ReviewSection title="Network">

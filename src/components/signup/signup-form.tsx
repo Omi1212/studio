@@ -102,6 +102,21 @@ export default function SignupForm() {
         
         const createdUser: User = await response.json();
 
+        if (createdUser.role === 'issuer') {
+            await fetch('/api/issuers', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name: createdUser.name,
+                    email: createdUser.email,
+                    walletAddress: createdUser.walletAddress,
+                    issuedAssets: 0,
+                    pendingAssets: 0,
+                    status: 'active'
+                }),
+            });
+        }
+
         localStorage.setItem('userRole', createdUser.role);
         localStorage.setItem('currentUser', JSON.stringify(createdUser));
 
@@ -129,7 +144,7 @@ export default function SignupForm() {
         <div className="flex justify-center items-center mb-4">
             <div className="w-72 h-auto relative" style={{ aspectRatio: '170/41' }}>
               <Image src="https://i.ibb.co/dsx2xgVc/image-69.png" alt="BlockStratus Logo" fill style={{objectFit: 'contain'}} sizes="18rem" priority className="block dark:hidden" />
-              <Image src="https://i.wpfc.ml/35/8gtsxa.png" alt="BlockStratus Logo" fill style={{objectFit: 'contain'}} sizes="18rem" priority className="hidden dark:block" />
+              <Image src="https://i.ibb.co/pBzFXyhT/imagen-2026-03-23-103520188.png" alt="BlockStratus Logo" fill style={{objectFit: 'contain'}} sizes="18rem" priority className="hidden dark:block" />
             </div>
         </div>
         {step === 1 ? (

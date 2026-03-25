@@ -1,12 +1,11 @@
-
 import { NextResponse } from 'next/server';
 import { subscriptionsData } from '../../subscriptions/data';
 import type { SubscriptionStatus } from '@/lib/types';
 import { z } from 'zod';
 
 const subscriptionSchema = z.object({
-  tokenId: z.string(),
-  status: z.enum(['none', 'pending', 'approved'])
+  assetId: z.string(),
+  status: z.enum(['none', 'pending', 'approved', 'rejected'])
 });
 
 export async function GET(
@@ -23,15 +22,15 @@ export async function POST(
 ) {
   try {
     const body = await request.json();
-    const { tokenId, status } = subscriptionSchema.parse(body);
+    const { assetId, status } = subscriptionSchema.parse(body);
     
     if (!subscriptionsData[params.id]) {
       subscriptionsData[params.id] = {};
     }
 
-    subscriptionsData[params.id][tokenId] = status;
+    subscriptionsData[params.id][assetId] = status;
 
-    return NextResponse.json({ tokenId, status }, { status: 201 });
+    return NextResponse.json({ assetId, status }, { status: 201 });
   } catch (error) {
       if (error instanceof z.ZodError) {
           return NextResponse.json({ errors: error.errors }, { status: 400 });

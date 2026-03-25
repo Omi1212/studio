@@ -6,20 +6,30 @@ import { Button } from '@/components/ui/button';
 import { ArrowDownLeft, ArrowUpRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
+import type { AssetDetails } from '@/lib/types';
 
-export default function RecentActivity() {
+export default function RecentActivity({ selectedCompanyId }: { selectedCompanyId: string | null }) {
     const [transactions, setTransactions] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         setLoading(true);
-        fetch('/api/investors/inv-001')
-            .then(res => res.json())
-            .then(investor => {
-                setTransactions(investor?.transactions.slice(0, 5) || []);
-            }).catch(console.error)
-            .finally(() => setLoading(false));
-    }, []);
+         Promise.all([
+            fetch('/api/investors/inv-001').then(res => res.json()),
+            fetch('/api/assets?perPage=999').then(res => res.json())
+        ]).then(([investor, assetsData]) => {
+            const allAssets: AssetDetails[] = assetsData.data || [];
+            let investorTransactions = investor?.transactions || [];
+
+            if (selectedCompanyId) {
+                const companyAssetIds = allAssets.filter(a => a.companyId === selectedCompanyId).map(a => a.id);
+                investorTransactions = investorTransactions.filter((tx: any) => tx.asset && companyAssetIds.includes(tx.asset.id));
+            }
+            
+            setTransactions(investorTransactions.slice(0, 5));
+        }).catch(console.error)
+        .finally(() => setLoading(false));
+    }, [selectedCompanyId]);
 
     if (loading) {
         return <Card className="h-80 animate-pulse bg-muted/50"></Card>;
@@ -47,7 +57,7 @@ export default function RecentActivity() {
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {transactions.map(tx => (
+                        {transactions.filter(tx => tx.asset).map(tx => (
                             <TableRow key={tx.id}>
                                 <TableCell>
                                     <div className="flex items-center gap-3">
@@ -55,7 +65,7 @@ export default function RecentActivity() {
                                             {tx.type === 'Buy' ? <ArrowDownLeft className="h-4 w-4" /> : <ArrowUpRight className="h-4 w-4" />}
                                         </div>
                                         <div>
-                                            <p className="font-medium">{tx.type} {tx.token.tokenTicker}</p>
+                                            <p className="font-medium">{tx.type} {tx.asset.assetTicker}</p>
                                             <p className="text-sm text-muted-foreground">Order #{tx.id.slice(0,6)}</p>
                                         </div>
                                     </div>

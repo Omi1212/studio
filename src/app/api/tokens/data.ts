@@ -1,15 +1,15 @@
-import type { TokenDetails } from '@/lib/types';
+import type { AssetDetails } from '@/lib/types';
 
 // Use a global variable in development to preserve data across HMR
 declare global {
-  var __exampleTokens__: Omit<TokenDetails, 'tokenIcon' | 'whitepaper' | 'legalTokenizationDoc' | 'tokenIssuanceLegalDoc' | 'publicKey'>[] | undefined;
+  var __exampleAssets__: Omit<AssetDetails, 'assetIcon' | 'whitepaper' | 'legalAssetizationDoc' | 'assetIssuanceLegalDoc' | 'publicKey'>[] | undefined;
 }
 
-const initialData: Omit<TokenDetails, 'tokenIcon' | 'whitepaper' | 'legalTokenizationDoc' | 'tokenIssuanceLegalDoc' | 'publicKey'>[] = [
+const initialData: Omit<AssetDetails, 'assetIcon' | 'whitepaper' | 'legalAssetizationDoc' | 'assetIssuanceLegalDoc' | 'publicKey'>[] = [
   {
     id: 'example-1',
-    tokenName: 'Digital Dollar',
-    tokenTicker: 'DUSD',
+    assetName: 'Digital Dollar',
+    assetTicker: 'DUSD',
     status: 'active' as const,
     network: 'spark',
     maxSupply: 100000000,
@@ -21,8 +21,8 @@ const initialData: Omit<TokenDetails, 'tokenIcon' | 'whitepaper' | 'legalTokeniz
   },
   {
     id: 'example-2',
-    tokenName: 'Gold Token',
-    tokenTicker: 'GLDT',
+    assetName: 'Gold Asset',
+    assetTicker: 'GLDT',
     status: 'active' as const,
     network: 'spark',
     maxSupply: 21000000,
@@ -34,8 +34,8 @@ const initialData: Omit<TokenDetails, 'tokenIcon' | 'whitepaper' | 'legalTokeniz
   },
   {
     id: 'example-3',
-    tokenName: 'Real Estate Share',
-    tokenTicker: 'REIT',
+    assetName: 'Real Estate Share',
+    assetTicker: 'REIT',
     status: 'pending' as const,
     network: 'rgb',
     maxSupply: 100000,
@@ -47,8 +47,8 @@ const initialData: Omit<TokenDetails, 'tokenIcon' | 'whitepaper' | 'legalTokeniz
   },
   {
     id: 'example-4',
-    tokenName: 'Carbon Credit',
-    tokenTicker: 'CRBN',
+    assetName: 'Carbon Credit',
+    assetTicker: 'CRBN',
     status: 'active' as const,
     network: 'rgb',
     maxSupply: 50000000,
@@ -61,8 +61,8 @@ const initialData: Omit<TokenDetails, 'tokenIcon' | 'whitepaper' | 'legalTokeniz
 ];
 
 // To prevent the data from being lost on hot-reloads in development
-if (process.env.NODE_ENV !== 'production' && !global.__exampleTokens__) {
-  global.__exampleTokens__ = [...initialData];
+if (process.env.NODE_ENV !== 'production' && !global.__exampleAssets__) {
+  global.__exampleAssets__ = [...initialData];
 }
 
-export let exampleTokens: Omit<TokenDetails, 'tokenIcon' | 'whitepaper' | 'legalTokenizationDoc' | 'tokenIssuanceLegalDoc' | 'publicKey'>[] = global.__exampleTokens__ || initialData;
+export let exampleAssets: Omit<AssetDetails, 'assetIcon' | 'whitepaper' | 'legalAssetizationDoc' | 'assetIssuanceLegalDoc' | 'publicKey'>[] = global.__exampleAssets__ || initialData;
