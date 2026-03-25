@@ -21,11 +21,11 @@ const initialData: Omit<AssetDetails, 'assetIcon' | 'whitepaper' | 'legalAssetiz
     destinationAddress: 'btkn1xgrvjwey5ngcagvap2dzzvsy4uk8ua9x69k82dwvt5e7ef9drm9qztux87',
     assetType: 'stablecoin',
     subscriptionTime: 'Daily',
-    minInvestment: 1000,
+    minInvestment: 10,
     maxInvestment: 100000,
     subscriptionFees: 0.05,
     redemptionTime: 'Daily',
-    minRedemptionAmount: 1000,
+    minRedemptionAmount: 10,
     redemptionFees: 0.05,
   },
   {
