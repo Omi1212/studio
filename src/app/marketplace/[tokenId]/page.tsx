@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useEffect, useState, use } from 'react';
@@ -134,6 +135,9 @@ function AssetOfferingPage({ params }: { params: { tokenId: string } }) {
                 <Button variant="outline" size="icon" asChild>
                     <Link href="/marketplace"><ArrowLeft /></Link>
                 </Button>
+                <h1 className="text-3xl font-headline font-semibold">
+                  {asset.assetTicker} Offering
+                </h1>
             </div>
             
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
